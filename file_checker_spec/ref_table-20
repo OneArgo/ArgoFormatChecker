@@ -1,0 +1,12 @@
+// $Revision: 1225 $
+// $Date: 2021-03-02 20:50:37 +0000 (Tue, 02 Mar 2021) $
+//
+// Reference table 20: Grounded Flag
+
+Y | Yes, the float touched the ground and the programmed free-drift period was affected. If it is uncertain what mission phase the grounding took place, use 'Y'.
+P | Yes, the float touched the ground during a part of the mission that did not affect the free-drift period.
+B | Yes, the float touched the ground as determined by an external bathymetry database and the programmed free-drift period was affected. If it is uncertain what mission phase the grounding took place, use 'B'.
+C | Yes, the float touched the ground as determined by an external bathymetry database during a part of the mission that did not affect the free-drift period.
+N | No, the float did not touch the ground
+S | Float is known to be drifting at a shallower depth than originally programmed Warning: this is not a "grounded" situation. The 'S' flag should probably be declared obsolete
+U | Unknown Warning: U and FillValue " " have a close meaning. The 'U' flag should probably be declared obsolete

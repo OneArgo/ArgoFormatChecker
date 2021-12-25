@@ -1,0 +1,41 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+// coriolis is missing these
+
+PRES:axis = <*>;
+PRES_ADJUSTED:standard_name = <*>;
+TEMP_ADJUSTED:standard_name = <*>;
+PSAL_ADJUSTED:standard_name = <*>;
+
+PSAL:standard_name = sea_water_salinity|sea_water_practical_salinity;
+
+DOXY_ADJUSTED:standard_name = <*>;
+MOLAR_DOXY:standard_name = <*>;
+MOLAR_DOXY_ADJUSTED:standard_name = <*>;
+
+//  Changes in BPHASE_DOXY between v2.2 and v2.31 that have not been dealt with
+
+BPHASE_DOXY:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY_ADJUSTED:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY_ADJUSTED:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY_ADJUSTED_ERROR:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+
+BPHASE_DOXY2:long_name = (BPHASE_DOXY2)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY2:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY2_ADJUSTED:long_name = (BPHASE_DOXY2)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY2_ADJUSTED:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+FREQUENCY_DOXY:valid_max = 25000.f|100.f;
+FREQUENCY_DOXY:C_format = (%7.1f)|(%5.2f);
+FREQUENCY_DOXY:FORTRAN_format  = (F7.1)|(F5.2);
+
+FREQUENCY_DOXY_ADJUSTED:valid_max = 25000.f|100.f;
+FREQUENCY_DOXY_ADJUSTED:C_format = (%7.1f)|(%5.2f);
+FREQUENCY_DOXY_ADJUSTED:FORTRAN_format  = (F7.1)|(F5.2);
+
+

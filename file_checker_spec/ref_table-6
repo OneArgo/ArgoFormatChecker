@@ -1,0 +1,11 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+0A | Data pass through a communications system and arrive at a processing centre. The data resolution is the highest permitted by the technical constraints of the floats and communications system.
+1A | The national centre assembles all of the raw information into a complete located in space and time.
+2B | The national centre passes the data through automated QC procedures and prepares the data for distribution on the GTS, to global servers and to PIs.
+2B+ | "Real-time data are received at global data centres that apply QC including visual inspection of the data. These are then distributed to users in near real-time
+2C | Data are reviewed by PIs and returned to processing centres. The processing centres forward the data to the global Argo servers.
+2C+ | Scientists accept data from various sources, combine them as they see fit with other data and generate a product. Results of the scientific analysis may be returned to regional centres or global servers. Incorporation of these results improves the quality of the data.
+3B | Scientists working as part of GODAE generate fields of gridded products delivered in near real-time for distribution from the global servers. Generally, these products mostly will be based on data having passed through automated QC procedures.
+3C | Scientists working as part of GODAE generate fields of gridded products delivered with some time delay for distribution from the global servers. Generally, these products mostly will be based on data having passed through manual or more sophisticated QC procedures than employed on the real-time data.

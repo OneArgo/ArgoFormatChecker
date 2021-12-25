@@ -1,0 +1,20 @@
+// $Revision: 1225 $
+// $Date: 2021-03-02 20:50:37 +0000 (Tue, 02 Mar 2021) $
+//
+// Reference table 5: location classes
+
+0 | Argos accuracy estimation over 1500m radius
+1 | Argos accuracy estimation better than 1500m radius
+2 | Argos accuracy estimation better than 500 m radius
+3 | Argos accuracy estimation better than 250 m radius
+A | Argos no accuracy estimation (3 messages received)
+B | Argos no accuracy estimation (1 or 2 messages received)
+Z | Argos invalid location
+G | GPS positioning accuracy accuracy (not better than 10 m)
+I | Iridium accuracy (not better than 5 km)
+D | Beidou accuracy (not better than 10 m)
+E | GLONASS accuracy (not better than 10 m)
+F | GALILEO accuracy (not better than 10 m)
+H | GNSS accuracy (not better than 10 m)
+R | RAFOS accuracy
+U | Estimated position. Accuracy not sent back by the float. An estimated accuracy may be in AXES_ERROR_ELLIPSE_

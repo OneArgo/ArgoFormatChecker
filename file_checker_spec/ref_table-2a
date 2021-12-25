@@ -1,0 +1,10 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+  | No QC was performed
+A | N = 100%; All levels have good data
+B | 75% <= N < 100%
+C | 50% <= N < 75%
+D | 25% <= N < 50%
+E | 0% < N < 25%
+F | No levels have good data

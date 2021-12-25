@@ -1,0 +1,20 @@
+// $Revision: 1233 $
+// $Date: 2021-03-09 15:45:04 +0000 (Tue, 09 Mar 2021) $
+
+DOXY:valid_min = 0.0;           WARN 
+DOXY_ADJUSTED:valid_min = 0.0;  WARN
+DOXY_STD:valid_min = 0.0;	WARN
+DOXY_MED:valid_min = 0.0;	WARN
+
+C2PHASE_DOXY:valid_min = 10.0;	WARN
+C2PHASE_DOXY:valid_max = 70.0;	WARN
+C2PHASE_DOXY_ADJUSTED:valid_min = 10.0;	WARN
+C2PHASE_DOXY_ADJUSTED:valid_max = 70.0;	WARN
+C2PHASE_DOXY_STD:valid_min = 10.0;	WARN
+C2PHASE_DOXY_STD:valid_max = 70.0;	WARN
+C2PHASE_DOXY_MED:valid_min = 10.0;	WARN
+C2PHASE_DOXY_MED:valid_max = 70.0;	WARN
+
+POSITION_ERROR_ESTIMATED:long_name = "Position error (estimated|determined) by the real-time or delayed-mode process"; NOWARN
+
+TRANSMITTANCE_PARTICLE_BEAM_ATTENUATION660:units = dimensionless;  WARN

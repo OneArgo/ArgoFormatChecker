@@ -1,0 +1,28 @@
+// $Revision: 878 $
+// $Date: 2018-04-04 13:55:45 +0000 (Wed, 04 Apr 2018) $
+
+// Special codes:
+//    "<->" attribute cannot exist; "<*>" attribute optional, value ignored; "<+>" attribute must exist, value is ignored
+
+// Parameter specifications:
+// Version 2.2 and earlier, there was an attribute "comment" and no attribute "standard_name"
+// Therefore, the 4th column is used for "comment"
+// Also, all parameters were "core" -- the "c" in the category column
+
+//Col 0 |       1        |                2             |     3     |         4        |           5          |   6  |     7     |     8     |          9            |        10         |           11      |     12      |     13      |   14    |     15      |   16   |    17     |    18     |
+//Order | parameter name | Parameter name short version | long_name | cf_standard_name | cf_standard_name_uri | unit | valid_min | valid_max | core/bio/intermediate | sdn_parameter_urn | sdn_parameter_uri | sdn_uom_urn | sdn_uom_uri | comment | update date | status | Fillvalue | Data Type |
+
+  | CNDC | CNDC | ELECTRICAL CONDUCTIVITY | In situ measurement | | mhos/m | 0.f | 60.f | c | | | | | | | | 99999. | float |
+  | PRES | PRES | SEA PRESSURE | In situ measurement, sea surface = 0 | | decibar | 0.f | 12000.f | c | | | | | | | | 99999. | float |
+  | PSAL | PSAL | PRACTICAL SALINITY | In situ measurement | | psu | 0.f | 42.f | c | | | | | | | | 99999. | float |
+  | TEMP | TEMP | SEA TEMPERATURE IN SITU ITS-90 SCALE | In situ measurement | | degree_Celsius | -2.f | 40.f | c | | | | | | | | 99999. | float |
+
+  | BPHASE_DOXY | BPHASE_DOXY | OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR | In situ measurement | | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+  | COUNT_DOXY | COUNT_DOXY | Raw counts reported by sensos such as SBE43 | | | * | 0.f | 100.f | c | | | | | | | | 99999. | float |
+  | DOXY | DOXY | DISSOLVED OXYGEN | In situ measurement | | micromole/kg | 0.f | 650.f | c | | | | | | | | 99999. | float |
+  | DPHASE_DOXY | DPHASE_DOXY | Calibrated phase shirt reported by sensors such as Aandera Optode | | | degree | <+> | <+> | c | | | | | | | | 99999. | float |
+  | FREQUENCY_DOXY | FREQUENCY_DOXY | Frequency reported by sensors such as SBE43 | | | hertz | <+> | <+> | c | | | | | | | | 99999. | float |
+  | MOLAR_DOXY | MOLAR_DOXY | MOLAR_DOXY | Technical value reported by sensors such as Aandera Optode | | micromole/litre | <+> | <+> | c | | | | | | | | 99999. | float |
+  | PRES_DOXY | PRES_DOXY | SEA PRESSURE FROM DOXY SENSOR | In situ measurement, sea surface = 0 | | decibar | <+> | <+> | c | | | | | | | | 99999. | float |
+  | VOLTAGE_DOXY | VOLTAGE_DOXY | Voltage reported by sensors such as SBE43 | | | volt | <+> | <+> | c | | | | | | | | 99999. | float |
+  | TEMP_DOXY | TEMP_DOXY | SEA TEMPERATURE FROM DOXY SENSOR (ITS-90 SCALE) | In situ measurement  |  | degree_Celsius | -2.f | 40.f | c | | | | | | | | 99999. | float |
