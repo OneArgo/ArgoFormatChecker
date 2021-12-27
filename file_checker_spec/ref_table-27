@@ -124,12 +124,19 @@ SEAFET | SBE | pH (SEABIRD) | TRANSISTOR_PH | DURAFET |  |
 
 //Radiometers |  |  |  |  |  | 
 OCR504_ICSW | Sea-Bird Scientific | Multispectral radiometer 4 channels with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR | 26/12/2021 | added by T. Carval for AOML
+OCR504_R10W | Sea-Bird Scientific | Multispectral radiometer 4 channels with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> |  | 27/12/2021 | added by T. Carval for AOML
+OCR507_ICSW | Sea-Bird Scientific | Multispectral radiometer 7 channels with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR | 27/12/2021 | added by T. Carval for AOML
+OCR507_R10W | Sea-Bird Scientific | Multispectral radiometer 7 channels with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> |  | 27/12/2021 | added by T. Carval for AOML
+OCR507_ICSWR10W | Sea-Bird Scientific | Multispectral radiometer 7 channels combination of cosine detector to measure irradiance and a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn> , RADIOMETER_PAR, RADIOMETER_UP_RAD<nnn> |  | 27/12/2021 | added by T. Carval for AOML
+PAR | Sea-Bird Scientific |  | RADIOMETER_PAR |  | 27/12/2021 | added by T. Carval for AOML
+
 SATLANTIC_OCR504_ICSW | SATLANTIC | Multispectral radiometer 4 channels (SATLANTIC) with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR |  | 
 SATLANTIC_OCR504_R10W | SATLANTIC | Multispectral radiometer 4 channels (SATLANTIC) with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> |  |  | 
 SATLANTIC_OCR507_ICSW | SATLANTIC | Multispectral radiometer 7 channels (SATLANTIC) with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR |  | 
 SATLANTIC_OCR507_R10W | SATLANTIC | Multispectral radiometer 7 channels (SATLANTIC) with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> |  |  | 
 SATLANTIC_OCR507_ICSWR10W | SATLANTIC | Multispectral radiometer 7 channels (SATLANTIC) combination of cosine detector to measure irradiance and a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn> , RADIOMETER_PAR, RADIOMETER_UP_RAD<nnn> |  |  | 
 SATLANTIC_PAR | SATLANTIC |  | RADIOMETER_PAR |  |  | 
+
 RAMSES_ACC | TRIOS | Hyperspectral radiometer 256 channels (TRIOS) with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | RAMSES | 17/11/2020 | added by T. Carval for h. bittig, pilot stage to be validated by BGC-Argo on https://github.com/nvs-vocabs/ArgoVocabs/issues/1
 
 //Backscatteringmeters and Fluorometers combination |  |  |  |  |  | 
