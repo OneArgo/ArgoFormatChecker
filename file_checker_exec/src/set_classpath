@@ -1,0 +1,22 @@
+if [[ -n "$1" ]]; then
+   base=$1
+else
+   base=$PWD
+fi
+
+echo
+echo
+echo "base for CLASSPATH: $base"
+
+export CLASSPATH=$base/bin:\
+$base/slf4j/slf4j-api-1.7.25.jar:\
+$base/log4j2/log4j-slf4j-impl-2.11.1.jar:\
+$base/log4j2/log4j-api-2.11.1.jar:\
+$base/log4j2/log4j-core-2.11.1.jar:\
+$base/unidata/netcdfAll-4.3.jar
+
+echo
+echo "CLASSPATH set to:"
+echo "CLASSPATH=$CLASSPATH"
+echo
+echo

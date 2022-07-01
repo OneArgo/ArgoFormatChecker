@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [[ -z "$1" || ! -d "$1" ]]; then
+   echo -e "***ERROR***"
+   echo -e "\nUsage: $0  distribution-dir\n"
+   exit 1
+fi
+
+distr_dir=$1
+
+if [[ ! -f log4j2.xml ]]; then
+   cp log4j2.xml.production log4j2.xml
+fi
+
+jar cfm $distr_dir/ValidateSubmit.jar MANIFEST.txt log4j2.xml Application.properties ValidateSubmit*.class ResultsFile*.class usgdac/*.class
