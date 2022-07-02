@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="off">
+
+  <Properties>
+    <Property name="logfile">${sys:logfile.name:-all_LOG}</Property>
+    <Property name="suffix">${sys:log_suffix:-}</Property>
+  </Properties>
+
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+    </Console>
+
+    <RollingFile name="File" 
+                 fileName="${logfile}${suffix}" 
+                 filePattern="${logfile}${suffix}-%i"
+                 createOnDemand="true"
+                 immediateFlush="false" append="false">
+      <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
+      <Policies>
+        <SizeBasedTriggeringPolicy size="250 MB"/>
+      </Policies>
+    </RollingFile>
+  </Appenders>
+
+  <Loggers>
+    <Logger name="ValidateSubmit" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ResultsFile" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="WriteFloatMultiProfile" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="WriteMergeProfile" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ArgoDataFile" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ArgoFileSpecification" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ArgoMetadataFile" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ArgoProfileFile" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ArgoReferenceTable" level="off" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Logger name="ArgoVariable" level="off" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <Root level="off">
+      <AppenderRef ref="File"/>
+    </Root>
+  </Loggers>
+</Configuration>

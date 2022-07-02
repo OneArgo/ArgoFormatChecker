@@ -1,0 +1,35 @@
+<FileCheckResults>
+  <file 
+    <path>........</path>
+    <status>
+      disposition
+    </status>
+    <metadata>
+      <dac>name</dac>
+      <DATA_TYPE>type</DATA_TYPE>
+      <PLATFORM_NUMBER>number</PLATFORM_NUMBER>
+      <WMO_INST_TYPE>code</WMO_INST_TYPE>   
+      <N_PROF>n</N_PROF>
+      <N_LEVELS>nn</N_LEVELS>
+      <CYCLE_NUMBER>045</CYCLE_NUMBER>
+      <DATA_MODE>mode</DATA_MODE>
+      <DIRECTION>d</DIRECTION>
+      <JULD_DTG>20141009042400</JULD_DTG>
+      <LATITUDE>lat</LATITUDE>
+      <LONGITUDE>lon</LONGITUDE>
+      <PROFILE_TEMP_QC>qc</PROFILE_TEMP_QC>
+      <PROFILE_PSAL_QC>qc</PROFILE_PSAL_QC>
+      <PROFILE_DOXY_QC>qc</PROFILE_DOXY_QC>
+    </metadata>
+    <errors n_errors=N>
+      <message>
+        message-text
+      </message>
+    </errors>
+    <warnings n_warnings=W>
+      <message>
+        message-text
+      </message>
+    </warnings>
+  </file>
+</FileCheckResults>
