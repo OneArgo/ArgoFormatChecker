@@ -4,8 +4,8 @@ netcdf argo-trajectory-v3.0-spec {
 //@ FORMAT_VERSION   = "3.1"
 //@ HANDBOOK_VERSION = "1.2"
 //@ REFERENCE_DATE_TIME = "19500101000000"
-//@ $Revision: 1247 $
-//@ $Date: 2021-03-31 15:56:31 +0000 (Wed, 31 Mar 2021) $
+//@ $Revision: 1250 $
+//@ $Date: 2021-04-20 23:55:30 +0000 (Tue, 20 Apr 2021) $
 
 // global attributes:
 	:title = "Argo float trajectory file" ;
