@@ -879,7 +879,7 @@ public class ArgoFileSpecification
     *        
     */
    public boolean isPhysicalParamName(String name) {
-      if (physParamNameList == (HashSet) null) return false;
+      if (physParamNameList == (HashSet<String>) null) return false;
       return physParamNameList.contains(name);
    }
 
@@ -891,7 +891,7 @@ public class ArgoFileSpecification
     *        
     */
    public boolean isDeprecatedPhysicalParam(String name) {
-      if (depParamNameList == (HashSet) null) return false;
+      if (depParamNameList == (HashSet<String>) null) return false;
       return depParamNameList.contains(name);
    }
 
@@ -1115,9 +1115,8 @@ public class ArgoFileSpecification
     */
    public boolean parseCdlFile() throws IOException
    {
-      boolean inDim = false, inVar = false, inData = false;
+      boolean inDim = false, inVar = false;
       String line;
-      boolean parsed;
       String specName;
 
       log.debug(".....parseCdlFile: start.....");
@@ -1185,13 +1184,13 @@ public class ArgoFileSpecification
          } else if (pDimTag.matcher(line).matches()) {
             //.."dimensions:" line - start of the dimension definitions
 
-            inDim = true; inVar = false; inData = false;
+            inDim = true; inVar = false;
             log.debug("***  DIMENSIONS  ***");
 
          } else if (pVarTag.matcher(line).matches()) {
             //.."variables:" line - start of the variable definitions
 
-            inDim = false; inVar = true; inData = false;
+            inDim = false; inVar = true;
             log.debug("***  VARIABLES  ***");
 
          } else if (pDataTag.matcher(line).matches() ||
@@ -1199,7 +1198,7 @@ public class ArgoFileSpecification
             //..the "data:" line or the closing "}"
             //..- nothing else needs to be done
 
-            inDim = false; inVar = false; inData = true;
+            inDim = false; inVar = false;
             log.debug("***  DATA  ***");
 
             break;
@@ -1208,6 +1207,7 @@ public class ArgoFileSpecification
             //..in the "dimensions" section - parse dimesion definitions
 
             if (! parseDimLine (line)) {
+               file.close();
                return false;
             }
 
@@ -1215,12 +1215,14 @@ public class ArgoFileSpecification
             //..in the "variables" section - parse variables and attributes
 
             if (! parseVarLine(line)) {
+               file.close();
                return false;
             }
          }
 
       } //..end while (file.readLine()
 
+      file.close();
       log.debug(".....parseCdlFile: end.....");
 
       return true;
@@ -1577,6 +1579,7 @@ public class ArgoFileSpecification
          Matcher m = pOptVar.matcher(line);
 
          if (! m.matches()) {
+            file.close();
             message = "Invalid line in '"+optFileName+"': '"+line+"'";
             throw new IOException("Invalid line in '"+optFileName+"'");
          }
@@ -1631,6 +1634,7 @@ public class ArgoFileSpecification
          }
       } //..end while (readLine)
 
+      file.close();
       log.debug(".....parseOptFile: end.....");
 
       return true;
@@ -1693,6 +1697,7 @@ public class ArgoFileSpecification
             Matcher m = pAttrRegex.matcher(line);
 
             if (! m.matches()) {
+               file.close();
                message = "Invalid line in '"+regFileName+"': '"+line+"'";
                throw new IOException("Invalid line in '"+regFileName+"'");
             }
@@ -1713,6 +1718,7 @@ public class ArgoFileSpecification
                //..this is a attribute special pattern: replace existing setting
                ArgoVariable aVar = varHash.get(var);
                if (aVar == null) {
+                  file.close();
                   throw new IOException("Invalid variable name in line '"+line+
                                         "' in '"+regFileName+"'");
                }
@@ -1727,6 +1733,7 @@ public class ArgoFileSpecification
                   p = Pattern.compile(regex);
 
                } catch (Exception e) {
+                  file.close();
                   log.error("Attr Regex compile error: "+e);
                   message = "Invalid Regex: '"+line+"'";
                   throw new IOException("Invalid regex in '"+regFileName+"'");
@@ -1748,6 +1755,7 @@ public class ArgoFileSpecification
          }
       } //..end while (readLine)
 
+      file.close();
       log.debug(".....parseAttrRegexFile: end.....");
 
       return true;
@@ -1869,6 +1877,7 @@ public class ArgoFileSpecification
             continue;
 
          } else {
+            file.close();
             log.error("Invalid line in '"+prmFileName+"': '"+line+"'");
             throw new IOException("Invalid line in '"+prmFileName+"': '"+line+"'");
          }
@@ -1878,6 +1887,42 @@ public class ArgoFileSpecification
 
       //........................read the MAIN parameter file.......................
 
+      /*..File types served:
+        ..   Core Profile
+        ..   Bio Profile
+        ..   Trajectory
+        ..      v3.1 - Core-trajectory and Bio-trajectory
+        ..      v3.2 and beyond -  (merged) Trajectory
+        */
+      
+      boolean isCoreProf = false;
+      boolean isBioProf = false;
+      boolean isOldCoreTraj = false;
+      boolean isOldBioTraj = false;
+      boolean isTraj = false;
+      
+      if (fileType == ArgoDataFile.FileType.PROFILE) {
+    	  isCoreProf = true;
+
+      } else if (fileType == ArgoDataFile.FileType.BIO_PROFILE) {
+           isBioProf = true;
+
+      } else if (fileType == ArgoDataFile.FileType.TRAJECTORY) {
+         if (version.compareTo("3.1") <= 0) {
+        	  isOldCoreTraj = true;
+         } else {
+           isTraj = true;
+         }
+
+      } else if (fileType == ArgoDataFile.FileType.BIO_TRAJECTORY) {
+         isOldBioTraj = true;
+      }
+
+      boolean isPost3_0 = false;
+      if (version.compareTo("3.0") > 0) {
+         isPost3_0 = true;
+      }
+    		     
       //..open the file
       f = new File(prmFileName);
       if (! f.isFile()) {
@@ -1910,6 +1955,7 @@ public class ArgoFileSpecification
          String st[] = line.split("\\|");
 
          if (st.length < nParamFields) {
+            file.close();
             log.error("too few columns on line {} in '{}'", nLine, prmFileName);
             throw new IOException("Too few columns on line "+nLine+" in '"+prmFileName+
                                   "': '"+line+"'");
@@ -1945,7 +1991,7 @@ public class ArgoFileSpecification
 
          //..set any special handling instructions for v3.1 and later files
 
-         if (version.compareTo("3.0") > 0) {
+         if (isPost3_0) {
             if (prmSName.length() == 0  || prmSName.equals("-")) prmSName = ATTR_NOT_ALLOWED;
             if (prmVmin.length() == 0  || prmVmin.equals("-")) prmVmin = ATTR_NOT_ALLOWED;
             if (prmVmax.length() == 0  || prmVmax.equals("-")) prmVmax = ATTR_NOT_ALLOWED;
@@ -2060,14 +2106,12 @@ public class ArgoFileSpecification
                keep = true;
 
                //..treat PRES/PRESn like any other bio-parameter in Bio- files
-               if (fileType == ArgoDataFile.FileType.BIO_PROFILE ||
-                   fileType == ArgoDataFile.FileType.BIO_TRAJECTORY) {
+               if (isBioProf || isOldBioTraj) {
                   CORE = false;
                }
 
-            } else if (fileType == ArgoDataFile.FileType.PROFILE ||
-                       fileType == ArgoDataFile.FileType.TRAJECTORY) { 
-               //..keep "c" parameters for core files
+            } else if (isCoreProf || isTraj || isOldCoreTraj) { 
+               //..keep "c" parameters for core and traj (> v3.1) files
                keep = true;
                if (prm.equals("TEMP") && fileType == ArgoDataFile.FileType.PROFILE) opt = false;
             }
@@ -2076,9 +2120,8 @@ public class ArgoFileSpecification
             CORE = false;
             BIO = false;
 
-            if (fileType == ArgoDataFile.FileType.PROFILE ||
-                fileType == ArgoDataFile.FileType.TRAJECTORY) { 
-               //..keep "c" and "ic" parameters for core files
+            if (isCoreProf || isTraj || isOldCoreTraj) { 
+               //..keep "c" and "ic" parameters for core and traj (> v3.1) files
                keep = true;
             }
 
@@ -2086,9 +2129,8 @@ public class ArgoFileSpecification
             CORE = false;
             BIO = true;
 
-            if (fileType == ArgoDataFile.FileType.BIO_PROFILE ||
-                fileType == ArgoDataFile.FileType.BIO_TRAJECTORY) {
-               //..keep "b" parameters for Bio-Argo files
+            if (isBioProf || isTraj || isOldBioTraj) {
+               //..keep "b" parameters for Bio-Argo and traj (> v3.1) files
                keep = true; 
             }
 
@@ -2096,14 +2138,13 @@ public class ArgoFileSpecification
             CORE = false;
             BIO = false;
 
-            if (fileType == ArgoDataFile.FileType.BIO_PROFILE ||
-                fileType == ArgoDataFile.FileType.BIO_TRAJECTORY) { 
-               //..keep "b" and "ib" parameters for Bio-Argo files
+            if (isBioProf || isTraj || isOldBioTraj) {
+               //..keep "ib" parameters for Bio-Argo and traj (> v3.1) files
                keep = true; 
             }
 
          } else {
-            log.debug("Invalid param category (c,b,i) '"+prmCategory+
+            log.debug("Invalid param category (c,b,ic,ib) '"+prmCategory+
                       "' in line '"+line+"'");
             throw new IOException("Invalid parameter category (c,b,i) '"+prmCategory+
                                   "' ("+prmFileName+"; "+nLine+")");
