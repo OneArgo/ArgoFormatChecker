@@ -14,19 +14,13 @@ public class TestWr1
       throws IOException
    {
       NetcdfFileWriter out;
-      Dimension dim[];
 
-      int n_dim = 20;
       int m_dim = 10;
-      int k_dim = 5;
 
       //..open netCDF file for writing
       out = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, "test.nc");
       out.setFill(true);
 
-      Dimension N = out.addDimension((Group) null, "N", n_dim);
-      Dimension M = out.addDimension((Group) null, "M", m_dim);
-      Dimension K = out.addDimension((Group) null, "K", k_dim);
       Variable var1 = out.addVariable((Group) null, "var1", DataType.DOUBLE, "N M");
 
       //Double fill = new Double(99999.);

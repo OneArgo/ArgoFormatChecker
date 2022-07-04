@@ -1,13 +1,10 @@
 package usgdac;
 
-import java.io.*;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.TimeZone;
 import java.util.regex.Pattern;

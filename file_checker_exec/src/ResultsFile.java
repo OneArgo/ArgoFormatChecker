@@ -391,10 +391,7 @@ public class ResultsFile
       //..try to get as much of the meta-data as exists, but avoid aborts
 
       String str;
-      String var;
-      int iarr[];
       int i;
-      double d;
 
       if (doXml) {
          xml.writeStartElement("metadata");

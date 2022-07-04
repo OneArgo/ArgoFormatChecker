@@ -1,11 +1,9 @@
 package usgdac;
 
-import ucar.nc2.*;
 import ucar.ma2.*;
 
 import java.io.*;
 import java.util.*;
-import java.text.DecimalFormat;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -296,7 +294,7 @@ public class ArgoTechnicalFile extends ArgoDataFile
       //..read technical parameters and values
 
       String nName = "TECHNICAL_PARAMETER_NAME";
-      String vName = "TECHNICAL_PARAMETER_VALUE";
+      //String vName = "TECHNICAL_PARAMETER_VALUE";
 
       String[] full_name = readStringArr(nName);
       /*

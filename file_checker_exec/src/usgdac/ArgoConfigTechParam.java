@@ -210,7 +210,6 @@ public class ArgoConfigTechParam
        HashMap<Pattern, HashMap<String, HashSet<String>>> regexSet)
    {
       ArgoConfigTechParamMatch match = null;  //..return object
-      int n = 0;  //..count of the number of matches found
       HashMap<String, String> unMatchedTemplates = null;  //..return templates
       HashMap<String, String> failedMatchedTemplates = null;  //..return templates
 
@@ -229,8 +228,6 @@ public class ArgoConfigTechParam
          Matcher m = pattern.matcher(name);
          
          if (m.matches()) {
-            n++;
-
             unMatchedTemplates = new HashMap<String, String>(m.groupCount());
             failedMatchedTemplates = new HashMap<String, String>(m.groupCount());
 
@@ -588,7 +585,8 @@ public class ArgoConfigTechParam
             int index = column[0].lastIndexOf('_');
 
             if (index <= 0) {
-               //..poorly formed name - only report if not already reported
+               //..poorly formed name
+               file.close();
                throw new IOException("Config-Parm-File '" + fileName +
                                   "': Badly formed name '"+column[0]+"'");
             }
@@ -823,7 +821,8 @@ public class ArgoConfigTechParam
             int index = column[0].lastIndexOf('_');
 
             if (index <= 0) {
-               //..poorly formed name - only report if not already reported
+               //..poorly formed name
+               file.close();
                throw new IOException("Technical-Parm-File '" + fileName +
                                   "': Badly formed name '"+column[0]+"'");
             }

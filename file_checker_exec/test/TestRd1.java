@@ -14,7 +14,6 @@ public class TestRd1
       throws IOException
    {
       NetcdfFile in;
-      Dimension dim[];
 
       //..open netCDF file for writing
       in = NetcdfFile.open("test.nc");

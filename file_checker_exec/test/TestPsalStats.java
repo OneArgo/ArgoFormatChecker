@@ -41,7 +41,6 @@ public class TestPsalStats
          }
 
          ArgoProfileFile argo = null;
-         boolean openSuccessful = false;
 
          try {
             argo = ArgoProfileFile.open(file);

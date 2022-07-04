@@ -17,12 +17,7 @@ public class TestReadString
       throws IOException
    {
       //.....extract the options....
-      String listFile = null;
       int next;
-
-      boolean only_first = false;
-      boolean no_trailing = false;
-      boolean id_inc_prof = false;
 
       for (next = 0; next < args.length; next++) {
          if (args[next].equals("-help")) {
@@ -69,34 +64,7 @@ public class TestReadString
       //..1) an input-file-list (overrides all other lists)
       //..2) file name arguments (already parsed above, if specified)
 
-      if (listFile != null) {
-         //..a list file was specified - open and read it
-         //..this overrides all other "input lists"
-         File f = new File(listFile);
-         if (! f.isFile()) {
-            stderr.println("\nERROR: -list-file does not exist: '"+listFile+"'");
-            log.error("-list-file does not exist: '" + listFile + "'");
-            System.exit(1);
-         } else if (! f.canRead()) {
-            log.error("-list-file '" + listFile + "' cannot be read");
-            stderr.println("\nERROR: -list-file cannot be read: '"+listFile+"'");
-            System.exit(1);
-         }
-
-         //..open and read the file
-         BufferedReader file = new BufferedReader(new FileReader(listFile));
-         inFileList = new ArrayList<String>(200);
-         String line;
-         while ((line = file.readLine()) != null) {
-            if (line.trim().length() > 0) {
-               inFileList.add(line.trim());
-            }
-         }
-         log.info("Read {} entries from -list-file '{}'", inFileList.size(), listFile);
-
-         stdout.println("   Input files read from:   '"+listFile+"'");
-
-      } else if (inFileList == null) {
+      if (inFileList == null) {
          stderr.println("\nERROR: No input files specified\n");
          log.error("No input files specified");
          System.exit(1);
@@ -117,8 +85,6 @@ public class TestReadString
       //.....loop over input files --- read from innie, write to outie
 
       int nFile = -1;
-      int nInProf;
-      int nextOutProf = 0;
 
       stdout.println("\nProcessing File:");
       stdout.println(" FileNum  File Name");
@@ -130,7 +96,7 @@ public class TestReadString
          outFile.printf("\n=========== FILE: %s (%d)\n", inFileName, nFile);
 
          ArgoProfileFile arFile = null;
-         boolean openSuccessful = false;
+
          try {
             arFile = ArgoProfileFile.open(inFileName);
          } catch (Exception e) {
@@ -284,7 +250,6 @@ public class TestReadString
                   continue;
                }
 
-               boolean nulls = false;
 
                outFile.printf("%-20s:\n", var);
 
@@ -322,7 +287,6 @@ public class TestReadString
                   continue;
                }
 
-               boolean nulls = false;
 
                outFile.printf("%-20s[0]:\n", var);
 
@@ -361,7 +325,6 @@ public class TestReadString
                   continue;
                }
 
-               boolean nulls = false;
 
                outFile.printf("%-20s[0,0]:\n", var);
 

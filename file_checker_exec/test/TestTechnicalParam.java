@@ -62,7 +62,6 @@ public class TestTechnicalParam
          stdout.println("\n\n==> FILE: "+file);
 
          ArgoDataFile argo = (ArgoDataFile) null;
-         boolean openSuccessful = false;
 
          try {
             argo = ArgoDataFile.open(file, spec_dir, true);
@@ -87,7 +86,7 @@ public class TestTechnicalParam
  
 
          ArgoTechnicalFile tech = (ArgoTechnicalFile) argo;
-         tech.validateTechParams(true);
+         tech.validateTechParams();
 
          //.....print diagnostics......
 

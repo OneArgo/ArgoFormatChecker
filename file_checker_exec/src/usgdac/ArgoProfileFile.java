@@ -161,9 +161,6 @@ public class ArgoProfileFile extends ArgoDataFile
       log.debug(".....createNew: start.....");
 
       ArgoProfileFile arFile = new ArgoProfileFile();
-      if (arFile == (ArgoProfileFile) null) {
-         return arFile;
-      }
 
       //..create the template specification
 
@@ -730,7 +727,7 @@ public class ArgoProfileFile extends ArgoDataFile
       }
 
       //............check per-profile dates.............
-      String posQC = readString("POSITION_QC");
+      //String posQC = readString("POSITION_QC");
       for (int n = 0; n < nProf; n++) {
          //..all of the JULD checks must be contingent on JULD_QC
          char qc = juld_qc.charAt(n);
@@ -1206,26 +1203,20 @@ public class ArgoProfileFile extends ArgoDataFile
 
             boolean has_data = false;
 
-            if (hasData == null) {
-               //..not checked above
+            //..not checked above
 
-               float[] pres = readFloatArr("PRES", n);
-               if (pres != null) {
-                  for (float d : pres) {
-                     if (! ArgoDataFile.is_99_999_FillValue(d)) {
-                        has_data = true;
-                        break;
-                     }
-                  }
+            float[] pres = readFloatArr("PRES", n);
+            if (pres != null) {
+               for (float d : pres) {
+                  if (! ArgoDataFile.is_99_999_FillValue(d)) {
+                     has_data = true;
+                     break;
+                 }
                }
-
-               hasData = has_data;
-               log.debug("...data_state_indicator empty. searched PRES. has_data = {}", has_data);
-
-            } else {
-               has_data = hasData;
-               log.debug("...data_state_indicator empty. PRES already searched. has_data = {}", has_data);
             }
+
+            hasData = has_data;
+            log.debug("...data_state_indicator empty. searched PRES. has_data = {}", has_data);
 
             if (has_data) {
                formatErrors.add("DATA_STATE_INDICATOR["+(n+1)+"]: '"+s+"' Not set");

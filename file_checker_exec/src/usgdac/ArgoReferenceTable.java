@@ -172,12 +172,6 @@ public final class ArgoReferenceTable
    public ArgoReferenceTable (String specDir)
       throws IOException
    {
-      char c;
-      File file;
-      BufferedReader fileReader;
-      String fileName;
-      String line;
-
       String prefix = specDir.trim() + File.separator + "ref_table-";
 
       if (initialized) {
@@ -369,6 +363,7 @@ public final class ArgoReferenceTable
 
          map.put(Character.valueOf(c), new ArgoReferenceEntry(st));
       }
+      fileReader.close();
       log.debug("...end readMapCharString...");
    } //..end readMapCharString
 
@@ -460,6 +455,7 @@ public final class ArgoReferenceTable
             log.debug ("add regex:    '{}' for entry '{}'", pRegex, key);
          }
       }
+      fileReader.close();
       log.debug("...end readMapStrinString...");
    } //..end readMapStringString
 
@@ -504,6 +500,7 @@ public final class ArgoReferenceTable
 
          map.put(Integer.valueOf(st[0]), info);
       }
+      fileReader.close();
       log.debug("...end readMapIntegerString...");
    } //..end readMapIntegerString
 
@@ -547,6 +544,7 @@ public final class ArgoReferenceTable
 
          set.add(line.trim());
       }
+      fileReader.close();
       log.debug("...end readSetString...");
    } //..end readSetString
 

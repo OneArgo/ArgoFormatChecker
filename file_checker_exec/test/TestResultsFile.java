@@ -79,6 +79,7 @@ public class TestResultsFile
       }
 
       String specDirName = property.getProperty("SpecDirectory", "unknown");
+      String dacName = property.getProperty("Dac", "unknown");
 
       //.....extract the options....
       int next;
@@ -118,7 +119,6 @@ public class TestResultsFile
 
       String fcVersion = "6.0";
       String spVersion = "1.2.4";
-      String dacName = "sloppy";
 
       ArgoDataFile argo = null;
 
@@ -293,7 +293,7 @@ public class TestResultsFile
          stdout.println("...verify format");
          log.debug("...verify format");
 
-         checkTest = argo.verifyFormat();
+         checkTest = argo.verifyFormat(dacName);
 
          if (! checkTest) {
             stdout.println("\n   *** TEST FAILED!!! argo.verifyFormat incorrectly returned false ***\n");
@@ -364,7 +364,7 @@ public class TestResultsFile
          stdout.println("...verify format");
          log.debug("...verify format");
 
-         checkTest = argo.verifyFormat();
+         checkTest = argo.verifyFormat(dacName);
 
          if (! checkTest) {
             stdout.println("\n   *** TEST FAILED!!! argo.verifyFormat incorrectly returned false ***\n");

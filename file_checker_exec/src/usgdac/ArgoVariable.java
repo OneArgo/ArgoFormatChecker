@@ -4,7 +4,6 @@ import java.util.*;
 
 import java.util.regex.*;
 
-import ucar.nc2.Dimension;
 import ucar.nc2.Variable;
 import ucar.ma2.DataType;
 
@@ -23,9 +22,9 @@ public class ArgoVariable {
    //.................................................
 
    //..class variables..
-   private static Pattern pParamQC = Pattern.compile("PROFILE_(.+)_QC");
-   private static Pattern pParam   = Pattern.compile
-      ("(\\w+?)(_QC|_ADJUSTED|_ADJUSTED_QC|_ADJUSTED_ERROR)?");
+   //private static Pattern pParamQC = Pattern.compile("PROFILE_(.+)_QC");
+   //private static Pattern pParam   = Pattern.compile
+   //   ("(\\w+?)(_QC|_ADJUSTED|_ADJUSTED_QC|_ADJUSTED_ERROR)?");
 
    private static final Logger log = LogManager.getLogger("ArgoVariable");
 
