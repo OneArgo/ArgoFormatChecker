@@ -32,7 +32,8 @@ dimensions:
 	N_CYCLE = _unspecified_;
 	N_HISTORY = _unspecified_;
     N_VALUES\d+ = _extra_;
-	N_CALIB = _unspecified_;
+	N_CALIB_PARAM = _unspecified_;
+	N_CALIB_JULD = _unspecified_;
 
 variables:
 
@@ -412,23 +413,39 @@ variables:
 
 //	Scientific calibration information
 
-	char SCIENTIFIC_CALIB_PARAMETER(N_CALIB, N_PARAM, STRING64);
+	char SCIENTIFIC_CALIB_PARAMETER(N_CALIB_PARAM, N_PARAM, STRING64);
 		SCIENTIFIC_CALIB_PARAMETER:long_name = "List of parameters with calibration information";
 		SCIENTIFIC_CALIB_PARAMETER:conventions = "Argo reference table 3";
 		SCIENTIFIC_CALIB_PARAMETER:_FillValue = " ";
-	char SCIENTIFIC_CALIB_EQUATION(N_CALIB, N_PARAM, STRING256);
+	char SCIENTIFIC_CALIB_EQUATION(N_CALIB_PARAM, N_PARAM, STRING256);
 		SCIENTIFIC_CALIB_EQUATION:long_name = "Calibration equation for this parameter";
 		SCIENTIFIC_CALIB_EQUATION:_FillValue = " ";
-	char SCIENTIFIC_CALIB_COEFFICIENT(N_CALIB, N_PARAM, STRING256);
+	char SCIENTIFIC_CALIB_COEFFICIENT(N_CALIB_PARAM, N_PARAM, STRING256);
 		SCIENTIFIC_CALIB_COEFFICIENT:long_name = "Calibration coefficients for this equation";
 		SCIENTIFIC_CALIB_COEFFICIENT:_FillValue = " ";
-	char SCIENTIFIC_CALIB_COMMENT(N_CALIB, N_PARAM, STRING256);
+	char SCIENTIFIC_CALIB_COMMENT(N_CALIB_PARAM, N_PARAM, STRING256);
 		SCIENTIFIC_CALIB_COMMENT:long_name = "Comment applying to this parameter calibration";
 		SCIENTIFIC_CALIB_COMMENT:_FillValue = " ";
-	char SCIENTIFIC_CALIB_DATE(N_CALIB, N_PARAM, DATE_TIME);
+	char SCIENTIFIC_CALIB_DATE(N_CALIB_PARAM, N_PARAM, DATE_TIME);
 		SCIENTIFIC_CALIB_DATE:long_name = "Date of calibration";
 		SCIENTIFIC_CALIB_DATE:conventions = "YYYYMMDDHHMISS";
 		SCIENTIFIC_CALIB_DATE:_FillValue = " ";
+
+//  JULD calibration
+
+	char JULD_CALIB_EQUATION(N_CALIB_JULD, STRING256);
+		JULD_CALIB_EQUATION:long_name = "Calibration equation for JULD";
+		JULD_CALIB_EQUATION:_FillValue = " ";
+	char JULD_CALIB_COEFFICIENT(N_CALIB_JULD, STRING256);
+		JULD_CALIB_COEFFICIENT:long_name = "Calibration coefficients for JULD equation";
+		JULD_CALIB_COEFFICIENT:_FillValue = " ";
+	char JULD_CALIB_COMMENT(N_CALIB_JULD, STRING256);
+		JULD_CALIB_COMMENT:long_name = "Comment applying to JULD calibration";
+		JULD_CALIB_COMMENT:_FillValue = " ";
+	char JULD_CALIB_DATE(N_CALIB_JULD, DATE_TIME);
+		JULD_CALIB_DATE:long_name = "Date of JULD calibration";
+		JULD_CALIB_DATE:conventions = "YYYYMMDDHHMISS";
+		JULD_CALIB_DATE:_FillValue = " ";
 
 //  History information
 	char HISTORY_INSTITUTION(N_HISTORY, STRING4);
