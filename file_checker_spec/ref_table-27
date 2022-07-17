@@ -55,6 +55,7 @@ SBE61_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added 
 SBE61_V5.0.2 | SBE | Pressure calibration done correctly. | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 11/01/2019 | added by M. Scanderbeg for J. Gilson 
 SBE61_V5.0.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/12/2021 | added by T. Carval for C. Schmid 
 SBE61_V5.0.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/12/2021 | added by T. Carval for C. Schmid 
+SBE61CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 08/07/2022 | added by T. Carval for Z. Liu
 SBE61 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
 CTD_F01 | TSK | TSK model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 RBR | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
