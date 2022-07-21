@@ -1013,7 +1013,7 @@ public final class ArgoReferenceTable
          }
 
          //..look for the sensor in the list of valid sensors
-         boolean valid = false;
+
          for (String s : slist) {
             if (xref.equals(s)) {
                return true;

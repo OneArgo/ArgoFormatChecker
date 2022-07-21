@@ -1,7 +1,3 @@
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayDouble.D1;
-import ucar.nc2.NetcdfFile;
-
 import usgdac.*;
 import usgdac.ArgoDataFile.FileType;
 

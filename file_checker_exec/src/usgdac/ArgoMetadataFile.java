@@ -1417,8 +1417,7 @@ public class ArgoMetadataFile extends ArgoDataFile
       for (String v : varNames) {
          String dim = "N_" + v + "PARAM";
          String varName = v + "PARAMETER_NAME";
-         String valName = v + "PARAMETER_VALUE";
-
+         
          int nParam = getDimensionLength(dim);
 
          log.debug("'{}' checking: number of parameters = {}", v, nParam);

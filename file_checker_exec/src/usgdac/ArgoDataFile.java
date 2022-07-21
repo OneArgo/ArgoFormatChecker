@@ -841,8 +841,9 @@ public class ArgoDataFile
                                    "\n\tSpecification = '"+specAttrValue+"'"+
                                    "\n\tData File     = '"+dataAttrValue+"'");
 
-                  log.info("format error: "+varName+":"+attrName+
-                           " attribute mismatch (no regex)");
+                  log.info("format error: {}:{} " +
+                           "attribute mismatch (no regex): spec, data = {}, {}",
+                           varName, attrName, specAttrValue, dataAttrValue);
                   
                   returnVal = false;
 

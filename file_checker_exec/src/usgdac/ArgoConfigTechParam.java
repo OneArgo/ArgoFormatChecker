@@ -1,13 +1,8 @@
 package usgdac;
 
-import usgdac.*;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-
-import ucar.nc2.*;
-import ucar.ma2.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.regex.*;
 
 import ucar.nc2.*;
+import ucar.nc2.iosp.netcdf3.N3iosp;
 import ucar.ma2.*;
 
 import org.apache.logging.log4j.LogManager;
@@ -647,6 +648,7 @@ public class ArgoFileSpecification
 
       //..build type-map for nc_fill_values
       NC_FILL_TYPES.put("NC_FILL_CHAR", "0");
+      //NC_FILL_TYPES.put("NC_FILL_DOUBLE", ucar.nc2.iosp.netcdf3.N3iosp.NC_FILL_DOUBLE.toString());
       NC_FILL_TYPES.put("NC_FILL_DOUBLE", "9.969209968386869E36");
       NC_FILL_TYPES.put("NC_FILL_FLOAT",  "9.969209968386869E36f");
       NC_FILL_TYPES.put("NC_FILL_INT",    "-2147483647");
@@ -2031,6 +2033,7 @@ public class ArgoFileSpecification
 
                } else { //..duplicate name is a no, no
                   log.error("Duplicate param name '"+prmFileName+"': '"+line+"'");
+                  file.close();
                   throw new IOException("Duplicate param name in '"+prmFileName+"': '"+
                                         line+"'");
                }
