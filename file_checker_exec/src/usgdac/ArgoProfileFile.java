@@ -1000,14 +1000,20 @@ public class ArgoProfileFile extends ArgoDataFile
                         formatErrors.add("D-mode: SCIENTIFIC_CALIB variables not "+
                         "checked for PARAMETER '{}' due to missing PROFILE_param_QC");
 
-                     } else if (pQC != ' ') {
+                     } else { //if (pQC != ' ') {   //....Qc manual pg 74.
                         if (cmt.length() == 0) {
-                           formatErrors.add("D-mode: SCIENTIFIC_CALIB_COMMENT["+
+                           //################# TEMPORARY WARNING ################
+                           formatWarnings.add("D-mode: SCIENTIFIC_CALIB_COMMENT["+
                               (n+1)+","+(c+1)+","+(p+1)+"]: Not set for '"+param+"'");
+                           log.warn("TEMP WARNING: {}: D-mode: SCIENTIFIC_CALIB_COMMENT[{},{},{}] not set for {}",
+                                 file.getName(), n, c, p, param);
                         }
                         if (date.length() == 0) {
-                           formatErrors.add("D-mode: "+calib_date+"["+
+                           //################# TEMPORARY WARNING ################
+                           formatWarnings.add("D-mode: "+calib_date+"["+
                               (n+1)+","+(c+1)+","+(p+1)+"]: Not set for '"+param+"'");
+                           log.warn("TEMP WARNING: {}: D-mode: {}[{},{},{}] not set for {}",
+                                 file.getName(), calib_date, n, c, p, param);
                         }
                         //if (eqn.length() == 0) {
                         //   formatErrors.add("D-mode: SCIENTIFIC_CALIB_EQUATION["+
@@ -1018,9 +1024,9 @@ public class ArgoProfileFile extends ArgoDataFile
                         //         (n+1)+","+(c+1)+","+(p+1)+"]: Not set for '"+param+"'");
                         //}
 
-                     } else {
-                        log.debug ("D-mode: PROF_*_QC[{}] = ' ': " +
-                                   "skipped SCI_CALIB[{},{},{}] checks", n, n, c, p);
+                      //} else {   //....Qc manual pg 74.
+                      //  log.debug ("D-mode: PROF_*_QC[{}] = ' ': " +
+                      //             "skipped SCI_CALIB[{},{},{}] checks", n, n, c, p);
                      }
                   }//..end if (param.length)
                }//..end for (nParam)
