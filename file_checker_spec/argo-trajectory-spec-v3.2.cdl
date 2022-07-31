@@ -480,7 +480,7 @@ variables:
 		HISTORY_PARAMETER:long_name = "Parameter action is performed on";
 		HISTORY_PARAMETER:conventions = "Argo reference table 3";
 		HISTORY_PARAMETER:_FillValue = " ";
-	float HISTORY_PREVIOUS_VALUE(N_HISTORY);
+	float_or_double HISTORY_PREVIOUS_VALUE(N_HISTORY);
 		HISTORY_PREVIOUS_VALUE:long_name = "Parameter/Flag previous value before action";
 		HISTORY_PREVIOUS_VALUE:_FillValue = 99999.f;
 	char HISTORY_INDEX_DIMENSION(N_HISTORY);
