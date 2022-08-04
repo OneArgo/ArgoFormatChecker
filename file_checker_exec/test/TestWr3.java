@@ -13,11 +13,6 @@ public class TestWr3
       throws IOException
    {
       NetcdfFileWriter out = null;
-      Dimension dim[];
-
-      int n_dim = 20;
-      int m_dim = 10;
-      int k_dim = 5;
 
       //..open netCDF file for writing
 

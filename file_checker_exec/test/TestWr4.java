@@ -1,7 +1,6 @@
 import ucar.nc2.*;
 import ucar.ma2.*;
 import java.io.*;
-import java.util.*;
 
 //..creates a 2D 2-row array with fewer columns
 //..adds it to the bottom columns of rows 6 & 7
@@ -13,11 +12,6 @@ public class TestWr4
       throws IOException
    {
       NetcdfFileWriter out = null;
-      Dimension dim[];
-
-      int n_dim = 20;
-      int m_dim = 10;
-      int k_dim = 5;
 
       //..open netCDF file for writing
 

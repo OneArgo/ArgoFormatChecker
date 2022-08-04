@@ -106,7 +106,6 @@ public class ArgoDataFile
 //................................................
    //..class variables
    private static final String BLANK_MESSAGE = new String("");
-   private static final String UNKNOWN = new String("<unknown>");
    protected final static Date earliestDate = ArgoDate.get("19970101000000");
    private final static DecimalFormat cycleFmt = new DecimalFormat("000");
 
@@ -671,12 +670,6 @@ public class ArgoDataFile
 
       } catch (IOException e) {
          message = "Failed in ArgoFileSpecification";
-
-         if (s != (ArgoFileSpecification) null) {
-            message = s.getMessage();
-            s = (ArgoFileSpecification) null;
-         }
-
          throw e;
       }
 
@@ -848,8 +841,9 @@ public class ArgoDataFile
                                    "\n\tSpecification = '"+specAttrValue+"'"+
                                    "\n\tData File     = '"+dataAttrValue+"'");
 
-                  log.info("format error: "+varName+":"+attrName+
-                           " attribute mismatch (no regex)");
+                  log.info("format error: {}:{} " +
+                           "attribute mismatch (no regex): spec, data = {}, {}",
+                           varName, attrName, specAttrValue, dataAttrValue);
                   
                   returnVal = false;
 
@@ -1293,7 +1287,6 @@ public class ArgoDataFile
             //..some variables in this group were missing but not all
             //..format the list of required and reported variables
             StringBuilder req = new StringBuilder();
-            StringBuilder rep = new StringBuilder();
             for (String str : vReq) {
                req.append("'"+str+"' ");
             }

@@ -24,7 +24,6 @@ public class TestGdacFileName
          stdout.println("\n\n==> FILE: "+file);
 
          ArgoDataFile argo = (ArgoDataFile) null;
-         boolean openSuccessful = false;
 
          try {
             argo = ArgoDataFile.open(file);

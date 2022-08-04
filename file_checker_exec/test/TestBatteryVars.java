@@ -4,7 +4,6 @@ import usgdac.ArgoDataFile.FileType;
 import java.io.*;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,7 +61,6 @@ public class TestBatteryVars
          stdout.println("\n\n==> FILE: "+file);
 
          ArgoDataFile argo = (ArgoDataFile) null;
-         boolean openSuccessful = false;
 
          try {
             argo = ArgoDataFile.open(file, spec_dir, true);

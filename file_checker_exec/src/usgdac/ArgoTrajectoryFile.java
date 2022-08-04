@@ -163,9 +163,6 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       log.debug(".....createNew: start.....");
 
       ArgoTrajectoryFile arFile = new ArgoTrajectoryFile();
-      if (arFile == (ArgoTrajectoryFile) null) {
-         return arFile;
-      }
 
       //..create the template specification
       arFile.spec = ArgoDataFile.openSpecification
@@ -1883,8 +1880,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                //..check that JULD is after earliestDate and before DATE_UPDATE
 
                Date date = ArgoDate.get(juld[n]);
-               String dtg = ArgoDate.format(date);
-         
+
+               //String dtg = ArgoDate.format(date);
                //log.debug("JULD[{}]: {} = {} (qc = {})", n, juld[n], juldDTG, qc);
 
                if (date.before(earliestDate)) {
@@ -2214,8 +2211,6 @@ public class ArgoTrajectoryFile extends ArgoDataFile
        Final_NMeasurement_Variables[] finalNMVar)
    {
       log.debug(".....validateNCycleJuld: start.....");
-
-      boolean core = false;
 
       if (fileType != FileType.TRAJECTORY) {
          //..implies this is a core-file NOT a bio-file
@@ -3172,7 +3167,6 @@ public class ArgoTrajectoryFile extends ArgoDataFile
 
       ErrorTracker notMissQC = new ErrorTracker();
       ErrorTracker notMissPos = new ErrorTracker();
-      ErrorTracker invPos = new ErrorTracker();
       for (int n = 0; n < nMeasure; n++) {
          if (is_99_999_FillValue(lat[n]) || is_99_999_FillValue(lon[n])) {
 

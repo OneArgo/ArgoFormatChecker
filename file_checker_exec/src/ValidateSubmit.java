@@ -1,15 +1,10 @@
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayDouble.D1;
-import ucar.nc2.NetcdfFile;
 
 import usgdac.*;
 import usgdac.ArgoDataFile.FileType;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -269,6 +264,7 @@ public class ValidateSubmit
                inFileList.add(line.trim());
             }
          }
+         file.close();
          log.info("Read {} entries from -list-file '{}'", inFileList.size(), listFile);
 
       } else if (inFileList == null) {
@@ -305,7 +301,6 @@ public class ValidateSubmit
 
          //......open the input file.....
          argo = (ArgoDataFile) null;
-         boolean openSuccessful = false;
          try {
             argo = ArgoDataFile.open(inFileName, specDirName, true, dacName);
          } catch (Exception e) {
@@ -347,8 +342,6 @@ public class ValidateSubmit
 
             continue;
          }
-
-         openSuccessful = true;
 
          //.................check the format................
 

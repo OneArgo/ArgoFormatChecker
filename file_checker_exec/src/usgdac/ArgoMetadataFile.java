@@ -4,7 +4,6 @@ import ucar.nc2.*;
 import ucar.ma2.*;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.*;
 
@@ -37,8 +36,6 @@ public class ArgoMetadataFile extends ArgoDataFile
 
    //..class variables
    //..standard i/o shortcuts
-   private static PrintStream stdout = new PrintStream(System.out);
-   private static PrintStream stderr = new PrintStream(System.err);
    private static final Logger log = LogManager.getLogger("ArgoMetadataFile");
 
    private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
@@ -333,7 +330,6 @@ public class ArgoMetadataFile extends ArgoDataFile
       //..must be set ... not before earliest allowed date
       Date dateLaunch = (Date) null;
       boolean haveLaunch = false;
-      long launchSec = 0;
 
       if (launch.trim().length() > 0) {
          dateLaunch = ArgoDate.get(launch);
@@ -344,8 +340,6 @@ public class ArgoMetadataFile extends ArgoDataFile
             haveLaunch = false;
 
          } else {
-            launchSec = dateLaunch.getTime();
-            
             if (dateLaunch.before(earliestDate)) {
                formatErrors.add("LAUNCH_DATE: '"+launch+
                                 "': Before earliest allowed date ('"+
@@ -360,52 +354,38 @@ public class ArgoMetadataFile extends ArgoDataFile
       //............start date checks:...........
       //..if set, must be valid
       Date dateStart = (Date) null;
-      boolean haveStart = false;
-      long startSec = 0;
 
       if (start.trim().length() > 0) {
          dateStart = ArgoDate.get(start);
-         haveStart = true;
 
          if (dateStart == (Date) null) {
             formatErrors.add("START_DATE: '"+start+"': Invalid date");
-            haveStart = false;
          }
       }
 
       //............startup date checks:...........
       //..if set, within 3 days of launch date (W) and launch data set (W)
       Date dateStartup = (Date) null;
-      boolean haveStartup = false;
-      long startupSec = 0;
 
       if (startup.trim().length() > 0) {
          dateStartup = ArgoDate.get(startup);
-         haveStartup = true;
 
          if (dateStartup == (Date) null) {
             formatErrors.add("STARTUP_DATE: '"+startup+"': Invalid date");
-            haveStartup = false;
          }
       }
 
       //............end_mission date checks:...........
       //..if set, not before launch data and set if launch set
       Date dateEnd = (Date) null;
-      boolean haveEnd = false;
-      long endSec = 0;
 
       if (end.trim().length() > 0) {
          dateEnd = ArgoDate.get(end);
-         haveEnd = true;
 
          if (dateEnd == (Date) null) {
             formatErrors.add("END_MISSION_DATE: '"+end+"': Invalid date");
-            haveEnd = false;
 
          } else {
-            endSec = dateEnd.getTime();
-
             if (haveLaunch) {
                if (dateEnd.before(dateLaunch)) {
                   formatErrors.add("END_MISSION_DATE: '"+start+
@@ -1437,8 +1417,7 @@ public class ArgoMetadataFile extends ArgoDataFile
       for (String v : varNames) {
          String dim = "N_" + v + "PARAM";
          String varName = v + "PARAMETER_NAME";
-         String valName = v + "PARAMETER_VALUE";
-
+         
          int nParam = getDimensionLength(dim);
 
          log.debug("'{}' checking: number of parameters = {}", v, nParam);

@@ -1,7 +1,3 @@
-import ucar.ma2.ArrayDouble;
-import ucar.ma2.ArrayDouble.D1;
-import ucar.nc2.NetcdfFile;
-
 import usgdac.*;
 import usgdac.ArgoDataFile.FileType;
 
@@ -391,10 +387,7 @@ public class ResultsFile
       //..try to get as much of the meta-data as exists, but avoid aborts
 
       String str;
-      String var;
-      int iarr[];
       int i;
-      double d;
 
       if (doXml) {
          xml.writeStartElement("metadata");
