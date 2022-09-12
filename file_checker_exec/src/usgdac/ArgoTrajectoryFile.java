@@ -5,7 +5,6 @@ import ucar.ma2.*;
 
 import java.io.*;
 import java.util.*;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
 import org.apache.logging.log4j.LogManager;
@@ -44,13 +43,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile
    private final static String goodJuldQC = new String("01258");
 
    //..object variables
-   private String data_mode;
-
    private NetcdfFileWriter ncWriter;
-   
-   private ArrayList<ArrayList<String>> profParam;
-
-
+ 
    //.......................................
    //          CONSTRUCTORS
    //.......................................
@@ -233,7 +227,6 @@ public class ArgoTrajectoryFile extends ArgoDataFile
             arFile.ncWriter.addGroupAttribute(null, new Attribute(name, value));
             log.debug("add global attribute: '{}' = '{}'", name, value);
          }
-         ////2014-11-24T10:31:58Z creation;2014-11-26T16:31:26Z update" ;
       }
 
       //.........add Dimensions...............
@@ -268,7 +261,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
 
       //......ordered list.....
       //..this bit of code arranges the variables in the "expected order"
-      //..this is technically completely unecessary
+      //..this is technically completely unnecessary
       //..the ordering of the variables in the file should not matter
       //..however, at least one user is complaining about the current files
       //..and I am guessing that variable ordering is the problem.
@@ -350,7 +343,6 @@ public class ArgoTrajectoryFile extends ArgoDataFile
 
             //..add attributes for this variable
             for (ArgoAttribute a : v.getAttributes()) {
-               Attribute att = null;
                String aname = a.getName();
 
                if (a.isNumeric()) {
@@ -381,19 +373,19 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                            try {
                               switch (v.getType()) {
                               case DOUBLE:
-                                 def = (Number) new Double(val);
+                                 def = (Number) Double.valueOf(val);
                                  var.addAttribute(new Attribute(aname, (Number) def));
                                  break;
                               case FLOAT:
-                                 def = (Number) new Float(val);
+                                 def = (Number) Float.valueOf(val);
                                  var.addAttribute(new Attribute(aname, (Number) def));
                                  break;
                               case INT:
-                                 def = (Number) new Integer(val);
+                                 def = (Number) Integer.valueOf(val);
                                  var.addAttribute(new Attribute(aname, (Number) def));
                                  break;
                               case SHORT:
-                                 def = (Number) new Short(val);
+                                 def = (Number) Short.valueOf(val);
                                  var.addAttribute(new Attribute(aname, (Number) def));
                                  break;
                               default:  //..assume it is a string
@@ -1332,7 +1324,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       ArgoReferenceTable.ArgoReferenceEntry info;
 
       if (fileType == FileType.TRAJECTORY) {
-         //..implies this is a core-file NOT a bio-file
+         //..implies this is 1) a v3.2+ or 2) a pre-v3.2 core-file (NOT a bio-file)
          core = true;
       }
 
@@ -1622,7 +1614,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       char[]   juld_adj_status = null;
 
       if (core) {
-         //..read juld and associated variables
+         //..read juld_adjusted and associated variables
 
          juld_adj = readDoubleArr("JULD_ADJUSTED");
 
@@ -1636,6 +1628,22 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          juld_adj_status = new char[nMeasure];
          for (int n = 0; n < nMeasure; n++) {
             juld_adj_status[n] = str.charAt(n);
+         }
+
+         //..get the juld_data_mode
+
+         char mode[];
+         
+         str = readString("JULD_DATA_MODE");
+         if (str == null) {
+            //..pre-v3.2 file
+            log.debug("JULD_DATA_MODE missing - pre-v3.2");
+            mode = Arrays.copyOf(mode_nMeasure, nMeasure);
+
+         } else {
+            //..v3.2+ file
+            log.debug("JULD_DATA_MODE exists - v3.2+");
+            mode = str.toCharArray();
          }
 
          //....boolean fail = false;  DON'T reset - want it to be cumulative for both
@@ -1746,7 +1754,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                      //Integer ndx = 
                      //   CycNumIndex_cycle2index.get(Integer.valueOf(finalCycle[n]));
 
-                     if (mode_nMeasure[n] != 'A' && mode_nMeasure[n] != 'D') {
+                     if (mode[n] != 'A' && mode[n] != 'D') {
                         adjNotAorD.increment(n);
                      }
                   }
@@ -1908,10 +1916,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                   //..check that JULD_ADJUSTED is after earliestDate and before DATE_UPDATE
 
                   Date date = ArgoDate.get(juld_adj[n]);
-                  String dtg = ArgoDate.format(date);
          
-                  //log.debug("JULD[{}]: {} = {} (qc = {})", n, juld[n], juldDTG, qc);
-
                   if (date.before(earliestDate)) {
                      juld_adjBeforeEarliest.increment(n);
                   }
@@ -2449,8 +2454,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile
    }
    
    /**
-    * Validates the PARAM[N_MEASUREMENT] variables in a trajectory file
-    * 
+    * Validates the PARAM[N_MEASUREMENT] variables in a trajectory file.
+    * <p>
+    * Version Note:  This routine will process both pre-v3.2 and v3.2+ trajectory files.
+    * The difference is in the handling of data_mode variables.
+    * <p>
     * Assumes:
     * <ul>
     * <li>DATA_MODE has been read and validated (and passed into routine)
@@ -2462,8 +2470,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile
     *
     *
     * @param nMeasure N_MEASUREMENT value
-    * @param mode DATA_MODE[N_CYCLE]
-    * @param CycNumIndex_cycle2index  Cycle number-to-index mapping for N_CYCLE variables
+    * @param mode_nMeasure  DATA_MODE[N_CYCLE] mapped into "N_MEARUEMENT" space
+    * @param paramList List of trajectory parameters
     * @throws IOException If an I/O error occurs
     */
 
@@ -2478,7 +2486,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       boolean core = false;
 
       if (fileType == FileType.TRAJECTORY) {
-         //..implies this is a core-file NOT a bio-file
+         //..implies: 1) a v3.2+ file or 2) a pre-v3.2 core-file NOT a bio-file
          core = true;
       }
 
@@ -2490,8 +2498,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       char[]  prm_qc;
 
       PARAM_LOOP:
-      for (String param : paramList) {
-         String varName = param.trim();
+      for (int nPrm =0 ; nPrm < paramList.size(); nPrm++) {
+         String   param = paramList.get(nPrm);
+         String   varName = param.trim();
          Variable var   = findVariable(varName);
 
          Number fillValue = var.findAttribute("_FillValue").getNumericValue();
@@ -2570,6 +2579,28 @@ public class ArgoTrajectoryFile extends ArgoDataFile
             prm_qc = null;
          }
 
+         //..Set the data mode for this parameter
+         
+         String[] trajPrmDM = readStringArr("TRAJECTORY_PARAMETER_DATA_MODE");
+         if (trajPrmDM == null) {
+            log.debug("TRAJECTORY_PARAMETER_DATA_MODE missing - pre-v3.2");
+         } else {
+            log.debug("TRAJECTORY_PARAMETER_DATA_MODE exists - v3.2+");
+         }
+
+         char mode[] = new char[nMeasure];
+         for (int n = 0; n < nMeasure; n++) {
+            if (trajPrmDM != null) {
+               //..v3.2+ file
+               mode[n] = trajPrmDM[n].charAt(nPrm);
+               log.debug("trajPrmDM set. {}[{}]   '{}'", varName, n, mode[n]);
+            } else {
+               //..pre-v3.2 file
+               mode[n]= mode_nMeasure[n];
+               log.debug("trajPrmDM not set {}[{}]   '{}'", varName, n, mode[n]);
+            }
+         }
+         
          //..analyze the param variables
 
          boolean fail = false;
@@ -2581,7 +2612,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          ErrorTracker nan = new ErrorTracker();
          ErrorTracker notMiss = new ErrorTracker();
 
-         for (int n = 0; n < prm.length; n++) {
+         for (int n = 0; n < nMeasure; n++) {
             if (prm[n] == Float.NaN) {
                nan.increment(n);
             }
@@ -2658,10 +2689,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          varName = param.trim()+"_ADJUSTED";
          var   = findVariable(varName);
 
-         //..bio-traj exception:
-         //..   PRES does not have *_ADJUSTED variables
-         //..   Intermediate PARAMS may or may not have them
-         //..   Depend on the format checks to verify the variables are correct
+         //..bio-traj exception (pre-v3.2): PRES does not have *_ADJUSTED variables
+         //..Intermediate PARAMS may or may not have them
+         //..Depend on the format checks to verify the variables are correct
          //..   and go with the flow here
          //..-- ie, if *_ADJUSTED not present, skip these checks entirely
 
@@ -2796,7 +2826,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          ErrorTracker rQcNotMiss = new ErrorTracker();
 
 
-         for (int n = 0; n < prm_adj.length; n++) {
+         for (int n = 0; n < nMeasure; n++) {
             if (prm_adj[n] == Float.NaN) {
                nan.increment(n);
             }
@@ -2805,7 +2835,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                nanErr.increment(n);
             }
 
-            if (mode_nMeasure[n] == 'R') {
+            if (mode[n] == 'R') {
 
                //........... r-mode ............
 
@@ -2892,7 +2922,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                         //..param_adj is NOT missing
 
                         if (prm_adj_qc[n] == '4' || prm_adj_qc[n] == '9') {
-                           if (mode_nMeasure[n] == 'D') {
+                           if (mode[n] == 'D') {
                               adjNotMiss.increment(n);
                                     
                            } else { //..mode == 'A'
@@ -2900,7 +2930,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                            }
 
                         } else {
-                           if (mode_nMeasure[n] == 'D') {
+                           if (mode[n] == 'D') {
                               if (is_FillValue(fValue, prm_adj_err[n])) {
                                  errNotSetDmode.increment(n);
                               }
@@ -3198,7 +3228,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
 
 
    /**
-    * Validates the TRAJECTORY_PARAMETER variable in the trajectory file.
+    * Validates the TRAJECTORY_PARAMETERS variable in the trajectory file.
     * 
     * STATION_PARAMETERS:  Checks 
     * <ul>
@@ -3227,13 +3257,12 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       ArrayList<String> allowedParam = spec.getPhysicalParamNames();  //..allowed <param>
       ArrayList<String> paramList = new ArrayList<String>(nParam);
 
-      int maxParamUsed = -1;  //..max number of PARAMs used - all profiles
-
       //.....check that trajectory parameters are valid.....
       String trajParam[] = readStringArr("TRAJECTORY_PARAMETERS");
 
-      for (int paramNum = 0; paramNum < trajParam.length; paramNum++) {
-
+      for (int paramNum = 0; paramNum < nParam; paramNum++) {
+         paramList.add("");   //..initialize this position in the list
+         
          String param = trajParam[paramNum].trim();
 
          //..check <param> name
@@ -3244,7 +3273,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
 
          } else {
             //..this entry is not empty
-
+            
             if (last_empty > 0) {
                //..warn if an earlier entry was empty
                embeddedEmpty = true;
@@ -3263,9 +3292,6 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                   log.debug("param #{}: '{}': duplicate", paramNum, param);
 
                } else {
-                  //..add to list of <param> for this profile
-                  paramList.add(param);
-                  //nParamUsed++;
                   log.debug("param #{}: '{}': accepted", paramNum, param);
                }
 
@@ -3283,6 +3309,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                log.debug("param #{}: '{}': invalid", paramNum, param);
             }
          }
+
+         paramList.set(paramNum, param);
       }//..end for nParam
 
       log.debug("paramList: "+paramList);

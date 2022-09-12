@@ -25,8 +25,6 @@ public class ArgoTechnicalFile extends ArgoDataFile
 
    //..class variables
    //..standard i/o shortcuts
-   private static PrintStream stdout = new PrintStream(System.out);
-   private static PrintStream stderr = new PrintStream(System.err);
    private static final Logger log = LogManager.getLogger("ArgoTechnicalFile");
 
    private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;

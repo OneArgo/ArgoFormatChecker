@@ -1,6 +1,3 @@
-import ucar.nc2.*;
-import ucar.ma2.*;
-
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 

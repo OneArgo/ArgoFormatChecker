@@ -13,7 +13,7 @@ netcdf argo-trajectory-v3.2-spec {
 	:source = "Argo float" ;
 	:history = "<+>";
 	:references = "http://www.argodatamgt.org/Documentation" ;
-	:user_manual_version = "3.4" ;        /*REGEX = "3\.[4-9]*" */
+	:user_manual_version = "3.4" ;        /*REGEX = "3\.[4-9][0-9]*\.[0-9][0-9]*" */
 	:Conventions = "Argo-3.2 CF-1.6" ;    /*REGEX = "Argo-3\.[2-9]* +CF-.*" */
 	:featureType = "trajectory" ;
 

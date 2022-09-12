@@ -5,6 +5,10 @@ import java.util.regex.*;
 
 public class TestPattern
 {
+   
+   //..standard i/o shortcuts
+   static PrintStream stdout = new PrintStream(System.out);
+   static PrintStream stderr = new PrintStream(System.err);
 
    public static void main (String args[])
       throws IOException
@@ -22,7 +26,7 @@ public class TestPattern
          }
       }
 
-      if (args.length - next < 2) {
+      if (args.length - next < 1) {
          stderr.println("Not enough arguments");
          System.exit(1);
       }
@@ -32,14 +36,18 @@ public class TestPattern
       stdout.printf("\nPattern = '%s'\n\n", pat);
 
       Pattern pattern;
-      Matcher matcher;
 
       pattern = Pattern.compile(pat);
 
-      for (next = next+1; next < args.length; next++) {
-         String str = args[next];
+      BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+      
+      while (true) {
+         stdout.print("Enter test string (\"zzzendzzz\" to stop): ");
+         String str = in.readLine();
          stdout.printf("String = '%s'\n", str);
 
+         if (str.equals("zzzendzzz")) break;
+         
          Matcher m = pattern.matcher(str);
 
          if (m.matches()) {
@@ -74,22 +82,16 @@ public class TestPattern
    {
       stdout.println (
       "\n"+
-      "Purpose: Tests a Pattern\n" +
+      "Purpose: Tests a Pattern. Strings to test against pattern are read from terminal.\n" +
       "\n"+
-      "Usage: java TestPattern pattern string ...\n"+
+      "Usage: java TestPattern pattern \n"+
       "\n"+
       "Options:\n"+
       "\n"+
       "Arguments:\n"+
-      "   output-file      Output file\n" +
-      "   profile-files    Input Argo NetCDF profile file(s)\n"+
+      "   pattern      REGEXP pattern to test\n" +
       "\n");
       return;
    }
-
-   
-   //..standard i/o shortcuts
-   static PrintStream stdout = new PrintStream(System.out);
-   static PrintStream stderr = new PrintStream(System.err);
 
 } //..end class

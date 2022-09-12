@@ -1,10 +1,7 @@
-import ucar.nc2.*;
-import ucar.ma2.*;
 
 import java.io.*;
 import java.util.*;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodHandles.Lookup;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerConfigurationException;
@@ -14,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import usgdac.*;
-import usgdac.ArgoDataFile.FileType;
 
 /**
  */
