@@ -47,6 +47,7 @@ SBE41N_V5.3.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/02/2021 | *** a
 SBE41N_V5.3.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | *** added my Iggy for Fumihiko Akazawa *** Not in Google docs
 SBE41N_V5.3.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | *** added my Iggy for Fumihiko Akazawa *** Not in Google docs
 SBE41N_V5.3.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | added by TC for Fumihiko Akazawa
+SBE41N_V5.3.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 21/10/2022 | added by TC for Kanako Sato
 SBE41N_V5.4.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE61_V4.5.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/6/2015 | added by t. carval for j. gilson 
 SBE61_V4.5.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/6/2015 | added by t. carval for j. gilson 
@@ -55,6 +56,7 @@ SBE61_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added 
 SBE61_V5.0.2 | SBE | Pressure calibration done correctly. | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 11/01/2019 | added by M. Scanderbeg for J. Gilson 
 SBE61_V5.0.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/12/2021 | added by T. Carval for C. Schmid 
 SBE61_V5.0.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/12/2021 | added by T. Carval for C. Schmid 
+SBE61CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 08/07/2022 | added by T. Carval for Z. Liu
 SBE61 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
 CTD_F01 | TSK | TSK model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 RBR | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
@@ -150,6 +152,7 @@ ECO_FLNTU | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (
 ECO_BB2 | WETLABS | Wetlabs Eco optical sensor packages with two backscatteringmeters (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
 ECO_FLBBCD | WETLABS | Wetlabs Eco optical sensor packages with two fluorometers (type specified in SENSOR) and one backscatteringmeter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA,FLUOROMETER_CDOM, BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
 ECO_FLBB2 | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) and two backscatteringmeters (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA,BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FLBBFL | SBE | A three-channel optical sensor fitted with two single-wavelength chlorophyll fluorometers and a single-angle scattering meter, depth-rated to 2000 m and designed for float applications. The two fluorometers are configured to detect chlorophyll-a fluorescence at 470 nm (excitation) / 695 nm (emission) wavelengths and chlorophyll-a fluorescence at 435 nm (excitation) / 695 nm (emission) wavelengths respectively, whereas the scattering meter (in-water centroid angle of 124 deg) is configured to measure backscattering at 700 nm wavelength. The instrument is part of the Environmental Characterization Optics (ECO) series tools, manufactured by Sea-Bird Scientific. | FLUOROMETER_CHLA,FLUOROMETER_CHLA435, BACKSCATTERINGMETER_BBP<nnn> | ECO | 2022-11-21 | added by added by TC and validated by BGC-Argo
 ECO_BB3 | WETLABS | Wetlabs Eco optical sensor packages with 3 backscatteringmeters (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
 MCOMS_FLBBCD | WETLABS | Wetlabs MCOMS optical sensor packages with two fluorometers CHLA, CDOM and one backscatteringmeter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA,FLUOROMETER_CDOM,BACKSCATTERINGMETER_BBP<nnn> | MCOMS |  |  
 MCOMS_FLBB2 | WETLABS | Wetlabs MCOMS optical sensor packages with one fluorometer CHLA and two backscatteringmeters (wavelengths specified in SENSOR) | FLUOROMETER_CHLA, BACKSCATTERINGMETER_BBP<nnn> | MCOMS |  |  
