@@ -124,6 +124,7 @@ C_ROVER | WETLABS | Transmissometer (WETLABS) | TRANSMISSOMETER_CP<nnn> | CROVER
 
 //pH Sensors |  |  |  |  |  |  
 DURA | MBARI | pH (MBARI) | TRANSISTOR_PH | DURAFET |  |  
+GDF | MBARI | New pH sensor design : similar root components (DURA), same sensor output and processing chain | TRANSISTOR_PH | DURAFET | 07/12/2022 | added by t. carval for t. maurer 
 SEAFET | SBE | pH (SEABIRD) | TRANSISTOR_PH | DURAFET |  | updated from DURAFET on 10/06/2021 
 
 //Radiometers |  |  |  |  |  |  
