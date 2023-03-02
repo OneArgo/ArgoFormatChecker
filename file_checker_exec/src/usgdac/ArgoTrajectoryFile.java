@@ -2674,7 +2674,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          if (nan.counter > 0) {
             fail = true;
             nan.addMessage(formatWarnings,   //will be..  formatErrors,
-                           varName+": = NaN at", "measurements");
+                           varName+": NaN at", "measurements");
          }
 
          if (fail) {
@@ -2966,72 +2966,72 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          }
          
          adjNotMiss.addMessage(formatWarnings,   //will be..  formatErrors,
-                               varName+": = Not FillValue where QC is 4 or 9 at",
+                               varName+": Not FillValue where QC is 4 or 9 at",
                                "measurements");
 
          errNotMiss.addMessage(formatWarnings,   //will be..  formatErrors,
-                               varName+"_ERROR: = Not FillValue where "+
+                               varName+"_ERROR: Not FillValue where "+
                                varName+" is FillValue at",
                                "measurements");
 
          errNotMissAmode.addMessage(formatWarnings,   //will be..  formatErrors,
-                                    "A-mode: "+varName+"_ERROR: = Not FillValue at",
+                                    "A-mode: "+varName+"_ERROR: Not FillValue at",
                                     "measurements");
 
          errNotSetDmode.addMessage(formatWarnings,   //will be..  formatErrors,
                                    "D-mode: "+varName+
-                                   "_ERROR: = FillValue at",
+                                   "_ERROR: FillValue at",
                                    "measurements");
 
          incNotMeas.addMessage(formatWarnings,   //will be..  formatErrors,
-                               varName+"_QC: = Inconsistent ' ' with PARAM_QC at",
+                               varName+"_QC: Inconsistent ' ' with PARAM_QC at",
                                "measurements");
 
          invQC.addMessage(formatWarnings,   //will be..  formatErrors,
-                          varName+"_QC: = Invalid at ",
+                          varName+"_QC: Invalid at ",
                           "measurements");
          depQC.addMessage(formatWarnings,
-                          varName+"_QC: = Deprecated at ",
+                          varName+"_QC: Deprecated at ",
                           "measurements");
 
          missAdj.addMessage(formatWarnings,   //will be..  formatErrors,
-                            varName+"_QC: = FillValue where QC not ' ' or '9' at", 
+                            varName+"_QC: FillValue where QC not ' ' or '9' at", 
                             "measurements");
 
          nan.addMessage(formatWarnings,   //will be..  formatErrors,
-                        varName+": = NaN at ",
+                        varName+": NaN at ",
                         "measurements");
 
          nanErr.addMessage(formatWarnings,   //will be..  formatErrors,
-                           varName+"_ERROR: = NaN at ",
+                           varName+"_ERROR: NaN at ",
                            "measurements");
 
          notMissAdj.addMessage(formatWarnings,   //will be..  formatErrors, 
-                               varName+": = Not FillValue where PARAM is FillValue at",
+                               varName+": Not FillValue where PARAM is FillValue at",
                                "measurements");
 
          notMissAdjQc.addMessage(formatWarnings,   //will be..  formatErrors, 
-                                 varName+"_QC: = Not 9 where PARAM is FillValue at",
+                                 varName+"_QC: Not 9 where PARAM is FillValue at",
                                  "measurements");
 
          notMissErr.addMessage(formatWarnings,   //will be..  formatErrors,
-                               varName+"_ERROR: = Not FillValue where PARAM is FillValue at",
+                               varName+"_ERROR: Not FillValue where PARAM is FillValue at",
                                "measurements");
 
          notNotMeas.addMessage(formatWarnings,   //will be..  formatErrors, 
-                               varName+": = Not FillValue where QC is set to ' ' at",
+                               varName+": Not FillValue where QC is set to ' ' at",
                                "measurements");
 
          rErrNotMiss.addMessage(formatWarnings,   //will be..  formatErrors, 
-                                "R-mode: "+varName+"_ERROR: = Not FillValue at ",
+                                "R-mode: "+varName+"_ERROR: Not FillValue at ",
                                 "measurements");
 
          rNotMiss.addMessage(formatWarnings,   //will be..  formatErrors,
-                             "R-mode: "+varName+": = Not FillValue at ",
+                             "R-mode: "+varName+": Not FillValue at ",
                              "measurements");
 
          rQcNotMiss.addMessage(formatWarnings,   //will be..  formatErrors,
-                               "R-mode: "+varName+": = Not ' ' or '9' at",
+                               "R-mode: "+varName+": Not ' ' or '9' at",
                                "measurements");
       } //..end PARAM_LOOP
 
