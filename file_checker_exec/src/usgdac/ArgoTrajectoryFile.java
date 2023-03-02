@@ -2934,16 +2934,18 @@ public class ArgoTrajectoryFile extends ArgoDataFile
                               if (is_FillValue(fValue, prm_adj_err[n])) {
                                  errNotSetDmode.increment(n);
                               }
-                           } else {
-                              //.. mode == 'A'
+                           //} else {
+                           //   //.. mode == 'A'
 
-                              //..core-parameters must NOT have error set
-                              if (core &&
-                                  ! is_FillValue(fValue, prm_adj_err[n])) {
-                                 errNotMissAmode.increment(n);
-                                 //errNotMissAmode.increment(n, 
-                                 //   "a-mode: prm_adj_err["+n+"] = "+prm_adj_err[n]);
-                              }
+                           //   //..core-parameters must NOT have error set
+                           //..variable "core" refers to the file type, not the parameter type
+                           //..allow PARAM_ADJUST_ERROR to be set for all parameters
+                           //   if (core &&
+                           //       ! is_FillValue(fValue, prm_adj_err[n])) {
+                           //      errNotMissAmode.increment(n);
+                           //      //errNotMissAmode.increment(n, 
+                           //      //   "a-mode: prm_adj_err["+n+"] = "+prm_adj_err[n]);
+                           //}
                            }
                         }
                      } //..end if (param_adj is missing)
