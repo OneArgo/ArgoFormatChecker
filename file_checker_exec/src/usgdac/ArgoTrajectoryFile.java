@@ -2501,12 +2501,15 @@ public class ArgoTrajectoryFile extends ArgoDataFile
       for (int nPrm =0 ; nPrm < paramList.size(); nPrm++) {
          String   param = paramList.get(nPrm);
          String   varName = param.trim();
+         log.debug("<param>/_QC check: '{}'", varName);
+
+         if (varName.length() == 0) continue; //..TRAJ_PARAMS can have blank entries
+         
          Variable var   = findVariable(varName);
 
          Number fillValue = var.findAttribute("_FillValue").getNumericValue();
          float fValue = fillValue.floatValue();
 
-         log.debug("<param>/_QC check: '{}'", varName);
 
          //..the possible <param> data configurations:  
          //..    <type> <param> (N_MEASUREMENT[, extra-dimensions])
@@ -3325,6 +3328,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile
          
       //......check that all TRAJECTORY_PARAMETERS have <param> variable........
       for (String p : paramList) {
+         if (p.length() == 0) continue; //..TRAJ_PARAMS can contain blank entries
          Variable var = findVariable(p);
          if (var == (Variable) null) {
             formatErrors.add("TRAJECTORY_PARAMETERS: PARAM '"+p+
