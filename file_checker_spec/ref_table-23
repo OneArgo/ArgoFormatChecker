@@ -35,8 +35,8 @@ NAVIS_EBR | 501 | 869 | SBE | SBE FLoat. serial >=590  |
 NAVIS_A | 500 | 863 | SBE | SBE Float | 
 NOVA | 600 | 865 | METOCEAN | METOCEAN Float | http://www.metocean.com/sites/default/files/files/products/pdfs/metocean_iridium_profiling_floats_1.pdf
 HM2000 | 700 | 870 | HSOE | manufactured by HSOE | 
-HM4000 | 700 | 881 | HSOE | Xuanwu deep 4000 float manufactured by HSOE for QNLM - Qingdao Pilot National Laboratory for Marine Science and Technology | 
-XUANWU | 700 | 882 | QNLM | Xuanwu deep 6000 float | 
+HM4000 | 700 | 881 | HSOE | Xuanwu deep 4000 float manufactured by HSOE for LAOSHAN LABORATORY |
+XUANWU | 700 | 882 | LaoshanLaboratory | Xuanwu deep 6000 float |
 COPEX | 701 | 871 | SOA/NOTC | The COPEX is developed by National Ocean Technology Center (NOTC), SOA, which uses BEIDOU satellite for data transmission and positioning  | 
 ITP | 901 | 901 | WHOI | http://www.whoi.edu/website/itp/overview | 
 ALAMO | 800 | 866 867 868 | MRV | MRV/WHOI new micro float | 
