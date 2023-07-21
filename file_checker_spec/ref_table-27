@@ -49,15 +49,17 @@ SBE41N_V5.3.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | *** a
 SBE41N_V5.3.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | added by TC for Fumihiko Akazawa
 SBE41N_V5.3.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 21/10/2022 | added by TC for Kanako Sato
 SBE41N_V5.4.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE61CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 08/07/2022 | added by T. Carval for Z. Liu
+SBE61 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
 SBE61_V4.5.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/6/2015 | added by t. carval for j. gilson 
 SBE61_V4.5.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/6/2015 | added by t. carval for j. gilson 
 SBE61_V5.0.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/02/2016 | aded by MB for J. Gilson 
 SBE61_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
 SBE61_V5.0.2 | SBE | Pressure calibration done correctly. | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 11/01/2019 | added by M. Scanderbeg for J. Gilson 
 SBE61_V5.0.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/12/2021 | added by T. Carval for C. Schmid 
-SBE61_V5.0.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/12/2021 | added by T. Carval for C. Schmid 
-SBE61CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 08/07/2022 | added by T. Carval for Z. Liu
-SBE61 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
+SBE61_V5.0.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2021-12-10 | added by T. Carval for C. Schmid 
+SBE61_V5.0.10 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-07-21 | https://github.com/nvs-vocabs/ArgoVocabs/issues/65
+SBE61_V5.0.12 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-07-21 | https://github.com/nvs-vocabs/ArgoVocabs/issues/65
 CTD_F01 | TSK | TSK model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 RBR | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 RBRoem_V1.16 | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC |  |  |  
