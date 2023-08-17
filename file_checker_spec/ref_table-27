@@ -10,37 +10,39 @@ FSI | FSI |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |
 SBE | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE37 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-SBE41_V2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 27/04/2015 | added by t. carval for a. thresher 
+SBE41_V2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
 SBE41_V2.6 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41_V3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41CP | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-SBE41_IDO_V1.0c | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2/6/2015 | added b. m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
-SBE41_IDO_V2.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2/6/2015 | updated CTD_IDO to CTD (10/06 2021) 
-SBE41CP_IDO_V2.0b | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 27/04/2015 | added by t. carval for a. thresher updated CTD_IDO to CTD (10/06 2021) 
-SBE41_IDO_V3.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 3/7/2015 | added by m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
+SBE41_IDO_V1.0c | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-06-02 | added b. m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
+SBE41_IDO_V2.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-06-02 | updated CTD_IDO to CTD (10/06 2021) 
+SBE41CP_IDO_V2.0b | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-04-27 | added by t. carval for a. thresher updated CTD_IDO to CTD (10/06 2021) 
+SBE41_IDO_V3.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-07-23 | added by m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
 SBE41CP_V1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-SBE41CP_V1.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
+SBE41CP_V1.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
 SBE41CP_V1.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-SBE41CP_V1.2a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 27/04/2015 | added by t. carval for a. thresher 
-SBE41CP_V1.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
-SBE41CP_V1.3b | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 27/04/2015 | added by t. carval for a. thresher 
-SBE41CP_V1.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
-SBE41CP_V1.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
-SBE41CP_V1.7 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
-SBE41CP_V1.8 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
-SBE41CP_V1.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/04/2015 | added by t. carval for j. gilson 
-SBE41CP_V1.9a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 8/9/2015 | added by m. belbeoch for JAMSTEC 
+SBE41CP_V1.2a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
+SBE41CP_V1.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.3b | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
+SBE41CP_V1.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.7 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.8 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.9a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-09-08 | added by m. belbeoch for JAMSTEC 
 SBE41CP_V2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41CP_V3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41CP_V3.0a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41CP_V3.0c | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-SBE41CP_V4.4.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 17/08/2015 | added by M.B.  for A.Thresher 
-SBE41CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 17/08/2016 | added by M.B.  for A.Thresher 
-SBE41CP_V5.3.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 21/01/2016 | added by M.B.  for A.Thresher 
-SBE41CP_V5.3.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 18/12/208 | added by MB for M. Takahashi. 
-SBE41CP_V5.3.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 02/09/2019 | added by MB for F. Akazawa 
-SBE41CP_V7.2.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 18/04/2016 | added by MB for K. Sato 
-SBE41CP_V7.2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 18/04/2016 | added by MB for K. Sato 
+SBE41CP_V4.4.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-08-17 | added by M.B.  for A.Thresher 
+SBE41CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-08-17 | added by M.B.  for A.Thresher 
+SBE41CP_V5.3.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-01-21 | added by M.B.  for A.Thresher 
+SBE41CP_V5.3.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2018-12-18 | added by MB for M. Takahashi. 
+SBE41CP_V5.3.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2019-09-02 | added by MB for F. Akazawa 
+SBE41CP_V5.3.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-08-17 | https://github.com/nvs-vocabs/ArgoVocabs/issues/68
+SBE41CP_V5.3.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-08-17 | https://github.com/nvs-vocabs/ArgoVocabs/issues/68
+SBE41CP_V7.2.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-04-18 | added by MB for K. Sato 
+SBE41CP_V7.2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-04-18 | added by MB for K. Sato 
 SBE41N | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41N_V5.3.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41N_V5.3.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/02/2021 | *** added my Iggy for Fumihiko Akazawa *** Not in Google docs
