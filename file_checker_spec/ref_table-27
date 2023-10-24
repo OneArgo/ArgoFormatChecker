@@ -76,6 +76,7 @@ SBE43_IDO | SBE | Seabird Electrochemical Dissolved Oxygen IDO sensor (volt outp
 SBE43I | SBE | configuration option | IDO_DOXY | IDO |  |  
 SBE43F_IDO | SBE | Seabird Electrochemical Dissolved Oxygen IDO sensor (frequency output) | IDO_DOXY | IDO |  |  
 SBE63_OPTODE | SBE | Seabird Optical Dissolved Oxygen Sensor | OPTODE_DOXY | OPTODE |  |  
+SBE83_OPTODE | SBE | Seabird Optical Dissolved Oxygen Sensor | OPTODE_DOXY | OPTODE | 2023-10-24 | https://github.com/nvs-vocabs/R27/issues/15
 //** following sensor is deprecated but not marked as such in the table
 AANDERAA_OPTODE | AANDERAA |  | OPTODE_DOXY | OPTODE |  | deprecated
 AANDERAA_OPTODE_3830 | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
