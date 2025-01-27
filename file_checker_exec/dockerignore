@@ -1,0 +1,7 @@
+**/**
+!scripts/**
+!src/**
+!/**/pom.xml
+!LICENSE
+!.mvn/**
+!mvnw
