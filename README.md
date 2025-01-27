@@ -19,7 +19,7 @@ With Release you will find :
 java -jar file_checker_exec-[version].jar $OPTION $DAC_NAME $SPEC $OUTPUT_DIR $INPUT_DIR $FILE_NAME
 ```
 
-Only this JAR file is needed. You can delete legacy log4j2 & netcdf library jar files.
+Only this JAR file is needed. You can delete legacy log4j2 & netcdf libraries jar files.
 
 ## TOOLS
 
@@ -32,7 +32,7 @@ Thanks to the wrapper, Maven is embedded in the project (in a defined version). 
 - Clone the repository :
 
 ```bash
-git clone https://gitlab.ifremer.fr/amrit/development/format-checker.git
+git clone https://github.com/OneArgo/ArgoFormatChecker.git
 ```
 
 ### building jar
@@ -45,7 +45,7 @@ cd file_checker_exec
 mvnw clean install
 ```
 
-In target folder you will find both original file_checker_exec and file_checker_exec_uber.
+In target folder you will find both original-file_checker_exec and file_checker_exec-[version]. It is this last one to use.
 
 
 ### Using docker
@@ -61,9 +61,4 @@ docker build -t filechecker_docker .
 
 ```
 docker run --rm -v [ABSOLUTE_PATH_TO_file_checker_spec]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results filechecker_2.8.01_docker:latest $DAC_NAME ./file_checker_spec ./results ./data $FILE_NAME
-```
-
-exemple : 
-```docker run --rm -v C:/Users/ylubac/Desktop/work/eclipse_projects/projects/ArgoFormatChecker-main/file_checker_spec:/app/file_checker_spec -v C:/Users/ylubac/Desktop/work/eclipse_projects/projects/datatest:/app/data -v C:/Users/
-ylubac/Desktop/work/eclipse_projects/projects/results:/app/results filechecker_2.8.01_docker:latest bodc ./file_checker_spec ./results ./data 
 ```
