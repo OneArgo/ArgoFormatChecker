@@ -54,11 +54,11 @@ In target folder you will find both original-file_checker_exec and file_checker_
 - Build the application with Docker :
 
 ```
-docker build -t filechecker_docker .
+docker build -t filechecker_2.8.14 .
 ```
 
 - Run the application using Docker
 
 ```
-docker run --rm -v [ABSOLUTE_PATH_TO_file_checker_spec]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results filechecker_2.8.01_docker:latest $DAC_NAME ./file_checker_spec ./results ./data $FILE_NAME
+docker run --rm -v [ABSOLUTE_PATH_TO_file_checker_spec]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results filechecker_2.8.14:latest $DAC_NAME ./file_checker_spec ./results ./data $FILE_NAME
 ```
