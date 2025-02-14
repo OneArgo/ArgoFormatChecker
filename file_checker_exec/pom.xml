@@ -1,0 +1,176 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>fr.ifremer</groupId>
+  <artifactId>file_checker_exec</artifactId>
+  <version>2.8.14</version>
+  <name>Argo NetCDF file format checker</name>
+  
+  <dependencies>
+<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-core</artifactId>
+	    <version>2.17.1</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-api</artifactId>
+	    <version>2.17.1</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-slf4j-impl</artifactId>
+	    <version>2.17.1</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>slf4j-api</artifactId>
+	    <version>1.7.25</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>edu.ucar</groupId>
+	    <artifactId>netcdfAll</artifactId>
+	    <version>4.3</version>
+	    <exclusions>
+		    <exclusion>
+	            <groupId>java.xml</groupId>
+	            <artifactId>java.xml</artifactId>
+	        </exclusion>
+	    </exclusions>
+	</dependency>
+  </dependencies>
+  
+   <!--Distribution-->
+    <distributionManagement>
+        <repository>
+            <id>ifr-gitlab-project</id>
+            <url>https://gitlab.ifremer.fr/api/v4/projects/4888/packages/maven</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>ifr-gitlab-project</id>
+            <url>https://gitlab.ifremer.fr/api/v4/projects/4888/packages/maven</url>
+        </snapshotRepository>
+    </distributionManagement>  
+  <repositories>
+   <repository>
+            <id>nexus-ifremer-release</id>
+            <name>maven-release</name>
+            <url>https://nexus.ifremer.fr/repository/maven-private-release/</url>
+        </repository>
+
+        <repository>
+            <id>nexus-ifremer-snapshot</id>
+            <name>maven-snapshot</name>
+            <url>https://nexus.ifremer.fr/repository/maven-private-snapshot/</url>
+        </repository>
+  <!-- Repository where netcdfAll library is found -->
+    <repository>
+        <id>brockmann-repo</id>
+        <url>https://www.brockmann-consult.de/mvn/os/</url>
+    </repository>
+</repositories>
+
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+          <exclude>log4j2/**</exclude>
+          <exclude>slf4j/**</exclude>
+		  <exclude>unidata/**</exclude>
+        </excludes>       
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>test</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
+    <plugins>  
+	        <!--Rename the log4j2 xml production file-->
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-file</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>rename</goal>
+                        </goals>
+                        <configuration>                           
+						    <sourceFile>${project.build.outputDirectory}/log4j2.xml.production</sourceFile>
+						    <destinationFile>${project.build.outputDirectory}/log4j2.xml</destinationFile>
+						</configuration>                        
+                    </execution>
+                </executions>
+            </plugin>            
+	        
+         <!-- Package Dependencies in a Fat (Uber) JAR -->   
+        <plugin>     
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.6.0</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                     <configuration>
+                     
+		                <transformers>
+		                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+		                        <mainClass>ValidateSubmit</mainClass>
+		                    </transformer>
+		                </transformers>
+		                <filters>
+		               	 <filter>
+                                <artifact>edu.ucar:netcdfAll</artifact>
+                                <excludes>
+                                    <exclude>org/slf4j/**</exclude>
+                                </excludes>
+                            </filter>
+			                <filter>
+			                    <artifact>*:*</artifact>
+			                    <excludes>
+			                        <exclude>META-INF/license/**</exclude>
+			                        <exclude>META-INF/*</exclude>
+			                        <exclude>META-INF/maven/**</exclude>
+			                        <exclude>LICENSE</exclude>
+			                        <exclude>NOTICE</exclude>
+			                        <exclude>/*.txt</exclude>
+			                        <exclude>build.properties</exclude>
+			                        <exclude>log4j2.xml.debug</exclude>
+			                        <exclude>log4j2.xml.production</exclude>
+			                        <exclude>xml-design</exclude>
+			                        <exclude>Makefile</exclude>
+			                        <exclude>make_exe_jar</exclude>
+			                        <exclude>set_classpath</exclude>
+			                        <exclude>MANIFEST.txt</exclude>
+			                        <exclude>log4j2/**</exclude>
+			                        <exclude>slf4j/**</exclude>
+			                        <exclude>unidata/**</exclude>
+			                     
+			                    </excludes>
+			                </filter>               
+			            </filters>
+			            <createDependencyReducedPom>false</createDependencyReducedPom>
+			            
+		            </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+  </build>
+</project>
