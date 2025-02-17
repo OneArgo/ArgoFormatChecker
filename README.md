@@ -42,7 +42,7 @@ git clone https://github.com/OneArgo/ArgoFormatChecker.git
 
 ```bash
 cd file_checker_exec
-mvnw clean install
+./mvnw clean install
 ```
 
 In target folder you will find both original-file_checker_exec and file_checker_exec-[version]. It is this last one to use.

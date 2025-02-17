@@ -74,47 +74,51 @@
 </repositories>
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test</testSourceDirectory>
-    <resources>
-      <resource>
-        <directory>src</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-          <exclude>log4j2/**</exclude>
-          <exclude>slf4j/**</exclude>
-		  <exclude>unidata/**</exclude>
-        </excludes>       
-      </resource>
-    </resources>
+    <sourceDirectory>src/main/java</sourceDirectory>
+		<testSourceDirectory>src/test/java</testSourceDirectory>
+		<resources>
+			<resource>
+				<filtering>true</filtering>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+					<exclude>**/log4j2*</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
     <testResources>
-      <testResource>
-        <directory>test</directory>
-        <excludes>
-          <exclude>**/*.java</exclude>
-        </excludes>
-      </testResource>
-    </testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</testResource>
+		</testResources>
+
     <plugins>  
 	        <!--Rename the log4j2 xml production file-->
             <plugin>
-                <groupId>com.coderplus.maven.plugins</groupId>
-                <artifactId>copy-rename-maven-plugin</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-file</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>rename</goal>
-                        </goals>
-                        <configuration>                           
-						    <sourceFile>${project.build.outputDirectory}/log4j2.xml.production</sourceFile>
-						    <destinationFile>${project.build.outputDirectory}/log4j2.xml</destinationFile>
-						</configuration>                        
-                    </execution>
-                </executions>
-            </plugin>            
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<id>copy-file</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<sourceFile>
+								${project.basedir}/src/main/resources/log4j2-prod.xml</sourceFile>
+							<destinationFile>
+								${project.build.outputDirectory}/log4j2.xml</destinationFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+      
 	        
          <!-- Package Dependencies in a Fat (Uber) JAR -->   
         <plugin>     
@@ -173,4 +177,35 @@
         </plugin>
     </plugins>
   </build>
+  <profiles>
+		<!-- debug Profile : copy debug log4j xml file -->
+		<profile>
+			<id>debug</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.coderplus.maven.plugins</groupId>
+						<artifactId>copy-rename-maven-plugin</artifactId>
+						<version>1.0</version>
+						<executions>
+							<execution>
+								<id>copy-file</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>copy</goal>
+								</goals>
+								<configuration>
+									<sourceFile>
+										${project.basedir}/src/main/resources/log4j2-debug.xml</sourceFile>
+									<destinationFile>
+										${project.build.outputDirectory}/log4j2.xml</destinationFile>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
