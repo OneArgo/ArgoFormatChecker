@@ -108,7 +108,7 @@ KISTLER_2900PSIA | KISTLER |  | CTD_PRES | PRES |  |
 KISTLER_10153PSIA | KISTLER |  | CTD_PRES | PRES | 10/6/2015 | added by t. carval for j. gilson 
 KELLER_PA8 | KELLER |  | CTD_PRES | PRES | 17/08/2015 | added by M.B.  for A.Thresher 
 SEASCAN_SSTD | SEASCAN |  | CTD_PRES | PRES | 4/9/2015 | added by M.B for AOML 
-MP40_C_2000_G | MICRON | MICRON | CTD_PRES | PRES | 11/5/2016 | added by M.B for AOML 
+MP40_C_2000_G | Micron Instruments MP40C-2000G pressure transducer | A flush mountable pressure transducer MP40 model, configured to performance specification 'C' and header option 'G' (gage), depth-rated to 2000 psi. The instrument was manufactured by Micron Instruments (also operating as Piezo-Metrics). | CTD_PRES | PRES | 11/5/2016 | added by M.B for AOML 
 DSB301-10-C85 | QUARTZDYNE | Deep SOLO with two pressure sensors | CTD_PRES | PRES | 06/04/2021 | added by M. Scanderbeg for J. Gilson, 20211226 T. Carval remove quartzdyne from name 
 MENSOR | MENSOR | Deep SOLO with two pressure sensors | CTD_PRES | PRES | 06/04/2021 | added by M. Scanderbeg for J. Gilson 
 
