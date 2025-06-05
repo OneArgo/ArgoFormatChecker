@@ -27,6 +27,10 @@
     <Logger name="ValidateSubmit" level="debug" additivity="false">
       <AppenderRef ref="File"/>
     </Logger>
+    
+    <Logger name="Options" level="debug" additivity="false">
+      <AppenderRef ref="File"/>
+    </Logger>
 
     <Logger name="ResultsFile" level="debug" additivity="false">
       <AppenderRef ref="File"/>

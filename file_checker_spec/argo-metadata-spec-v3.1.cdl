@@ -194,7 +194,7 @@ variables:
 		STARTUP_DATE_QC:long_name = "Quality on startup date"; 
 		STARTUP_DATE_QC:conventions = "Argo reference table 2"; 
 		STARTUP_DATE_QC:_FillValue = " ";
-	char DEPLOYMENT_PLATFORM(STRING32);
+	char DEPLOYMENT_PLATFORM(STRING32|STRING128);
 		DEPLOYMENT_PLATFORM:long_name = "Identifier of the deployment platform"; 
 		DEPLOYMENT_PLATFORM:_FillValue = " ";
 	char DEPLOYMENT_CRUISE_ID(STRING32);
@@ -248,7 +248,10 @@ float_or_double CONFIG_PARAMETER_VALUE(N_MISSIONS, N_CONFIG_PARAM);
 		SENSOR_MODEL:_FillValue = " "; 
 	char SENSOR_SERIAL_NO(N_SENSOR, STRING16);
 		SENSOR_SERIAL_NO:long_name = "Serial number of the sensor";
-		SENSOR_SERIAL_NO:_FillValue = " "; 
+		SENSOR_SERIAL_NO:_FillValue = " ";
+	char SENSOR_FIRMWARE_VERSION(N_SENSOR, STRING32);
+		SENSOR_FIRMWARE_VERSION:long_name = "Firmware version of the sensor"; 
+		SENSOR_FIRMWARE_VERSION:_FillValue = " ";		
 
 // Float parameter information
 	char PARAMETER(N_PARAM, STRING64);

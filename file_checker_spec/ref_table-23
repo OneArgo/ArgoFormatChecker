@@ -9,7 +9,7 @@ APEX_D | 020 | 849 | TWR | Deep APEX |
 PROVOR_MT | 100 | 840 841 842 | METOCEAN | Metocean PROVOR | 
 PROVOR | 101 | 840 841 842 | MARTEC KANNAD NKE |  | 
 ARVOR | 102 | 844 878 | NKE | NKE ARVOR float | 
-PROVOR_II | 103 | 839 | NKE | dual board PROVOR | 
+PROVOR_II | 103 | 839 | NKE MARTEC | dual board PROVOR | 
 PROVOR_III | 104 | 836 | NKE | dual board PROVOR new generation CTS4 | 
 PROVOR_III_JUMBO | 108 | 836 | NKE | PROVOR float with additional battery pack | 
 PROVOR_IV | 105 | 835 | NKE | PROVOR CTS5 | 
