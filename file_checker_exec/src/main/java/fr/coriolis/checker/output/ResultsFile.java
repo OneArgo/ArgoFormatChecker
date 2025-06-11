@@ -25,8 +25,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.filetypes.ArgoDataFile;
-import fr.coriolis.checker.filetypes.ArgoProfileFile;
 import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
+import fr.coriolis.checker.filetypes.ArgoProfileFile;
 import fr.coriolis.checker.specs.ArgoDate;
 
 public class ResultsFile {
@@ -105,6 +105,7 @@ public class ResultsFile {
 
 				String xmlString = stringWriter.getBuffer().toString();
 				stringWriter.close();
+				xmlString = scrubInvalidXmlChar(xmlString);
 
 				Source xmlInput = new StreamSource(new StringReader(xmlString));
 
@@ -142,28 +143,13 @@ public class ResultsFile {
 
 				try {
 					transformer.transform(xmlInput, xmlOutput);
-
 				} catch (TransformerException e) {
+					log.warn("Transformer failed, retrying after re-scrubbing", e);
 					// ..tranform exception: probably an invalid character
 					// ..scrub and re-transform
+					xmlString = scrubInvalidXmlChar(xmlString);
 
-					StringBuffer o = new StringBuffer(); // Used to hold the output.
-					char current; // Used to reference the current character.
-
-					for (int i = 0; i < xmlString.length(); i++) {
-						current = xmlString.charAt(i);
-
-						if ((current == 0x9) || (current == 0xA) || (current == 0xD)
-								|| ((current >= 0x20) && (current <= 0xD7FF))
-								|| ((current >= 0xE000) && (current <= 0xFFFD))
-								|| ((current >= 0x10000) && (current <= 0x10FFFF))) {
-							o.append(current);
-						} else {
-							o.append('-');
-						}
-					}
-
-					xmlInput = new StreamSource(new StringReader(o.toString()));
+					xmlInput = new StreamSource(new StringReader(xmlString));
 
 					stringWriter = new StringWriter();
 					xmlOutput = new StreamResult(stringWriter);
@@ -174,7 +160,6 @@ public class ResultsFile {
 
 				log.debug("output xml");
 				out.println(stringWriter.toString());
-
 			}
 			out.close();
 		}
@@ -1053,5 +1038,26 @@ public class ResultsFile {
 
 		log.debug("meta-data: 'TRAJECTORY_PARAMETER' = '" + list + "' (single string)");
 	}// ..end metaTrajectoryParameters
+
+	// ************************** convenience methods ******************************
+	private String scrubInvalidXmlChar(String input) {
+		if (input == null) {
+			return null;
+		}
+
+		StringBuilder out = new StringBuilder();
+
+		input.codePoints().forEach(cp -> {
+			if ((cp == 0x9) || (cp == 0xA) || (cp == 0xD) || (cp >= 0x20 && cp <= 0xD7FF)
+					|| (cp >= 0xE000 && cp <= 0xFFFD) || (cp >= 0x10000 && cp <= 0x10FFFF)) {
+				out.appendCodePoint(cp);
+			} else {
+				out.append('-');
+			}
+		});
+
+		return out.toString();
+
+	}
 
 } // ..end class ResultsFile

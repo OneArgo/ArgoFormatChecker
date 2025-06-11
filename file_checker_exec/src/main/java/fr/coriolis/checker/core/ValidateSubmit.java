@@ -22,11 +22,11 @@ import fr.coriolis.checker.exceptions.NotAnArgoFileException;
 import fr.coriolis.checker.exceptions.ValidateFileDataFailedException;
 import fr.coriolis.checker.exceptions.VerifyFileFormatFailedException;
 import fr.coriolis.checker.filetypes.ArgoDataFile;
+import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.filetypes.ArgoMetadataFile;
 import fr.coriolis.checker.filetypes.ArgoProfileFile;
 import fr.coriolis.checker.filetypes.ArgoTechnicalFile;
 import fr.coriolis.checker.filetypes.ArgoTrajectoryFile;
-import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.output.ResultsFile;
 
 /**
@@ -239,7 +239,6 @@ public class ValidateSubmit {
 					phase = "FILE-NAME-CHECK";
 					argo.validateGdacFileName();
 				}
-
 				// ...............report status and meta-data results...............
 				// ..status is that open was successful
 				// ..- that means identified as Argo netCDF file (DATA_TYPE and FORMAT_VERSION)
@@ -258,7 +257,6 @@ public class ValidateSubmit {
 
 				// .............................close Argo file......................
 				argo.close();
-
 				// .....................Exceptions handle......................
 			} catch (Exception e) {
 				handleValidateFilesExceptions(e, out, file, dacName);

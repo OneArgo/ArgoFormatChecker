@@ -747,26 +747,16 @@ public class ArgoDataFile {
 				 */
 
 				log.info("extra attribute (allowed): {}:{} not in spec", varName, attrName);
-				continue DATA_ATTR_LOOP;
+				continue;
 			}
-			// log.debug("ckVarAttr: '{}': attribute in spec", attrName);
 
 			// ..check if the spec attribute is label "NOT_ALLOWED" error
-
 			ArgoAttribute.AttrHandling specialHandling = specAttr.getHandling();
-
-			if (specialHandling == ArgoAttribute.AttrHandling.NOT_ALLOWED) {
-				String err = String.format("attribute: %s:%s: Attribute is not allowed.", varName, attrName);
-				// formatErrors.add(err)
-
-				// ################# TEMPORARY WARNING ################
-				formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-				log.warn("{}: {}: {}", dacName, file.getName(), err);
-
+			if (!checkAttributNotAllowed(varName, attrName, specialHandling)) {
 				returnVal = false;
-				continue DATA_ATTR_LOOP;
+				continue;
 			}
-			// log.debug("ckVarAttr: '{}': not labelled NOT_ALLOWED", attrName);
+			;
 
 			// ..check the data attribute type
 			// ..the 3 types supported by ArgoAttribute are: Number, String, Object
@@ -775,127 +765,169 @@ public class ArgoDataFile {
 			// ..Number and String are the only 2 currently in use.
 			// ..Hard crash if it is anything else.
 
-			DataType dataAttrType = dataAttr.getDataType();
-
-			if (specAttr.isString()) {
-				if (!dataAttr.isString()) {
-					String err = String.format("attribute: %s:%s: Incorrect attribute value type. Must be string",
-							varName, attrName);
-					// formatErrors.add(err)
-
-					// ################# TEMPORARY WARNING ################
-					formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-					log.warn("{}: {}: {}", dacName, file.getName(), err);
-
-					returnVal = false;
-					continue DATA_ATTR_LOOP;
-				}
-				// log.debug("ckVarAttr: '{}': spec/data both String", attrName);
-
-			} else if (specAttr.isNumeric()) {
-				if (!dataAttrType.isNumeric()) {
-					String err = String.format("attribute: %s:%s: Incorrect attribute value type. Must be numeric",
-							varName, attrName);
-
-					// formatErrors.add(err);
-					// ################# TEMPORARY WARNING ################
-					formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-
-					log.warn("{}: {}: {}", dacName, file.getName(), err);
-
-					returnVal = false;
-					continue DATA_ATTR_LOOP;
-				}
-				// log.debug("ckVarAttr: '{}': spec/data both Number", attrName);
-
-			} else {
-				// ..what the hell were you thinking?
-				stderr.println("\n\n******\n" + "****** PROGRAM ERROR: ArgoDataFile(ckvarattr) " + varName + ":"
-						+ attrName + ": unknown specAttr type.  TERMINATING.\n" + "******");
-				System.exit(1);
+			if (!checkAttributeType(varName, dataAttr, attrName, specAttr)) {
+				returnVal = false;
+				continue;
 			}
-
 			// ..check the attribute value
-			// ..- if the spec attribute is "IGNORE_COMPLETELY" or "IGNORE_VALUE",
-			// .. we just don't care about the value so skip the check
-
-			if (!(specialHandling == ArgoAttribute.AttrHandling.IGNORE_COMPLETELY
-					|| specialHandling == ArgoAttribute.AttrHandling.IGNORE_VALUE)) {
-				String dataAttrValue = null;
-				String specAttrValue = specAttr.getValue().toString();
-
-				if (dataAttr.isString()) {
-					try {
-						dataAttrValue = dataAttr.getStringValue();
-					} catch (Exception e) {
-						formatErrors.add("attribute: " + varName + ":" + attrName + ": Bad value.  Not a string.");
-						returnVal = false;
-						continue DATA_ATTR_LOOP;
-					}
-
-				} else {
-					try {
-						dataAttrValue = dataAttr.getNumericValue().toString();
-					} catch (Exception e) {
-						formatErrors
-								.add("attribute: " + varName + ":" + attrName + ": Bad value.  Not a numeric value.");
-						returnVal = false;
-						continue DATA_ATTR_LOOP;
-					}
-				}
-
-				if (!dataAttrValue.equals(specAttrValue)) {
-					// ..data file attribute is not the same as the spec file attribute
-
-					ArgoFileSpecification.AttrRegex regex = spec.getAttrRegex(varName, attrName);
-
-					if (regex == null) {
-						// ..no regex .. this is a format error
-
-						formatErrors.add("attribute: " + varName + ":" + attrName + ": Definitions differ "
-								+ "\n\tSpecification = '" + specAttrValue + "'" + "\n\tData File     = '"
-								+ dataAttrValue + "'");
-
-						log.info("format error: {}:{} " + "attribute mismatch (no regex): spec, data = {}, {}", varName,
-								attrName, specAttrValue, dataAttrValue);
-
-						returnVal = false;
-
-					} else {
-						// ..regex defined ... does it match?
-
-						if (!regex.pattern.matcher(dataAttrValue).matches()) {
-							formatErrors.add("attribute: " + dataVar.getShortName() + ":" + dataAttr.getShortName()
-									+ ": Definitions differ " + "\n\tSpecification = '" + regex.pattern + "' (regex)"
-									+ "\n\tData File     = '" + dataAttrValue + "'");
-
-							log.info("format error: " + attrName + " attribute regex mismatch '" + regex.pattern + "'");
-
-							returnVal = false;
-						} else {
-							if (regex.warn) {
-								formatWarnings
-										.add("attribute: " + dataVar.getShortName() + ":" + dataAttr.getShortName()
-												+ ": Accepted; not standard value" + "\n\tSpecification     = '"
-												+ specAttrValue + "'" + "\n\tException allowed = '" + regex.pattern
-												+ "' (regex)" + "\n\tData File         = '" + dataAttrValue + "'");
-								log.warn("regex match (WARN): attribute '{}:{} = '{}' matches '{}'", varName, attrName,
-										dataAttrValue, regex.pattern);
-							} else {
-								log.warn("regex match (NO WARN): attribute '{}:{} = '{}' matches '{}'", varName,
-										attrName, dataAttrValue, regex.pattern);
-							}
-						}
-					} // ..end if regex
-				} // ..end attr.equals
-			} else {
-				log.debug("ckVarAttr: '{}': marked as IGNORE", attrName);
-			} // ..end if (marked IGNORE)
-
+			if (!checkVarAttributeValue(dataVar, varName, dataAttr, attrName, specAttr, specialHandling)) {
+				returnVal = false;
+				continue;
+			}
 		} // ..end for (dataAttr)
-
 		return returnVal;
 	} // ..end ckVarAttr
+
+	/**
+	 * // ..check the attribute value. if the spec attribute is "IGNORE_COMPLETELY"
+	 * or "IGNORE_VALUE", we just don't care about the value so skip the check
+	 * 
+	 * @param dataVar
+	 * @param varName
+	 * @param dataAttr
+	 * @param attrName
+	 * @param specAttr
+	 * @param specialHandling
+	 * @return
+	 */
+	private boolean checkVarAttributeValue(Variable dataVar, String varName, Attribute dataAttr, String attrName,
+			ArgoAttribute specAttr, ArgoAttribute.AttrHandling specialHandling) {
+		if (!(specialHandling == ArgoAttribute.AttrHandling.IGNORE_COMPLETELY
+				|| specialHandling == ArgoAttribute.AttrHandling.IGNORE_VALUE)) {
+			String dataAttrValue = null;
+			String specAttrValue = specAttr.getValue().toString();
+
+			if (dataAttr.isString()) {
+				try {
+					dataAttrValue = dataAttr.getStringValue();
+				} catch (Exception e) {
+					formatErrors.add("attribute: " + varName + ":" + attrName + ": Bad value.  Not a string.");
+					return false;
+
+				}
+
+			} else {
+				try {
+					dataAttrValue = dataAttr.getNumericValue().toString();
+				} catch (Exception e) {
+					formatErrors.add("attribute: " + varName + ":" + attrName + ": Bad value.  Not a numeric value.");
+					return false;
+				}
+			}
+
+			if (!dataAttrValue.equals(specAttrValue)) {
+				// ..data file attribute is not the same as the spec file attribute
+				ArgoFileSpecification.AttrRegex regex = spec.getAttrRegex(varName, attrName);
+				if (regex == null) {
+					// ..no regex .. this is a format error
+					formatErrors.add(
+							"attribute: " + varName + ":" + attrName + ": Definitions differ " + "\n\tSpecification = '"
+									+ specAttrValue + "'" + "\n\tData File     = '" + dataAttrValue + "'");
+					log.info("format error: {}:{} " + "attribute mismatch (no regex): spec, data = {}, {}", varName,
+							attrName, specAttrValue, dataAttrValue);
+
+					return false;
+
+				} else {
+					// ..regex defined ... does it match?
+					if (!regex.pattern.matcher(dataAttrValue).matches()) {
+						formatErrors.add("attribute: " + dataVar.getShortName() + ":" + dataAttr.getShortName()
+								+ ": Definitions differ " + "\n\tSpecification = '" + regex.pattern + "' (regex)"
+								+ "\n\tData File     = '" + dataAttrValue + "'");
+						log.info("format error: " + attrName + " attribute regex mismatch '" + regex.pattern + "'");
+						return false;
+
+					} else {
+						if (regex.warn) {
+							formatWarnings.add("attribute: " + dataVar.getShortName() + ":" + dataAttr.getShortName()
+									+ ": Accepted; not standard value" + "\n\tSpecification     = '" + specAttrValue
+									+ "'" + "\n\tException allowed = '" + regex.pattern + "' (regex)"
+									+ "\n\tData File         = '" + dataAttrValue + "'");
+							log.warn("regex match (WARN): attribute '{}:{} = '{}' matches '{}'", varName, attrName,
+									dataAttrValue, regex.pattern);
+						} else {
+							log.warn("regex match (NO WARN): attribute '{}:{} = '{}' matches '{}'", varName, attrName,
+									dataAttrValue, regex.pattern);
+						}
+					}
+				} // ..end if regex
+			} // ..end attr.equals
+		} else {
+			log.debug("ckVarAttr: '{}': marked as IGNORE", attrName);
+		} // ..end if (marked IGNORE)
+		return true;
+	}
+
+	/**
+	 * // ..check the data attribute type. The 3 types supported by ArgoAttribute
+	 * are: Number, String, Object netCDF supports: Number, String, List of (number
+	 * or string) Number and String are the only 2 currently in use. Hard crash if
+	 * it is anything else.
+	 * 
+	 * @param varName
+	 * @param dataAttr
+	 * @param attrName
+	 * @param specAttr
+	 * @return
+	 */
+	private boolean checkAttributeType(String varName, Attribute dataAttr, String attrName, ArgoAttribute specAttr) {
+		DataType dataAttrType = dataAttr.getDataType();
+
+		if (specAttr.isString()) {
+			if (!dataAttr.isString()) {
+				String err = String.format("attribute: %s:%s: Incorrect attribute value type. Must be string", varName,
+						attrName);
+				// formatErrors.add(err)
+
+				// ################# TEMPORARY WARNING ################
+				formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+				log.warn("{}: {}: {}", dacName, file.getName(), err);
+
+				return false;
+
+			}
+			// log.debug("ckVarAttr: '{}': spec/data both String", attrName);
+
+		} else if (specAttr.isNumeric()) {
+			if (!dataAttrType.isNumeric()) {
+				String err = String.format("attribute: %s:%s: Incorrect attribute value type. Must be numeric", varName,
+						attrName);
+
+				// formatErrors.add(err);
+				// ################# TEMPORARY WARNING ################
+				formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+
+				log.warn("{}: {}: {}", dacName, file.getName(), err);
+
+				return false;
+
+			}
+			// log.debug("ckVarAttr: '{}': spec/data both Number", attrName);
+
+		} else {
+			// ..what the hell were you thinking?
+			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: ArgoDataFile(ckvarattr) " + varName + ":" + attrName
+					+ ": unknown specAttr type.  TERMINATING.\n" + "******");
+			System.exit(1);
+		}
+		return true;
+	}
+
+	private boolean checkAttributNotAllowed(String varName, String attrName,
+			ArgoAttribute.AttrHandling specialHandling) {
+		if (specialHandling == ArgoAttribute.AttrHandling.NOT_ALLOWED) {
+			String err = String.format("attribute: %s:%s: Attribute is not allowed.", varName, attrName);
+			// formatErrors.add(err)
+
+			// ################# TEMPORARY WARNING ################
+			formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+			log.warn("{}: {}: {}", dacName, file.getName(), err);
+
+			return false;
+
+		}
+		return true;
+	}
 
 	// ......................ckVarDims...................
 	/**
@@ -1025,10 +1057,9 @@ public class ArgoDataFile {
 				return true;
 			}
 
-			formatErrors
-					.add("variable: " + dataVar.getShortName() + ": Definitions differ" + "\n\tSpecification type = '"
-							+ specType.toString() + "'" + "\n\tData File type     = '" + dataType.toString() + "'");
-
+			formatErrors.add("variable: " + dataVar.getShortName() + ": Definitions differ"
+					+ "\n\tSpecification type = '" + specVar.getType().toString() + "'" + "\n\tData File type     = '"
+					+ dataVar.getDataType().toString() + "'");
 			log.info("format error: '{}' data type mismatch", dataVar.getShortName());
 
 			return false;
@@ -1080,190 +1111,139 @@ public class ArgoDataFile {
 
 		// ......Step 1: Compare the data file dimensions to the specification.......
 		log.debug(".....verifyFormat: compare data dimensions to spec.....");
-
-		List<Dimension> dimList = ncReader.getDimensions();
-
-		if (dimList != null) {
-
-			for (Dimension dataDim : dimList) {
-				String dimName = dataDim.getShortName();
-				ArgoDimension specDim = spec.getDimension(dimName);
-				dataElement.add(dimName);
-				if (log.isDebugEnabled()) {
-					log.debug("data dim: " + dataDim + " -- " + specDim);
-				}
-
-				if (specDim == null) {
-					// ..dimension in data file is not in the spec
-
-					// ..is it an "extra dimension"?
-					specDim = spec.addExtraDimension(dimName, dataDim.getLength());
-
-					if (specDim == null) {
-						// ..nope, not an allowed "extra dimension" -> error
-						formatErrors.add("dimension: " + dimName + ": not defined in specification '"
-								+ spec.getSpecName() + "'");
-
-						log.info("format error: '{}' not in spec", dimName);
-
-					} else {
-						log.debug("extra dimension: '{}'. value = {}", dimName, dataDim.getLength());
-					}
-
-				} else { // ..dimension is in the spec
-					int specValue = specDim.getValue();
-					int dataValue = dataDim.getLength();
-					if (specValue > 0 && specValue != dataValue) {
-						// ..tValue > 0: dimension is not _unspecified_ or UNLIMITED
-						// .. AND it doesn't have the same value -> error
-						formatErrors.add("dimension: " + dataDim.getShortName() + ": Definitions differ"
-								+ "\n\tSpecification = '" + specValue + "'" + "\n\tData File     = '" + dataValue
-								+ "'");
-
-						log.info("format error: '{}' dimension value mismatch", dataDim.getShortName());
-					}
-
-					// ..if a data dimension is in a group,
-					// .. we have to check the rest of the group later
-					String group = spec.inGroup(dimName);
-					if (group != null) {
-						dataGroup.add(group);
-					}
-				}
-			}
-
-		} else {
-			log.debug("no dimensions in this file");
-		}
+		verifyFileDimensions(dataElement, dataGroup);
 
 		// .......Step 2: Compare the data file variables to the spec.......
-		if (log.isDebugEnabled()) {
-			log.debug(".....verifyFormat: compare data variables to spec.....");
-		}
 
-		varList = ncReader.getVariables();
-
-		for (Variable dataVar : varList) {
-			String name = dataVar.getShortName();
-			ArgoVariable specVar = spec.getVariable(name);
-			dataElement.add(name);
-			if (log.isDebugEnabled()) {
-				log.debug("data var: '{}'", name);
-			}
-
-			if (specVar == null) {
-				// ..data file variable is not in the specification
-				formatErrors.add("variable: " + name + ": not defined in specification '" + spec.getSpecName() + "'");
-
-				log.info("format error: variable not in spec: '{}'", name);
-
-			} else if (!ckVarTypes(dataVar, specVar)) {
-				// ..data types don't match
-
-			} else if (!ckVarDims(dataVar, specVar)) {
-				// ..variable dimensions don't match
-
-				// .....Step 2a: Compare the attributes for this variable......
-			} else if (!ckVarAttr(dataVar, specVar)) {
-				// ..variable attributes don't match
-			}
-
-			// ..if a data variable is in a group,
-			// .. we have to check the rest of the group later
-			String group = spec.inGroup(name);
-			if (group != null) {
-				dataGroup.add(group);
-			}
-		} // ..end for (dataVar)
+		log.debug(".....verifyFormat: compare data variables to spec.....");
+		verifyFileVariables(dataElement, dataGroup);
 
 		// ......Step 3: Check the spec dimensions against data file.........
 		// .. - only need to check existence - definitions already checked above
 		log.debug(".....verifyFormat: compare spec dimensions to data.....");
-
-		for (ArgoDimension dim : spec.getDimensions()) {
-			String name = dim.getName();
-			Dimension dataDim = ncReader.findDimension(name);
-			log.debug("spec dim: {}", name);
-
-			if (dataDim == null) {
-				if (spec.isOptional(name)) {
-					// ..dimension is optional
-					log.debug("optional dimension '{}': not defined in data file - allowed", name);
-
-				} else if (dim.isAlternateDimension()) {
-					// ..this is an alt-dim --- it will never appear in the data file by name
-					log.debug("alt-dim '{}': not defined in data file - expected", name);
-
-				} else {
-					// ..dimension in spec file is not in the data
-					formatErrors.add("dimension: " + name + ": not defined in data file");
-
-					log.info("format error: dimension not in data file: '{}'", name);
-				}
-			}
-		} // end for (spec-Dim-name)
+		verifySpecDimensionsPresenceInData();
 
 		// ......Step 4: Check the spec variables against the data.........
 		// .. - only need to check existence - definitions already checked above
 		log.debug(".....verifyFormat: compare spec variables to data.....");
-
-		for (String name : spec.getSpecVariableNames()) {
-			ArgoVariable specVar = spec.getVariable(name);
-			Variable dataVar = ncReader.findVariable(name);
-			log.debug("spec var: {}", name);
-
-			if (dataVar == null) {
-				// ..variable in spec file is not in the data file
-
-				if (spec.isOptional(name)) {
-					// ..the variable is optional
-					log.debug("optional variable not defined in data file: '{}'", name);
-
-				} else {
-					formatErrors.add("variable: " + name + ": not defined in data file");
-
-					log.info("format error: variable not in data file: '{}'", name);
-				}
-
-				// ..........Step 4a: Check the spec attributes against the data file.......
-			} else {
-				// ..we are looking for attributes the spec says must exist
-				// ..and checking the data variable to see if they do
-				// ..- don't have to check values because the data var attr values were checked
-				// above
-
-				for (String attrName : specVar.getAttributeNames()) {
-					ArgoAttribute attr = specVar.getAttribute(attrName);
-					ArgoAttribute.AttrHandling handling = attr.getHandling();
-
-					if (handling == ArgoAttribute.AttrHandling.IGNORE_COMPLETELY
-							|| handling == ArgoAttribute.AttrHandling.NOT_ALLOWED) {
-
-						// ..attribute is allowed to be missing OR
-						// ..attribute must NOT exist
-						// ..- don't bother checking
-						log.debug("optional attr: '" + name + ":" + attrName + "' - ignored");
-
-					} else {
-						Attribute dataAttr = dataVar.findAttribute(attrName);
-
-						if (dataAttr == null) {
-							// ..attribute in spec file is not in the data file
-
-							formatErrors.add("attribute: '" + name + ":" + attrName + "' not defined in data file");
-
-							log.info("format error: attribute not in data file: '{}:{}'", name, attrName);
-						}
-					}
-				}
-			}
-		} // end for (spec-Var-name)
+		verifySpecVariablePresenceInData();
 
 		// ..............Step 5: Finish group variables.........................
 		// .. - for each group with a reported variable -- make sure all of them are
 		// reported
 		log.debug(".....verifyFormat: check reported groups.....");
+		checkGroupsCompleteness(dataElement, dataGroup);
 
+		// ......Step 6: Compare the spec global attributes to the file.......
+		log.debug(".....verifyFormat: compare spec global attr to data file.....");
+		verifyGlobalAttributes(dacName);
+
+		spec.clearExtraDimensions();
+
+		if (formatErrors.size() == 0) {
+			verified = true;
+		}
+
+		log.debug(".....verifyFormat: completed.....");
+
+		return true;
+	} // ..end verifyFormat
+
+	private void verifyGlobalAttributes(String dacName) {
+		for (String name : spec.getGlobalAttributeNames()) {
+			ArgoAttribute specAttr = spec.getGlobalAttribute(name);
+			Attribute dataAttr = ncReader.findGlobalAttribute(name);
+			if (log.isDebugEnabled()) {
+				log.debug("spec attribute: " + name);
+			}
+
+			if (dataAttr == null) {
+				// ..attribute in spec file is not in the data file
+
+				String err = String.format("global attribute: %s: not defined in data file", name);
+				// formatErrors.add(err);
+
+				// ################# TEMPORARY WARNING ################
+				formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+				log.warn("{}: {}: {}", dacName, file.getName(), err);
+
+			} else {
+				// ..spec attr is in data file -- check values
+				checkGlobalAttributeValue(dacName, name, specAttr, dataAttr);
+			}
+		}
+	}
+
+	private void checkGlobalAttributeValue(String dacName, String name, ArgoAttribute specAttr, Attribute dataAttr) {
+		if (dataAttr.isString()) {
+			String specValue = specAttr.getValue().toString();
+			String dataValue = dataAttr.getStringValue();
+
+			if (!(specValue.startsWith(ArgoFileSpecification.ATTR_IGNORE)
+					|| specValue.startsWith(ArgoFileSpecification.ATTR_IGNORE_VALUE))) {
+				// ..specAttr is not set for ignore
+
+				if (!dataValue.equals(specValue)) {
+					// ..data file attribute is not the same as the spec file attribute
+
+					// Pattern regex = spec.getAttrRegex("", name);
+					ArgoFileSpecification.AttrRegex regex = spec.getAttrRegex("", name);
+
+					if (regex == null) {
+						// ..no regex .. this is a format error
+
+						String err = String.format("global attribute: %s: Definitions differ"
+								+ "\n\tSpecification = '%s'" + "\n\tData File     = '%s'", name, specValue, dataValue);
+
+						// formatErrors.add(err);
+
+						// ################# TEMPORARY WARNING ################
+						formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+						log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+
+					} else {
+						// ..regex defined ... does it match?
+
+						if (!regex.pattern.matcher(dataValue).matches()) {
+							String err = String.format("global attribute: %s: Definitions differ"
+									+ "\n\tSpecification = '%s' (regex)" + "\n\tData File     = '%s'", name,
+									regex.pattern, dataValue);
+							// formatErrors.add("global attribute: "+
+
+							// ################# TEMPORARY WARNING ################
+							formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+
+							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+
+						} else {
+							if (regex.warn) {
+								formatWarnings.add("global attribute: " + name + ": Accepted; not standard value"
+										+ "\n\tSpecification     = '" + specValue + "'" + "\n\tException allowed = '"
+										+ regex.pattern + "' (regex)" + "\n\tData File         = '" + dataValue + "'");
+								log.warn("regex match (WARN): global attribute ':{} = '{}' matches '{}'", name,
+										dataValue, regex.pattern);
+							} else {
+								log.warn("regex match (NO WARN): global attribute ':{} = '{}' matches '{}'", name,
+										dataValue, regex.pattern);
+							}
+						}
+					} // ..end if regex
+
+				} // ..end attr.equals
+			} // ..end if (ignore)
+
+		} else {
+			String err = String.format("global attribute: %s: not a \"string valued\" attribute", name);
+			// formatErrors.add("global attribute: "+name+
+
+			// ################# TEMPORARY WARNING ################
+			formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+			log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+
+		} // ..end if(dataAttr.isString)
+	}
+
+	private void checkGroupsCompleteness(HashSet<String> dataElement, HashSet<String> dataGroup) {
 		for (String group : dataGroup) {
 			log.debug("group with reported variable: '{}'", group);
 
@@ -1301,113 +1281,208 @@ public class ArgoDataFile {
 				log.info("format error: option group '{}' variables missing from data file", group);
 			}
 		}
+	}
 
-		// ......Step 6: Compare the spec global attributes to the file.......
-		log.debug(".....verifyFormat: compare spec global attr to data file.....");
+	private void verifySpecVariablePresenceInData() {
 
-		for (String name : spec.getGlobalAttributeNames()) {
-			ArgoAttribute specAttr = spec.getGlobalAttribute(name);
-			Attribute dataAttr = ncReader.findGlobalAttribute(name);
-			if (log.isDebugEnabled()) {
-				log.debug("spec attribute: " + name);
+		for (String name : spec.getSpecVariableNames()) {
+			ArgoVariable specVar = spec.getVariable(name);
+			Variable dataVar = ncReader.findVariable(name);
+			log.debug("spec var: {}", name);
+
+			if (dataVar == null) {
+				// ..variable in spec file is not in the data file
+
+				if (spec.isOptional(name)) {
+					// ..the variable is optional
+					log.debug("optional variable not defined in data file: '{}'", name);
+
+				} else {
+					formatErrors.add("variable: " + name + ": not defined in data file");
+
+					log.info("format error: variable not in data file: '{}'", name);
+				}
+
+				// ..........Step 4a: Check the spec attributes against the data file.......
+			} else {
+				// ..we are looking for attributes the spec says must exist
+				// ..and checking the data variable to see if they do
+				// ..- don't have to check values because the data var attr values were checked
+				// above
+				for (String attrName : specVar.getAttributeNames()) {
+					checkSpevVarAttributePresenceInData(name, specVar, dataVar, attrName);
+				}
 			}
+		} // end for (spec-Var-name)
+	}
+
+	private void checkSpevVarAttributePresenceInData(String name, ArgoVariable specVar, Variable dataVar,
+			String attrName) {
+		ArgoAttribute attr = specVar.getAttribute(attrName);
+		ArgoAttribute.AttrHandling handling = attr.getHandling();
+
+		if (handling == ArgoAttribute.AttrHandling.IGNORE_COMPLETELY
+				|| handling == ArgoAttribute.AttrHandling.NOT_ALLOWED) {
+
+			// ..attribute is allowed to be missing OR
+			// ..attribute must NOT exist
+			// ..- don't bother checking
+			log.debug("optional attr: '" + name + ":" + attrName + "' - ignored");
+
+		} else {
+			Attribute dataAttr = dataVar.findAttribute(attrName);
 
 			if (dataAttr == null) {
 				// ..attribute in spec file is not in the data file
 
-				String err = String.format("global attribute: %s: not defined in data file", name);
-				// formatErrors.add(err);
+				formatErrors.add("attribute: '" + name + ":" + attrName + "' not defined in data file");
 
-				// ################# TEMPORARY WARNING ################
-				formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-				log.warn("{}: {}: {}", dacName, file.getName(), err);
-
-			} else {
-				// ..spec attr is in data file -- check values
-
-				if (dataAttr.isString()) {
-					String specValue = specAttr.getValue().toString();
-					String dataValue = dataAttr.getStringValue();
-
-					if (!(specValue.startsWith(ArgoFileSpecification.ATTR_IGNORE)
-							|| specValue.startsWith(ArgoFileSpecification.ATTR_IGNORE_VALUE))) {
-						// ..specAttr is not set for ignore
-
-						if (!dataValue.equals(specValue)) {
-							// ..data file attribute is not the same as the spec file attribute
-
-							// Pattern regex = spec.getAttrRegex("", name);
-							ArgoFileSpecification.AttrRegex regex = spec.getAttrRegex("", name);
-
-							if (regex == null) {
-								// ..no regex .. this is a format error
-
-								String err = String.format("global attribute: %s: Definitions differ"
-										+ "\n\tSpecification = '%s'" + "\n\tData File     = '%s'", name, specValue,
-										dataValue);
-
-								// formatErrors.add(err);
-
-								// ################# TEMPORARY WARNING ################
-								formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-								log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
-
-							} else {
-								// ..regex defined ... does it match?
-
-								if (!regex.pattern.matcher(dataValue).matches()) {
-									String err = String.format(
-											"global attribute: %s: Definitions differ"
-													+ "\n\tSpecification = '%s' (regex)" + "\n\tData File     = '%s'",
-											name, regex.pattern, dataValue);
-									// formatErrors.add("global attribute: "+
-
-									// ################# TEMPORARY WARNING ################
-									formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-
-									log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
-
-								} else {
-									if (regex.warn) {
-										formatWarnings.add("global attribute: " + name
-												+ ": Accepted; not standard value" + "\n\tSpecification     = '"
-												+ specValue + "'" + "\n\tException allowed = '" + regex.pattern
-												+ "' (regex)" + "\n\tData File         = '" + dataValue + "'");
-										log.warn("regex match (WARN): global attribute ':{} = '{}' matches '{}'", name,
-												dataValue, regex.pattern);
-									} else {
-										log.warn("regex match (NO WARN): global attribute ':{} = '{}' matches '{}'",
-												name, dataValue, regex.pattern);
-									}
-								}
-							} // ..end if regex
-
-						} // ..end attr.equals
-					} // ..end if (ignore)
-
-				} else {
-					String err = String.format("global attribute: %s: not a \"string valued\" attribute", name);
-					// formatErrors.add("global attribute: "+name+
-
-					// ################# TEMPORARY WARNING ################
-					formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
-					log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
-
-				} // ..end if(dataAttr.isString)
+				log.info("format error: attribute not in data file: '{}:{}'", name, attrName);
 			}
 		}
+	}
 
-		spec.clearExtraDimensions();
+	private void verifySpecDimensionsPresenceInData() {
 
-		if (formatErrors.size() == 0) {
-			verified = true;
+		for (ArgoDimension dim : spec.getDimensions()) {
+			String name = dim.getName();
+			Dimension dataDim = ncReader.findDimension(name);
+			log.debug("spec dim: {}", name);
+
+			if (dataDim == null) {
+				if (spec.isOptional(name)) {
+					// ..dimension is optional
+					log.debug("optional dimension '{}': not defined in data file - allowed", name);
+
+				} else if (dim.isAlternateDimension()) {
+					// ..this is an alt-dim --- it will never appear in the data file by name
+					log.debug("alt-dim '{}': not defined in data file - expected", name);
+
+				} else {
+					// ..dimension in spec file is not in the data
+					formatErrors.add("dimension: " + name + ": not defined in data file");
+
+					log.info("format error: dimension not in data file: '{}'", name);
+				}
+			}
+		} // end for (spec-Dim-name)
+	}
+
+	private void verifyFileVariables(HashSet<String> dataElement, HashSet<String> dataGroup) {
+
+		varList = ncReader.getVariables();
+
+		for (Variable dataVar : varList) {
+			String name = dataVar.getShortName();
+
+			dataElement.add(name);
+
+			checkVariableAgainstSpec(name, dataVar);
+
+			addElementToGroupIfDefinedInSpec(dataGroup, name);
+
 		}
+	}
+
+	private void checkVariableAgainstSpec(String name, Variable dataVar) {
 
 		if (log.isDebugEnabled()) {
-			log.debug(".....verifyFormat: completed.....");
+			log.debug("data var: '{}'", name);
 		}
-		return true;
-	} // ..end verifyFormat
+
+		ArgoVariable specVar = spec.getVariable(name);
+
+		if (specVar == null) {
+			// ..data file variable is not in the specification
+			formatErrors.add("variable: " + name + ": not defined in specification '" + spec.getSpecName() + "'");
+
+			log.info("format error: variable not in spec: '{}'", name);
+
+		} else if (!ckVarTypes(dataVar, specVar)) {
+			// ..data types don't match
+			return;
+
+		} else if (!ckVarDims(dataVar, specVar)) {
+			// ..variable dimensions don't match
+			return;
+			// .....Step 2a: Compare the attributes for this variable......
+		} else if (!ckVarAttr(dataVar, specVar)) {
+			// ..variable attributes don't match
+			return;
+		}
+
+	}
+
+// .........................................................
+// ........... verifyFileDimensions ..............
+// .........................................................
+	private void verifyFileDimensions(HashSet<String> dataElement, HashSet<String> dataGroup) {
+
+		List<Dimension> dimList = ncReader.getDimensions();
+
+		if (dimList == null || dimList.isEmpty()) {
+			log.debug("no dimensions in this file");
+			return;
+		}
+
+		for (Dimension dataDim : dimList) {
+			String dimName = dataDim.getShortName();
+			ArgoDimension specDim = spec.getDimension(dimName);
+			dataElement.add(dimName);
+			if (log.isDebugEnabled()) {
+				log.debug("data dim: {} -- {}", dataDim, specDim);
+			}
+
+			if (specDim == null) {
+				// ..dimension in data file is not in the spec
+				// ..is it an "extra dimension"?
+				handleExtraDimension(dataDim, dimName);
+
+			} else {
+				// ..dimension is in the spec, check its value
+				validateDimensionLength(dataDim, specDim);
+				// ..if a data dimension is in a group,
+				// .. we have to check the rest of the group later
+				addElementToGroupIfDefinedInSpec(dataGroup, dimName);
+			}
+		}
+	}
+
+	private void addElementToGroupIfDefinedInSpec(HashSet<String> dataGroup, String elementName) {
+		String group = spec.inGroup(elementName);
+		if (group != null) {
+			dataGroup.add(group);
+		}
+	}
+
+	private void validateDimensionLength(Dimension dataDim, ArgoDimension specDim) {
+		int specValue = specDim.getValue();
+		int dataValue = dataDim.getLength();
+		if (specValue > 0 && specValue != dataValue) {
+			// ..tValue > 0: dimension is not _unspecified_ or UNLIMITED
+			// .. AND it doesn't have the same value -> error
+			formatErrors.add("dimension: " + dataDim.getShortName() + ": Definitions differ" + "\n\tSpecification = '"
+					+ specValue + "'" + "\n\tData File     = '" + dataValue + "'");
+
+			log.info("format error: '{}' dimension value mismatch", dataDim.getShortName());
+		}
+	}
+
+	private void handleExtraDimension(Dimension dataDim, String dimName) {
+		ArgoDimension specDim;
+		specDim = spec.addExtraDimension(dimName, dataDim.getLength());
+
+		if (specDim == null) {
+			// ..nope, not an allowed "extra dimension" -> error
+			formatErrors.add(
+					String.format("dimension: %s: not defined in specification '%s'", dimName, spec.getSpecName()));
+
+			log.info("format error: '{}' not in spec", dimName);
+
+		} else {
+			log.debug("extra dimension: '{}'. value = {}", dimName, dataDim.getLength());
+		}
+	}
 
 	// .........................................................
 	// ........... getGdacFileName ..............

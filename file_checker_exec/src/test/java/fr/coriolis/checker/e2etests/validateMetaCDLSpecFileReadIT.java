@@ -22,7 +22,8 @@ class validateMetaCDLSpecFileReadIT {
 	@Tag(TEST_DIR_NAME)
 	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
 	@CsvSource({
-			"6903281_meta_DEPLOYMENT_PLATFORM_STRING128_SENSOR_FIRMWARE_VERSION.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION" })
+			"6903281_meta_DEPLOYMENT_PLATFORM_STRING128_SENSOR_FIRMWARE_VERSION.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+			"6903281_meta_DEPLOYMENT_PLATFORM_STRING128_NO-SENSOR_FIRMWARE_VERSION.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION" })
 	void fileChecker_shouldAcceptMetaFile_WhenConformToMetaCDLSpec(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 
