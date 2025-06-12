@@ -8,21 +8,21 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-@DisplayName("Check read of physical parameter's core/bio/intermediate specification")
-class ValidateICparameterIT {
+@DisplayName("Check good naming of parameters from duplicate sensors")
+class ValidateMultipleSensorIT {
 
-	private final String TEST_DIR_NAME = "TEST_ALL_0002";
+	private final String TEST_DIR_NAME = "TEST_ALL_0003";
 
 	@BeforeAll
 	public static void init() {
-		TestsUtils.init(ValidateICparameterIT.class);
+		TestsUtils.init(ValidateMultipleSensorIT.class);
 	}
 
 	@Tag(TEST_DIR_NAME)
 	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
-	@CsvSource({ "D4900757_024_CNDC_with_ADJUSTED.nc,aoml,FILE-ACCEPTED,DATA-VALIDATION",
-			"D4900757_024_CNDC_without_ADJUSTED.nc,aoml,FILE-ACCEPTED,DATA-VALIDATION" })
-	void fileChecker_shouldAcceptIntermediateCoreParameters_WhenNoAdjustedVariables(String fileName, String dac,
+	@CsvSource({ "BD4900476_032_DOXY2.nc,aoml,FILE-REJECTED,FORMAT-VERIFICATION",
+			"BD4900476_032_DOXY_2.nc,aoml,FILE-ACCEPTED,DATA-VALIDATION" })
+	void fileChecker_shouldRejectDuplicateParameters_WhenIntegerNotSeparatedByUnderscore(String fileName, String dac,
 			String result, String phase) throws IOException, InterruptedException {
 
 		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME);

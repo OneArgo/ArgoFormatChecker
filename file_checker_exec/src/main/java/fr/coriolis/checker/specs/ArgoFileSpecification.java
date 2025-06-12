@@ -2018,16 +2018,11 @@ public class ArgoFileSpecification {
 
 			String prmList[] = new String[4];
 			prmList[0] = prm;
-
-			if (pParamEndInDigit.matcher(prm).matches()) {
-				prmList[1] = prm + "_2";
-				prmList[2] = prm + "_3";
-				prmList[3] = prm + "_4";
-			} else {
-				prmList[1] = prm + "2";
-				prmList[2] = prm + "3";
-				prmList[3] = prm + "4";
-			}
+			// ADMT-25 : Always add an underscore to numbering duplicate sensor/parameters
+			// variable
+			prmList[1] = prm + "_2";
+			prmList[2] = prm + "_3";
+			prmList[3] = prm + "_4";
 
 			// ...LIST-ONLY MODE: grab the param name and continue with the next line
 			if (listOnly) {
