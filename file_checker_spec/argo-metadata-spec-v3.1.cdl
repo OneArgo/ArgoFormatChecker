@@ -115,7 +115,7 @@ variables:
 	char PROJECT_NAME(STRING64);
 		PROJECT_NAME:long_name = "Program under which the float was deployed"; 
 		PROJECT_NAME:_FillValue = " ";
-	char PROGRAM_NAME(N_PROF, STRING64);
+	char PROGRAM_NAME(STRING64);
 		PROGRAM_NAME:long_name = "Name of the program";
 		PROGRAM_NAME:_FillValue = " ";  
 	char DATA_CENTRE(STRING2);
