@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import fr.coriolis.checker.specs.ArgoConfigTechParam;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
+import fr.coriolis.checker.specs.ArgoReferenceTable.StringTable;
 import ucar.ma2.ArrayChar;
 import ucar.nc2.Variable;
 
@@ -196,6 +197,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 			validateHighlyDesirable_v2(dac);
 		} else {
 			validateMandatory_v3(dac);
+			validateOptionalParams();
 			validateConfigMission();
 			validateConfigParams();
 
@@ -206,6 +208,11 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 		return true;
 	}// ..end validate
+
+	private void validateOptionalParams() {
+		// PROGRAM_NAME - ref table 41
+		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME);
+	}
 
 	/**
 	 * Validates the dates in the meta-data file.
@@ -1144,6 +1151,29 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 		log.debug("....validateMandatory_v3: end.....");
 	} // ..end validateMandatory_v3
+
+	private void checkParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
+		ArgoReferenceTable.ArgoReferenceEntry info;
+		String parameterValue = readString(parameterName).trim();
+
+		log.debug("{}: '{}'", parameterName, parameterValue);
+		if ((info = ArgoReferenceTable.PROGRAM_NAME.contains(parameterValue)).isValid()) {
+			if (info.isDeprecated) {
+				formatWarnings.add(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+			}
+
+		} else {
+			formatErrors.add(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+		}
+	}
+
+	private void checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
+
+		Variable dataVar = ncReader.findVariable("PROGRAM_NAME");
+		if (dataVar != null) {
+			checkParameterValueAgainstRefTable(parameterName, refTable);
+		}
+	}
 
 	/**
 	 * Convenience method to return a char value for a variable

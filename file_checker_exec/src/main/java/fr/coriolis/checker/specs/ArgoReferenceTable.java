@@ -131,6 +131,9 @@ public final class ArgoReferenceTable {
 	public static LinkedHashSet<String> BATTERY_PACKS_style;
 	public static LinkedHashSet<String> BATTERY_PACKS_type;
 
+	// .....reference table 41.....
+	public static StringTable PROGRAM_NAME;
+
 	// .....Measurement_codes..........
 	public static IntegerTable MEASUREMENT_CODE_specific;
 	public static IntegerTable MEASUREMENT_CODE_toJuldVariable;
@@ -242,6 +245,9 @@ public final class ArgoReferenceTable {
 
 		// .....reference table 27....
 		SENSOR_MODEL = new StringTable(prefix + "27");
+
+		// .....reference table 41....
+		PROGRAM_NAME = new StringTable(prefix + "41");
 
 		// ..append platform_maker entries to sensor_maker table
 		// ..ADMT-19 confirmed this as a requirment
