@@ -40,7 +40,7 @@ public final class ArgoReferenceTable {
 
 	public static enum DACS {
 		AOML("aoml"), BODC("bodc"), CORIOLIS("coriolis"), CSIO("csio"), CSIRO("csiro"), INCOIS("incois"), JMA("jma"),
-		KMA("kma"), KORDI("kordi"), MEDS("meds"), NMDIS("nmdis");
+		KMA("kma"), KORDI("kordi"), MEDS("meds"), NMDIS("nmdis"), KIOST("kiost");
 
 		public final String name;
 
@@ -158,6 +158,7 @@ public final class ArgoReferenceTable {
 		DacCenterCodes.put(DACS.JMA, "JA JM");
 		DacCenterCodes.put(DACS.KMA, "KM");
 		DacCenterCodes.put(DACS.KORDI, "KO");
+		DacCenterCodes.put(DACS.KIOST, "KO");
 		DacCenterCodes.put(DACS.MEDS, "CI ME");
 		DacCenterCodes.put(DACS.NMDIS, "NM");
 
