@@ -919,6 +919,7 @@ public class ArgoConfigTechParam {
 	}
 
 	private List<String> generateParamListFromPattern(String pRegex) {
+
 		List<String> regexList = new ArrayList<>(Arrays.asList(pRegex));
 		boolean replacedAtLeastOne = false;
 
@@ -946,15 +947,18 @@ public class ArgoConfigTechParam {
 
 		}
 		return replacedAtLeastOne ? regexList : new ArrayList<>();
+
 	}
 
 	private List<String> generateStringsFromPattern(String pRegex, Set<String> values, String regexToReplace) {
 		if (!Pattern.compile(regexToReplace).matcher(pRegex).find()) {
 			// Pattern not processed (pattern to replace absent)
 			return Collections.singletonList(pRegex); // return the original pRegex
+
 		}
 		return values.stream().map(value -> pRegex.toString().replaceAll(regexToReplace, value))
 				.collect(Collectors.toList());
+
 	}
 
 	private String generalizeNamedGroupPattern(String groupRegex) {
