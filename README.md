@@ -62,3 +62,10 @@ docker build -t filechecker_2.8.14 .
 ```
 docker run --rm -v [ABSOLUTE_PATH_TO_file_checker_spec]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results filechecker_2.8.14:latest $DAC_NAME ./file_checker_spec ./results ./data $FILE_NAME
 ```
+
+### Run integration tests
+The source code comes with some netcdf test files. You can run the integration tests with this following command :
+
+```bash
+./mvnw verify
+```

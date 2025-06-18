@@ -13,7 +13,9 @@ SBE41 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |
 SBE41_V2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
 SBE41_V2.6 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
 SBE41_V3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-SBE41CP | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |
+SBE41_IDO | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2025-04-28 | added by y. lubac 
+SBE41CP_IDO | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2025-04-28 | added by y. lubac 
 SBE41_IDO_V1.0c | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-06-02 | added b. m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
 SBE41_IDO_V2.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-06-02 | updated CTD_IDO to CTD (10/06 2021) 
 SBE41CP_IDO_V2.0b | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-04-27 | added by t. carval for a. thresher updated CTD_IDO to CTD (10/06 2021) 
