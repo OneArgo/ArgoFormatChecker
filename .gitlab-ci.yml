@@ -1,0 +1,35 @@
+---
+include:
+  - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@~latest
+
+variables:
+  CONTAINER_IMAGE_BUILD_CONTEXT: ./file_checker_exec
+  CONTAINER_IMAGE_DOCKER_FILE_PATH: ./file_checker_exec/Dockerfile
+  JAVA_BUILDER_BUILD_COMMAND: clean package -f file_checker_exec/pom.xml
+  JAVA_BUILDER_TESTS_COMMAND: test -f file_checker_exec/pom.xml
+  JAVA_BUILDER_MAVEN_QUALITY_ENABLE: "false" #no script npm de linting
+  JAVA_BUILDER_QUALITY_COMMAND: checkstyle:check -f file_checker_exec/pom.xml
+  JAVA_BUILDER_ARTIFACTS_PATH: "**/target/*.{war,jar}"
+  JAVA_BUILDER_PUBLISH_COMMAND: deploy -f file_checker_exec/pom.xml
+  JAVA_BUILDER_MAVEN_SETTINGS_PATH: ./file_checker_exec/settings.xml
+  JAVA_JACOCO_XML_REPORT_PATH: ./file_checker_exec/**/target/site/**/jacoco.xml
+  JAVA_PUBLISH_ENABLE: true
+  YAMLLINT_ENABLE: "false"
+  PIPELINE_ENABLE_SONARQUBE: false
+
+security:filesystem:scan 🛡️:
+  rules:
+    - when: always
+
+check_container-image_scanning:
+  stage: security
+  image: alpine:latest
+  script:
+    - CRITICAL_COUNT=$(grep -o '<tr class="severity-CRITICAL">' scanning-report.html | wc -l || echo 0) 
+    - echo "Number of critical vulnerabilities:${CRITICAL_COUNT}"
+    - if [ "$CRITICAL_COUNT" -gt 0 ]; then echo "Critical vulnerabilities detected"; exit 1; fi
+  needs:
+    - job: security:filesystem:scan 🛡️
+      artifacts: true
+  allow_failure: false  
+
