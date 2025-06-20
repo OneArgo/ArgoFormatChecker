@@ -12,10 +12,10 @@ variables:
   JAVA_BUILDER_ARTIFACTS_PATH: "**/target/*.{war,jar}"
   JAVA_BUILDER_PUBLISH_COMMAND: deploy -f file_checker_exec/pom.xml
   JAVA_BUILDER_MAVEN_SETTINGS_PATH: ./file_checker_exec/settings.xml
-  JAVA_JACOCO_XML_REPORT_PATH: ./file_checker_exec/**/target/site/**/jacoco.xml
   JAVA_PUBLISH_ENABLE: true
   YAMLLINT_ENABLE: "false"
   PIPELINE_ENABLE_SONARQUBE: false
+
 
 security:filesystem:scan 🛡️:
   rules:
