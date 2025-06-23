@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,7 +100,7 @@ public class ArgoConfigTechParam {
 
 		Map<String, Set<String>> temp2 = new HashMap<>();
 		temp2.put("short_sensor_name", ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name);
-		temp2.put("Z", Set.of("1", "2", "3", "4", "5"));
+		temp2.put("Z", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
 		temp2.put("cycle_phase_name", ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name);
 		temp2.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
 		possibleValuesByKey = Collections.unmodifiableMap(temp2);
@@ -917,7 +919,7 @@ public class ArgoConfigTechParam {
 	}
 
 	private List<String> generateParamListFromPattern(String pRegex) {
-		List<String> regexList = List.of(pRegex);
+		List<String> regexList = new ArrayList<>(Arrays.asList(pRegex));
 		boolean replacedAtLeastOne = false;
 
 		for (Map.Entry<String, String> entry : templateReplacement.entrySet()) {
@@ -943,13 +945,13 @@ public class ArgoConfigTechParam {
 			}).collect(Collectors.toList());
 
 		}
-		return replacedAtLeastOne ? regexList : List.of();
+		return replacedAtLeastOne ? regexList : new ArrayList<>();
 	}
 
 	private List<String> generateStringsFromPattern(String pRegex, Set<String> values, String regexToReplace) {
 		if (!Pattern.compile(regexToReplace).matcher(pRegex).find()) {
 			// Pattern not processed (pattern to replace absent)
-			return List.of(pRegex); // return the original pRegex
+			return Collections.singletonList(pRegex); // return the original pRegex
 		}
 		return values.stream().map(value -> pRegex.toString().replaceAll(regexToReplace, value))
 				.collect(Collectors.toList());
