@@ -27,6 +27,7 @@ import fr.coriolis.checker.filetypes.ArgoMetadataFile;
 import fr.coriolis.checker.filetypes.ArgoProfileFile;
 import fr.coriolis.checker.filetypes.ArgoTechnicalFile;
 import fr.coriolis.checker.filetypes.ArgoTrajectoryFile;
+import fr.coriolis.checker.filetypes.ValidationResult;
 import fr.coriolis.checker.output.ResultsFile;
 
 /**
@@ -184,7 +185,7 @@ public class ValidateSubmit {
 
 		if (argo == null) {
 			// ..null file means it did not meet the min criteria to be an argo file
-			throw new NotAnArgoFileException("ArgoDataFile.open failed: " + ArgoDataFile.getMessage());
+			throw new NotAnArgoFileException("ArgoDataFile.open failed: " + ValidationResult.getMessage());
 		}
 
 		return argo;
@@ -250,7 +251,7 @@ public class ValidateSubmit {
 				if (!specialPreV31FormatCheckPassed) {
 					out.oldDModeFile(dacName, argo.fileVersion());
 				} else {
-					out.statusAndPhase((argo.nFormatErrors() == 0), phase);
+					out.statusAndPhase((argo.getValidationResult().nFormatErrors() == 0), phase);
 					out.metaData(dacName, argo, formatPassed, options.isDoPsalStats());
 					out.errorsAndWarnings(argo);
 				}
@@ -300,11 +301,11 @@ public class ValidateSubmit {
 
 		if (!isVerifyFormatCompleted) {
 			// ..verifyFormat *failed* -- not format errors - an actual failure
-			throw new VerifyFileFormatFailedException("verifyFormat check failed: " + ArgoDataFile.getMessage());
+			throw new VerifyFileFormatFailedException("verifyFormat check failed: " + ValidationResult.getMessage());
 
 		} else {
 			// ..verifyFormat completed -- chech error/warning counts to determine status
-			if (argo.nFormatErrors() == 0) {
+			if (argo.getValidationResult().nFormatErrors() == 0) {
 				log.debug("format ACCEPTED");
 				return true;
 
@@ -375,7 +376,7 @@ public class ValidateSubmit {
 					doBatteryChecks);
 			if (!isValidateArgoMetadaFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
-				log.error("ArgoMetadataFile.validate failed: " + ArgoDataFile.getMessage());
+				log.error("ArgoMetadataFile.validate failed: " + ValidationResult.getMessage());
 				throw new ValidateFileDataFailedException("Meta-data");
 			}
 
@@ -384,7 +385,7 @@ public class ValidateSubmit {
 			boolean isValidateArgoProfileFileDataCompleted = ((ArgoProfileFile) argo).validate(false, dacName, doNulls);
 			if (!isValidateArgoProfileFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
-				log.error("ArgoProfileFile.validate failed: " + ArgoDataFile.getMessage());
+				log.error("ArgoProfileFile.validate failed: " + ValidationResult.getMessage());
 				throw new ValidateFileDataFailedException("Profile");
 			}
 
@@ -393,7 +394,7 @@ public class ValidateSubmit {
 			boolean isValidateArgoTechnicalFileDataCompleted = ((ArgoTechnicalFile) argo).validate(dacName, doNulls);
 			if (!isValidateArgoTechnicalFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
-				log.error("ArgoTechnicalFile.validate failed: " + ArgoDataFile.getMessage());
+				log.error("ArgoTechnicalFile.validate failed: " + ValidationResult.getMessage());
 				throw new ValidateFileDataFailedException("Technical");
 			}
 
@@ -402,7 +403,7 @@ public class ValidateSubmit {
 			boolean isValidateArgoTrajectoryFileDataCompleted = ((ArgoTrajectoryFile) argo).validate(dacName, doNulls);
 			if (!isValidateArgoTrajectoryFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
-				log.error("ArgoTrajectoryFile.validate failed: " + ArgoDataFile.getMessage());
+				log.error("ArgoTrajectoryFile.validate failed: " + ValidationResult.getMessage());
 				throw new ValidateFileDataFailedException("Trajectory");
 			}
 		}

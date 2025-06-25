@@ -1,4 +1,5 @@
 package fr.coriolis.checker.output;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import fr.coriolis.checker.filetypes.ArgoDataFile;
 import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.filetypes.ArgoProfileFile;
+import fr.coriolis.checker.filetypes.ValidationResult;
 import fr.coriolis.checker.specs.ArgoDate;
 
 public class ResultsFile {
@@ -256,7 +258,7 @@ public class ResultsFile {
 			xml.writeStartElement("errors");
 			xml.writeAttribute("number", "1");
 			xml.writeStartElement("error");
-			xml.writeCharacters(ArgoDataFile.getMessage());
+			xml.writeCharacters(ValidationResult.getMessage());
 			xml.writeEndElement();
 			xml.writeEndElement();
 
@@ -267,7 +269,7 @@ public class ResultsFile {
 			out.println("DAC: " + dacName);
 			out.println("META-DATA: end");
 			out.println("FORMAT-ERRORS: start");
-			out.println(ArgoDataFile.getMessage());
+			out.println(ValidationResult.getMessage());
 			out.println("FORMAT-ERRORS: end");
 			out.println("FORMAT-WARNINGS: start");
 			out.println("FORMAT-WARNINGS: end");
@@ -287,12 +289,12 @@ public class ResultsFile {
 			xml.writeStartElement("errors");
 			xml.writeAttribute("number", "1");
 			xml.writeStartElement("error");
-			xml.writeCharacters("Format check failed. " + ArgoDataFile.getMessage());
+			xml.writeCharacters("Format check failed. " + ValidationResult.getMessage());
 			xml.writeEndElement();
 			xml.writeEndElement();
 
 		} else {
-			out.println("ERROR: Format check failed." + ArgoDataFile.getMessage());
+			out.println("ERROR: Format check failed." + ValidationResult.getMessage());
 			out.println("PHASE: " + phase);
 		}
 	}
@@ -312,12 +314,12 @@ public class ResultsFile {
 			xml.writeStartElement("errors");
 			xml.writeAttribute("number", "1");
 			xml.writeStartElement("error");
-			xml.writeCharacters(type + " validation failed. " + ArgoDataFile.getMessage());
+			xml.writeCharacters(type + " validation failed. " + ValidationResult.getMessage());
 			xml.writeEndElement();
 			xml.writeEndElement();
 
 		} else {
-			out.println("ERROR: " + type + " validation failed: " + ArgoDataFile.getMessage());
+			out.println("ERROR: " + type + " validation failed: " + ValidationResult.getMessage());
 		}
 	}
 
@@ -584,13 +586,13 @@ public class ResultsFile {
 	public void errorsAndWarnings(ArgoDataFile argo) throws XMLStreamException {
 		if (doXml) {
 			xml.writeStartElement("errors");
-			xml.writeAttribute("number", Integer.toString(argo.nFormatErrors()));
+			xml.writeAttribute("number", Integer.toString(argo.getValidationResult().nFormatErrors()));
 		} else {
 			out.println("FORMAT-ERRORS: start");
 		}
-		log.debug("format errors:" + argo.nFormatErrors());
+		log.debug("format errors:" + argo.getValidationResult().nFormatErrors());
 
-		for (String err : argo.formatErrors()) {
+		for (String err : argo.getValidationResult().getErrors()) {
 			if (doXml) {
 				xml.writeStartElement("error");
 				xml.writeCharacters(err);
@@ -611,13 +613,13 @@ public class ResultsFile {
 		// ...............report warnings................
 		if (doXml) {
 			xml.writeStartElement("warnings");
-			xml.writeAttribute("number", Integer.toString(argo.nFormatWarnings()));
+			xml.writeAttribute("number", Integer.toString(argo.getValidationResult().nFormatWarnings()));
 		} else {
 			out.println("FORMAT-WARNINGS: start");
 		}
-		log.debug("format warnings: " + argo.nFormatWarnings());
+		log.debug("format warnings: " + argo.getValidationResult().nFormatWarnings());
 
-		for (String err : argo.formatWarnings()) {
+		for (String err : argo.getValidationResult().getWarnings()) {
 			if (doXml) {
 				xml.writeStartElement("warning");
 				xml.writeCharacters(err);

@@ -73,7 +73,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	public static ArgoTechnicalFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
 		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
 		if (!(arFile instanceof ArgoTechnicalFile)) {
-			message = "ERROR: '" + inFile + "' not an Argo PROFILE file";
+			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
 			return null;
 		}
 
@@ -98,8 +98,8 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	public boolean validate(String dacName, boolean ckNulls) throws IOException {
 		ArgoReferenceTable.DACS dac = null;
 
-		if (!verified) {
-			message = "File must be verified (verifyFormat) " + "successfully before validation";
+		if (!validationResult.isValid()) {
+			ValidationResult.lastMessage = "File must be verified (verifyFormat) " + "successfully before validation";
 			return false;
 		}
 
@@ -112,7 +112,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 				}
 			}
 			if (dac == null) {
-				message = "Unknown DAC name = '" + dacName + "'";
+				ValidationResult.lastMessage = "Unknown DAC name = '" + dacName + "'";
 				return false;
 			}
 		}
@@ -169,7 +169,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 		long creationSec = 0;
 
 		if (creation.trim().length() <= 0) {
-			formatErrors.add("DATE_CREATION: Not set");
+			validationResult.addError("DATE_CREATION: Not set");
 
 		} else {
 			dateCreation = ArgoDate.get(creation);
@@ -177,17 +177,17 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 			if (dateCreation == null) {
 				haveCreation = false;
-				formatErrors.add("DATE_CREATION: '" + creation + "': Invalid date");
+				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
 
 			} else {
 				creationSec = dateCreation.getTime();
 
 				if (dateCreation.before(earliestDate)) {
-					formatErrors.add("DATE_CREATION: '" + creation + "': Before allowed date ('"
+					validationResult.addError("DATE_CREATION: '" + creation + "': Before allowed date ('"
 							+ ArgoDate.format(earliestDate) + "')");
 
 				} else if ((creationSec - fileSec) > oneDaySec) {
-					formatErrors.add("DATE_CREATION: '" + creation + "': After system file time ('"
+					validationResult.addError("DATE_CREATION: '" + creation + "': After system file time ('"
 							+ ArgoDate.format(fileTime) + "')");
 				}
 			}
@@ -200,24 +200,25 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 		long updateSec = 0;
 
 		if (update.trim().length() <= 0) {
-			formatErrors.add("DATE_UPDATE: Not set");
+			validationResult.addError("DATE_UPDATE: Not set");
 		} else {
 			dateUpdate = ArgoDate.get(update);
 			haveUpdate = true;
 
 			if (dateUpdate == null) {
-				formatErrors.add("DATE_UPDATE: '" + update + "': Invalid date");
+				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
 				haveUpdate = false;
 
 			} else {
 				updateSec = dateUpdate.getTime();
 
 				if (haveCreation && dateUpdate.before(dateCreation)) {
-					formatErrors.add("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
+					validationResult
+							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
 				}
 
 				if ((updateSec - fileSec) > oneDaySec) {
-					formatErrors.add("DATE_UPDATE: '" + update + "': After system file time ('"
+					validationResult.addError("DATE_UPDATE: '" + update + "': After system file time ('"
 							+ ArgoDate.format(fileTime) + "')");
 				}
 			}
@@ -250,7 +251,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 		String s = plNum.getString().trim();
 		if (!s.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
-			formatErrors.add("PLATFORM_NUMBER: '" + s + "': Invalid");
+			validationResult.addError("PLATFORM_NUMBER: '" + s + "': Invalid");
 		}
 
 		log.debug("DATA_CENTRE: '" + dc.getString() + "'");
@@ -258,12 +259,12 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 		s = dc.getString().trim();
 		if (dac != null) {
 			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(s)) {
-				formatErrors.add("DATA_CENTRE: '" + s + "': Invalid for DAC " + dac);
+				validationResult.addError("DATA_CENTRE: '" + s + "': Invalid for DAC " + dac);
 			}
 
 		} else { // ..incoming DAC not set
 			if (!ArgoReferenceTable.DacCenterCodes.containsValue(s)) {
-				formatErrors.add("DATA_CENTRE: '" + s + "': Invalid (for all DACs)");
+				validationResult.addError("DATA_CENTRE: '" + s + "': Invalid (for all DACs)");
 			}
 		}
 	}// ..end validateMetaData
@@ -309,7 +310,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 				// ..poorly formed name - only report if not already reported
 
 				if (!nameAlreadyChecked.contains(full)) {
-					formatErrors.add(nName + "[" + (n + 1) + "]: " + "Incorrectly formed name '" + full + "'");
+					validationResult.addError(nName + "[" + (n + 1) + "]: " + "Incorrectly formed name '" + full + "'");
 					nameAlreadyChecked.add(full);
 				}
 
@@ -336,10 +337,10 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 				if (match == null) {
 					// ..NOT an active name, NOT a deprecated name --> error
 					String err = String.format("%s[%d]: Invalid name '%s'", nName, (n + 1), param);
-					// formatErrors.add(err);
+					// validationResult.addError(err);
 
 					// ################# TEMPORARY WARNING ################
-					formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+					validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
 					log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
 
 					log.debug("invalid param (not active or deprecated): '{}'", param);
@@ -347,7 +348,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 				} else {
 					if (match.isDeprecated) {
 						// ..IS a deprecated name --> warning
-						formatWarnings.add(nName + "[" + (n + 1) + "]: " + "Deprecated name '" + param);
+						validationResult.addWarning(nName + "[" + (n + 1) + "]: " + "Deprecated name '" + param);
 						log.debug("parameter is deprecated: '{}'", param);
 					}
 
@@ -361,10 +362,10 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 							String err = String.format("%s[%d]: Invalid template/value '%s'/'%s' in '%s'", nName,
 									(n + 1), tmplt, val, param);
-							// formatErrors.add(err);
+							// validationResult.addError(err);
 
 							// ################# TEMPORARY WARNING ################
-							formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
 							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
 
 							log.debug("...invalid template/value '{}'/'{}'", tmplt, val);
@@ -384,10 +385,10 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 							if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
 								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName,
 										(n + 1), str, param);
-								// formatErrors.add(err);
+								// validationResult.addError(err);
 
 								// ################# TEMPORARY WARNING ################
-								formatWarnings.add(err + "   *** WILL BECOME AN ERROR ***");
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
 								log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
 
 								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
@@ -415,15 +416,15 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 						// ..IS a deprecated unit --> warning
 
 						validUnit = true;
-						formatWarnings.add(
+						validationResult.addWarning(
 								nName + "[" + (n + 1) + "]: " + "Deprecated unit '" + unit + "' in '" + full + "'");
 						log.warn("'{}': unit is deprecated", unit);
 
 					} else {
 						// ..NOT an active unit, NOT a deprecated unit --> error
 						validUnit = false;
-						formatErrors
-								.add(nName + "[" + (n + 1) + "]: " + "Invalid unit '" + unit + "' in '" + full + "'");
+						validationResult.addError(
+								nName + "[" + (n + 1) + "]: " + "Invalid unit '" + unit + "' in '" + full + "'");
 						log.debug("unit is invalid (new or old)", unit);
 					}
 
@@ -452,11 +453,11 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 			 * err =
 			 * String.format("%s[%d]: Invalid value for '%s' (type '%s'): value = '%s'",
 			 * vName, (n+1), full, spec.ConfigTech.getConfigTechDataType(unit),
-			 * value[n].trim()); //formatErrors.add(err);
+			 * value[n].trim()); //validationResult.addError(err);
 			 *
-			 * //################# TEMPORARY WARNING ################ formatWarnings.add(err
-			 * + "   *** WILL BECOME AN ERROR ***"); log.warn("TEMP WARNING: {}: {}: {}",
-			 * dacName, file.getName(), err);
+			 * //################# TEMPORARY WARNING ################
+			 * validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+			 * log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
 			 *
 			 * log.debug("invalid value"); } } //..end if validUnit
 			 */

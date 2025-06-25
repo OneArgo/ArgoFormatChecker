@@ -5,7 +5,10 @@
 	<groupId>fr.ifremer</groupId>
 	<artifactId>file_checker_exec</artifactId>
 	<version>2.9.3-SNAPSHOT</version>
+<<<<<<< HEAD
 
+=======
+>>>>>>> f2dbe19 (delete legacy tests)
 	<name>Argo NetCDF file format checker</name>
 
 	<properties>

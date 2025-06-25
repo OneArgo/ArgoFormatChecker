@@ -189,7 +189,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			String p = i.next();
 			if (!arFile.spec.isPhysicalParamName(p)) {
 				i.remove();
-				// arFile.formatWarnings.add("Parameter: '"+p+
+				// arFile.validationResult.addWarning("Parameter: '"+p+
 				// "' not in specification. Removed.");
 				log.debug("requested parameter '{}' not in spec: removed");
 			}
@@ -462,7 +462,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 	public static ArgoTrajectoryFile open(String inFile) throws IOException {
 		ArgoDataFile arFile = ArgoDataFile.open(inFile);
 		if (!(arFile instanceof ArgoTrajectoryFile)) {
-			message = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
+			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
 			return null;
 		}
 
@@ -485,7 +485,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 	public static ArgoTrajectoryFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
 		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
 		if (!(arFile instanceof ArgoTrajectoryFile)) {
-			message = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
+			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
 			return null;
 		}
 
@@ -533,8 +533,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		ArgoReferenceTable.DACS dac = null;
 
-		if (!verified) {
-			message = new String("File must be verified (verifyFormat) " + "successfully before validation");
+		if (!validationResult.isValid()) {
+			ValidationResult.lastMessage = new String(
+					"File must be verified (verifyFormat) " + "successfully before validation");
 			return false;
 		}
 
@@ -546,8 +547,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					break;
 				}
 			}
-			if (dac == (ArgoReferenceTable.DACS) null) {
-				message = new String("Unknown DAC name = '" + dacName + "'");
+			if (dac == null) {
+				ValidationResult.lastMessage = new String("Unknown DAC name = '" + dacName + "'");
 				return false;
 			}
 		}
@@ -596,9 +597,10 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (!pass) {
 			// ..the mapping from cyc_num to cyc_num_index is too important to continue w/o
-			// will be.. formatErrors.add("CYCLE_NUMBER errors exist. Remaining checks
+			// will be.. validationResult.addError("CYCLE_NUMBER errors exist. Remaining
+			// checks
 			// skipped");
-			formatWarnings.add("CYCLE_NUMBER errors exist. Remaining checks skipped");
+			validationResult.addWarning("CYCLE_NUMBER errors exist. Remaining checks skipped");
 			return true;
 		}
 
@@ -771,33 +773,33 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (adjSet.counter > 0) {
 			pass = false;
-			adjSet.addMessage(formatWarnings, // will be.. formatErrors,
+			adjSet.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_INDEX_ADJUSTED: Set in real-time at", "cycles");
 		}
 		if (dupIndex.counter > 0) {
 			pass = false;
-			dupIndex.addMessage(formatWarnings, // will be.. formatErrors,
+			dupIndex.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_INDEX / CYCLE_NUMBER_ADJUSTED_INDEX:" + " Duplicate cycle number at ", "cycles");
 		}
 		if (invAdjCyc.counter > 0) {
 			pass = false;
-			invAdjCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			invAdjCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_ADJUSTED_INDEX: Invalid cycle number at", "cycles");
 		}
 		if (invCyc.counter > 0) {
 			pass = false;
-			invCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			invCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_INDEX: Invalid cycle number at", "cycles");
 		}
 		if (missDCyc.counter > 0) {
 			pass = false;
-			missDCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			missDCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_ADJUSTED_INDEX: Missing in delayed-mode at", "cycles");
 		}
 		if (missRCyc.counter > 0) {
 			pass = false;
 
-			missRCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			missRCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_INDEX: Missing in real-time at", "cycles");
 		}
 
@@ -933,37 +935,37 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (adjSet.counter > 0) {
 			pass = false;
-			adjSet.addMessage(formatWarnings, // will be.. formatErrors,
+			adjSet.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_ADJUSTED: Set in real-time at", "measurements");
 		}
 		if (invAdjCyc.counter > 0) {
 			pass = false;
-			invAdjCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			invAdjCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_ADJUSTED: Invalid cycle number at", "measurments");
 		}
 		if (invCyc.counter > 0) {
 			pass = false;
-			invCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			invCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER: Invalid cycle number at", "measurements");
 		}
 		if (invAdjLaunch.counter > 0) {
 			pass = false;
-			invAdjLaunch.addMessage(formatWarnings, // will be.. formatErrors,
+			invAdjLaunch.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_ADJUSTED: Cycle -1 not in first index at", "measurements");
 		}
 		if (invLaunch.counter > 0) {
 			pass = false;
-			invLaunch.addMessage(formatWarnings, // will be.. formatErrors,
+			invLaunch.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER: Cycle -1 not in first index at", "measurements");
 		}
 		if (missDCyc.counter > 0) {
 			pass = false;
-			missDCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			missDCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER_ADJUSTED: Missing in delayed-mode at", "measurements");
 		}
 		if (missRCyc.counter > 0) {
 			pass = false;
-			missRCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			missRCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"CYCLE_NUMBER: Missing in real-time at ", "cycles");
 		}
 
@@ -1040,7 +1042,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (missCyc.counter > 0) {
 			pass = false;
-			missCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			missCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"Cycle number in CYCLE_NUMBER/*_ADJUSTED is not " + "in CYCLE_NUMBER_INDEX/*_ADJUSTED: At ",
 					" measurements");
 		}
@@ -1082,7 +1084,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (missCyc.counter > 0) {
 			pass = false;
-			missCyc.addMessage(formatWarnings, // will be.. formatErrors,
+			missCyc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"Cycle number in CYCLE_NUMBER_INDEX/*_ADJUSTED is not " + "in CYCLE_NUMBER/*_ADJUSTED: At ",
 					"cycles");
 		}
@@ -1136,7 +1138,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			}
 		}
 
-		invalid.addMessage(formatErrors, "DATA_MODE: Invalid at ", "cycles");
+		invalid.addMessage(validationResult.getErrors(), "DATA_MODE: Invalid at ", "cycles");
 
 		log.debug(".....validateDataMode: end.....");
 		return overallDM;
@@ -1172,7 +1174,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		log.debug(name + ": " + ref);
 		if (!ref.matches(spec.getMeta(name))) {
-			formatErrors.add(name + ": '" + ref + "': Does not match specification ('" + spec.getMeta(name) + "')");
+			validationResult
+					.addError(name + ": '" + ref + "': Does not match specification ('" + spec.getMeta(name) + "')");
 		}
 
 		String creation = readString("DATE_CREATION");
@@ -1194,7 +1197,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		long creationSec = 0;
 
 		if (creation.trim().length() <= 0) {
-			formatErrors.add("DATE_CREATION: Not set");
+			validationResult.addError("DATE_CREATION: Not set");
 
 		} else {
 			dateCreation = ArgoDate.get(creation);
@@ -1202,17 +1205,17 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			if (dateCreation == null) {
 				haveCreation = false;
-				formatErrors.add("DATE_CREATION: '" + creation + "': Invalid date");
+				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
 
 			} else {
 				creationSec = dateCreation.getTime();
 
 				if (dateCreation.before(earliestDate)) {
-					formatErrors.add("DATE_CREATION: '" + creation + "': Before allowed date ('"
+					validationResult.addError("DATE_CREATION: '" + creation + "': Before allowed date ('"
 							+ ArgoDate.format(earliestDate) + "')");
 
 				} else if ((creationSec - fileSec) > oneDaySec) {
-					formatErrors.add("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
+					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
 							+ ArgoDate.format(fileTime) + "')");
 				}
 			}
@@ -1225,24 +1228,25 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		long updateSec = 0;
 
 		if (update.trim().length() <= 0) {
-			formatErrors.add("DATE_UPDATE: Not set");
+			validationResult.addError("DATE_UPDATE: Not set");
 		} else {
 			dateUpdate = ArgoDate.get(update);
 			haveUpdate = true;
 
 			if (dateUpdate == null) {
-				formatErrors.add("DATE_UPDATE: '" + update + "': Invalid date");
+				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
 				haveUpdate = false;
 
 			} else {
 				updateSec = dateUpdate.getTime();
 
 				if (haveCreation && dateUpdate.before(dateCreation)) {
-					formatErrors.add("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
+					validationResult
+							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
 				}
 
 				if ((updateSec - fileSec) > oneDaySec) {
-					formatErrors.add("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
+					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
 							+ ArgoDate.format(fileTime) + "')");
 				}
 			}
@@ -1262,12 +1266,12 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 					Date date = ArgoDate.get(d);
 					if (date == null) {
-						formatErrors.add("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h] + "': Invalid date");
+						validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h] + "': Invalid date");
 
 					} else if (haveUpdate) {
 						long dateSec = date.getTime();
 						if ((dateSec - updateSec) > oneDaySec) {
-							formatErrors.add("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h]
+							validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h]
 									+ "': After DATE_UPDATE ('" + update + "')");
 						}
 					}
@@ -1416,10 +1420,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		log.debug("depCode.counter = {}", depCode.counter);
 		log.debug("delCode.counter = {}", delCode.counter);
 
-		invCode.addMessage(formatWarnings, // will be.. formatErrors,
+		invCode.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 				"MEASUREMENT_CODE: Invalid measurement codes at ", "measurements");
-		depCode.addMessage(formatWarnings, "MEASUREMENT_CODE: Deprecated measurement codes at ", "measurements");
-		delCode.addMessage(formatWarnings, // will be.. formatErrors,
+		depCode.addMessage(validationResult.getWarnings(), "MEASUREMENT_CODE: Deprecated measurement codes at ",
+				"measurements");
+		delCode.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 				"MEASUREMENT_CODE: Obsolete measurement codes at ", "measurements");
 
 		// ..........JULD............
@@ -1522,25 +1527,26 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (invQC.counter > 0) {
 			// fail = true;
-			invQC.addMessage(formatWarnings, // will be.. formatErrors,
+			invQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD_QC: Invalid QC code at", "measurements");
 		}
 		if (depQC.counter > 0) {
 			// fail = true;
-			depQC.addMessage(formatWarnings, "JULD_QC: Deprecated QC code at", "measurements");
+			depQC.addMessage(validationResult.getWarnings(), "JULD_QC: Deprecated QC code at", "measurements");
 		}
 		if (invStatus.counter > 0) {
 			// fail = true;
-			invStatus.addMessage(formatWarnings, // will be.. formatErrors,
+			invStatus.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD_STATUS: Invalid status code at", "measurements");
 		}
 		if (depStatus.counter > 0) {
 			// fail = true;
-			depStatus.addMessage(formatWarnings, "JULD_STATUS: Deprecated status code at", "measurements");
+			depStatus.addMessage(validationResult.getWarnings(), "JULD_STATUS: Deprecated status code at",
+					"measurements");
 		}
 		if (incStatus.counter > 0) {
 			// fail = true;
-			incStatus.addMessage(formatWarnings, // will be.. formatErrors,
+			incStatus.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD_QC / JULD_STATUS: Use of ' ' or '9' is inconsistent at", "measurements");
 		}
 		/*
@@ -1552,12 +1558,12 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		 */
 		if (notMiss.counter > 0) {
 			// fail = true;
-			notMiss.addMessage(formatWarnings, // will be.. formatErrors,
+			notMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD: FillValue where QC not ' ' or '9': At", "measurements");
 		}
 		if (noQC.counter > 0) {
 			// fail = true;
-			noQC.addMessage(formatWarnings, // will be.. formatErrors,
+			noQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD: Not FillValue where QC ' ' or '9': At", "measurements");
 		}
 
@@ -1715,26 +1721,28 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			if (invQC.counter > 0) {
 				// fail = true;
-				invQC.addMessage(formatWarnings, // will be.. formatErrors,
+				invQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_ADJUSTED_QC: Invalid QC code at", "measurements");
 			}
 			if (depQC.counter > 0) {
 				// fail = true;
-				depQC.addMessage(formatWarnings, "JULD_ADJUSTED_QC: Deprecated QC code at", "measurements");
+				depQC.addMessage(validationResult.getWarnings(), "JULD_ADJUSTED_QC: Deprecated QC code at",
+						"measurements");
 			}
 			if (invStatus.counter > 0) {
 				// fail = true;
-				invStatus.addMessage(formatWarnings, // will be.. formatErrors,
+				invStatus.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_ADJUSTED_STATUS: Invalid status code at", "measurements");
 			}
 			if (depStatus.counter > 0) {
 				// fail = true;
-				depStatus.addMessage(formatWarnings, "JULD_ADJUSTED_STATUS: Deprecated status code at", "measurements");
+				depStatus.addMessage(validationResult.getWarnings(), "JULD_ADJUSTED_STATUS: Deprecated status code at",
+						"measurements");
 			}
 
 			if (incStatus.counter > 0) {
 				// fail = true;
-				incStatus.addMessage(formatWarnings, // will be.. formatErrors,
+				incStatus.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_ADJUSTED_QC / JULD_ADJUSTED_STATUS: Use of ' '/'9' is inconsistent at", "measurements");
 			}
 
@@ -1755,25 +1763,25 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			 */
 			if (notMiss.counter > 0) {
 				// fail = true;
-				notMiss.addMessage(formatWarnings, // will be.. formatErrors,
+				notMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_ADJUSTED: FillValue where QC not ' ' or '9': At", "measurements");
 			}
 			if (noQC.counter > 0) {
 				// fail = true;
-				noQC.addMessage(formatWarnings, // will be.. formatErrors,
+				noQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_ADJUSTED: Not FillValue where QC ' ' or '9': At", "measurements");
 			}
 			if (adjNotAorD.counter > 0) {
 				// fail = true;
-				adjNotAorD.addMessage(formatWarnings, // will be.. formatErrors,
+				adjNotAorD.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_ADJUSTED: Not FillValue where DATA_MODE not 'A' or 'D': At", " measurements");
 			}
 
 			log.debug("fail = {}", fail);
 
 			/*
-			 * if (fail == true) {
-			 * formatErrors.add("Above JULD/JULD_ADJUSTED errors prohibit further tests");
+			 * if (fail == true) { validationResult.
+			 * addError("Above JULD/JULD_ADJUSTED errors prohibit further tests");
 			 * log.debug(".....validateMC_and_JULD: end (due to prior juld errors).....");
 			 * return false; }
 			 */
@@ -1858,22 +1866,22 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		if (juldBeforeEarliest.counter > 0) {
 			// fail = true;
-			juldBeforeEarliest.addMessage(formatWarnings, // will be.. formatErrors,
+			juldBeforeEarliest.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD before " + earliestDate + " at", " measurements");
 		}
 		if (juldAfterUpdate.counter > 0) {
 			// fail = true;
-			juldAfterUpdate.addMessage(formatWarnings, // will be.. formatErrors,
+			juldAfterUpdate.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD after update time at", "measurements");
 		}
 		if (juld_adjBeforeEarliest.counter > 0) {
 			// fail = true;
-			juld_adjBeforeEarliest.addMessage(formatWarnings, // will be.. formatErrors,
+			juld_adjBeforeEarliest.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD_ADJUSTED before " + earliestDate + " at", "measurements");
 		}
 		if (juld_adjAfterUpdate.counter > 0) {
 			// fail = true;
-			juld_adjAfterUpdate.addMessage(formatWarnings, // will be.. formatErrors,
+			juld_adjAfterUpdate.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"JULD_ADJUSTED after update time at", "measurements");
 		}
 
@@ -1942,19 +1950,19 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		str = readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (!str.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
-			formatErrors.add(name + ": '" + str + "': Invalid");
+			validationResult.addError(name + ": '" + str + "': Invalid");
 		}
 
 		name = "DATA_CENTRE";
 		str = readString(name).trim();
 		log.debug("{}: '{}'   DAC: '{}'", name, str, dac);
-		if (dac != (ArgoReferenceTable.DACS) null) {
+		if (dac != null) {
 			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
-				formatErrors.add(name + ": '" + str + "': Invalid for DAC '" + dac + "'");
+				validationResult.addError(name + ": '" + str + "': Invalid for DAC '" + dac + "'");
 			}
 		} else { // ..incoming DAC not set
 			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
-				formatErrors.add(name + ": '" + str + "': Invalid (for all DACs)");
+				validationResult.addError(name + ": '" + str + "': Invalid (for all DACs)");
 			}
 		}
 
@@ -1965,24 +1973,24 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		info = ArgoReferenceTable.DATA_STATE_INDICATOR.contains(str);
 		if (info.isValid()) {
 			if (info.isDeprecated) {
-				formatWarnings.add(name + ": '" + str + "' Status: " + info.message);
+				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
 			}
 		} else {
-			formatErrors.add(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
 		}
 
 		name = "FIRMWARE_VERSION"; // ..not empty
 		str = readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
-			formatErrors.add(name + ": Empty");
+			validationResult.addError(name + ": Empty");
 		}
 
 		name = "FLOAT_SERIAL_NO"; // ..not empty
 		str = readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
-			formatErrors.add(name + ": Empty");
+			validationResult.addError(name + ": Empty");
 		}
 
 		name = "PLATFORM_TYPE"; // ..ref table 23
@@ -1992,11 +2000,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		info = ArgoReferenceTable.PLATFORM_TYPE.contains(str);
 		if (info.isValid()) {
 			if (info.isDeprecated) {
-				formatWarnings.add(name + ": '" + str + "' Status: " + info.message);
+				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
 			}
 
 		} else {
-			formatErrors.add(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
 		}
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
@@ -2006,11 +2014,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str);
 		if (info.isValid()) {
 			if (info.isDeprecated) {
-				formatWarnings.add(name + ": '" + str + "' Status: " + info.message);
+				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
 			}
 
 		} else {
-			formatErrors.add(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
 		}
 
 		name = "WMO_INST_TYPE";
@@ -2018,7 +2026,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		log.debug("{}: '{}'", name, str);
 
 		if (str.length() == 0) {
-			formatErrors.add(name + ": Not set");
+			validationResult.addError(name + ": Not set");
 
 		} else {
 			try {
@@ -2027,14 +2035,14 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				info = ArgoReferenceTable.WMO_INST_TYPE.contains(N);
 				if (info.isValid()) {
 					if (info.isDeprecated) {
-						formatWarnings.add(name + ": '" + str + "' Status: " + info.message);
+						validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
 					}
 
 				} else {
-					formatErrors.add(name + ": '" + str + "' Status: " + info.message);
+					validationResult.addError(name + ": '" + str + "' Status: " + info.message);
 				}
 			} catch (Exception e) {
-				formatErrors.add(name + ": '" + str + "' Invalid. Must be integer.");
+				validationResult.addError(name + ": '" + str + "' Invalid. Must be integer.");
 			}
 		}
 
@@ -2077,9 +2085,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			// will be.. inv.addMessage(formatErrors, varName+": Invalid code at ",
 			// "cycles");
-			inv.addMessage(formatWarnings, varName + ": Invalid code at ", "cycles");
+			inv.addMessage(validationResult.getWarnings(), varName + ": Invalid code at ", "cycles");
 
-			dep.addMessage(formatWarnings, varName + ": Deprecated code at ", "cycles");
+			dep.addMessage(validationResult.getWarnings(), varName + ": Deprecated code at ", "cycles");
 		}
 
 		varName = "CONFIG_MISSION_NUMBER";
@@ -2102,9 +2110,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		// will be.. inv.addMessage(formatErrors, varName+": Invalid value at",
 		// "cycles");
-		inv.addMessage(formatWarnings, varName + ": Invalid value at", "cycles");
+		inv.addMessage(validationResult.getWarnings(), varName + ": Invalid value at", "cycles");
 
-		set.addMessage(formatErrors, varName + ": Not set in D-mode at", "cycles");
+		set.addMessage(validationResult.getErrors(), varName + ": Not set in D-mode at", "cycles");
 
 		log.debug(".....validateNCycle: end.....");
 	}
@@ -2235,8 +2243,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 					Integer ndx = CycNumIndex_cycle2index.get(cycNum);
 					if (ndx == null) {
-						// will be.. formatErrors.add("No JULD_*[*] variable for cycle "+cycNum);
-						formatWarnings.add("No JULD_*[*] variable for cycle " + cycNum);
+						// will be.. validationResult.addError("No JULD_*[*] variable for cycle
+						// "+cycNum);
+						validationResult.addWarning("No JULD_*[*] variable for cycle " + cycNum);
 						log.error(
 								"validateNCycleJuld: CycNumIndex_cycle2index[{}] is null. " + "This should not happen",
 								cycNum);
@@ -2316,34 +2325,35 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			// .....report for this MC........
 			if (juldCheck.incJuld.counter > 0) {
-				juldCheck.incJuld.addMessage(formatWarnings, // will be.. formatErrors,
+				juldCheck.incJuld.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD (MC " + M_CODE + ") / " + var + ": Inconsistent at ", "cycles",
 						"(N_MEASUREMENT, N_CYCLE)");
 
-				// formatErrors.add("JULD (MC "+M_CODE+") / "+var+
+				// validationResult.addError("JULD (MC "+M_CODE+") / "+var+
 				// ": Inconsistent at "+
 				// juldCheck.incJuld+" cycles; index of first case = "+
 				// juldCheck.a_incJuld+", "+juldCheck.b_incJuld+
 				// " (N_MEASUREMENT, N_CYCLE)");
 			}
 			if (juldCheck.incJuld_s.counter > 0) {
-				juldCheck.incJuld_s.addMessage(formatWarnings, // will be.. formatErrors,
+				juldCheck.incJuld_s.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						"JULD_STATUS (MC " + M_CODE + ") / " + var + "_STATUS: Inconsistent at ", "cycles",
 						"(N_MEASUREMENT, N_CYCLE)");
 
-				// formatErrors.add("JULD_STATUS (MC "+M_CODE+") / "+var+
+				// validationResult.addError("JULD_STATUS (MC "+M_CODE+") / "+var+
 				// "_STATUS: Inconsistent at "+
 				// juldCheck.incJuld_s+" cycles; index of first case = "+
 				// juldCheck.a_incJuld_s+", "+juldCheck.b_incJuld_s+
 				// " (N_MEASUREMENT, N_CYCLE)");
 			}
 			if (notJuld > 0) {
-				// * should be* formatErrors.add(var+" (MC "+M_CODE+
-				formatWarnings.add(var + " (MC " + M_CODE + "): Not FillValue where there is no associated JULD at "
-						+ notJuld + " cycles; index of first case = " + a_notJuld);
+				// * should be* validationResult.addError(var+" (MC "+M_CODE+
+				validationResult
+						.addWarning(var + " (MC " + M_CODE + "): Not FillValue where there is no associated JULD at "
+								+ notJuld + " cycles; index of first case = " + a_notJuld);
 			}
 			if (notJuld_s > 0) {
-				formatWarnings.add(
+				validationResult.addWarning(
 						var + "_STATUS (MC " + M_CODE + "): Not FillValue where there is no associated JULD_STATUS at "
 								+ notJuld_s + " cycles; index of first case = " + a_notJuld_s);
 			}
@@ -2553,31 +2563,32 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			if (invQC.counter > 0) {
 				fail = true;
-				invQC.addMessage(formatWarnings, // will be.. formatErrors,
+				invQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						varName + "_QC: Invalid QC code at", "measurements");
 			}
 
-			invQC.addMessage(formatWarnings, varName + "_QC: Deprecated QC code at", "measurements");
+			invQC.addMessage(validationResult.getWarnings(), varName + "_QC: Deprecated QC code at", "measurements");
 
 			if (missQC.counter > 0) {
 				fail = true;
-				missQC.addMessage(formatWarnings, // will be.. formatErrors,
+				missQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						varName + ": Not FillValue where QC is ' ' or 9 at", "measurements");
 			}
 			if (notMiss.counter > 0) {
 				fail = true;
-				notMiss.addMessage(formatWarnings, // will be.. formatErrors,
+				notMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						varName + ": FillValue where QC is not ' ' or 9 at", "measurements");
 			}
 			if (nan.counter > 0) {
 				fail = true;
-				nan.addMessage(formatWarnings, // will be.. formatErrors,
+				nan.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 						varName + ": NaN at", "measurements");
 			}
 
 			if (fail) {
-				// will be.. formatErrors.add("PARAM/_QC errors prevent checking _ADJUSTED");
-				formatWarnings.add("PARAM/_QC errors prevent checking _ADJUSTED");
+				// will be.. validationResult.addError("PARAM/_QC errors prevent checking
+				// _ADJUSTED");
+				validationResult.addWarning("PARAM/_QC errors prevent checking _ADJUSTED");
 				continue PARAM_LOOP;
 			}
 
@@ -2861,53 +2872,53 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 						rNotMiss.counter, rQcNotMiss.counter);
 			}
 
-			adjNotMiss.addMessage(formatWarnings, // will be.. formatErrors,
+			adjNotMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + ": Not FillValue where QC is 4 or 9 at", "measurements");
 
-			errNotMiss.addMessage(formatWarnings, // will be.. formatErrors,
+			errNotMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_ERROR: Not FillValue where " + varName + " is FillValue at", "measurements");
 
-			errNotMissAmode.addMessage(formatWarnings, // will be.. formatErrors,
+			errNotMissAmode.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"A-mode: " + varName + "_ERROR: Not FillValue at", "measurements");
 
-			errNotSetDmode.addMessage(formatWarnings, // will be.. formatErrors,
+			errNotSetDmode.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"D-mode: " + varName + "_ERROR: FillValue at", "measurements");
 
-			incNotMeas.addMessage(formatWarnings, // will be.. formatErrors,
+			incNotMeas.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_QC: Inconsistent ' ' with PARAM_QC at", "measurements");
 
-			invQC.addMessage(formatWarnings, // will be.. formatErrors,
+			invQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_QC: Invalid at ", "measurements");
-			depQC.addMessage(formatWarnings, varName + "_QC: Deprecated at ", "measurements");
+			depQC.addMessage(validationResult.getWarnings(), varName + "_QC: Deprecated at ", "measurements");
 
-			missAdj.addMessage(formatWarnings, // will be.. formatErrors,
+			missAdj.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_QC: FillValue where QC not ' ' or '9' at", "measurements");
 
-			nan.addMessage(formatWarnings, // will be.. formatErrors,
+			nan.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + ": NaN at ", "measurements");
 
-			nanErr.addMessage(formatWarnings, // will be.. formatErrors,
+			nanErr.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_ERROR: NaN at ", "measurements");
 
-			notMissAdj.addMessage(formatWarnings, // will be.. formatErrors,
+			notMissAdj.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + ": Not FillValue where PARAM is FillValue at", "measurements");
 
-			notMissAdjQc.addMessage(formatWarnings, // will be.. formatErrors,
+			notMissAdjQc.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_QC: Not 9 where PARAM is FillValue at", "measurements");
 
-			notMissErr.addMessage(formatWarnings, // will be.. formatErrors,
+			notMissErr.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_ERROR: Not FillValue where PARAM is FillValue at", "measurements");
 
-			notNotMeas.addMessage(formatWarnings, // will be.. formatErrors,
+			notNotMeas.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + ": Not FillValue where QC is set to ' ' at", "measurements");
 
-			rErrNotMiss.addMessage(formatWarnings, // will be.. formatErrors,
+			rErrNotMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"R-mode: " + varName + "_ERROR: Not FillValue at ", "measurements");
 
-			rNotMiss.addMessage(formatWarnings, // will be.. formatErrors,
+			rNotMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"R-mode: " + varName + ": Not FillValue at ", "measurements");
 
-			rQcNotMiss.addMessage(formatWarnings, // will be.. formatErrors,
+			rQcNotMiss.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					"R-mode: " + varName + ": Not ' ' or '9' at", "measurements");
 		} // ..end PARAM_LOOP
 
@@ -3041,9 +3052,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		// will be.. invCode.addMessage(formatErrors, "POSITION_QC: Invalid QC code at
 		// ", "measurements");
-		invCode.addMessage(formatWarnings, "POSITION_QC: Invalid QC code at ", "measurements");
+		invCode.addMessage(validationResult.getWarnings(), "POSITION_QC: Invalid QC code at ", "measurements");
 
-		depCode.addMessage(formatWarnings, "POSITION_QC: Deprecated QC code at ", "measurements");
+		depCode.addMessage(validationResult.getWarnings(), "POSITION_QC: Deprecated QC code at ", "measurements");
 
 		// ........accuracy code check...........
 
@@ -3064,9 +3075,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			}
 		}
 
-		invCode.addMessage(formatWarnings, // will be.. formatErrors,
+		invCode.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 				"POSITION_ACCURACY: Invalid code at ", " measurements");
-		depCode.addMessage(formatWarnings, "POSITION_ACCURACY: Deprecated code at ", " measurements");
+		depCode.addMessage(validationResult.getWarnings(), "POSITION_ACCURACY: Deprecated code at ", " measurements");
 
 		// ........lat/lon/qc checks..............
 
@@ -3088,10 +3099,10 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			}
 		}
 
-		notMissQC.addMessage(formatWarnings, // will be.. formatErrors,
+		notMissQC.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 				"LAT/LON missing: QC is not 9 or ' ' at ", "measurements");
 
-		notMissPos.addMessage(formatWarnings, // will be.. formatErrors,
+		notMissPos.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 				"POSITION_QC = 9 or ' ': LAT/LON not missing at ", " measurements");
 
 		log.debug(".....validatePosition: end.....");
@@ -3158,8 +3169,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					if (paramList.contains(param)) {
 						// ..this is a duplicate entry
 
-						formatErrors
-								.add("TRAJECTORY_PARAMETERS[" + (paramNum + 1) + "]: '" + param + "': Duplicate entry");
+						validationResult.addError(
+								"TRAJECTORY_PARAMETERS[" + (paramNum + 1) + "]: '" + param + "': Duplicate entry");
 						log.debug("param #{}: '{}': duplicate", paramNum, param);
 
 					} else {
@@ -3169,13 +3180,13 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					if (spec.isDeprecatedPhysicalParam(param)) {
 						// ..this is a deprecated parameter name
 
-						formatWarnings.add("TRAJECTORY_PARAMETERS[" + (paramNum + 1) + "]: '" + param
+						validationResult.addWarning("TRAJECTORY_PARAMETERS[" + (paramNum + 1) + "]: '" + param
 								+ "': Deprecated parameter name");
 					}
 
 				} else {
 					// ..<param> is illegal
-					formatErrors.add(
+					validationResult.addError(
 							"TRAJECTORY_PARAMETERS[" + (paramNum + 1) + "]: '" + param + "': Invalid parameter name");
 					log.debug("param #{}: '{}': invalid", paramNum, param);
 				}
@@ -3188,7 +3199,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		// ..report errors and warnings
 		if (embeddedEmpty) {
-			formatWarnings.add("TRAJECTORY_PARAMETERS: Empty entries in list" + "\n\tList: " + paramList);
+			validationResult.addWarning("TRAJECTORY_PARAMETERS: Empty entries in list" + "\n\tList: " + paramList);
 		}
 
 		// ......check that all TRAJECTORY_PARAMETERS have <param> variable........
@@ -3198,7 +3209,8 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			}
 			Variable var = findVariable(p);
 			if (var == null) {
-				formatErrors.add("TRAJECTORY_PARAMETERS: PARAM '" + p + "' specified. Variables not in data file.");
+				validationResult
+						.addError("TRAJECTORY_PARAMETERS: PARAM '" + p + "' specified. Variables not in data file.");
 				// fatalError = true;
 			}
 		}
@@ -3246,7 +3258,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					}
 
 					if (hasData) {
-						formatErrors.add("TRAJECTORY_PARAMETERS: Does not specify '" + p
+						validationResult.addError("TRAJECTORY_PARAMETERS: Does not specify '" + p
 								+ "'. Variable exists and contains data.");
 						log.debug("{}: not in TRAJECTORY_PARAMETERS. exists and has data", p);
 					} else {
