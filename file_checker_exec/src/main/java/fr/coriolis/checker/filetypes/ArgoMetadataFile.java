@@ -162,6 +162,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public boolean validate(String dacName, boolean ckNulls, boolean... optionalChecks) throws IOException {
+		// USE super.validate to avoid code repetition !
 		ArgoReferenceTable.DACS dac = null;
 
 		if (!validationResult.isValid()) {
