@@ -90,24 +90,6 @@ public class ArgoProfileFile extends ArgoDataFile {
 	}
 
 	/**
-	 * Retrieve a list of variables in the associated file
-	 */
-	public ArrayList<String> getVariableNames() {
-		ArrayList<String> varNames = new ArrayList<String>();
-
-		if (ncReader != null) {
-			for (Variable var : ncReader.getVariables()) {
-				varNames.add(var.getShortName());
-			}
-
-		} else {
-			varNames = null;
-		}
-
-		return varNames;
-	}
-
-	/**
 	 * Convenience method to add to String list for "pretty printing".
 	 *
 	 * @param list the StringBuilder list

@@ -1191,6 +1191,82 @@ public class ArgoFileValidator {
 		log.debug(".....rudimentaryDateChecks: end.....");
 	}
 
+	// .............................................
+	// convenience "check" methods
+	// .............................................
+
+	/**
+	 * Determines if a float value is the specified FillValue Performs a "real
+	 * value" comparison to a resolution of 1.e-5 (not an exact equality).
+	 * 
+	 * @param _FillValue for the parameter
+	 * @param data       value
+	 * @return true = value is FillValue; false = value is not FillValue
+	 */
+	public static boolean is_FillValue(float fillValue, float value) {
+		float diff = Math.abs(1.f - (value / fillValue));
+		return diff < 1.0e-8f;
+	}
+
+	/**
+	 * Determines if a double value is the specified FillValue Performs a "real
+	 * value" comparison to a resolution of 1.e-5 (not an exact equality).
+	 * 
+	 * @param _FillValue for the parameter
+	 * @param data       value
+	 * @return true = value is FillValue; false = value is not FillValue
+	 */
+	public static boolean is_FillValue(double fillValue, double value) {
+		double diff = Math.abs(1.d - (value / fillValue));
+		return diff < 1.0e-8d;
+	}
+
+	/**
+	 * Determines if a float value is a "99,999.0" missing value. Performs a "real
+	 * value" comparison to a resolution of 1.e-5 (not an exact equality). <br>
+	 * <br>
+	 * NOTE: This is required because we've run into examples where "bad values" of
+	 * a parameter have been larger than the FillValue so simple
+	 * greater-than/less-than tests fails
+	 * 
+	 * @param data value
+	 * @return true = value is FillValue; false = value is not FillValue
+	 */
+	public static boolean is_99_999_FillValue(float value) {
+		float diff = Math.abs(value - 99999.f);
+		return diff < 0.00001f;
+	}
+
+	/**
+	 * Determines if a double value is a "99,999.0" missing value. Performs a "real
+	 * value" comparison to a resolution of 1.e-5 (not an exact equality). <br>
+	 * <br>
+	 * NOTE: This is required because we've run into examples where "bad values" of
+	 * a parameter have been larger than the FillValue so simple
+	 * greater-than/less-than tests fails
+	 * 
+	 * @param data value
+	 * @return true = value is FillValue; false = value is not FillValue
+	 */
+	public static boolean is_99_999_FillValue(double value) {
+		double diff = Math.abs(value - 99999.d);
+		return diff < 0.00001d;
+	}
+
+	/**
+	 * Determines if a double value is a "999,999.0" missing value. Performs a "real
+	 * value" comparison to a resolution of 1.e-5 (not an exact equality).
+	 * 
+	 * @param data value
+	 * @return true = value is FillValue; false = value is not FillValue
+	 */
+	public static boolean is_999_999_FillValue(double value) {
+		double diff = Math.abs(value - 999999.d);
+		return diff < 0.00001d;
+	}
+
+	// ............ end "check" methods ..............
+
 //.........................................
 //  ACCESSORS
 //.........................................
