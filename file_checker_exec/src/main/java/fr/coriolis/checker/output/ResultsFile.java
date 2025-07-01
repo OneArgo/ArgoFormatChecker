@@ -27,7 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.filetypes.ArgoDataFile;
 import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
-import fr.coriolis.checker.filetypes.ArgoProfileFile;
+import fr.coriolis.checker.filetypes.ArgoProfileFileValidator;
 import fr.coriolis.checker.filetypes.ValidationResult;
 import fr.coriolis.checker.specs.ArgoDate;
 
@@ -457,7 +457,7 @@ public class ResultsFile {
 			metaStationParameters(argo);
 
 			if (formatPassed && argo.fileType() == FileType.PROFILE) {
-				addMetaPsalStats((ArgoProfileFile) argo);
+				addMetaPsalStats((ArgoProfileFileValidator) argo);
 			}
 
 		} else if (argo.fileType() == FileType.TRAJECTORY || argo.fileType() == FileType.BIO_TRAJECTORY) {
@@ -564,7 +564,7 @@ public class ResultsFile {
 		}
 	} // ..end metaData
 
-	public void addMetaPsalStats(ArgoProfileFile argo) throws XMLStreamException {
+	public void addMetaPsalStats(ArgoProfileFileValidator argo) throws XMLStreamException {
 		// ...............report PSAL adjustment statistics...............
 		// ..assumes:
 		// ..- Argo-open was successful

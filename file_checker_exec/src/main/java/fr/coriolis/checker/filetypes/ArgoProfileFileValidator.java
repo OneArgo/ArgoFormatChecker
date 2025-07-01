@@ -2,30 +2,22 @@ package fr.coriolis.checker.filetypes;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.coriolis.checker.specs.ArgoAttribute;
+import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
-import fr.coriolis.checker.specs.ArgoDimension;
-import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
-import fr.coriolis.checker.specs.ArgoVariable;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.ma2.InvalidRangeException;
-import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 /**
@@ -46,7 +38,7 @@ import ucar.nc2.Variable;
  *          $
  * @version $Id: ArgoProfileFile.java 1269 2021-06-14 20:34:45Z ignaszewski $
  */
-public class ArgoProfileFile extends ArgoDataFile {
+public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 	// .........................................
 	// VARIABLES
@@ -64,7 +56,7 @@ public class ArgoProfileFile extends ArgoDataFile {
 	// ..object variables
 	private String data_mode;
 
-	private NetcdfFileWriter ncWriter;
+//	private NetcdfFileWriter ncWriter;
 
 	private ArrayList<ArrayList<String>> profParam;
 
@@ -72,458 +64,412 @@ public class ArgoProfileFile extends ArgoDataFile {
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoProfileFile() throws IOException {
-		super();
+	protected ArgoProfileFileValidator(ArgoDataFile arFile) throws IOException {
+		super(arFile);
 	}
 
-	protected ArgoProfileFile(String specDir, String version) {
-		// super(specDir, FileType.PROFILE, version);
-	}
+//	protected ArgoProfileFileValidator(String specDir, String version) {
+//		// super(specDir, FileType.PROFILE, version);
+//	}
 
 	// ..........................................
 	// METHODS
 	// ..........................................
-
-	/** Retrieve the NetcdfFileWriter reference */
-	public NetcdfFileWriter getNetcdfFileWriter() {
-		return ncWriter;
-	}
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-	private void addToList(StringBuilder list, String add) {
-		if (list.length() == 0) {
-			list.append("'" + add + "'");
-		} else {
-			list.append(", '" + add + "'");
-		}
-	}
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-	private void addToList(StringBuilder list, int add) {
-		if (list.length() == 0) {
-			list.append(add);
-		} else {
-			list.append(", " + add);
-		}
-	}
-
-	/**
-	 * Closes an existing file.
-	 *
-	 * @throws IOException If an I/O error occurs
-	 */
-	@Override
-	public void close() throws IOException {
-		if (ncWriter != null) {
-			ncWriter.close();
-		}
-		super.close();
-	} // ..end close()
-
-	/**
-	 * Creates a new Argo profile file. The "template" for the file is the indicated
-	 * CDL specification file. The physical parameters (<PARAM> variables) to be
-	 * included must be specified -- see the "parameters" argument.
-	 * <p>
-	 * A few variables in the CDL spec can be float or double. These default to
-	 * double.
-	 *
-	 * @param fileName   The name of the output file
-	 * @param specDir    Path to the specification directory
-	 * @param version    The version string of the spec file to use as a template
-	 * @param N_PROF     N_PROF dimension of the new file
-	 * @param N_PARAM    N_PARAM dimension of the new file (max number of params in
-	 *                   a single profile)
-	 * @param N_LEVELS   N_LEVELS dimension of the new file
-	 * @param N_CALIB    N_CALIB dimension of the new file
-	 * @param parameters The parameter names that will be in the new file
-	 * @throws IOException           If problems creating the file are encountered
-	 * @throws NumberFormatException If problems converting certain values encoded
-	 *                               in the CDL attributes to number are
-	 *                               encountered.
-	 */
-	public static ArgoProfileFile createNew(String fileName, String specDir, String version,
-			ArgoDataFile.FileType fileType, int N_PROF, int N_PARAM, int N_LEVELS, int N_CALIB,
-			Set<String> inParameters) throws IOException, NumberFormatException {
-		log.debug(".....createNew: start.....");
-
-		ArgoProfileFile arFile = new ArgoProfileFile();
-
-		// ..create the template specification
-
-		arFile.spec = ArgoDataFile.openSpecification(false, specDir, fileType, version);
-		if (arFile.spec == null) {
-			return null;
-		}
-
-		arFile.fileType = fileType;
-
-		// ..remove any parameters that are not in this specification
-
-		HashSet<String> parameters = new HashSet<String>(20);
-
-		for (String p : inParameters) {
-			if (arFile.spec.isPhysicalParamName(p)) {
-				parameters.add(p);
-			} else {
-				log.debug("requested parameter '{}' not in spec: removed");
-			}
-		}
-
-		// ..create new file
-
-		arFile.ncWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, fileName);
-		arFile.ncWriter.setFill(true);
-
-		// ..fill in object variables
-		arFile.file = null; // ..don't know why I need this ..... yet
-		arFile.fileType = fileType;
-		arFile.format_version = version;
-		arFile.ncFileName = fileName;
-		// arFile.spec is filled in by openSpec...
-
-		// .....add globabl attributes.....
-
-		for (ArgoAttribute a : arFile.spec.getGlobalAttributes()) {
-			String name = a.getName();
-			String value = (String) a.getValue();
-
-			if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
-				// ..the definition starts with one of the special ATTR_IGNORE codes
-
-				if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
-					// ..there is more than just the code on the line
-					// ..defining the default value, use it
-
-					value = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
-					log.debug("global attribute with special code: '{}'", value);
-
-				} else {
-					// ..nothing but the code on the line
-					// ..ignore the attribute
-					value = null;
-				}
-			}
-
-			if (name.equals("history")) {
-				value = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")).format(new Date()).toString();
-				log.debug("history global attribute: '{}'", value);
-			}
-
-			if (value != null) {
-				arFile.ncWriter.addGroupAttribute(null, new Attribute(name, value));
-				log.debug("add global attribute: '{}' = '{}'", name, value);
-			}
-			//// 2014-11-24T10:31:58Z creation;2014-11-26T16:31:26Z update" ;
-		}
-
-		// .........add Dimensions...............
-		// ..don't allow <= 0 dimensions
-		if (N_PROF <= 0) {
-			N_PROF = 1;
-		}
-		if (N_PARAM <= 0) {
-			N_PARAM = 1;
-		}
-		if (N_LEVELS <= 0) {
-			N_LEVELS = 1;
-		}
-		if (N_CALIB <= 0) {
-			N_CALIB = 1;
-		}
-
-		for (ArgoDimension d : arFile.spec.getDimensions()) {
-			String name = d.getName();
-			int value = d.getValue();
-
-			if (name.equals("N_PROF")) {
-				value = N_PROF;
-			} else if (name.equals("N_PARAM")) {
-				value = N_PARAM;
-			} else if (name.equals("N_LEVELS")) {
-				value = N_LEVELS;
-			} else if (name.equals("N_CALIB")) {
-				value = N_CALIB;
-			}
-
-			if (!d.isAlternateDimension()) {
-				log.debug("add dimension: '{}' = '{}'", name, value);
-
-				if (name.equals("N_HISTORY")) {
-					arFile.ncWriter.addUnlimitedDimension(name);
-				} else {
-					arFile.ncWriter.addDimension(null, name, value);
-				}
-			} else {
-				log.debug("skip alternate dimension: '{}'", name);
-			}
-		}
-
-		// .........add Variables...............
-
-		// ......ordered list.....
-		// ..this bit of code arranges the variables in the "expected order"
-		// ..this is, technically, completely unecessary
-		// ..the ordering of the variables in the file should not matter
-		// ..however, at least one user is complaining about the current files
-		// ..and I am guessing that variable ordering is the problem.
-
-		// ..the way the "spec" files are parsed, the PARAM variables end up
-		// ..at the end of the variables list
-		// ..so I am trying to distribute the variables in the "expected order"
-
-		// ..good coding by users would eliminate the need for this
-
-		// ..the idea is to create an ordered list of variable names that are
-		// ..then used in the next section
-
-		log.debug("...build ordered list of variables...");
-
-		ArrayList<ArgoVariable> orderedList = new ArrayList<ArgoVariable>(200);
-
-		for (ArgoVariable v : arFile.spec.getVariables()) {
-			String name = v.getName();
-
-			if (v.isParamVar()) {
-				// ..when we get to the PARAM variables, we are done
-				// ..they are always at the end of the list and we handle
-				// ..them separately in the if-blocks below
-				break;
-			}
-
-			orderedList.add(v);
-			log.debug("add {}", name);
-
-			// ..insert the PROFILE_<PARAM>_QC variables after POSITIONING_SYSTEM
-
-			if (name.equals("POSITIONING_SYSTEM")) {
-				log.debug("insert PROFILE_ here");
-				for (ArgoVariable w : arFile.spec.getVariables()) {
-					if (w.getName().startsWith("PROFILE_")) {
-						orderedList.add(w);
-						log.debug("add {}", w.getName());
-					}
-				}
-			}
-
-			// ..insert the <PARAM> variables after CONFIG_MISSION_NUMBER
-
-			if (name.equals("CONFIG_MISSION_NUMBER")) {
-				log.debug("insert <PARAM> here");
-				for (ArgoVariable w : arFile.spec.getVariables()) {
-					if (w.isParamVar()) {
-						if (!w.getName().startsWith("PROFILE_")) {
-							orderedList.add(w);
-							log.debug("add {}", w.getName());
-						}
-					}
-				}
-			}
-		}
-
-		log.debug("...ordered list complete...");
-
-		// ....end ordered list....
-
-		Boolean keep;
-		// ...if we didn't need the list to be ordered...
-		// for (ArgoVariable v : arFile.spec.getVariables()) {
-
-		for (ArgoVariable v : orderedList) {
-			String name = v.getName();
-			String prm = v.getParamName();
-
-			if (prm != null) {
-				// ..this is a physical parameter variable
-				// ..is it's parameter name in the parameter list
-
-				if (parameters.contains(prm)) {
-					keep = true;
-				} else {
-					keep = false;
-					log.debug("skip variable: '{}'", name);
-				}
-
-			} else {
-				// ..not a physical parameter, so keep it
-				keep = true;
-			}
-
-			if (keep) {
-				DataType type = v.getType();
-				String dims = v.getDimensionsString();
-
-				if (type == DataType.OPAQUE) {
-					// ..this is one of the float_or_double types
-					// ..default it to double
-					type = DataType.DOUBLE;
-				}
-
-				if (v.canHaveAlternateDimensions()) {
-					// ..this variable has an alternate dimension
-					// ..dim string will have a "|" in it must remove it
-					String newDims = dims.replaceAll("\\|\\w+", "");
-					log.debug("modify alternate dims: before = '{}' after = '{}'", dims, newDims);
-					dims = newDims;
-				}
-
-				Variable var = arFile.ncWriter.addVariable(null, name, type, dims);
-				log.debug("add variable: '{}': '{}' '{}'", name, type, dims);
-
-				// ..add attributes for this variable
-				for (ArgoAttribute a : v.getAttributes()) {
-					Attribute att = null;
-					String aname = a.getName();
-
-					if (a.isNumeric()) {
-						Number num = (Number) a.getValue();
-
-						if (num == null) {
-							// ..see if there is a default
-							String def = a.getDefaultValue();
-
-							if (def != null) {
-								try {
-									switch (type) {
-									case INT:
-										num = new Integer(def);
-										break;
-									case FLOAT:
-										num = new Float(def);
-										break;
-									case DOUBLE:
-										num = new Double(def);
-										break;
-									case LONG:
-										num = new Long(def);
-										break;
-									}
-								} catch (NumberFormatException e) {
-									throw new NumberFormatException(
-											"Attribute " + name + ":" + aname + ": Unable to convert to number");
-								}
-							}
-						}
-
-						if (num != null) {
-							var.addAttribute(new Attribute(aname, num));
-							log.debug("add attribute: '{}:{}' = '{}'", name, aname, num);
-						} else {
-							log.debug("attribute ignored (no value): '{}:{}'", name, aname);
-						}
-
-					} else if (a.isString()) {
-						Object value = a.getValue();
-						String str = null;
-
-						if (value == null) {
-							// ..value is not set, see if there is a default
-							str = a.getDefaultValue();
-						} else {
-							str = value.toString();
-						}
-
-						if (str != null) {
-							var.addAttribute(new Attribute(aname, str));
-							log.debug("add attribute: '{}:{}' = '{}'", name, aname, str);
-						}
-
-					} else {
-						log.error("attribute not Number or String: '{}:{}'", name, aname);
-						continue;
-					}
-
-				}
-			}
-		}
-
-		// .....create the file -- end "define mode"
-
-		arFile.ncWriter.create();
-		arFile.ncWriter.close(); // ..having trouble exiting define mode so close/reopen
-
-		arFile.ncWriter = NetcdfFileWriter.openExisting(fileName);
-		arFile.ncWriter.setFill(true);
-
-		arFile.ncReader = arFile.ncWriter.getNetcdfFile();
-
-		log.debug(".....createNew: end.....");
-		return arFile;
-	}
-
-	/**
-	 * Opens an existing file without opening the <i>specification</i>
-	 *
-	 * @param inFile the string name of the file to open
-	 * @return the file object reference. Returns null if the file is not opened
-	 *         successfully. (ArgoProfileFile.getMessage() will return the reason
-	 *         for the failure to open.)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public static ArgoProfileFile open(String inFile) throws IOException {
-		try {
-			return (ArgoProfileFile.open(inFile, false));
-
-		} catch (IOException e) {
-			throw e;
-		}
-
-	}
-
-	/**
-	 * Opens an existing file without opening the <i>specification</i> and,
-	 * optionally, ignores a bad DATA_TYPE --- will still detect accepted
-	 * non-standard settings in old v3.1 files
-	 *
-	 * @param inFile          the string name of the file to open
-	 * @param overrideBadTYPE true = force "open" to ignore BadTYPE failure
-	 * @return the file object reference. Returns null if the file is not opened
-	 *         successfully. (ArgoProfileFile.getMessage() will return the reason
-	 *         for the failure to open.)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public static ArgoProfileFile open(String inFile, boolean overrideBadTYPE) throws IOException {
-		ArgoDataFile arFile = ArgoDataFile.open(inFile, overrideBadTYPE);
-		if (!(arFile instanceof ArgoProfileFile)) {
-			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
-			return null;
-		}
-
-		return (ArgoProfileFile) arFile;
-	}
-
-	/**
-	 * Opens an existing file and the assoicated <i>Argo specification</i>).
-	 *
-	 * @param inFile   the string name of the file to open
-	 * @param specDir  the string name of the directory containing the format
-	 *                 specification files
-	 * @param fullSpec true = open the full specification; false = open the template
-	 *                 specification
-	 * @return the file object reference. Returns null if the file is not opened
-	 *         successfully. (ArgoProfileFile.getMessage() will return the reason
-	 *         for the failure to open.)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public static ArgoProfileFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
-		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
-		if (!(arFile instanceof ArgoProfileFile)) {
-			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
-			return null;
-		}
-
-		return (ArgoProfileFile) arFile;
-	}
+//
+//	/**
+//	 * Creates a new Argo profile file. The "template" for the file is the indicated
+//	 * CDL specification file. The physical parameters (<PARAM> variables) to be
+//	 * included must be specified -- see the "parameters" argument.
+//	 * <p>
+//	 * A few variables in the CDL spec can be float or double. These default to
+//	 * double.
+//	 *
+//	 * @param fileName   The name of the output file
+//	 * @param specDir    Path to the specification directory
+//	 * @param version    The version string of the spec file to use as a template
+//	 * @param N_PROF     N_PROF dimension of the new file
+//	 * @param N_PARAM    N_PARAM dimension of the new file (max number of params in
+//	 *                   a single profile)
+//	 * @param N_LEVELS   N_LEVELS dimension of the new file
+//	 * @param N_CALIB    N_CALIB dimension of the new file
+//	 * @param parameters The parameter names that will be in the new file
+//	 * @throws IOException           If problems creating the file are encountered
+//	 * @throws NumberFormatException If problems converting certain values encoded
+//	 *                               in the CDL attributes to number are
+//	 *                               encountered.
+//	 */
+//	public static ArgoProfileFileValidator createNew(String fileName, String specDir, String version,
+//			ArgoDataFile.FileType fileType, int N_PROF, int N_PARAM, int N_LEVELS, int N_CALIB,
+//			Set<String> inParameters) throws IOException, NumberFormatException {
+//		log.debug(".....createNew: start.....");
+//
+//		ArgoProfileFileValidator arFile = new ArgoProfileFileValidator();
+//
+//		// ..create the template specification
+//
+//		arFile.spec = ArgoDataFile.openSpecification(false, specDir, fileType, version);
+//		if (arFile.spec == null) {
+//			return null;
+//		}
+//
+//		arFile.fileType = fileType;
+//
+//		// ..remove any parameters that are not in this specification
+//
+//		HashSet<String> parameters = new HashSet<String>(20);
+//
+//		for (String p : inParameters) {
+//			if (arFile.spec.isPhysicalParamName(p)) {
+//				parameters.add(p);
+//			} else {
+//				log.debug("requested parameter '{}' not in spec: removed");
+//			}
+//		}
+//
+//		// ..create new file
+//
+//		arFile.ncWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, fileName);
+//		arFile.ncWriter.setFill(true);
+//
+//		// ..fill in object variables
+//		arFile.file = null; // ..don't know why I need this ..... yet
+//		arFile.fileType = fileType;
+//		arFile.format_version = version;
+//		arFile.ncFileName = fileName;
+//		// arFile.spec is filled in by openSpec...
+//
+//		// .....add globabl attributes.....
+//
+//		for (ArgoAttribute a : arFile.spec.getGlobalAttributes()) {
+//			String name = a.getName();
+//			String value = (String) a.getValue();
+//
+//			if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
+//				// ..the definition starts with one of the special ATTR_IGNORE codes
+//
+//				if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
+//					// ..there is more than just the code on the line
+//					// ..defining the default value, use it
+//
+//					value = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
+//					log.debug("global attribute with special code: '{}'", value);
+//
+//				} else {
+//					// ..nothing but the code on the line
+//					// ..ignore the attribute
+//					value = null;
+//				}
+//			}
+//
+//			if (name.equals("history")) {
+//				value = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")).format(new Date()).toString();
+//				log.debug("history global attribute: '{}'", value);
+//			}
+//
+//			if (value != null) {
+//				arFile.ncWriter.addGroupAttribute(null, new Attribute(name, value));
+//				log.debug("add global attribute: '{}' = '{}'", name, value);
+//			}
+//			//// 2014-11-24T10:31:58Z creation;2014-11-26T16:31:26Z update" ;
+//		}
+//
+//		// .........add Dimensions...............
+//		// ..don't allow <= 0 dimensions
+//		if (N_PROF <= 0) {
+//			N_PROF = 1;
+//		}
+//		if (N_PARAM <= 0) {
+//			N_PARAM = 1;
+//		}
+//		if (N_LEVELS <= 0) {
+//			N_LEVELS = 1;
+//		}
+//		if (N_CALIB <= 0) {
+//			N_CALIB = 1;
+//		}
+//
+//		for (ArgoDimension d : arFile.spec.getDimensions()) {
+//			String name = d.getName();
+//			int value = d.getValue();
+//
+//			if (name.equals("N_PROF")) {
+//				value = N_PROF;
+//			} else if (name.equals("N_PARAM")) {
+//				value = N_PARAM;
+//			} else if (name.equals("N_LEVELS")) {
+//				value = N_LEVELS;
+//			} else if (name.equals("N_CALIB")) {
+//				value = N_CALIB;
+//			}
+//
+//			if (!d.isAlternateDimension()) {
+//				log.debug("add dimension: '{}' = '{}'", name, value);
+//
+//				if (name.equals("N_HISTORY")) {
+//					arFile.ncWriter.addUnlimitedDimension(name);
+//				} else {
+//					arFile.ncWriter.addDimension(null, name, value);
+//				}
+//			} else {
+//				log.debug("skip alternate dimension: '{}'", name);
+//			}
+//		}
+//
+//		// .........add Variables...............
+//
+//		// ......ordered list.....
+//		// ..this bit of code arranges the variables in the "expected order"
+//		// ..this is, technically, completely unecessary
+//		// ..the ordering of the variables in the file should not matter
+//		// ..however, at least one user is complaining about the current files
+//		// ..and I am guessing that variable ordering is the problem.
+//
+//		// ..the way the "spec" files are parsed, the PARAM variables end up
+//		// ..at the end of the variables list
+//		// ..so I am trying to distribute the variables in the "expected order"
+//
+//		// ..good coding by users would eliminate the need for this
+//
+//		// ..the idea is to create an ordered list of variable names that are
+//		// ..then used in the next section
+//
+//		log.debug("...build ordered list of variables...");
+//
+//		ArrayList<ArgoVariable> orderedList = new ArrayList<ArgoVariable>(200);
+//
+//		for (ArgoVariable v : arFile.spec.getVariables()) {
+//			String name = v.getName();
+//
+//			if (v.isParamVar()) {
+//				// ..when we get to the PARAM variables, we are done
+//				// ..they are always at the end of the list and we handle
+//				// ..them separately in the if-blocks below
+//				break;
+//			}
+//
+//			orderedList.add(v);
+//			log.debug("add {}", name);
+//
+//			// ..insert the PROFILE_<PARAM>_QC variables after POSITIONING_SYSTEM
+//
+//			if (name.equals("POSITIONING_SYSTEM")) {
+//				log.debug("insert PROFILE_ here");
+//				for (ArgoVariable w : arFile.spec.getVariables()) {
+//					if (w.getName().startsWith("PROFILE_")) {
+//						orderedList.add(w);
+//						log.debug("add {}", w.getName());
+//					}
+//				}
+//			}
+//
+//			// ..insert the <PARAM> variables after CONFIG_MISSION_NUMBER
+//
+//			if (name.equals("CONFIG_MISSION_NUMBER")) {
+//				log.debug("insert <PARAM> here");
+//				for (ArgoVariable w : arFile.spec.getVariables()) {
+//					if (w.isParamVar()) {
+//						if (!w.getName().startsWith("PROFILE_")) {
+//							orderedList.add(w);
+//							log.debug("add {}", w.getName());
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		log.debug("...ordered list complete...");
+//
+//		// ....end ordered list....
+//
+//		Boolean keep;
+//		// ...if we didn't need the list to be ordered...
+//		// for (ArgoVariable v : arFile.spec.getVariables()) {
+//
+//		for (ArgoVariable v : orderedList) {
+//			String name = v.getName();
+//			String prm = v.getParamName();
+//
+//			if (prm != null) {
+//				// ..this is a physical parameter variable
+//				// ..is it's parameter name in the parameter list
+//
+//				if (parameters.contains(prm)) {
+//					keep = true;
+//				} else {
+//					keep = false;
+//					log.debug("skip variable: '{}'", name);
+//				}
+//
+//			} else {
+//				// ..not a physical parameter, so keep it
+//				keep = true;
+//			}
+//
+//			if (keep) {
+//				DataType type = v.getType();
+//				String dims = v.getDimensionsString();
+//
+//				if (type == DataType.OPAQUE) {
+//					// ..this is one of the float_or_double types
+//					// ..default it to double
+//					type = DataType.DOUBLE;
+//				}
+//
+//				if (v.canHaveAlternateDimensions()) {
+//					// ..this variable has an alternate dimension
+//					// ..dim string will have a "|" in it must remove it
+//					String newDims = dims.replaceAll("\\|\\w+", "");
+//					log.debug("modify alternate dims: before = '{}' after = '{}'", dims, newDims);
+//					dims = newDims;
+//				}
+//
+//				Variable var = arFile.ncWriter.addVariable(null, name, type, dims);
+//				log.debug("add variable: '{}': '{}' '{}'", name, type, dims);
+//
+//				// ..add attributes for this variable
+//				for (ArgoAttribute a : v.getAttributes()) {
+//					Attribute att = null;
+//					String aname = a.getName();
+//
+//					if (a.isNumeric()) {
+//						Number num = (Number) a.getValue();
+//
+//						if (num == null) {
+//							// ..see if there is a default
+//							String def = a.getDefaultValue();
+//
+//							if (def != null) {
+//								try {
+//									switch (type) {
+//									case INT:
+//										num = new Integer(def);
+//										break;
+//									case FLOAT:
+//										num = new Float(def);
+//										break;
+//									case DOUBLE:
+//										num = new Double(def);
+//										break;
+//									case LONG:
+//										num = new Long(def);
+//										break;
+//									}
+//								} catch (NumberFormatException e) {
+//									throw new NumberFormatException(
+//											"Attribute " + name + ":" + aname + ": Unable to convert to number");
+//								}
+//							}
+//						}
+//
+//						if (num != null) {
+//							var.addAttribute(new Attribute(aname, num));
+//							log.debug("add attribute: '{}:{}' = '{}'", name, aname, num);
+//						} else {
+//							log.debug("attribute ignored (no value): '{}:{}'", name, aname);
+//						}
+//
+//					} else if (a.isString()) {
+//						Object value = a.getValue();
+//						String str = null;
+//
+//						if (value == null) {
+//							// ..value is not set, see if there is a default
+//							str = a.getDefaultValue();
+//						} else {
+//							str = value.toString();
+//						}
+//
+//						if (str != null) {
+//							var.addAttribute(new Attribute(aname, str));
+//							log.debug("add attribute: '{}:{}' = '{}'", name, aname, str);
+//						}
+//
+//					} else {
+//						log.error("attribute not Number or String: '{}:{}'", name, aname);
+//						continue;
+//					}
+//
+//				}
+//			}
+//		}
+//
+//		// .....create the file -- end "define mode"
+//
+//		arFile.ncWriter.create();
+//		arFile.ncWriter.close(); // ..having trouble exiting define mode so close/reopen
+//
+//		arFile.ncWriter = NetcdfFileWriter.openExisting(fileName);
+//		arFile.ncWriter.setFill(true);
+//
+//		arFile.ncReader = arFile.ncWriter.getNetcdfFile();
+//
+//		log.debug(".....createNew: end.....");
+//		return arFile;
+//	}
+
+//	/**
+//	 * Opens an existing file without opening the <i>specification</i>
+//	 *
+//	 * @param inFile the string name of the file to open
+//	 * @return the file object reference. Returns null if the file is not opened
+//	 *         successfully. (ArgoProfileFile.getMessage() will return the reason
+//	 *         for the failure to open.)
+//	 * @throws IOException If an I/O error occurs
+//	 */
+//	public static ArgoProfileFileValidator open(String inFile) throws IOException {
+//		try {
+//			return (ArgoProfileFileValidator.open(inFile, false));
+//
+//		} catch (IOException e) {
+//			throw e;
+//		}
+//
+//	}
+
+//	/**
+//	 * Opens an existing file without opening the <i>specification</i> and,
+//	 * optionally, ignores a bad DATA_TYPE --- will still detect accepted
+//	 * non-standard settings in old v3.1 files
+//	 *
+//	 * @param inFile          the string name of the file to open
+//	 * @param overrideBadTYPE true = force "open" to ignore BadTYPE failure
+//	 * @return the file object reference. Returns null if the file is not opened
+//	 *         successfully. (ArgoProfileFile.getMessage() will return the reason
+//	 *         for the failure to open.)
+//	 * @throws IOException If an I/O error occurs
+//	 */
+//	public static ArgoProfileFileValidator open(String inFile, boolean overrideBadTYPE) throws IOException {
+//		ArgoDataFile arFile = ArgoDataFile.open(inFile, overrideBadTYPE);
+//		if (!(arFile instanceof ArgoProfileFileValidator)) {
+//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
+//			return null;
+//		}
+//
+//		return (ArgoProfileFileValidator) arFile;
+//	}
+
+//	/**
+//	 * Opens an existing file and the assoicated <i>Argo specification</i>).
+//	 *
+//	 * @param inFile   the string name of the file to open
+//	 * @param specDir  the string name of the directory containing the format
+//	 *                 specification files
+//	 * @param fullSpec true = open the full specification; false = open the template
+//	 *                 specification
+//	 * @return the file object reference. Returns null if the file is not opened
+//	 *         successfully. (ArgoProfileFile.getMessage() will return the reason
+//	 *         for the failure to open.)
+//	 * @throws IOException If an I/O error occurs
+//	 */
+//	public static ArgoProfileFileValidator open(String inFile, String specDir, boolean fullSpec) throws IOException {
+//		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
+//		if (!(arFile instanceof ArgoProfileFileValidator)) {
+//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
+//			return null;
+//		}
+//
+//		return (ArgoProfileFileValidator) arFile;
+//	}
 
 	/**
 	 * Validates the data in the profile file. This is a driver routine that
@@ -545,45 +491,25 @@ public class ArgoProfileFile extends ArgoDataFile {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validate(boolean singleCycle, String dacName, boolean ckNulls) throws IOException {
-		ArgoReferenceTable.DACS dac = null;
-
-		if (!validationResult.isValid()) {
-			ValidationResult.lastMessage = new String(
-					"File must be verified (verifyFormat) " + "successfully before validation");
+	public boolean validateData(boolean singleCycle, String dacName, boolean ckNulls) throws IOException {
+		boolean basicsChecks = super.validateData(ckNulls);
+		if (!basicsChecks) {
 			return false;
-		}
-
-		// .......check arguments.......
-		if (dacName.trim().length() > 0) {
-			for (ArgoReferenceTable.DACS d : ArgoReferenceTable.DACS.values()) {
-				if (d.name.equals(dacName)) {
-					dac = d;
-					break;
-				}
-			}
-			if (dac == null) {
-				ValidationResult.lastMessage = new String("Unknown DAC name = '" + dacName + "'");
-				return false;
-			}
 		}
 
 		// ............Determine number of profiles............
 
-		int nProf = getDimensionLength("N_PROF");
+		int nProf = arFile.getDimensionLength("N_PROF");
 		log.debug(".....validate: number of profiles {}.....", nProf);
 
-		int nCalib = getDimensionLength("N_CALIB");
-		int nHistory = getDimensionLength("N_HISTORY");
-		int nParam = getDimensionLength("N_PARAM");
-		int nLevel = getDimensionLength("N_LEVELS");
+		int nCalib = arFile.getDimensionLength("N_CALIB");
+		int nHistory = arFile.getDimensionLength("N_HISTORY");
+		int nParam = arFile.getDimensionLength("N_PARAM");
+		int nLevel = arFile.getDimensionLength("N_LEVELS");
 
-		if (ckNulls) {
-			validateStringNulls();
-		}
 		validateHighlyDesirable(nProf);
 
-		if (!validateMetaData(nProf, dac, singleCycle)) {
+		if (!validateMetaData(nProf, arFile.getValidatedDac(), singleCycle)) {
 			return true;
 		}
 
@@ -591,7 +517,7 @@ public class ArgoProfileFile extends ArgoDataFile {
 		validateParams(nProf, nParam, nLevel);
 		validateQC(nProf, nParam, nLevel);
 
-		if (fileType == FileType.PROFILE) { // ..implies a core-file
+		if (arFile.fileType() == FileType.PROFILE) { // ..implies a core-file
 			validateDMode(nProf, nParam, nCalib, nHistory);
 		}
 
@@ -627,92 +553,33 @@ public class ArgoProfileFile extends ArgoDataFile {
 		// ..check Reference_Date
 
 		String name = "REFERENCE_DATE_TIME";
-		String ref = readString(name);
+		String ref = arFile.readString(name);
 
 		log.debug(name + ": " + ref);
-		if (!ref.matches(spec.getMeta(name))) {
-			validationResult
-					.addError(name + ": '" + ref + "': Does not match specification ('" + spec.getMeta(name) + "')");
+		if (!ref.matches(arFile.getFileSpec().getMeta(name))) {
+			validationResult.addError(name + ": '" + ref + "': Does not match specification ('"
+					+ arFile.getFileSpec().getMeta(name) + "')");
 		}
 
 		// ..read other times
 
-		double[] juld = readDoubleArr("JULD");
-		String juld_qc = readString("JULD_QC", true); // ..true -> return NULLs if present
-		double[] juld_loc = readDoubleArr("JULD_LOCATION");
-		String creation = readString("DATE_CREATION");
-		String update = readString("DATE_UPDATE");
-		Date fileTime = new Date(file.lastModified());
+		double[] juld = arFile.readDoubleArr("JULD");
+		String juld_qc = arFile.readString("JULD_QC", true); // ..true -> return NULLs if present
+		double[] juld_loc = arFile.readDoubleArr("JULD_LOCATION");
+//		String creation = arFile.readString("DATE_CREATION");
+//		String update = arFile.readString("DATE_UPDATE");
+		Date fileTime = new Date(arFile.getFile().lastModified());
 		long fileSec = fileTime.getTime();
 
 		if (log.isDebugEnabled()) {
 			log.debug("earliestDate:  " + ArgoDate.format(earliestDate));
 			log.debug("fileTime:      " + ArgoDate.format(fileTime));
-			log.debug("DATE_CREATION: " + creation);
-			log.debug("DATE_UPDATE:   " + update);
+//			log.debug("DATE_CREATION: " + creation);
+//			log.debug("DATE_UPDATE:   " + update);
 		}
 
-		// ...........initial creation date checks:.............
-		// ..set, after earliestDate, and before file time
-		Date dateCreation = null;
-		boolean haveCreation = false;
-		long creationSec = 0;
-
-		if (creation.trim().length() <= 0) {
-			validationResult.addError("DATE_CREATION: Not set");
-
-		} else {
-			dateCreation = ArgoDate.get(creation);
-			haveCreation = true;
-
-			if (dateCreation == null) {
-				haveCreation = false;
-				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
-
-			} else {
-				creationSec = dateCreation.getTime();
-
-				if (dateCreation.before(earliestDate)) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': Before allowed date ('"
-							+ ArgoDate.format(earliestDate) + "')");
-
-				} else if ((creationSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
-
-		// ............initial update date checks:...........
-		// ..set, not before creation time, before file time
-		Date dateUpdate = null;
-		boolean haveUpdate = false;
-		long updateSec = 0;
-
-		if (update.trim().length() <= 0) {
-			validationResult.addError("DATE_UPDATE: Not set");
-		} else {
-			dateUpdate = ArgoDate.get(update);
-			haveUpdate = true;
-
-			if (dateUpdate == null) {
-				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
-				haveUpdate = false;
-
-			} else {
-				updateSec = dateUpdate.getTime();
-
-				if (haveCreation && dateUpdate.before(dateCreation)) {
-					validationResult
-							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
-				}
-
-				if ((updateSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
+		// ...........initial creation & update dates checks:.............
+		super.validateCreationUpdateDates(fileTime, fileSec);
 
 		// ............check per-profile dates.............
 		// String posQC = readString("POSITION_QC");
@@ -741,9 +608,9 @@ public class ArgoProfileFile extends ArgoDataFile {
 				// ..check that JULD is before DATE_CREATION and before file time
 				long juldSec = dateJuld.getTime();
 
-				if (haveCreation && (juldSec - creationSec) > oneDaySec) {
+				if (arFile.isHaveCreationDate() && (juldSec - arFile.getCreationSec()) > oneDaySec) {
 					validationResult.addError("JULD[" + (n + 1) + "]: " + juld[n] + " = '" + juldDTG
-							+ "': After DATE_CREATION ('" + creation + "')");
+							+ "': After DATE_CREATION ('" + arFile.getCreationDate() + "')");
 				}
 				if ((juldSec - fileSec) > oneDaySec) {
 					validationResult.addError("JULD[" + (n + 1) + "]: " + juld[n] + " = '" + juldDTG
@@ -767,8 +634,8 @@ public class ArgoProfileFile extends ArgoDataFile {
 							// ..if this is missing, position better be missing
 							// ..this is very rare -- spend the overhead to do it
 							// .. here each time
-					double lat = readDouble("LATITUDE", n);
-					double lon = readDouble("LONGITUDE", n);
+					double lat = arFile.readDouble("LATITUDE", n);
+					double lon = arFile.readDouble("LONGITUDE", n);
 
 					// if ((posQC.charAt(n) == '1' || posQC.charAt(n) == '2') &&
 					// (lat < 99990.d || lon < 99990.d)) {
@@ -787,7 +654,7 @@ public class ArgoProfileFile extends ArgoDataFile {
 		// ..if set, after DATE_CREATION, before DATE_UPDATE
 
 		if (nHistory > 0) {
-			ArrayChar hDate = (ArrayChar) findVariable("HISTORY_DATE").read();
+			ArrayChar hDate = (ArrayChar) arFile.findVariable("HISTORY_DATE").read();
 			Index ndx = hDate.getIndex();
 
 			for (int h = 0; h < nHistory; h++) {
@@ -811,11 +678,11 @@ public class ArgoProfileFile extends ArgoDataFile {
 							// dateHist+
 							// "': Before DATE_CREATION ('"+creation+"')");
 
-						} else if (haveUpdate) {
+						} else if (arFile.isHaveUpdateDate()) {
 							long dateSec = date.getTime();
-							if ((dateSec - updateSec) > oneDaySec) {
+							if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 								validationResult.addError("HISTORY_DATE[" + (h + 1) + "," + (n + 1) + "]: '" + dateHist
-										+ "': After DATE_UPDATE ('" + update + "')");
+										+ "': After DATE_UPDATE ('" + arFile.getUpdateDate() + "')");
 							}
 						}
 					}

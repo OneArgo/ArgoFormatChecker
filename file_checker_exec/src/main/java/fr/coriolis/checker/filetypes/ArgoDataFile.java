@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import ucar.ma2.ArrayChar;
@@ -117,7 +115,7 @@ public class ArgoDataFile {
 //................................................
 	// ..class variables
 	private static final String BLANK_MESSAGE = new String("");
-	protected final static Date earliestDate = ArgoDate.get("19970101000000");
+
 //	private final static DecimalFormat cycleFmt = new DecimalFormat("000");
 
 	// ..NOTE: The string values map to spec file names
@@ -162,6 +160,14 @@ public class ArgoDataFile {
 	private ArgoFileSpecification spec = null;
 	private ArgoReferenceTable.DACS validatedDAC;
 
+	// dates properties
+	private boolean haveCreationDate = false;
+	private boolean haveUpdateDate = false;
+	private long creationSec = 0;
+	private long updateSec = 0;
+	String creationDate;
+	String updateDate;
+
 	private List<Variable> varList;
 
 	protected ValidationResult validationResult;
@@ -184,6 +190,54 @@ public class ArgoDataFile {
 
 	public void setValidatedDac(ArgoReferenceTable.DACS validatedDAC) {
 		this.validatedDAC = validatedDAC;
+	}
+
+	public long getUpdateSec() {
+		return updateSec;
+	}
+
+	public void setUpdateSec(long updateSec) {
+		this.updateSec = updateSec;
+	}
+
+	public boolean isHaveUpdateDate() {
+		return haveUpdateDate;
+	}
+
+	public void setHaveUpdateDate(boolean haveUpdateDate) {
+		this.haveUpdateDate = haveUpdateDate;
+	}
+
+	public String getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(String update) {
+		this.updateDate = update;
+	}
+
+	public String getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(String creation) {
+		this.creationDate = creation;
+	}
+
+	public boolean isHaveCreationDate() {
+		return haveCreationDate;
+	}
+
+	public void setHaveCreationDate(boolean haveCreationDate) {
+		this.haveCreationDate = haveCreationDate;
+	}
+
+	public long getCreationSec() {
+		return creationSec;
+	}
+
+	public void setCreationSec(long creationSec) {
+		this.creationSec = creationSec;
 	}
 
 	public File getFile() {
@@ -418,7 +472,9 @@ public class ArgoDataFile {
 		} else {
 			log.info("Invalid DATA_TYPE: '" + dt + "'");
 			ft = FileType.UNKNOWN;
-			ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
+			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
+			System.exit(1);
+			// ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
 			return null;
 		}
 
@@ -434,35 +490,35 @@ public class ArgoDataFile {
 
 		// ..create the correct type of File
 
-		ArgoDataFile arFile = null;
-		if (ft == FileType.METADATA) {
-			log.debug("creating ArgoMetadataFile");
-			arFile = new ArgoMetadataValidator();
-
-		} else if (ft == FileType.PROFILE) {
-			log.debug("creating ArgoProfileFile");
-			arFile = new ArgoProfileFile();
-
-		} else if (ft == FileType.TECHNICAL) {
-			log.debug("creating ArgoTechnicalFile");
-			arFile = new ArgoTechnicalFile();
-
-		} else if (ft == FileType.TRAJECTORY) {
-			log.debug("creating ArgoTrajectoryFile");
-			arFile = new ArgoTrajectoryFile();
-
-		} else if (ft == FileType.BIO_PROFILE) {
-			log.debug("creating ArgoProfileFile");
-			arFile = new ArgoProfileFile();
-
-		} else if (ft == FileType.BIO_TRAJECTORY) {
-			log.debug("creating ArgoTrajectoryFile");
-			arFile = new ArgoTrajectoryFile();
-
-		} else {
-			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
-			System.exit(1);
-		} // ..end open
+		ArgoDataFile arFile = new ArgoDataFile();
+//		if (ft == FileType.METADATA) {
+//			log.debug("creating ArgoMetadataFile");
+//			arFile = new ArgoMetadataValidator();
+//
+//		} else if (ft == FileType.PROFILE) {
+//			log.debug("creating ArgoProfileFile");
+//			arFile = new ArgoProfileFileValidator();
+//
+//		} else if (ft == FileType.TECHNICAL) {
+//			log.debug("creating ArgoTechnicalFile");
+//			arFile = new ArgoTechnicalFile();
+//
+//		} else if (ft == FileType.TRAJECTORY) {
+//			log.debug("creating ArgoTrajectoryFile");
+//			arFile = new ArgoTrajectoryFile();
+//
+//		} else if (ft == FileType.BIO_PROFILE) {
+//			log.debug("creating ArgoProfileFile");
+//			arFile = new ArgoProfileFileValidator();
+//
+//		} else if (ft == FileType.BIO_TRAJECTORY) {
+//			log.debug("creating ArgoTrajectoryFile");
+//			arFile = new ArgoTrajectoryFile();
+//
+//		} else {
+//			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
+//			System.exit(1);
+//		} // ..end open
 
 		// ..set object variables
 		arFile.dacName = dac;

@@ -24,7 +24,7 @@ import fr.coriolis.checker.exceptions.VerifyFileFormatFailedException;
 import fr.coriolis.checker.filetypes.ArgoDataFile;
 import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.filetypes.ArgoMetadataValidator;
-import fr.coriolis.checker.filetypes.ArgoProfileFile;
+import fr.coriolis.checker.filetypes.ArgoProfileFileValidator;
 import fr.coriolis.checker.filetypes.ArgoTechnicalFile;
 import fr.coriolis.checker.filetypes.ArgoTrajectoryFile;
 import fr.coriolis.checker.filetypes.ValidationResult;
@@ -382,7 +382,7 @@ public class ValidateSubmit {
 
 		} else if (argo.fileType() == FileType.PROFILE || argo.fileType() == FileType.BIO_PROFILE) {
 			// Do profile file validate data
-			boolean isValidateArgoProfileFileDataCompleted = ((ArgoProfileFile) argo).validateData(false, dacName, doNulls);
+			boolean isValidateArgoProfileFileDataCompleted = ((ArgoProfileFileValidator) argo).validateData(false, dacName, doNulls);
 			if (!isValidateArgoProfileFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoProfileFile.validate failed: " + ValidationResult.getMessage());

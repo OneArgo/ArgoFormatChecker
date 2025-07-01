@@ -65,6 +65,11 @@ import ucar.nc2.Variable;
  */
 public class ArgoFileValidator {
 	// class variables
+	// ..standard i/o shortcuts
+	private static PrintStream stdout = new PrintStream(System.out);
+	private static PrintStream stderr = new PrintStream(System.err);
+	private static final Logger log = LogManager.getLogger("ArgoFileValidator");
+
 	static Pattern pDataMode; // ..CDL "variables:" tag
 	static {
 		// ..check for legal data_mode
@@ -72,11 +77,9 @@ public class ArgoFileValidator {
 	}
 	private final static DecimalFormat cycleFmt = new DecimalFormat("000");
 	protected final static Date earliestDate = ArgoDate.get("19970101000000");
-	// ..standard i/o shortcuts
-	private static PrintStream stdout = new PrintStream(System.out);
-	private static PrintStream stderr = new PrintStream(System.err);
-	private static final Logger log = LogManager.getLogger("ArgoFileValidator");
+	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
 
+	// ..object variables
 	protected final ArgoDataFile arFile;
 	protected ValidationResult validationResult;
 
@@ -215,7 +218,80 @@ public class ArgoFileValidator {
 		return true;
 	}
 
-	//
+	protected void validateCreationUpdateDates(Date fileTime, long fileSec) {
+		String creation = arFile.readString("DATE_CREATION").trim();
+		String update = arFile.readString("DATE_UPDATE").trim();
+		arFile.setCreationDate(creation);
+		arFile.setUpdateDate(update);
+
+		log.debug("DATE_CREATION:    '{}'", creation);
+		log.debug("DATE_UPDATE:      '{}'", update);
+
+		// ...........creation date checks:.............
+		// ..set, after earliestDate, and before file time
+		Date dateCreation = null;
+		boolean haveCreation = false;
+		long creationSec = 0;
+
+		if (creation.trim().length() <= 0) {
+			validationResult.addError("DATE_CREATION: Not set");
+
+		} else {
+			dateCreation = ArgoDate.get(creation);
+			haveCreation = true;
+
+			if (dateCreation == null) {
+				haveCreation = false;
+				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
+
+			} else {
+				creationSec = dateCreation.getTime();
+
+				if (dateCreation.before(earliestDate)) {
+					validationResult.addError("DATE_CREATION: '" + creation + "': Before earliest allowed date ('"
+							+ ArgoDate.format(earliestDate) + "')");
+
+				} else if ((arFile.getCreationSec() - fileSec) > oneDaySec) {
+					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
+							+ ArgoDate.format(fileTime) + "')");
+				}
+			}
+		}
+		arFile.setHaveCreationDate(haveCreation);
+		arFile.setCreationSec(creationSec);
+		// ............update date checks:...........
+		// ..set, not before creation time, before file time
+		Date dateUpdate = null;
+		boolean haveUpdate = false;
+		long updateSec = 0;
+
+		if (update.trim().length() <= 0) {
+			validationResult.addError("DATE_UPDATE: Not set");
+		} else {
+			dateUpdate = ArgoDate.get(update);
+			haveUpdate = true;
+
+			if (dateUpdate == null) {
+				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
+				haveUpdate = false;
+
+			} else {
+				updateSec = dateUpdate.getTime();
+
+				if (arFile.isHaveCreationDate() && dateUpdate.before(dateCreation)) {
+					validationResult
+							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
+				}
+
+				if ((updateSec - fileSec) > oneDaySec) {
+					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
+							+ ArgoDate.format(fileTime) + "')");
+				}
+			}
+		}
+		arFile.setHaveUpdateDate(haveUpdate);
+		arFile.setUpdateSec(updateSec);
+	}
 
 	private void verifyGlobalAttributes(String dacName) {
 		for (String name : arFile.getFileSpec().getGlobalAttributeNames()) {
@@ -1339,6 +1415,34 @@ public class ArgoFileValidator {
 	}
 
 	// ............ end "check" methods ..............
+
+	/**
+	 * Convenience method to add to String list for "pretty printing".
+	 *
+	 * @param list the StringBuilder list
+	 * @param add  the String to add
+	 */
+	private void addToList(StringBuilder list, String add) {
+		if (list.length() == 0) {
+			list.append("'" + add + "'");
+		} else {
+			list.append(", '" + add + "'");
+		}
+	}
+
+	/**
+	 * Convenience method to add to String list for "pretty printing".
+	 *
+	 * @param list the StringBuilder list
+	 * @param add  the String to add
+	 */
+	private void addToList(StringBuilder list, int add) {
+		if (list.length() == 0) {
+			list.append(add);
+		} else {
+			list.append(", " + add);
+		}
+	}
 
 //.........................................
 //  ACCESSORS

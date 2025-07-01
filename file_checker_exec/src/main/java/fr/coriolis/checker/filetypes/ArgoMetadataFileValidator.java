@@ -47,8 +47,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	// ..standard i/o shortcuts
 	private static final Logger log = LogManager.getLogger("ArgoMetadataFile");
 
-	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
-
 	private static Pattern pBatteryType;
 	private static Pattern pBatteryPacks;
 
@@ -83,34 +81,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	// ..........................................
 	// METHODS
 	// ..........................................
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-	private void addToList(StringBuilder list, String add) {
-		if (list.length() == 0) {
-			list.append("'" + add + "'");
-		} else {
-			list.append(", '" + add + "'");
-		}
-	}
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-	private void addToList(StringBuilder list, int add) {
-		if (list.length() == 0) {
-			list.append(add);
-		} else {
-			list.append(", " + add);
-		}
-	}
 
 //	/**
 //	 * Opens an existing file and the assoicated <i>Argo specification</i>).
@@ -221,8 +191,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		// ..read times
 
-		String creation = arFile.readString("DATE_CREATION").trim();
-		String update = arFile.readString("DATE_UPDATE").trim();
 		String launch = arFile.readString("LAUNCH_DATE").trim();
 		String start = arFile.readString("START_DATE").trim();
 		String end = arFile.readString("END_MISSION_DATE").trim();
@@ -244,75 +212,14 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		if (log.isDebugEnabled()) {
 			log.debug("earliestDate:     '{}'", ArgoDate.format(earliestDate));
 			log.debug("fileTime:         '{}'", ArgoDate.format(fileTime));
-			log.debug("DATE_CREATION:    '{}'", creation);
-			log.debug("DATE_UPDATE:      '{}'", update);
 			log.debug("LAUNCH_DATE:      '{}'", launch);
 			log.debug("START_DATE:       '{}' length = {}", start, start.length());
 			log.debug("STARTUP_DATE:     '{}'", startup);
 			log.debug("END_MISSION_DATE: '{}'", end);
 		}
 
-		// ...........creation date checks:.............
-		// ..set, after earliestDate, and before file time
-		Date dateCreation = null;
-		boolean haveCreation = false;
-		long creationSec = 0;
-
-		if (creation.trim().length() <= 0) {
-			validationResult.addError("DATE_CREATION: Not set");
-
-		} else {
-			dateCreation = ArgoDate.get(creation);
-			haveCreation = true;
-
-			if (dateCreation == null) {
-				haveCreation = false;
-				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
-
-			} else {
-				creationSec = dateCreation.getTime();
-
-				if (dateCreation.before(earliestDate)) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': Before earliest allowed date ('"
-							+ ArgoDate.format(earliestDate) + "')");
-
-				} else if ((creationSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
-
-		// ............update date checks:...........
-		// ..set, not before creation time, before file time
-		Date dateUpdate = null;
-		boolean haveUpdate = false;
-		long updateSec = 0;
-
-		if (update.trim().length() <= 0) {
-			validationResult.addError("DATE_UPDATE: Not set");
-		} else {
-			dateUpdate = ArgoDate.get(update);
-			haveUpdate = true;
-
-			if (dateUpdate == null) {
-				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
-				haveUpdate = false;
-
-			} else {
-				updateSec = dateUpdate.getTime();
-
-				if (haveCreation && dateUpdate.before(dateCreation)) {
-					validationResult
-							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
-				}
-
-				if ((updateSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
+		// ...........creation and update dates checks:.............
+		super.validateCreationUpdateDates(fileTime, fileSec);
 
 		// ............launch date checks:...........
 		// ..must be set ... not before earliest allowed date
@@ -324,7 +231,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			haveLaunch = true;
 
 			if (dateLaunch == null) {
-				validationResult.addError("LAUNCH_DATE: '" + update + "': Invalid date");
+				validationResult.addError("LAUNCH_DATE: '" + launch + "': Invalid date");
 				haveLaunch = false;
 
 			} else {
