@@ -37,9 +37,9 @@ import ucar.nc2.Variable;
  * @version $Id: ArgoMetadataFile.java 1314 2022-04-13 00:20:48Z ignaszewski $
  */
 
-public class ArgoMetadataFile extends ArgoDataFile {
+public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
-	// .........................................
+	// .........................................y
 	// VARIABLES
 	// .........................................
 
@@ -72,13 +72,13 @@ public class ArgoMetadataFile extends ArgoDataFile {
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoMetadataFile() throws IOException {
-		super();
+	protected ArgoMetadataFileValidator(ArgoDataFile arFile) {
+		super(arFile);
 	}
 
-	public ArgoMetadataFile(String specDir, String version) {
-		// super(specDir, FileType.METADATA, version);
-	}
+//	public ArgoMetadataValidator(String specDir, String version) {
+//		// super(specDir, FileType.METADATA, version);
+//	}
 
 	// ..........................................
 	// METHODS
@@ -112,28 +112,28 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 	}
 
-	/**
-	 * Opens an existing file and the assoicated <i>Argo specification</i>).
-	 *
-	 * @param inFile   the string name of the file to open
-	 * @param specDir  the string name of the directory containing the format
-	 *                 specification files
-	 * @param fullSpec true = open the full specification; false = open the template
-	 *                 specification
-	 * @return the file object reference. Returns null if the file is not opened
-	 *         successfully. (ArgoMetadataFile.getMessage() will return the reason
-	 *         for the failure to open.)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public static ArgoMetadataFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
-		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
-		if (!(arFile instanceof ArgoMetadataFile)) {
-			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo META-DATA file";
-			return null;
-		}
-
-		return (ArgoMetadataFile) arFile;
-	}
+//	/**
+//	 * Opens an existing file and the assoicated <i>Argo specification</i>).
+//	 *
+//	 * @param inFile   the string name of the file to open
+//	 * @param specDir  the string name of the directory containing the format
+//	 *                 specification files
+//	 * @param fullSpec true = open the full specification; false = open the template
+//	 *                 specification
+//	 * @return the file object reference. Returns null if the file is not opened
+//	 *         successfully. (ArgoMetadataFile.getMessage() will return the reason
+//	 *         for the failure to open.)
+//	 * @throws IOException If an I/O error occurs
+//	 */
+//	public static ArgoMetadataFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
+//		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
+//		if (!(arFile instanceof ArgoMetadataFile)) {
+//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo META-DATA file";
+//			return null;
+//		}
+//
+//		return (ArgoMetadataFile) arFile;
+//	}
 
 	/**
 	 * Validates the data in the meta-data file. This is a driver routine that
@@ -161,44 +161,23 @@ public class ArgoMetadataFile extends ArgoDataFile {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validate(String dacName, boolean ckNulls, boolean... optionalChecks) throws IOException {
-		// USE super.validate to avoid code repetition !
-		ArgoReferenceTable.DACS dac = null;
-
-		if (!validationResult.isValid()) {
-			ValidationResult.lastMessage = new String(
-					"File must be verified (verifyFormat) " + "successfully before validation");
+	public boolean validateData(boolean ckNulls, boolean... optionalChecks) throws IOException {
+		boolean basicsChecks = super.validateData(ckNulls);
+		if (!basicsChecks) {
 			return false;
 		}
+		// .......do meta-data file specific validations..........
 
-		// .......check arguments.......
-		if (dacName.trim().length() > 0) {
-			for (ArgoReferenceTable.DACS d : ArgoReferenceTable.DACS.values()) {
-				if (d.name.equals(dacName)) {
-					dac = d;
-					break;
-				}
-			}
-			if (dac == null) {
-				ValidationResult.lastMessage = new String("Unknown DAC name = '" + dacName + "'");
-				return false;
-			}
-		}
-
-		// .......do validations..........
-
-		this.dacName = dacName;
-
-		if (ckNulls) {
-			validateStringNulls();
-		}
+//		if (ckNulls) {
+//			validateStringNulls();
+//		}
 
 		validateDates();
 
-		if (format_version.trim().compareTo("2.2") <= 0) {
-			validateHighlyDesirable_v2(dac);
+		if (this.arFile.fileVersion().trim().compareTo("2.2") <= 0) {
+			validateHighlyDesirable_v2(this.arFile.getValidatedDac());
 		} else {
-			validateMandatory_v3(dac);
+			validateMandatory_v3(this.arFile.getValidatedDac());
 			validateOptionalParams();
 			validateConfigMission();
 			validateConfigParams();
@@ -242,15 +221,15 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 		// ..read times
 
-		String creation = readString("DATE_CREATION").trim();
-		String update = readString("DATE_UPDATE").trim();
-		String launch = readString("LAUNCH_DATE").trim();
-		String start = readString("START_DATE").trim();
-		String end = readString("END_MISSION_DATE").trim();
+		String creation = arFile.readString("DATE_CREATION").trim();
+		String update = arFile.readString("DATE_UPDATE").trim();
+		String launch = arFile.readString("LAUNCH_DATE").trim();
+		String start = arFile.readString("START_DATE").trim();
+		String end = arFile.readString("END_MISSION_DATE").trim();
 
 		// ..version specific dates
 
-		Variable var = ncReader.findVariable("STARTUP_DATE");
+		Variable var = arFile.getNcReader().findVariable("STARTUP_DATE");
 		String startup;
 
 		if (var != null) {
@@ -259,7 +238,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 			startup = " ";
 		}
 
-		Date fileTime = new Date(file.lastModified());
+		Date fileTime = new Date(arFile.getFile().lastModified());
 		long fileSec = fileTime.getTime();
 
 		if (log.isDebugEnabled()) {
@@ -440,7 +419,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ..CYCLE_TIME ---> see "per-cycle" checks below
 
 		name = "DATA_CENTRE"; // ..valid (and valid for DAC)
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (dac != null) {
 			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
@@ -463,7 +442,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "LAUNCH_LATITUDE"; // ..on the earth
-		dVal = readDouble(name);
+		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
 
 		if (dVal < -90.d || dVal > 90.d) {
@@ -471,14 +450,14 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "LAUNCH_DATE"; // ..not empty -- validity checked elsewhere
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addWarning(name + ": Empty");
 		}
 
 		name = "LAUNCH_LONGITUDE"; // ..on the earth
-		dVal = readDouble(name);
+		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
 
 		if (dVal < -180.d || dVal > 180.d) {
@@ -497,14 +476,14 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ..PARKING_PRESSURE ---> see "per-cycle" checks below
 
 		name = "PLATFORM_MODEL"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addWarning(name + ": Empty");
 		}
 
 		name = "PLATFORM_NUMBER"; // ..valid platform number
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		if (!str.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
@@ -512,7 +491,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		if (!(info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str)).isActive) {
@@ -520,14 +499,14 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "PTT"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addWarning(name + ": Empty");
 		}
 
 		name = "START_DATE"; // ..not empty -- validity checked elsewhere
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addWarning(name + ": Empty");
@@ -542,7 +521,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "TRANS_SYSTEM"; // ..ref table 10
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		if (!(info = ArgoReferenceTable.TRANS_SYSTEM.contains(str)).isActive) {
@@ -550,7 +529,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "TRANS_SYSTEM_ID"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addWarning(name + ": Empty");
@@ -558,25 +537,25 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 		// ..............parameter names...........
 
-		int nParam = getDimensionLength("N_PARAM");
+		int nParam = arFile.getDimensionLength("N_PARAM");
 
 		log.debug("n_param: '{}'", nParam);
-		String paramVar[] = readStringArr("PARAMETER");
+		String paramVar[] = arFile.readStringArr("PARAMETER");
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
 			log.debug("param[{}]: '{}'", n, str);
-			if (!spec.isPhysicalParamName(str)) {
+			if (!arFile.getFileSpec().isPhysicalParamName(str)) {
 				validationResult.addWarning("Physical parameter name: '" + str + "': Invalid");
 			}
 		}
 
 		// .........per-cycle checks..........
 
-		int nCycles = getDimensionLength("N_CYCLES");
+		int nCycles = arFile.getDimensionLength("N_CYCLES");
 
 		log.debug("n_cycles: '{}'", nCycles);
 		name = "CYCLE_TIME"; // ..not empty
-		fVar = readFloatArr(name);
+		fVar = arFile.readFloatArr(name);
 		for (int n = 0; n < nCycles; n++) {
 			fVal = fVar[n];
 			log.debug("{}[{}]: {}", name, n, fVal);
@@ -587,7 +566,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "PARKING_PRESSURE"; // ..not empty
-		fVar = readFloatArr(name);
+		fVar = arFile.readFloatArr(name);
 		for (int n = 0; n < nCycles; n++) {
 			fVal = fVar[n];
 			log.debug("{}[{}]: {}", name, n, fVal);
@@ -598,7 +577,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "DEEPEST_PRESSURE"; // ..not empty
-		fVar = readFloatArr(name);
+		fVar = arFile.readFloatArr(name);
 		for (int n = 0; n < nCycles; n++) {
 			fVal = fVar[n];
 			log.debug("{}[{}]: {}", name, n, fVal);
@@ -702,28 +681,28 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ...........single valued variables..............
 
 		name = "CONTROLLER_BOARD_SERIAL_NO_PRIMARY"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "CONTROLLER_BOARD_TYPE_PRIMARY"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "DAC_FORMAT_ID"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "DATA_CENTRE"; // ..ref table 4 (and valid for DAC)
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (dac != null) {
 			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
@@ -737,14 +716,14 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "FIRMWARE_VERSION"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "FLOAT_SERIAL_NO"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
@@ -753,7 +732,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ..LAUNCH_DATE --> checked elsewhere
 
 		name = "LAUNCH_LATITUDE"; // ..on the earth
-		dVal = readDouble(name);
+		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
 
 		if (dVal < -90.d || dVal > 90.d) {
@@ -761,7 +740,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "LAUNCH_LONGITUDE"; // ..on the earth
-		dVal = readDouble(name);
+		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
 
 		if (dVal < -180.d || dVal > 180.d) {
@@ -782,7 +761,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "MANUAL_VERSION"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
@@ -791,14 +770,14 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ..PARAMETER --> see below
 
 		name = "PI_NAME"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "PLATFORM_FAMILY"; // ..ref table 22
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		if ((info = ArgoReferenceTable.PLATFORM_FAMILY.contains(str)).isValid()) {
@@ -811,7 +790,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		if (!str.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
@@ -821,7 +800,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		boolean pmkrValid = false;
 
 		String plfmMakerName = "PLATFORM_MAKER"; // ..ref table 24
-		String plfmMaker = readString(plfmMakerName).trim();
+		String plfmMaker = arFile.readString(plfmMakerName).trim();
 		log.debug("{}: '{}'", plfmMakerName, plfmMaker);
 
 		if ((info = ArgoReferenceTable.PLATFORM_MAKER.contains(plfmMaker)).isValid()) {
@@ -838,7 +817,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		boolean typValid = false;
 
 		String plfmTypeName = "PLATFORM_TYPE"; // ..ref table 23
-		String plfmType = readString(plfmTypeName).trim();
+		String plfmType = arFile.readString(plfmTypeName).trim();
 		log.debug("{}: '{}'", plfmTypeName, plfmType);
 
 		if ((info = ArgoReferenceTable.PLATFORM_TYPE.contains(plfmType)).isValid()) {
@@ -871,7 +850,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ..PREDEPLOYMENT_CALIB_EQUATION --> see per-param below
 
 		name = "PTT";
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
@@ -896,7 +875,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "STANDARD_FORMAT_ID"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
@@ -909,7 +888,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		boolean wmoValid = false;
 
 		name = "WMO_INST_TYPE"; // ..ref table 8
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		try {
 			int N = Integer.valueOf(str);
@@ -944,22 +923,22 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// ...........per-parameter checks...........
 
 		String[] paramVar;
-		int nParam = getDimensionLength("N_PARAM");
+		int nParam = arFile.getDimensionLength("N_PARAM");
 		log.debug("N_PARAM: '{}'", nParam);
 
 		name = "PARAMETER"; // ..in physical parameter list
-		paramVar = readStringArr(name);
+		paramVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
-			if (!spec.isPhysicalParamName(str)) {
+			if (!arFile.getFileSpec().isPhysicalParamName(str)) {
 				validationResult.addError(name + "[" + (n + 1) + "]: '" + str + "': Invalid");
 			}
 		}
 
 		name = "PARAMETER_UNITS"; // ..not empty
-		paramVar = readStringArr(name);
+		paramVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
@@ -970,7 +949,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "PARAMETER_SENSOR"; // ..not empty
-		paramVar = readStringArr(name);
+		paramVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n];
@@ -981,7 +960,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "PREDEPLOYMENT_CALIB_COEFFICIENT"; // ..not empty
-		paramVar = readStringArr(name);
+		paramVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
@@ -993,7 +972,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "PREDEPLOYMENT_CALIB_EQUATION"; // ..not empty
-		paramVar = readStringArr(name);
+		paramVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
@@ -1005,17 +984,17 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		// .........per-sensor checks............
-		int nSensor = getDimensionLength("N_SENSOR");
+		int nSensor = arFile.getDimensionLength("N_SENSOR");
 		log.debug("N_SENSOR: '{}'", nSensor);
 
 		String sensorName = "SENSOR"; // ..ref table 25
-		String[] sensor = readStringArr(sensorName);
+		String[] sensor = arFile.readStringArr(sensorName);
 
 		String sensorMakerName = "SENSOR_MAKER"; // ..ref table 26
-		String[] sensorMaker = readStringArr(sensorMakerName);
+		String[] sensorMaker = arFile.readStringArr(sensorMakerName);
 
 		String sensorModelName = "SENSOR_MODEL"; // ..ref table 27
-		String[] sensorModel = readStringArr(sensorModelName);
+		String[] sensorModel = arFile.readStringArr(sensorModelName);
 
 		for (int n = 0; n < nSensor; n++) {
 			ArgoReferenceTable.ArgoReferenceEntry mdlInfo;
@@ -1106,11 +1085,11 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 		// ..........per-positioning_system checks
 		String[] positVar;
-		int nPosit = getDimensionLength("N_POSITIONING_SYSTEM");
+		int nPosit = arFile.getDimensionLength("N_POSITIONING_SYSTEM");
 		log.debug("N_POSITIONING_SYSTEM: '{}'", nPosit);
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
-		positVar = readStringArr(name);
+		positVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nPosit; n++) {
 			str = positVar[n].trim();
@@ -1127,11 +1106,11 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 		// ..........per-trans_system checks
 		String[] transVar;
-		int nTrans = getDimensionLength("N_TRANS_SYSTEM");
+		int nTrans = arFile.getDimensionLength("N_TRANS_SYSTEM");
 		log.debug("N_TRANS_SYSTEM: '{}'", nTrans);
 
 		name = "TRANS_SYSTEM"; // ..ref table 10
-		transVar = readStringArr(name);
+		transVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nTrans; n++) {
 			str = transVar[n].trim();
@@ -1147,7 +1126,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		}
 
 		name = "TRANS_SYSTEM_ID"; // ..not empty
-		transVar = readStringArr(name);
+		transVar = arFile.readStringArr(name);
 
 		for (int n = 0; n < nTrans; n++) {
 			str = transVar[n].trim();
@@ -1162,7 +1141,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 	private void checkParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
 		ArgoReferenceTable.ArgoReferenceEntry info;
-		String parameterValue = readString(parameterName).trim();
+		String parameterValue = arFile.readString(parameterName).trim();
 
 		log.debug("{}: '{}'", parameterName, parameterValue);
 		if ((info = ArgoReferenceTable.PROGRAM_NAME.contains(parameterValue)).isValid()) {
@@ -1177,7 +1156,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 	private void checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
 
-		Variable dataVar = ncReader.findVariable("PROGRAM_NAME");
+		Variable dataVar = arFile.getNcReader().findVariable("PROGRAM_NAME");
 		if (dataVar != null) {
 			checkParameterValueAgainstRefTable(parameterName, refTable);
 		}
@@ -1191,7 +1170,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 	 * @throws IOException If an I/O error occurs
 	 */
 	private Character getChar(String name) throws IOException {
-		ArrayChar.D0 value = (ArrayChar.D0) ncReader.findVariable(name).read();
+		ArrayChar.D0 value = (ArrayChar.D0) arFile.getNcReader().findVariable(name).read();
 		return Character.valueOf(value.get());
 	}
 
@@ -1210,7 +1189,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// .........battery_type............
 		int nTypes = 0;
 
-		String str = readString("BATTERY_TYPE");
+		String str = arFile.readString("BATTERY_TYPE");
 		log.debug("BATTERY_TYPE: '{}'", str);
 
 		if (str.length() <= 0) {
@@ -1240,7 +1219,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 						// ################# TEMPORARY WARNING ################
 						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("...invalid manufacturer");
 
@@ -1254,7 +1233,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 						// ################# TEMPORARY WARNING ################
 						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("invalid type");
 
@@ -1271,7 +1250,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 					// ################# TEMPORARY WARNING ################
 					validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-					log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+					log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 					log.debug("...does not match template");
 				}
@@ -1281,7 +1260,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 		// .....battery_packs.....
 		int nPacks = -1;
 
-		str = readString("BATTERY_PACKS");
+		str = arFile.readString("BATTERY_PACKS");
 
 		log.debug("BATTERY_PACKS: '{}'", str);
 
@@ -1322,7 +1301,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 							// ################# TEMPORARY WARNING ################
 							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 							log.debug("invalid style");
 
@@ -1336,7 +1315,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 							// ################# TEMPORARY WARNING ################
 							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 							log.debug("invalid type");
 
@@ -1353,7 +1332,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 						// ################# TEMPORARY WARNING ################
 						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("...does not match template");
 					}
@@ -1371,7 +1350,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 				// ################# TEMPORARY WARNING ################
 				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-				log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+				log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 				log.debug("number of types != number of packs => {} != {}", nTypes, nPacks);
 			}
@@ -1394,8 +1373,8 @@ public class ArgoMetadataFile extends ArgoDataFile {
 	public void validateConfigMission() throws IOException {
 		log.debug(".....validateConfigMission.....");
 
-		int nMissions = getDimensionLength("N_MISSIONS");
-		int[] mission = readIntArr("CONFIG_MISSION_NUMBER");
+		int nMissions = arFile.getDimensionLength("N_MISSIONS");
+		int[] mission = arFile.readIntArr("CONFIG_MISSION_NUMBER");
 
 		log.debug("N_MISSIONS = {}", nMissions);
 
@@ -1432,12 +1411,12 @@ public class ArgoMetadataFile extends ArgoDataFile {
 			String dim = "N_" + v + "PARAM";
 			String varName = v + "PARAMETER_NAME";
 
-			int nParam = getDimensionLength(dim);
+			int nParam = arFile.getDimensionLength(dim);
 
 			log.debug("'{}' checking: number of parameters = {}", v, nParam);
 
 			// ..read config names
-			String[] full_name = readStringArr(varName);
+			String[] full_name = arFile.readStringArr(varName);
 
 			// ...........loop over names.............
 
@@ -1472,7 +1451,8 @@ public class ArgoMetadataFile extends ArgoDataFile {
 				if (!nameAlreadyChecked.contains(param)) {
 					// ..this parameter name has not been checked
 
-					ArgoConfigTechParam.ArgoConfigTechParamMatch match = spec.ConfigTech.findConfigParam(param);
+					ArgoConfigTechParam.ArgoConfigTechParamMatch match = arFile.getFileSpec().ConfigTech
+							.findConfigParam(param);
 
 					if (match == null) {
 						// ..NOT an active name, NOT a deprecated name --> error
@@ -1481,7 +1461,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 						// ################# TEMPORARY WARNING ################
 						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("parameter is invalid");
 
@@ -1506,7 +1486,7 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 								// ################# TEMPORARY WARNING ################
 								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-								log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 								log.debug("...invalid template/value '{}'/'{}'", tmplt, value);
 							}
@@ -1529,7 +1509,8 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 									// ################# TEMPORARY WARNING ################
 									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+											err);
 
 									log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
 								} else {
@@ -1546,7 +1527,8 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 									// ################# TEMPORARY WARNING ################
 									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+											err);
 
 									log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
 
@@ -1565,7 +1547,8 @@ public class ArgoMetadataFile extends ArgoDataFile {
 
 									// ################# TEMPORARY WARNING ################
 									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+											err);
 
 									log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
 								} else {
@@ -1585,10 +1568,10 @@ public class ArgoMetadataFile extends ArgoDataFile {
 				if (!unitAlreadyChecked.containsKey(unit)) {
 					// ..this unit name has not been checked
 
-					if (!spec.ConfigTech.isConfigTechUnit(unit)) {
+					if (!arFile.getFileSpec().ConfigTech.isConfigTechUnit(unit)) {
 						// ..NOT an active unit name
 
-						if (spec.ConfigTech.isDeprecatedConfigTechUnit(unit)) {
+						if (arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(unit)) {
 							// ..IS a deprecated name --> warning
 
 							validUnit = true;

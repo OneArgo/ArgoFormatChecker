@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoFileSpecification;
+import fr.coriolis.checker.specs.ArgoReferenceTable;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
@@ -159,6 +160,7 @@ public class ArgoDataFile {
 	private NetcdfFile ncReader = null;
 	private String ncFileName = new String("");
 	private ArgoFileSpecification spec = null;
+	private ArgoReferenceTable.DACS validatedDAC;
 
 	private List<Variable> varList;
 
@@ -179,6 +181,18 @@ public class ArgoDataFile {
 //.........................................
 //               ACCESSORS
 //.........................................
+
+	public void setValidatedDac(ArgoReferenceTable.DACS validatedDAC) {
+		this.validatedDAC = validatedDAC;
+	}
+
+	public File getFile() {
+		return file;
+	}
+
+	public ArgoReferenceTable.DACS getValidatedDac() {
+		return this.validatedDAC;
+	}
 
 	public ValidationResult getValidationResult() {
 		return validationResult;
@@ -423,7 +437,7 @@ public class ArgoDataFile {
 		ArgoDataFile arFile = null;
 		if (ft == FileType.METADATA) {
 			log.debug("creating ArgoMetadataFile");
-			arFile = new ArgoMetadataFile();
+			arFile = new ArgoMetadataValidator();
 
 		} else if (ft == FileType.PROFILE) {
 			log.debug("creating ArgoProfileFile");

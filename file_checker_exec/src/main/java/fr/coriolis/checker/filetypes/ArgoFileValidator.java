@@ -17,6 +17,7 @@ import fr.coriolis.checker.specs.ArgoAttribute;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoDimension;
 import fr.coriolis.checker.specs.ArgoFileSpecification;
+import fr.coriolis.checker.specs.ArgoReferenceTable;
 import fr.coriolis.checker.specs.ArgoVariable;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.DataType;
@@ -70,13 +71,14 @@ public class ArgoFileValidator {
 		pDataMode = Pattern.compile("[RDA]+");
 	}
 	private final static DecimalFormat cycleFmt = new DecimalFormat("000");
+	protected final static Date earliestDate = ArgoDate.get("19970101000000");
 	// ..standard i/o shortcuts
 	private static PrintStream stdout = new PrintStream(System.out);
 	private static PrintStream stderr = new PrintStream(System.err);
 	private static final Logger log = LogManager.getLogger("ArgoFileValidator");
 
-	private final ArgoDataFile arFile;
-	private ValidationResult validationResult;
+	protected final ArgoDataFile arFile;
+	protected ValidationResult validationResult;
 
 	public ArgoFileValidator(ArgoDataFile arFile) {
 		this.arFile = arFile;
@@ -87,7 +89,6 @@ public class ArgoFileValidator {
 	// Validation methods
 	// ==================
 
-	// .......................verifyFormat.....................
 	/**
 	 * Verifies whether this file conforms to the Argo Netcdf specification. The
 	 * specification for this file type and version must be open. (See
@@ -105,7 +106,7 @@ public class ArgoFileValidator {
 	 * @return boolean status indicator: True - file checked (status unspecified);
 	 *         False - failed to check format
 	 */
-	public boolean verifyFormat(String dacName) {
+	public boolean validateFormat(String dacName) {
 		if (arFile.getFileSpec() == null) {
 			log.info("File specification not opened");
 			ValidationResult.lastMessage = "ERROR: File specification not opened for this file";
@@ -164,7 +165,57 @@ public class ArgoFileValidator {
 		log.debug(".....verifyFormat: completed.....");
 
 		return true;
-	} // ..end verifyFormat
+	} // ..end validateFormat
+
+	/**
+	 * Validates the data in the Argo file. This is a driver routine that performs
+	 * all types of validations (see other validate* routines).
+	 * 
+	 * <p>
+	 * Performs the following validations:
+	 * <ol>
+	 * <li>validateStringNulls -- if ckNulls = true
+	 * <li>validateDates
+	 * <li>(version 2.2 and earlier) validateHighlyDesirable_v2
+	 * <li>(version 3+) validateMandatory_v3
+	 * <li>validateBattery
+	 * <li>validateConfigMission
+	 * <li>validateConfigParams
+	 *
+	 * <p>
+	 * Upon completion <i>obj</i>.nFormatErrors(), <i>obj</i>.nFormatWarnings,
+	 * <i>obj</i>.formatErrors(), and <i>obj</i>.formatWarnings will return results.
+	 *
+	 * @param dacName name of the DAC for this file
+	 * @param ckNulls true = check all strings for NULL values; false = skip
+	 * @return success indicator. true - validation was performed. false -
+	 *         validation could not be performed (getMessage() will return the
+	 *         reason).
+	 * @throws IOException If an I/O error occurs
+	 */
+	public boolean validateData(boolean ckNulls) throws IOException {
+		// before checking data, verify if the file had not failed the format validation
+		// :
+		if (!validationResult.isValid()) {
+			ValidationResult.lastMessage = new String(
+					"File must be verified (verifyFormat) " + "successfully before validation");
+			return false;
+		}
+
+		// check dacName passed in argument line:
+		if (!checkDacNameArgument()) {
+			ValidationResult.lastMessage = new String("Unknown DAC name = '" + arFile.getDacName() + "'");
+			return false;
+		}
+
+		if (ckNulls) {
+			validateStringNulls();
+		}
+
+		return true;
+	}
+
+	//
 
 	private void verifyGlobalAttributes(String dacName) {
 		for (String name : arFile.getFileSpec().getGlobalAttributeNames()) {
@@ -856,6 +907,28 @@ public class ArgoFileValidator {
 	}
 
 	// .........................................................
+	// ............. validate DAC name argument.................
+	// .........................................................
+
+	private boolean checkDacNameArgument() {
+		ArgoReferenceTable.DACS dac = null;
+		// .......check arguments.......
+		if (arFile.getDacName().trim().length() > 0) {
+			for (ArgoReferenceTable.DACS d : ArgoReferenceTable.DACS.values()) {
+				if (d.name.equals(arFile.getDacName())) {
+					dac = d;
+					this.arFile.setValidatedDac(dac);
+					break;
+				}
+			}
+			if (dac == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	// .........................................................
 	// ........... getGdacFileName ..............
 	// .........................................................
 	/**
@@ -1056,7 +1129,7 @@ public class ArgoFileValidator {
 	 *
 	 * @throws IOException If an I/O error occurs
 	 */
-	public void validateStringNulls() throws IOException {
+	private void validateStringNulls() throws IOException {
 		char nullChar = (char) 0;
 
 		// .....Check all Strings -- no nulls allowed.....
