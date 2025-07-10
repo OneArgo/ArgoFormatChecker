@@ -207,7 +207,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		}
 
 		Date fileTime = new Date(arFile.getFile().lastModified());
-		long fileSec = fileTime.getTime();
 
 		if (log.isDebugEnabled()) {
 			log.debug("earliestDate:     '{}'", ArgoDate.format(earliestDate));
@@ -219,7 +218,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		}
 
 		// ...........creation and update dates checks:.............
-		super.validateCreationUpdateDates(fileTime, fileSec);
+		super.validateCreationUpdateDates(fileTime);
 
 		// ............launch date checks:...........
 		// ..must be set ... not before earliest allowed date
@@ -389,12 +388,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addWarning(name + ": Empty");
 		}
 
-		name = "PLATFORM_NUMBER"; // ..valid platform number
+		name = "PLATFORM_NUMBER"; // ..valid wmo id
 		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-
-		if (!str.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
-			validationResult.addError(name + ": '" + str + "': Invalid");
+		if (!super.validatePlatfomNumber(str)) {
+			validationResult.addError("PLATFORM_NUMBER" + ": '" + str + "': Invalid");
 		}
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
@@ -608,19 +605,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": Empty");
 		}
 
-		name = "DATA_CENTRE"; // ..ref table 4 (and valid for DAC)
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (dac != null) {
-			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
-				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid for DAC " + dac);
-			}
-
-		} else { // ..incoming DAC not set
-			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
-				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid (for all DACs)");
-			}
-		}
+		// DATA_CENTRE
+		super.validateDataCentre(dac);
 
 		name = "FIRMWARE_VERSION"; // ..not empty
 		str = arFile.readString(name).trim();

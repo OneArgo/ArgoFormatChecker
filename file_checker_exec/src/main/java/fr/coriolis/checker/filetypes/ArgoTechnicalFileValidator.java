@@ -1,7 +1,6 @@
 package fr.coriolis.checker.filetypes;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,9 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.specs.ArgoConfigTechParam;
-import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
-import ucar.ma2.ArrayChar;
 
 /**
  * Implements all of the features required to validate ArgoTechnicalFiles
@@ -24,7 +21,7 @@ import ucar.ma2.ArrayChar;
  * @version $Id: ArgoTechnicalFile.java 1263 2021-06-14 17:59:56Z ignaszewski $
  */
 
-public class ArgoTechnicalFile extends ArgoDataFile {
+public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 
 	// .........................................
 	// VARIABLES
@@ -32,26 +29,19 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 	// ..class variables
 	// ..standard i/o shortcuts
-	private static final Logger log = LogManager.getLogger("ArgoTechnicalFile");
-
-	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
-
-	// ..object variables
-	private String data_mode;
-
-	private ArrayList<String>[] profParam;
+	private static final Logger log = LogManager.getLogger("ArgoTechnicalFileValidator");
 
 	// .......................................
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoTechnicalFile() throws IOException {
-		super();
+	protected ArgoTechnicalFileValidator(ArgoDataFile arFile) throws IOException {
+		super(arFile);
 	}
 
-	public ArgoTechnicalFile(String specDir, String version) {
-		// super(specDir, FileType.PROFILE, version);
-	}
+//	public ArgoTechnicalFileValidator(String specDir, String version) {
+//		// super(specDir, FileType.PROFILE, version);
+//	}
 
 	// ..........................................
 	// METHODS
@@ -70,15 +60,15 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	 *         for the failure to open.)
 	 * @throws IOException If an I/O error occurs
 	 */
-	public static ArgoTechnicalFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
-		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
-		if (!(arFile instanceof ArgoTechnicalFile)) {
-			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
-			return null;
-		}
-
-		return (ArgoTechnicalFile) arFile;
-	}
+//	public static ArgoTechnicalFileValidator open(String inFile, String specDir, boolean fullSpec) throws IOException {
+//		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
+//		if (!(arFile instanceof ArgoTechnicalFileValidator)) {
+//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo PROFILE file";
+//			return null;
+//		}
+//
+//		return (ArgoTechnicalFileValidator) arFile;
+//	}
 
 	/**
 	 * Validates the data in the technical file. This is a driver routine that
@@ -95,38 +85,18 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validate(String dacName, boolean ckNulls) throws IOException {
-		ArgoReferenceTable.DACS dac = null;
-
-		if (!validationResult.isValid()) {
-			ValidationResult.lastMessage = "File must be verified (verifyFormat) " + "successfully before validation";
+	public boolean validateData(String dacName, boolean ckNulls) throws IOException {
+		boolean basicsChecks = super.validateData(ckNulls);
+		if (!basicsChecks) {
 			return false;
 		}
 
-		// .......check arguments.......
-		if (dacName.trim().length() > 0) {
-			for (ArgoReferenceTable.DACS d : ArgoReferenceTable.DACS.values()) {
-				if (d.name.equals(dacName)) {
-					dac = d;
-					break;
-				}
-			}
-			if (dac == null) {
-				ValidationResult.lastMessage = "Unknown DAC name = '" + dacName + "'";
-				return false;
-			}
-		}
+		// Validate tech meta data
+		validateMetaData(arFile.getValidatedDac());
 
-		// ............Determine number of tech params............
-
-		if (ckNulls) {
-			validateStringNulls();
-		}
-
-		validateMetaData(dac);
 		validateDates();
 
-		if (format_version.startsWith("2.4") || format_version.startsWith("3")) {
+		if (arFile.fileVersion().startsWith("2.4") || arFile.fileVersion().startsWith("3")) {
 			validateTechParams();
 		}
 
@@ -149,80 +119,9 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	 */
 	public void validateDates() throws IOException {
 		log.debug(".....validateDates.....");
-
-		String creation = ((ArrayChar) ncReader.findVariable("DATE_CREATION").read()).getString();
-		String update = ((ArrayChar) ncReader.findVariable("DATE_UPDATE").read()).getString();
-		Date fileTime = new Date(file.lastModified());
-		long fileSec = fileTime.getTime();
-
-		if (log.isDebugEnabled()) {
-			log.debug("earliestDate:  " + ArgoDate.format(earliestDate));
-			log.debug("fileTime:      " + ArgoDate.format(fileTime));
-			log.debug("DATE_CREATION: " + creation);
-			log.debug("DATE_UPDATE:   " + update);
-		}
-
-		// ...........initial creation date checks:.............
-		// ..set, after earliestDate, and before file time
-		Date dateCreation = null;
-		boolean haveCreation = false;
-		long creationSec = 0;
-
-		if (creation.trim().length() <= 0) {
-			validationResult.addError("DATE_CREATION: Not set");
-
-		} else {
-			dateCreation = ArgoDate.get(creation);
-			haveCreation = true;
-
-			if (dateCreation == null) {
-				haveCreation = false;
-				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
-
-			} else {
-				creationSec = dateCreation.getTime();
-
-				if (dateCreation.before(earliestDate)) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': Before allowed date ('"
-							+ ArgoDate.format(earliestDate) + "')");
-
-				} else if ((creationSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': After system file time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
-
-		// ............initial update date checks:...........
-		// ..set, not before creation time, before file time
-		Date dateUpdate = null;
-		boolean haveUpdate = false;
-		long updateSec = 0;
-
-		if (update.trim().length() <= 0) {
-			validationResult.addError("DATE_UPDATE: Not set");
-		} else {
-			dateUpdate = ArgoDate.get(update);
-			haveUpdate = true;
-
-			if (dateUpdate == null) {
-				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
-				haveUpdate = false;
-
-			} else {
-				updateSec = dateUpdate.getTime();
-
-				if (haveCreation && dateUpdate.before(dateCreation)) {
-					validationResult
-							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
-				}
-
-				if ((updateSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_UPDATE: '" + update + "': After system file time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
+		Date fileTime = new Date(arFile.getFile().lastModified());
+		// ...........creation and update dates checks:.............
+		super.validateCreationUpdateDates(fileTime);
 	}// ..end validateDates
 
 	/**
@@ -242,31 +141,14 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	public void validateMetaData(ArgoReferenceTable.DACS dac) throws IOException {
 		log.debug(".....validateMetaData.....");
 
-		ArrayChar.D1 plNum = (ArrayChar.D1) ncReader.findVariable("PLATFORM_NUMBER").read();
-		ArrayChar.D1 dc = (ArrayChar.D1) ncReader.findVariable("DATA_CENTRE").read();
-
-		String firstNum = new String(plNum.getString().trim());
-
-		log.debug("PLATFORM_NUMBER: '{}'", plNum.getString());
-
-		String s = plNum.getString().trim();
-		if (!s.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
-			validationResult.addError("PLATFORM_NUMBER: '" + s + "': Invalid");
+		// PLATFORM_NUMBER
+		String str = arFile.readString("PLATFORM_NUMBER").trim();
+		if (!super.validatePlatfomNumber(str)) {
+			validationResult.addError("PLATFORM_NUMBER" + ": '" + str + "': Invalid");
 		}
 
-		log.debug("DATA_CENTRE: '" + dc.getString() + "'");
-
-		s = dc.getString().trim();
-		if (dac != null) {
-			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(s)) {
-				validationResult.addError("DATA_CENTRE: '" + s + "': Invalid for DAC " + dac);
-			}
-
-		} else { // ..incoming DAC not set
-			if (!ArgoReferenceTable.DacCenterCodes.containsValue(s)) {
-				validationResult.addError("DATA_CENTRE: '" + s + "': Invalid (for all DACs)");
-			}
-		}
+		// DATA_CENTRE
+		super.validateDataCentre(dac);
 	}// ..end validateMetaData
 
 	/**
@@ -282,7 +164,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 	public void validateTechParams() throws IOException {
 		log.debug(".....validateTechParams.....");
 
-		int nParam = getDimensionLength("N_TECH_PARAM");
+		int nParam = arFile.getDimensionLength("N_TECH_PARAM");
 		log.debug("n_technical_parameter: {}", nParam);
 
 		// ..read technical parameters and values
@@ -290,7 +172,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 		String nName = "TECHNICAL_PARAMETER_NAME";
 		// String vName = "TECHNICAL_PARAMETER_VALUE";
 
-		String[] full_name = readStringArr(nName);
+		String[] full_name = arFile.readStringArr(nName);
 		/*
 		 * 2021-06-01: value checks are currently not being worked on
 		 *
@@ -332,7 +214,8 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 			if (!nameAlreadyChecked.contains(param)) {
 				// ..this parameter name has not been checked
 
-				ArgoConfigTechParam.ArgoConfigTechParamMatch match = spec.ConfigTech.findTechParam(param);
+				ArgoConfigTechParam.ArgoConfigTechParamMatch match = arFile.getFileSpec().ConfigTech
+						.findTechParam(param);
 
 				if (match == null) {
 					// ..NOT an active name, NOT a deprecated name --> error
@@ -341,7 +224,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 					// ################# TEMPORARY WARNING ################
 					validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-					log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+					log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 					log.debug("invalid param (not active or deprecated): '{}'", param);
 
@@ -366,7 +249,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 							// ################# TEMPORARY WARNING ################
 							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 							log.debug("...invalid template/value '{}'/'{}'", tmplt, val);
 						}
@@ -389,7 +272,7 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 
 								// ################# TEMPORARY WARNING ################
 								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-								log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
 							} else {
@@ -409,10 +292,10 @@ public class ArgoTechnicalFile extends ArgoDataFile {
 			if (!unitAlreadyChecked.containsKey(unit)) {
 				// ..this unit name has NOT been checked
 
-				if (!spec.ConfigTech.isConfigTechUnit(unit)) {
+				if (!arFile.getFileSpec().ConfigTech.isConfigTechUnit(unit)) {
 					// ..NOT an active unit
 
-					if (spec.ConfigTech.isDeprecatedConfigTechUnit(unit)) {
+					if (arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(unit)) {
 						// ..IS a deprecated unit --> warning
 
 						validUnit = true;

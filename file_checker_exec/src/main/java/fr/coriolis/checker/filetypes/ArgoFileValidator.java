@@ -218,7 +218,9 @@ public class ArgoFileValidator {
 		return true;
 	}
 
-	protected void validateCreationUpdateDates(Date fileTime, long fileSec) {
+	protected void validateCreationUpdateDates(Date fileTime) {
+		long fileSec = fileTime.getTime();
+
 		String creation = arFile.readString("DATE_CREATION").trim();
 		String update = arFile.readString("DATE_UPDATE").trim();
 		arFile.setCreationDate(creation);
@@ -297,7 +299,22 @@ public class ArgoFileValidator {
 		log.debug("{}: '{}'", "PLATFORM_NUMBER", platformNumberStr);
 
 		return platformNumberStr.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}");
+	}
 
+	protected void validateDataCentre(ArgoReferenceTable.DACS dac) {
+		String name = "DATA_CENTRE"; // ..ref table 4 (and valid for DAC)
+		String str = arFile.readString(name).trim();
+		log.debug("{}: '{}'", name, str);
+		if (dac != null) {
+			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
+				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid for DAC " + dac);
+			}
+
+		} else { // ..incoming DAC not set
+			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
+				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid (for all DACs)");
+			}
+		}
 	}
 
 	private void verifyGlobalAttributes(String dacName) {

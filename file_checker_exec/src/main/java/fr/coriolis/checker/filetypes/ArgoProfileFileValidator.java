@@ -53,11 +53,6 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
 	private final static String goodJuldQC = new String("01258");
 
-	// ..object variables
-	private String data_mode;
-
-//	private NetcdfFileWriter ncWriter;
-
 	private ArrayList<ArrayList<String>> profParam;
 
 	// .......................................
@@ -579,7 +574,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		}
 
 		// ...........initial creation & update dates checks:.............
-		super.validateCreationUpdateDates(fileTime, fileSec);
+		super.validateCreationUpdateDates(fileTime);
 
 		// ............check per-profile dates.............
 		// String posQC = readString("POSITION_QC");
@@ -1280,9 +1275,6 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			if (mode != 'A' && mode != 'D' && mode != 'R') {
 				validationResult.addError("DATA_MODE[" + (profNum + 1) + "]: '" + mode + "': Invalid");
 			}
-
-			char[] m = { mode };
-			data_mode = new String(m);
 
 			// .........check PARAMETER_DATA_MODE..............
 

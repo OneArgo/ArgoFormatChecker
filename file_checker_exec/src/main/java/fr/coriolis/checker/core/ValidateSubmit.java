@@ -25,7 +25,7 @@ import fr.coriolis.checker.filetypes.ArgoDataFile;
 import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.filetypes.ArgoMetadataValidator;
 import fr.coriolis.checker.filetypes.ArgoProfileFileValidator;
-import fr.coriolis.checker.filetypes.ArgoTechnicalFile;
+import fr.coriolis.checker.filetypes.ArgoTechnicalFileValidator;
 import fr.coriolis.checker.filetypes.ArgoTrajectoryFile;
 import fr.coriolis.checker.filetypes.ValidationResult;
 import fr.coriolis.checker.output.ResultsFile;
@@ -391,7 +391,7 @@ public class ValidateSubmit {
 
 		} else if (argo.fileType() == FileType.TECHNICAL) {
 			// Do Technical file validate data
-			boolean isValidateArgoTechnicalFileDataCompleted = ((ArgoTechnicalFile) argo).validateData(dacName, doNulls);
+			boolean isValidateArgoTechnicalFileDataCompleted = ((ArgoTechnicalFileValidator) argo).validateData(dacName, doNulls);
 			if (!isValidateArgoTechnicalFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoTechnicalFile.validate failed: " + ValidationResult.getMessage());
