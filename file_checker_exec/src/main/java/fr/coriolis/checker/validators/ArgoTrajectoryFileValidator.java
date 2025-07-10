@@ -1,4 +1,4 @@
-package fr.coriolis.checker.filetypes;
+package fr.coriolis.checker.validators;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -11,7 +11,8 @@ import java.util.HashSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
+import fr.coriolis.checker.core.ArgoDataFile;
+import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import ucar.ma2.Array;

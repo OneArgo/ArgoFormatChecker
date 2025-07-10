@@ -1,4 +1,4 @@
-package fr.coriolis.checker.filetypes;
+package fr.coriolis.checker.core;
 
 import java.io.File;
 import java.io.IOException;
@@ -179,7 +179,7 @@ public class ArgoDataFile {
 	/**
 	 * No public constructors are provided. See (
 	 * 
-	 * @see fr.coriolis.checker.filetypes.ArgoDataFile#open )
+	 * @see fr.coriolis.checker.core.ArgoDataFile#open )
 	 */
 	protected ArgoDataFile() {
 	}
@@ -2263,4 +2263,157 @@ public class ArgoDataFile {
 	// ********************************************************
 	// ******* end convenience "reader" functions ************
 	// ********************************************************
+
+	/**
+	 * Computes the "index-file psal adjustment" statistics defined as:<br>
+	 * <ul>
+	 * <li>Mean of (psal_adjusted - psal) on the deepest 500 meters with good
+	 * psal_adjusted_qc (equal to 1)
+	 * <li>Standard deviation of (psal_adjusted - psal) on the deepest 500 meters
+	 * with good psal_adjusted_qc (equal to 1)
+	 * </ul>
+	 * <p>
+	 * NOTES: Only performed for a core-file for the first profile.
+	 * 
+	 * @param nProf  number of profiles in the file
+	 * @param nParam number of parameters in the file
+	 * @param nLevel number of levels in the file
+	 * @throws IOException If an I/O error occurs
+	 */
+	public double[] computePsalAdjStats() {
+		log.debug(".....computePsalAdjStats.....");
+
+		double[] stats = { 99999., 99999. };
+
+		if (this.fileType() != FileType.PROFILE) {
+			log.debug("not a core-file. fileType = {}", this.fileType());
+			return (stats);
+		}
+
+		float[] p_adj = this.readFloatArr("PRES_ADJUSTED", 0);
+		String p_adj_qc = this.readString("PRES_ADJUSTED_QC", 0, true);
+
+		if (p_adj == null) {
+			log.debug("failed: no PRES_ADJUSTED variable");
+			return (stats);
+		}
+
+		// ..find the deepest good pres (must be > 500db)
+		float pDeep = 99999.f;
+		int nDeep = -1;
+
+		for (int n = p_adj.length - 1; n > 0; n--) {
+			// if (p_adj[n] >= 500.f) {
+			if (p_adj_qc.charAt(n) == '1') {
+				pDeep = p_adj[n];
+				nDeep = n;
+				break;
+			}
+			// }
+		}
+
+		if (nDeep < 0) {
+			log.debug("failed: no good PRES_ADJUSTED > 500db");
+			return (stats);
+		}
+
+		log.debug("nDeep, pDeep = {}, {}", nDeep, pDeep);
+
+		// ..find the starting point for the stats
+		float pShallow = 99999.f;
+		int nShallow = -1;
+
+		float shallowest = pDeep - 500.f;
+
+		for (int n = 0; n < p_adj.length; n++) {
+			if (p_adj[n] >= shallowest) {
+				pShallow = p_adj[n];
+				nShallow = n;
+				break;
+			}
+		}
+
+		if (nShallow < 0) {
+			log.debug("failed: could not find a starting PRES_ADJUSTED index");
+			return (stats);
+		}
+
+		log.debug("nShallow, pShallow = {},  {}", nShallow, pShallow);
+
+		// ..is this mode = A or D (otherwise, the psal_adj)
+
+		char m = this.readString("DATA_MODE", true).charAt(0);
+		log.debug("mode = {}", m);
+
+		if (m == 'R') {
+			// ..no adjustment
+			stats[0] = 0.;
+			stats[1] = 0.;
+			log.debug("r-mode. no adjustment. stats = 0");
+			return (stats);
+		}
+
+		// ..get psal and psal_adj
+
+		float[] s = this.readFloatArr("PSAL", 0);
+		float[] sadj = this.readFloatArr("PSAL_ADJUSTED", 0);
+
+		String s_qc = this.readString("PSAL_QC", 0, true);
+		String sadj_qc = this.readString("PSAL_ADJUSTED_QC", 0, true);
+
+		if (s == null) {
+			log.debug("failed: no PSAL data");
+			return (stats);
+		}
+
+		// ..compute mean
+
+		double[] diff = new double[s.length];
+		double sum = 0.;
+		int n_data = 0;
+		boolean[] include = new boolean[s.length];
+
+		for (int n = nShallow; n <= nDeep; n++) {
+			if (s_qc.charAt(n) == '1' && sadj_qc.charAt(n) == '1') {
+				include[n] = true;
+				n_data++;
+				diff[n] = sadj[n] - s[n];
+				sum += diff[n];
+			} else {
+				include[n] = false;
+				diff[n] = 1.e10;
+			}
+		}
+
+		if (n_data < 2) {
+			log.debug("failed: fewer than 2 good data");
+			return (stats);
+		}
+
+		double mean = sum / n_data;
+
+		log.debug("sum, n_data, mean = {}, {}, {}", sum, n_data, mean);
+
+		// ..compute std dev
+
+		sum = 0.;
+
+		for (int n = nShallow; n <= nDeep; n++) {
+			if (include[n]) {
+				double d = diff[n] - mean;
+				sum += d * d;
+			}
+		}
+
+		double sdev = Math.sqrt(sum / ((double) n_data - 1));
+
+		log.debug("sum, n_data, sdev = {}, {}, {}", sum, n_data, sdev);
+
+		// ..done
+
+		stats[0] = mean;
+		stats[1] = sdev;
+
+		return (stats);
+	}
 } // ..end class

@@ -18,17 +18,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.config.Options;
+import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.exceptions.NotAnArgoFileException;
 import fr.coriolis.checker.exceptions.ValidateFileDataFailedException;
 import fr.coriolis.checker.exceptions.VerifyFileFormatFailedException;
-import fr.coriolis.checker.filetypes.ArgoDataFile;
-import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
-import fr.coriolis.checker.filetypes.ArgoMetadataValidator;
-import fr.coriolis.checker.filetypes.ArgoProfileFileValidator;
-import fr.coriolis.checker.filetypes.ArgoTechnicalFileValidator;
-import fr.coriolis.checker.filetypes.ArgoTrajectoryFileValidator;
-import fr.coriolis.checker.filetypes.ValidationResult;
 import fr.coriolis.checker.output.ResultsFile;
+import fr.coriolis.checker.validators.ArgoFileValidator;
+import fr.coriolis.checker.validators.ArgoMetadataFileValidator;
+import fr.coriolis.checker.validators.ArgoProfileFileValidator;
+import fr.coriolis.checker.validators.ArgoTechnicalFileValidator;
+import fr.coriolis.checker.validators.ArgoTrajectoryFileValidator;
 
 /**
  * Implements the Argo FileChecker data file validation checking.
@@ -48,6 +47,7 @@ public class ValidateSubmit {
 	// ......................Variable Declarations................
 
 	private static ArgoDataFile argo;
+	private static ArgoFileValidator argoFileValidator;
 
 	private static boolean doXml = true;
 
@@ -215,6 +215,9 @@ public class ValidateSubmit {
 				// ..............open Argo file ....................
 				argo = openArgoFile(inFileName, options.getSpecDirName(), dacName);
 
+				// ..............instanciate File validator ....................
+				argoFileValidator = new ArgoFileValidator(argo);
+
 				// .................check the format................
 				String phase = "FORMAT-VERIFICATION";
 				boolean[] checkFormatResults = checkArgoFileFormat(dacName);
@@ -238,7 +241,7 @@ public class ValidateSubmit {
 				if (options.isDoNameCheck() && formatPassed) {
 					// .."name check" requested and no other errors
 					phase = "FILE-NAME-CHECK";
-					argo.validateGdacFileName();
+					argoFileValidator.validateGdacFileName();
 				}
 				// ...............report status and meta-data results...............
 				// ..status is that open was successful
@@ -297,7 +300,7 @@ public class ValidateSubmit {
 	private static boolean regularCheckArgoFileFormat(String dacName) throws VerifyFileFormatFailedException {
 
 		// check the format and return true if all process could be done
-		boolean isVerifyFormatCompleted = argo.validateFormat(dacName);
+		boolean isVerifyFormatCompleted = argoFileValidator.validateFormat(dacName);
 
 		if (!isVerifyFormatCompleted) {
 			// ..verifyFormat *failed* -- not format errors - an actual failure
@@ -353,7 +356,7 @@ public class ValidateSubmit {
 		if (doRudimentaryDateCheck) {
 			// ..passed format checks, format accepted, full data checks not performed
 			// because "early version" so do a couple of rudimentary date checks
-			argo.rudimentaryDateChecks();
+			argoFileValidator.rudimentaryDateChecks();
 		}
 		return doRudimentaryDateCheck;
 	}
@@ -372,8 +375,8 @@ public class ValidateSubmit {
 			throws IOException, ValidateFileDataFailedException {
 		if (argo.fileType() == FileType.METADATA) {
 			// Do metadata file validate data
-			boolean isValidateArgoMetadaFileDataCompleted = ((ArgoMetadataValidator) argo).validateData(dacName, doNulls,
-					doBatteryChecks);
+			boolean isValidateArgoMetadaFileDataCompleted = ((ArgoMetadataFileValidator) argoFileValidator)
+					.validateData(doNulls, doBatteryChecks);
 			if (!isValidateArgoMetadaFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoMetadataFile.validate failed: " + ValidationResult.getMessage());
@@ -382,7 +385,8 @@ public class ValidateSubmit {
 
 		} else if (argo.fileType() == FileType.PROFILE || argo.fileType() == FileType.BIO_PROFILE) {
 			// Do profile file validate data
-			boolean isValidateArgoProfileFileDataCompleted = ((ArgoProfileFileValidator) argo).validateData(false, dacName, doNulls);
+			boolean isValidateArgoProfileFileDataCompleted = ((ArgoProfileFileValidator) argoFileValidator)
+					.validateData(false, dacName, doNulls);
 			if (!isValidateArgoProfileFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoProfileFile.validate failed: " + ValidationResult.getMessage());
@@ -391,7 +395,8 @@ public class ValidateSubmit {
 
 		} else if (argo.fileType() == FileType.TECHNICAL) {
 			// Do Technical file validate data
-			boolean isValidateArgoTechnicalFileDataCompleted = ((ArgoTechnicalFileValidator) argo).validateData(dacName, doNulls);
+			boolean isValidateArgoTechnicalFileDataCompleted = ((ArgoTechnicalFileValidator) argoFileValidator)
+					.validateData(dacName, doNulls);
 			if (!isValidateArgoTechnicalFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoTechnicalFile.validate failed: " + ValidationResult.getMessage());
@@ -400,7 +405,8 @@ public class ValidateSubmit {
 
 		} else if (argo.fileType() == FileType.TRAJECTORY || argo.fileType() == FileType.BIO_TRAJECTORY) {
 			// Do Trajectory file validate data
-			boolean isValidateArgoTrajectoryFileDataCompleted = ((ArgoTrajectoryFileValidator) argo).validateData(dacName, doNulls);
+			boolean isValidateArgoTrajectoryFileDataCompleted = ((ArgoTrajectoryFileValidator) argoFileValidator)
+					.validateData(dacName, doNulls);
 			if (!isValidateArgoTrajectoryFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoTrajectoryFile.validate failed: " + ValidationResult.getMessage());

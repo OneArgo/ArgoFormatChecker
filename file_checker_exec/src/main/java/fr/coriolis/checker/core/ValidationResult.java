@@ -1,4 +1,4 @@
-package fr.coriolis.checker.filetypes;
+package fr.coriolis.checker.core;
 
 import java.util.ArrayList;
 
@@ -7,7 +7,7 @@ public class ValidationResult {
 
 	private ArrayList<String> warnings;
 	private ArrayList<String> errors;
-	protected static String lastMessage = BLANK_MESSAGE;
+	public static String lastMessage = BLANK_MESSAGE;
 
 	public ValidationResult() {
 		errors = new ArrayList<String>();

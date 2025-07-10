@@ -17,7 +17,7 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.coriolis.checker.filetypes.ArgoDataFile;
+import fr.coriolis.checker.core.ArgoDataFile;
 import ucar.ma2.DataType;
 
 /**
@@ -25,7 +25,7 @@ import ucar.ma2.DataType;
  * 
  * <p>
  * This class does NOT implement the "format verification" process. See
- * {@link fr.coriolis.checker.filetypes.ArgoDataFile#verifyFormat()
+ * {@link fr.coriolis.checker.core.ArgoDataFile#verifyFormat()
  * ArgoDataFile.verifyFormat} for more information.
  * <p>
  * <b>

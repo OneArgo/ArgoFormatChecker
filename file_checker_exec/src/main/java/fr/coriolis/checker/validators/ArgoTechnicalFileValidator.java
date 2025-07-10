@@ -1,4 +1,4 @@
-package fr.coriolis.checker.filetypes;
+package fr.coriolis.checker.validators;
 
 import java.io.IOException;
 import java.util.Date;
@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.specs.ArgoConfigTechParam;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 
