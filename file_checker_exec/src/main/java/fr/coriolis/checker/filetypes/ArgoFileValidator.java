@@ -66,7 +66,6 @@ import ucar.nc2.Variable;
 public class ArgoFileValidator {
 	// class variables
 	// ..standard i/o shortcuts
-	private static PrintStream stdout = new PrintStream(System.out);
 	private static PrintStream stderr = new PrintStream(System.err);
 	private static final Logger log = LogManager.getLogger("ArgoFileValidator");
 
@@ -77,7 +76,7 @@ public class ArgoFileValidator {
 	}
 	private final static DecimalFormat cycleFmt = new DecimalFormat("000");
 	protected final static Date earliestDate = ArgoDate.get("19970101000000");
-	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
+	protected final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
 
 	// ..object variables
 	protected final ArgoDataFile arFile;
@@ -171,23 +170,9 @@ public class ArgoFileValidator {
 	} // ..end validateFormat
 
 	/**
-	 * Validates the data in the Argo file. This is a driver routine that performs
-	 * all types of validations (see other validate* routines).
-	 * 
-	 * <p>
-	 * Performs the following validations:
-	 * <ol>
-	 * <li>validateStringNulls -- if ckNulls = true
-	 * <li>validateDates
-	 * <li>(version 2.2 and earlier) validateHighlyDesirable_v2
-	 * <li>(version 3+) validateMandatory_v3
-	 * <li>validateBattery
-	 * <li>validateConfigMission
-	 * <li>validateConfigParams
-	 *
-	 * <p>
-	 * Upon completion <i>obj</i>.nFormatErrors(), <i>obj</i>.nFormatWarnings,
-	 * <i>obj</i>.formatErrors(), and <i>obj</i>.formatWarnings will return results.
+	 * Before checking data, verify if the file had not failed the format
+	 * validations and if a valid dac name hase been passed in command line. Nulls
+	 * in the "char" variables are also checked.
 	 *
 	 * @param dacName name of the DAC for this file
 	 * @param ckNulls true = check all strings for NULL values; false = skip
@@ -196,7 +181,7 @@ public class ArgoFileValidator {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validateData(boolean ckNulls) throws IOException {
+	public boolean basicDataValidation(boolean ckNulls) throws IOException {
 		// before checking data, verify if the file had not failed the format validation
 		// :
 		if (!validationResult.isValid()) {

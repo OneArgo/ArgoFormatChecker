@@ -38,7 +38,7 @@ import ucar.nc2.Variable;
  *          $
  * @version $Id: ArgoProfileFile.java 1269 2021-06-14 20:34:45Z ignaszewski $
  */
-public class ArgoProfileFileValidator extends ArgoFileValidator {
+public abstract class ArgoProfileFileValidator extends ArgoFileValidator {
 
 	// .........................................
 	// VARIABLES
@@ -50,7 +50,6 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	private static PrintStream stderr = new PrintStream(System.err);
 	private static final Logger log = LogManager.getLogger("ArgoProfileFile");
 
-	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
 	private final static String goodJuldQC = new String("01258");
 
 	private ArrayList<ArrayList<String>> profParam;
@@ -487,7 +486,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public boolean validateData(boolean singleCycle, String dacName, boolean ckNulls) throws IOException {
-		boolean basicsChecks = super.validateData(ckNulls);
+		boolean basicsChecks = super.basicDataValidation(ckNulls);
 		if (!basicsChecks) {
 			return false;
 		}

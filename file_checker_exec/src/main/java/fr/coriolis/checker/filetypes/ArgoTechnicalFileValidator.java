@@ -86,7 +86,7 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public boolean validateData(String dacName, boolean ckNulls) throws IOException {
-		boolean basicsChecks = super.validateData(ckNulls);
+		boolean basicsChecks = super.basicDataValidation(ckNulls);
 		if (!basicsChecks) {
 			return false;
 		}

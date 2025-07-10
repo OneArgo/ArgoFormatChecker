@@ -132,7 +132,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	 * @throws IOException If an I/O error occurs
 	 */
 	public boolean validateData(boolean ckNulls, boolean... optionalChecks) throws IOException {
-		boolean basicsChecks = super.validateData(ckNulls);
+		boolean basicsChecks = super.basicDataValidation(ckNulls);
 		if (!basicsChecks) {
 			return false;
 		}

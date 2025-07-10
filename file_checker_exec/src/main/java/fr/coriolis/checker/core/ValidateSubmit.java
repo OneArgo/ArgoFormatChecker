@@ -26,7 +26,7 @@ import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.filetypes.ArgoMetadataValidator;
 import fr.coriolis.checker.filetypes.ArgoProfileFileValidator;
 import fr.coriolis.checker.filetypes.ArgoTechnicalFileValidator;
-import fr.coriolis.checker.filetypes.ArgoTrajectoryFile;
+import fr.coriolis.checker.filetypes.ArgoTrajectoryFileValidator;
 import fr.coriolis.checker.filetypes.ValidationResult;
 import fr.coriolis.checker.output.ResultsFile;
 
@@ -400,7 +400,7 @@ public class ValidateSubmit {
 
 		} else if (argo.fileType() == FileType.TRAJECTORY || argo.fileType() == FileType.BIO_TRAJECTORY) {
 			// Do Trajectory file validate data
-			boolean isValidateArgoTrajectoryFileDataCompleted = ((ArgoTrajectoryFile) argo).validateData(dacName, doNulls);
+			boolean isValidateArgoTrajectoryFileDataCompleted = ((ArgoTrajectoryFileValidator) argo).validateData(dacName, doNulls);
 			if (!isValidateArgoTrajectoryFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoTrajectoryFile.validate failed: " + ValidationResult.getMessage());

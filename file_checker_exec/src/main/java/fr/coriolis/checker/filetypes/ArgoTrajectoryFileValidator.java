@@ -2,31 +2,21 @@ package fr.coriolis.checker.filetypes;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.coriolis.checker.specs.ArgoAttribute;
+import fr.coriolis.checker.filetypes.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
-import fr.coriolis.checker.specs.ArgoDimension;
-import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
-import fr.coriolis.checker.specs.ArgoVariable;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
-import ucar.nc2.Attribute;
-import ucar.nc2.NetcdfFileWriter;
 import ucar.nc2.Variable;
 
 /**
@@ -48,81 +38,62 @@ import ucar.nc2.Variable;
  * @version $Id: ArgoTrajectoryFile.java 1269 2021-06-14 20:34:45Z ignaszewski $
  */
 
-public class ArgoTrajectoryFile extends ArgoDataFile {
+public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 	// .......................................
 	// VARIABLES
 	// .......................................
 
 	// ..standard i/o shortcuts
-	private static PrintStream stdout = new PrintStream(System.out);
 	private static PrintStream stderr = new PrintStream(System.err);
-	private static final Logger log = LogManager.getLogger("ArgoTrajectoryFile");
+	private static final Logger log = LogManager.getLogger("ArgoTrajectoryFileValidator");
 
 	private final static int fillCycNum = 99999;
 
-	private final static long oneDaySec = 1L * 24L * 60L * 60L * 1000L;
 	private final static String goodJuldQC = new String("01258");
-
-	// ..object variables
-	private NetcdfFileWriter ncWriter;
 
 	// .......................................
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoTrajectoryFile() throws IOException {
-		super();
+	protected ArgoTrajectoryFileValidator(ArgoDataFile arFile) throws IOException {
+		super(arFile);
 	}
 
-	protected ArgoTrajectoryFile(String specDir, String version) {
-		// super(specDir, FileType.TRAJECTORY, version);
-	}
+//	protected ArgoTrajectoryFileValidator(String specDir, String version) {
+//		// super(specDir, FileType.TRAJECTORY, version);
+//	}
 
 	// ..........................................
 	// METHODS
 	// ..........................................
 
-	/** Retrieve the NetcdfFileWriter reference */
-	public NetcdfFileWriter getNetcdfFileWriter() {
-		return ncWriter;
-	}
+//	/** Retrieve the NetcdfFileWriter reference */
+//	public NetcdfFileWriter getNetcdfFileWriter() {
+//		return ncWriter;
+//	}
 
 	/**
 	 * Retrieve a list of variables in the associated file
 	 */
-	public List<String> getVariableNames() {
-		LinkedList<String> varNames = new LinkedList<String>();
-
-		if (ncReader != null) {
-			for (Variable var : ncReader.getVariables()) {
-				varNames.add(var.getShortName());
-			}
-
-		} else if (ncWriter != null) {
-			for (Variable var : ncWriter.getNetcdfFile().getVariables()) {
-				varNames.add(var.getShortName());
-			}
-
-		} else {
-			varNames = null;
-		}
-
-		return varNames;
-	}
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-	private void addToList(StringBuilder list, String add) {
-		if (list.length() == 0) {
-			list.append("'" + add + "'");
-		} else {
-			list.append(", '" + add + "'");
-		}
-	}
+//	public List<String> getVariableNames() {
+//		LinkedList<String> varNames = new LinkedList<String>();
+//
+//		if (ncReader != null) {
+//			for (Variable var : ncReader.getVariables()) {
+//				varNames.add(var.getShortName());
+//			}
+//
+//		} else if (ncWriter != null) {
+//			for (Variable var : ncWriter.getNetcdfFile().getVariables()) {
+//				varNames.add(var.getShortName());
+//			}
+//
+//		} else {
+//			varNames = null;
+//		}
+//
+//		return varNames;
+//	}
 
 	/**
 	 * Convenience method to add to String list for "pretty printing".
@@ -130,26 +101,21 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 	 * @param list the StringBuilder list
 	 * @param add  the String to add
 	 */
-	private void addToList(StringBuilder list, int add) {
-		if (list.length() == 0) {
-			list.append(add);
-		} else {
-			list.append(", " + add);
-		}
-	}
+//	@Override
+//	private void addToList(StringBuilder list, String add) {
+//		if (list.length() == 0) {
+//			list.append("'" + add + "'");
+//		} else {
+//			list.append(", '" + add + "'");
+//		}
+//	}
 
 	/**
-	 * Closes an existing file.
+	 * Convenience method to add to String list for "pretty printing".
 	 *
-	 * @throws IOException If an I/O error occurs
+	 * @param list the StringBuilder list
+	 * @param add  the String to add
 	 */
-	@Override
-	public void close() throws IOException {
-		if (ncWriter != null) {
-			ncWriter.close();
-		}
-		super.close();
-	} // ..end close()
 
 	/**
 	 * Creates a new Argo trajectory file. The "template" for the file is the
@@ -168,329 +134,329 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 	 *                               in the CDL attributes to number are
 	 *                               encountered.
 	 */
-	public static ArgoTrajectoryFile createNew(String fileName, String specDir, String version, int N_PARAM,
-			int N_CYCLE, int N_HISTORY, Set<String> parameters) throws IOException, NumberFormatException {
-		log.debug(".....createNew: start.....");
-
-		ArgoTrajectoryFile arFile = new ArgoTrajectoryFile();
-
-		// ..create the template specification
-		arFile.spec = ArgoDataFile.openSpecification(false, specDir, ArgoDataFile.FileType.TRAJECTORY, version);
-		if (arFile.spec == null) {
-			return null;
-		}
-
-		arFile.fileType = ArgoDataFile.FileType.TRAJECTORY;
-
-		// ..remove any parameters that are not in this specification
-
-		Iterator<String> i = parameters.iterator();
-		while (i.hasNext()) {
-			String p = i.next();
-			if (!arFile.spec.isPhysicalParamName(p)) {
-				i.remove();
-				// arFile.validationResult.addWarning("Parameter: '"+p+
-				// "' not in specification. Removed.");
-				log.debug("requested parameter '{}' not in spec: removed");
-			}
-		}
-
-		N_PARAM = parameters.size();
-
-		// ..create new file
-
-		arFile.ncWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, fileName);
-		arFile.ncWriter.setFill(true);
-
-		// ..fill in object variables
-		arFile.file = null; // ..don't know why I need this ..... yet
-		arFile.fileType = ArgoDataFile.FileType.TRAJECTORY;
-		arFile.format_version = version;
-		arFile.ncFileName = fileName;
-		// arFile.spec is filled in by openSpec...
-
-		// .....add globabl attributes.....
-
-		for (ArgoAttribute a : arFile.spec.getGlobalAttributes()) {
-			String name = a.getName();
-			String value = (String) a.getValue();
-
-			if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
-				// ..the definition starts with one of the special ATTR_IGNORE codes
-
-				if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
-					// ..there is more than just the code on the line
-					// ..defining the default value, use it
-
-					value = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
-					log.debug("global attribute with special code: '{}'", value);
-
-				} else {
-					// ..nothing but the code on the line
-					// ..ignore the attribute
-					value = null;
-				}
-			}
-
-			if (name.equals("history")) {
-				value = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")).format(new Date()).toString();
-				log.debug("history global attribute: '{}'", value);
-			}
-
-			if (value != null) {
-				arFile.ncWriter.addGroupAttribute(null, new Attribute(name, value));
-				log.debug("add global attribute: '{}' = '{}'", name, value);
-			}
-		}
-
-		// .........add Dimensions...............
-		// ..don't allow <= 0 dimensions
-		if (N_PARAM <= 0) {
-			N_PARAM = 1;
-		}
-		if (N_CYCLE <= 0) {
-			N_CYCLE = 1;
-		}
-		if (N_HISTORY <= 0) {
-			N_HISTORY = 1;
-		}
-
-		for (ArgoDimension d : arFile.spec.getDimensions()) {
-			String name = d.getName();
-			int value = d.getValue();
-
-			if (name.equals("N_PARAM")) {
-				value = N_PARAM;
-			} else if (name.equals("N_CYCLE")) {
-				value = N_CYCLE;
-			} else if (name.equals("N_HISTORY")) {
-				value = N_HISTORY;
-			}
-
-			if (name.equals("N_MEASUREMENT")) {
-				arFile.ncWriter.addUnlimitedDimension(name);
-			} else {
-				arFile.ncWriter.addDimension(null, name, value);
-			}
-
-			log.debug("add dimension: '{}' = '{}'", name, value);
-		}
-
-		// .........add Variables...............
-
-		// ......ordered list.....
-		// ..this bit of code arranges the variables in the "expected order"
-		// ..this is technically completely unnecessary
-		// ..the ordering of the variables in the file should not matter
-		// ..however, at least one user is complaining about the current files
-		// ..and I am guessing that variable ordering is the problem.
-
-		// ..the way the "spec" files are parsed, the PARAM variables end up
-		// ..at the end of the variables list
-		// ..so I am trying to distribute the variables in the "expected order"
-
-		// ..good coding by users would eliminate the need for this
-
-		// ..the idea is to create an ordered list of variable names that are
-		// ..then used in the next section
-
-		log.debug("...build ordered list of variables...");
-
-		ArrayList<ArgoVariable> orderedList = new ArrayList<ArgoVariable>(200);
-
-		for (ArgoVariable v : arFile.spec.getVariables()) {
-			String name = v.getName();
-
-			if (v.isParamVar()) {
-				// ..when we get to the PARAM variables, we are done
-				// ..they are always at the end of the list and we handle
-				// ..them separately in the if-blocks below
-				break;
-			}
-
-			orderedList.add(v);
-			log.debug("add {}", name);
-
-			// ..insert the <PARAM> variables after MEASUREMENT_CODE
-
-			if (name.equals("MEASUREMENT_CODE")) {
-				log.debug("insert <PARAM> here");
-				for (ArgoVariable w : arFile.spec.getVariables()) {
-					if (w.isParamVar()) {
-						log.debug("isParamVar");
-						orderedList.add(w);
-						log.debug("add {}", w.getName());
-					}
-				}
-			}
-		}
-
-		log.debug("...ordered list complete...");
-
-		// ....end ordered list....
-
-		Boolean keep;
-		// ...if we didn't need the list to be ordered...
-		// for (ArgoVariable v : arFile.spec.getVariables()) {
-
-		for (ArgoVariable v : orderedList) {
-			String name = v.getName();
-			String prm = v.getParamName();
-
-			if (prm != null) {
-				// ..this is a physical parameter variable
-				// ..is it's parameter name in the parameter list
-
-				if (parameters.contains(prm)) {
-					keep = true;
-				} else {
-					keep = false;
-					log.debug("skip variable: '{}'", name);
-				}
-
-			} else {
-				// ..not a physical parameter, so keep it
-				keep = true;
-			}
-
-			if (keep) {
-				DataType type = v.getType();
-				String dims = v.getDimensionsString();
-
-				Variable var = arFile.ncWriter.addVariable(null, name, type, dims);
-				log.debug("add variable: '{}': '{}' '{}'", name, type, dims);
-
-				// ..add attributes for this variable
-				for (ArgoAttribute a : v.getAttributes()) {
-					String aname = a.getName();
-
-					if (a.isNumeric()) {
-						var.addAttribute(new Attribute(aname, (Number) a.getValue()));
-						log.debug("add attribute: '{}:{}' = '{}'", name, aname, a.getValue());
-
-					} else if (a.isString()) {
-						String value = (String) a.getValue();
-						Object def = null;
-
-						if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
-							// ..the definition starts with one of the special ATTR_IGNORE codes
-
-							if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
-								// ..there is more than just the code on the line
-								// ..defining the default value, use it
-
-								String val = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
-								log.debug("attribute with special code: '{}' '{}'", value, val);
-
-								if (val.startsWith("numeric:")) {
-									// ..this should be encoded as a number
-
-									val = val.substring("numeric:".length());
-									log.debug("...number: '{}'", val);
-
-									try {
-										switch (v.getType()) {
-										case DOUBLE:
-											def = Double.valueOf(val);
-											var.addAttribute(new Attribute(aname, (Number) def));
-											break;
-										case FLOAT:
-											def = Float.valueOf(val);
-											var.addAttribute(new Attribute(aname, (Number) def));
-											break;
-										case INT:
-											def = Integer.valueOf(val);
-											var.addAttribute(new Attribute(aname, (Number) def));
-											break;
-										case SHORT:
-											def = Short.valueOf(val);
-											var.addAttribute(new Attribute(aname, (Number) def));
-											break;
-										default: // ..assume it is a string
-											def = val;
-											var.addAttribute(new Attribute(aname, (String) def));
-										}
-									} catch (NumberFormatException e) {
-										throw new NumberFormatException(
-												"Attribute " + name + ":" + aname + ": Unable to convert to number");
-									}
-
-								} else {
-									// ..default value is a string
-									var.addAttribute(new Attribute(aname, val));
-								}
-
-								// } else {
-								// ..nothing but the special code on the line
-								// ..ignore the attribute
-								// def = null;
-							}
-
-						} else {
-							// ..not a special value -- insert as is
-							var.addAttribute(new Attribute(aname, value));
-							log.debug("add attribute: '{}:{}' = '{}'", name, aname, value);
-						}
-
-					} else {
-						log.error("attribute not Number or String: '{}:{}'", name, aname);
-						continue;
-					}
-
-				}
-			}
-		}
-
-		// .....create the file -- end "define mode"
-
-		arFile.ncWriter.create();
-		arFile.ncWriter.close();
-
-		log.debug(".....createNew: end.....");
-		return arFile;
-	}
-
-	/**
-	 * Opens an existing file without opening the <i>specification</i>
-	 *
-	 * @param inFile the string name of the file to open
-	 * @return the file object reference. Returns null if the file is not opened
-	 *         successfully. (ArgoTrajectoryFile.getMessage() will return the reason
-	 *         for the failure to open.)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public static ArgoTrajectoryFile open(String inFile) throws IOException {
-		ArgoDataFile arFile = ArgoDataFile.open(inFile);
-		if (!(arFile instanceof ArgoTrajectoryFile)) {
-			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
-			return null;
-		}
-
-		return (ArgoTrajectoryFile) arFile;
-	}
-
-	/**
-	 * Opens an existing file and the associated <i>Argo specification</i>).
-	 *
-	 * @param inFile   the string name of the file to open
-	 * @param specDir  the string name of the directory containing the format
-	 *                 specification files
-	 * @param fullSpec true = open the full specification; false = open the template
-	 *                 specification
-	 * @return the file object reference. Returns null if the file is not opened
-	 *         successfully. (ArgoTrajectoryFile.getMessage() will return the reason
-	 *         for the failure to open.)
-	 * @throws IOException If an I/O error occurs
-	 */
-	public static ArgoTrajectoryFile open(String inFile, String specDir, boolean fullSpec) throws IOException {
-		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
-		if (!(arFile instanceof ArgoTrajectoryFile)) {
-			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
-			return null;
-		}
-
-		return (ArgoTrajectoryFile) arFile;
-	}
+//	public static ArgoTrajectoryFileValidator createNew(String fileName, String specDir, String version, int N_PARAM,
+//			int N_CYCLE, int N_HISTORY, Set<String> parameters) throws IOException, NumberFormatException {
+//		log.debug(".....createNew: start.....");
+//
+//		ArgoTrajectoryFileValidator arFile = new ArgoTrajectoryFileValidator();
+//
+//		// ..create the template specification
+//		arFile.spec = ArgoDataFile.openSpecification(false, specDir, ArgoDataFile.FileType.TRAJECTORY, version);
+//		if (arFile.spec == null) {
+//			return null;
+//		}
+//
+//		arFile.fileType = ArgoDataFile.FileType.TRAJECTORY;
+//
+//		// ..remove any parameters that are not in this specification
+//
+//		Iterator<String> i = parameters.iterator();
+//		while (i.hasNext()) {
+//			String p = i.next();
+//			if (!arFile.spec.isPhysicalParamName(p)) {
+//				i.remove();
+//				// arFile.validationResult.addWarning("Parameter: '"+p+
+//				// "' not in specification. Removed.");
+//				log.debug("requested parameter '{}' not in spec: removed");
+//			}
+//		}
+//
+//		N_PARAM = parameters.size();
+//
+//		// ..create new file
+//
+//		arFile.ncWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, fileName);
+//		arFile.ncWriter.setFill(true);
+//
+//		// ..fill in object variables
+//		arFile.file = null; // ..don't know why I need this ..... yet
+//		arFile.fileType = ArgoDataFile.FileType.TRAJECTORY;
+//		arFile.format_version = version;
+//		arFile.ncFileName = fileName;
+//		// arFile.spec is filled in by openSpec...
+//
+//		// .....add globabl attributes.....
+//
+//		for (ArgoAttribute a : arFile.spec.getGlobalAttributes()) {
+//			String name = a.getName();
+//			String value = (String) a.getValue();
+//
+//			if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
+//				// ..the definition starts with one of the special ATTR_IGNORE codes
+//
+//				if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
+//					// ..there is more than just the code on the line
+//					// ..defining the default value, use it
+//
+//					value = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
+//					log.debug("global attribute with special code: '{}'", value);
+//
+//				} else {
+//					// ..nothing but the code on the line
+//					// ..ignore the attribute
+//					value = null;
+//				}
+//			}
+//
+//			if (name.equals("history")) {
+//				value = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")).format(new Date()).toString();
+//				log.debug("history global attribute: '{}'", value);
+//			}
+//
+//			if (value != null) {
+//				arFile.ncWriter.addGroupAttribute(null, new Attribute(name, value));
+//				log.debug("add global attribute: '{}' = '{}'", name, value);
+//			}
+//		}
+//
+//		// .........add Dimensions...............
+//		// ..don't allow <= 0 dimensions
+//		if (N_PARAM <= 0) {
+//			N_PARAM = 1;
+//		}
+//		if (N_CYCLE <= 0) {
+//			N_CYCLE = 1;
+//		}
+//		if (N_HISTORY <= 0) {
+//			N_HISTORY = 1;
+//		}
+//
+//		for (ArgoDimension d : arFile.spec.getDimensions()) {
+//			String name = d.getName();
+//			int value = d.getValue();
+//
+//			if (name.equals("N_PARAM")) {
+//				value = N_PARAM;
+//			} else if (name.equals("N_CYCLE")) {
+//				value = N_CYCLE;
+//			} else if (name.equals("N_HISTORY")) {
+//				value = N_HISTORY;
+//			}
+//
+//			if (name.equals("N_MEASUREMENT")) {
+//				arFile.ncWriter.addUnlimitedDimension(name);
+//			} else {
+//				arFile.ncWriter.addDimension(null, name, value);
+//			}
+//
+//			log.debug("add dimension: '{}' = '{}'", name, value);
+//		}
+//
+//		// .........add Variables...............
+//
+//		// ......ordered list.....
+//		// ..this bit of code arranges the variables in the "expected order"
+//		// ..this is technically completely unnecessary
+//		// ..the ordering of the variables in the file should not matter
+//		// ..however, at least one user is complaining about the current files
+//		// ..and I am guessing that variable ordering is the problem.
+//
+//		// ..the way the "spec" files are parsed, the PARAM variables end up
+//		// ..at the end of the variables list
+//		// ..so I am trying to distribute the variables in the "expected order"
+//
+//		// ..good coding by users would eliminate the need for this
+//
+//		// ..the idea is to create an ordered list of variable names that are
+//		// ..then used in the next section
+//
+//		log.debug("...build ordered list of variables...");
+//
+//		ArrayList<ArgoVariable> orderedList = new ArrayList<ArgoVariable>(200);
+//
+//		for (ArgoVariable v : arFile.spec.getVariables()) {
+//			String name = v.getName();
+//
+//			if (v.isParamVar()) {
+//				// ..when we get to the PARAM variables, we are done
+//				// ..they are always at the end of the list and we handle
+//				// ..them separately in the if-blocks below
+//				break;
+//			}
+//
+//			orderedList.add(v);
+//			log.debug("add {}", name);
+//
+//			// ..insert the <PARAM> variables after MEASUREMENT_CODE
+//
+//			if (name.equals("MEASUREMENT_CODE")) {
+//				log.debug("insert <PARAM> here");
+//				for (ArgoVariable w : arFile.spec.getVariables()) {
+//					if (w.isParamVar()) {
+//						log.debug("isParamVar");
+//						orderedList.add(w);
+//						log.debug("add {}", w.getName());
+//					}
+//				}
+//			}
+//		}
+//
+//		log.debug("...ordered list complete...");
+//
+//		// ....end ordered list....
+//
+//		Boolean keep;
+//		// ...if we didn't need the list to be ordered...
+//		// for (ArgoVariable v : arFile.spec.getVariables()) {
+//
+//		for (ArgoVariable v : orderedList) {
+//			String name = v.getName();
+//			String prm = v.getParamName();
+//
+//			if (prm != null) {
+//				// ..this is a physical parameter variable
+//				// ..is it's parameter name in the parameter list
+//
+//				if (parameters.contains(prm)) {
+//					keep = true;
+//				} else {
+//					keep = false;
+//					log.debug("skip variable: '{}'", name);
+//				}
+//
+//			} else {
+//				// ..not a physical parameter, so keep it
+//				keep = true;
+//			}
+//
+//			if (keep) {
+//				DataType type = v.getType();
+//				String dims = v.getDimensionsString();
+//
+//				Variable var = arFile.ncWriter.addVariable(null, name, type, dims);
+//				log.debug("add variable: '{}': '{}' '{}'", name, type, dims);
+//
+//				// ..add attributes for this variable
+//				for (ArgoAttribute a : v.getAttributes()) {
+//					String aname = a.getName();
+//
+//					if (a.isNumeric()) {
+//						var.addAttribute(new Attribute(aname, (Number) a.getValue()));
+//						log.debug("add attribute: '{}:{}' = '{}'", name, aname, a.getValue());
+//
+//					} else if (a.isString()) {
+//						String value = (String) a.getValue();
+//						Object def = null;
+//
+//						if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
+//							// ..the definition starts with one of the special ATTR_IGNORE codes
+//
+//							if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
+//								// ..there is more than just the code on the line
+//								// ..defining the default value, use it
+//
+//								String val = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
+//								log.debug("attribute with special code: '{}' '{}'", value, val);
+//
+//								if (val.startsWith("numeric:")) {
+//									// ..this should be encoded as a number
+//
+//									val = val.substring("numeric:".length());
+//									log.debug("...number: '{}'", val);
+//
+//									try {
+//										switch (v.getType()) {
+//										case DOUBLE:
+//											def = Double.valueOf(val);
+//											var.addAttribute(new Attribute(aname, (Number) def));
+//											break;
+//										case FLOAT:
+//											def = Float.valueOf(val);
+//											var.addAttribute(new Attribute(aname, (Number) def));
+//											break;
+//										case INT:
+//											def = Integer.valueOf(val);
+//											var.addAttribute(new Attribute(aname, (Number) def));
+//											break;
+//										case SHORT:
+//											def = Short.valueOf(val);
+//											var.addAttribute(new Attribute(aname, (Number) def));
+//											break;
+//										default: // ..assume it is a string
+//											def = val;
+//											var.addAttribute(new Attribute(aname, (String) def));
+//										}
+//									} catch (NumberFormatException e) {
+//										throw new NumberFormatException(
+//												"Attribute " + name + ":" + aname + ": Unable to convert to number");
+//									}
+//
+//								} else {
+//									// ..default value is a string
+//									var.addAttribute(new Attribute(aname, val));
+//								}
+//
+//								// } else {
+//								// ..nothing but the special code on the line
+//								// ..ignore the attribute
+//								// def = null;
+//							}
+//
+//						} else {
+//							// ..not a special value -- insert as is
+//							var.addAttribute(new Attribute(aname, value));
+//							log.debug("add attribute: '{}:{}' = '{}'", name, aname, value);
+//						}
+//
+//					} else {
+//						log.error("attribute not Number or String: '{}:{}'", name, aname);
+//						continue;
+//					}
+//
+//				}
+//			}
+//		}
+//
+//		// .....create the file -- end "define mode"
+//
+//		arFile.ncWriter.create();
+//		arFile.ncWriter.close();
+//
+//		log.debug(".....createNew: end.....");
+//		return arFile;
+//	}
+//
+//	/**
+//	 * Opens an existing file without opening the <i>specification</i>
+//	 *
+//	 * @param inFile the string name of the file to open
+//	 * @return the file object reference. Returns null if the file is not opened
+//	 *         successfully. (ArgoTrajectoryFile.getMessage() will return the reason
+//	 *         for the failure to open.)
+//	 * @throws IOException If an I/O error occurs
+//	 */
+//	public static ArgoTrajectoryFileValidator open(String inFile) throws IOException {
+//		ArgoDataFile arFile = ArgoDataFile.open(inFile);
+//		if (!(arFile instanceof ArgoTrajectoryFileValidator)) {
+//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
+//			return null;
+//		}
+//
+//		return (ArgoTrajectoryFileValidator) arFile;
+//	}
+//
+//	/**
+//	 * Opens an existing file and the associated <i>Argo specification</i>).
+//	 *
+//	 * @param inFile   the string name of the file to open
+//	 * @param specDir  the string name of the directory containing the format
+//	 *                 specification files
+//	 * @param fullSpec true = open the full specification; false = open the template
+//	 *                 specification
+//	 * @return the file object reference. Returns null if the file is not opened
+//	 *         successfully. (ArgoTrajectoryFile.getMessage() will return the reason
+//	 *         for the failure to open.)
+//	 * @throws IOException If an I/O error occurs
+//	 */
+//	public static ArgoTrajectoryFileValidator open(String inFile, String specDir, boolean fullSpec) throws IOException {
+//		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
+//		if (!(arFile instanceof ArgoTrajectoryFileValidator)) {
+//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
+//			return null;
+//		}
+//
+//		return (ArgoTrajectoryFileValidator) arFile;
+//	}
 
 	/**
 	 * Validates the data in the trajectory file. This is a driver routine that
@@ -528,37 +494,18 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validate(String dacName, boolean ckNulls) throws IOException {
-		log.debug(".....validate: start.....");
-
-		ArgoReferenceTable.DACS dac = null;
-
-		if (!validationResult.isValid()) {
-			ValidationResult.lastMessage = new String(
-					"File must be verified (verifyFormat) " + "successfully before validation");
+	public boolean validateData(String dacName, boolean ckNulls) throws IOException {
+		boolean basicsChecks = super.basicDataValidation(ckNulls);
+		if (!basicsChecks) {
 			return false;
-		}
-
-		// .......check arguments.......
-		if (dacName.trim().length() > 0) {
-			for (ArgoReferenceTable.DACS d : ArgoReferenceTable.DACS.values()) {
-				if (d.name.equals(dacName)) {
-					dac = d;
-					break;
-				}
-			}
-			if (dac == null) {
-				ValidationResult.lastMessage = new String("Unknown DAC name = '" + dacName + "'");
-				return false;
-			}
 		}
 
 		// ............Determine number of profiles............
 
-		int nCycle = getDimensionLength("N_CYCLE");
-		int nHistory = getDimensionLength("N_HISTORY");
-		int nMeasure = getDimensionLength("N_MEASUREMENT");
-		int nParam = getDimensionLength("N_PARAM");
+		int nCycle = arFile.getDimensionLength("N_CYCLE");
+		int nHistory = arFile.getDimensionLength("N_HISTORY");
+		int nMeasure = arFile.getDimensionLength("N_MEASUREMENT");
+		int nParam = arFile.getDimensionLength("N_PARAM");
 
 		boolean pass;
 
@@ -569,11 +516,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			log.debug("N_PARAM:       {}", nParam);
 		}
 
-		if (ckNulls) {
-			validateStringNulls();
-		}
-
-		pass = validateMetaData(dac);
+		pass = validateMetaData(arFile.getValidatedDac());
 		if (!pass) {
 			return true;
 		}
@@ -672,14 +615,14 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		// .....cycle_number_index and cycle_number_index_adj..........
 		log.debug("cyc_num_ind-check: start");
 
-		int[] cycleIndex = readIntArr("CYCLE_NUMBER_INDEX");
+		int[] cycleIndex = arFile.readIntArr("CYCLE_NUMBER_INDEX");
 		int[] cycleIndexAdj = null;
 		boolean core = false;
 
-		if (fileType == FileType.TRAJECTORY) {
+		if (arFile.fileType() == FileType.TRAJECTORY) {
 			// ..implies this is a core-file NOT a bio-file
 			core = true;
-			cycleIndexAdj = readIntArr("CYCLE_NUMBER_INDEX_ADJUSTED");
+			cycleIndexAdj = arFile.readIntArr("CYCLE_NUMBER_INDEX_ADJUSTED");
 		}
 
 		ErrorTracker adjSet = new ErrorTracker();
@@ -807,11 +750,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		log.debug("cyc_num_ind-check: end");
 		log.debug("cyc_num: start");
 
-		int[] cycle = readIntArr("CYCLE_NUMBER");
+		int[] cycle = arFile.readIntArr("CYCLE_NUMBER");
 		int[] cycleAdj = null;
 
 		if (core) {
-			cycleAdj = readIntArr("CYCLE_NUMBER_ADJUSTED");
+			cycleAdj = arFile.readIntArr("CYCLE_NUMBER_ADJUSTED");
 		}
 
 		adjSet.reset();
@@ -1114,7 +1057,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		// .....get DATA_MODE and check it as long we're at it.....
 
-		String data_mode = readString("DATA_MODE", true); // ..true -> return NULLS
+		String data_mode = arFile.readString("DATA_MODE", true); // ..true -> return NULLS
 
 		ErrorTracker invalid = new ErrorTracker();
 
@@ -1170,93 +1113,23 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		// ..check Reference_Date
 
 		String name = "REFERENCE_DATE_TIME";
-		String ref = readString(name);
+		String ref = arFile.readString(name);
 
 		log.debug(name + ": " + ref);
-		if (!ref.matches(spec.getMeta(name))) {
-			validationResult
-					.addError(name + ": '" + ref + "': Does not match specification ('" + spec.getMeta(name) + "')");
+		if (!ref.matches(arFile.getFileSpec().getMeta(name))) {
+			validationResult.addError(name + ": '" + ref + "': Does not match specification ('"
+					+ arFile.getFileSpec().getMeta(name) + "')");
 		}
 
-		String creation = readString("DATE_CREATION");
-		String update = readString("DATE_UPDATE");
-		Date fileTime = new Date(file.lastModified());
-		long fileSec = fileTime.getTime();
-
-		if (log.isDebugEnabled()) {
-			log.debug("earliestDate:  " + ArgoDate.format(earliestDate));
-			log.debug("fileTime:      " + ArgoDate.format(fileTime));
-			log.debug("DATE_CREATION: " + creation);
-			log.debug("DATE_UPDATE:   " + update);
-		}
-
-		// ...........initial creation date checks:.............
-		// ..set, after earliestDate, and before file time
-		Date dateCreation = null;
-		boolean haveCreation = false;
-		long creationSec = 0;
-
-		if (creation.trim().length() <= 0) {
-			validationResult.addError("DATE_CREATION: Not set");
-
-		} else {
-			dateCreation = ArgoDate.get(creation);
-			haveCreation = true;
-
-			if (dateCreation == null) {
-				haveCreation = false;
-				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
-
-			} else {
-				creationSec = dateCreation.getTime();
-
-				if (dateCreation.before(earliestDate)) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': Before allowed date ('"
-							+ ArgoDate.format(earliestDate) + "')");
-
-				} else if ((creationSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
-
-		// ............initial update date checks:...........
-		// ..set, not before creation time, before file time
-		Date dateUpdate = null;
-		boolean haveUpdate = false;
-		long updateSec = 0;
-
-		if (update.trim().length() <= 0) {
-			validationResult.addError("DATE_UPDATE: Not set");
-		} else {
-			dateUpdate = ArgoDate.get(update);
-			haveUpdate = true;
-
-			if (dateUpdate == null) {
-				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
-				haveUpdate = false;
-
-			} else {
-				updateSec = dateUpdate.getTime();
-
-				if (haveCreation && dateUpdate.before(dateCreation)) {
-					validationResult
-							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
-				}
-
-				if ((updateSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
+		Date fileTime = new Date(arFile.getFile().lastModified());
+		// ...........creation and update dates checks:.............
+		super.validateCreationUpdateDates(fileTime);
 
 		// ...................history date checks...................
 		// ..if set, after DATE_CREATION, before DATE_UPSATE
 
 		if (nHistory > 0) {
-			String[] dateHist = readStringArr("HISTORY_DATE");
+			String[] dateHist = arFile.readStringArr("HISTORY_DATE");
 
 			for (int h = 0; h < nHistory; h++) {
 				String d = dateHist[h].trim();
@@ -1268,11 +1141,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					if (date == null) {
 						validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h] + "': Invalid date");
 
-					} else if (haveUpdate) {
+					} else if (arFile.isHaveUpdateDate()) {
 						long dateSec = date.getTime();
-						if ((dateSec - updateSec) > oneDaySec) {
+						if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 							validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h]
-									+ "': After DATE_UPDATE ('" + update + "')");
+									+ "': After DATE_UPDATE ('" + arFile.getUpdateDate() + "')");
 						}
 					}
 				}
@@ -1315,7 +1188,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		boolean core = false;
 		ArgoReferenceTable.ArgoReferenceEntry info;
 
-		if (fileType == FileType.TRAJECTORY) {
+		if (arFile.fileType() == FileType.TRAJECTORY) {
 			// ..implies this is 1) a v3.2+ or 2) a pre-v3.2 core-file (NOT a bio-file)
 			core = true;
 		}
@@ -1325,11 +1198,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		// ..............cycle_number...............
 		log.debug("..validate CYCLE_NUMBER");
 
-		int[] cycle = readIntArr("CYCLE_NUMBER");
+		int[] cycle = arFile.readIntArr("CYCLE_NUMBER");
 
 		int[] cycle_adj = null;
 		if (core) {
-			cycle_adj = readIntArr("CYCLE_NUMBER_ADJUSTED");
+			cycle_adj = arFile.readIntArr("CYCLE_NUMBER_ADJUSTED");
 		}
 
 		int[] finalCycle = new int[nMeasure];
@@ -1346,7 +1219,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		// ..........MEASUREMENT_CODE............
 		log.debug("..validate MEASUREMENT_CODE");
 
-		int[] m_code = readIntArr("MEASUREMENT_CODE");
+		int[] m_code = arFile.readIntArr("MEASUREMENT_CODE");
 
 		ErrorTracker delCode = new ErrorTracker();
 		ErrorTracker depCode = new ErrorTracker();
@@ -1432,15 +1305,15 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		// ..read juld and associated variables
 
-		double[] juld = readDoubleArr("JULD");
+		double[] juld = arFile.readDoubleArr("JULD");
 
-		String str = readString("JULD_QC", true); // ..true -> include any NULLs
+		String str = arFile.readString("JULD_QC", true); // ..true -> include any NULLs
 		char[] juld_qc = new char[nMeasure];
 		for (int n = 0; n < nMeasure; n++) {
 			juld_qc[n] = str.charAt(n);
 		}
 
-		str = readString("JULD_STATUS", true); // ..true -> include any NULLs
+		str = arFile.readString("JULD_STATUS", true); // ..true -> include any NULLs
 		char[] juld_status = new char[nMeasure];
 		log.debug("juld_status length = {}", str.length());
 		log.debug("juld_status = '{}'", str);
@@ -1501,7 +1374,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			 * juld_status[n], juld_qc[n]); } }
 			 */
 
-			if (ArgoDataFile.is_999_999_FillValue(juld[n])) {
+			if (ArgoFileValidator.is_999_999_FillValue(juld[n])) {
 				// ..data is missing - QC better be too
 				if (!(juld_qc[n] == '9' || juld_qc[n] == ' ')) {
 					notMiss.increment(n);
@@ -1581,15 +1454,15 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		if (core) {
 			// ..read juld_adjusted and associated variables
 
-			juld_adj = readDoubleArr("JULD_ADJUSTED");
+			juld_adj = arFile.readDoubleArr("JULD_ADJUSTED");
 
-			str = readString("JULD_ADJUSTED_QC", true); // ..true -> include any NULLs
+			str = arFile.readString("JULD_ADJUSTED_QC", true); // ..true -> include any NULLs
 			juld_adj_qc = new char[nMeasure];
 			for (int n = 0; n < nMeasure; n++) {
 				juld_adj_qc[n] = str.charAt(n);
 			}
 
-			str = readString("JULD_ADJUSTED_STATUS", true); // ..true -> include any NULLs
+			str = arFile.readString("JULD_ADJUSTED_STATUS", true); // ..true -> include any NULLs
 			juld_adj_status = new char[nMeasure];
 			for (int n = 0; n < nMeasure; n++) {
 				juld_adj_status[n] = str.charAt(n);
@@ -1599,7 +1472,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			char mode[];
 
-			str = readString("JULD_DATA_MODE");
+			str = arFile.readString("JULD_DATA_MODE");
 			if (str == null) {
 				// ..pre-v3.2 file
 				log.debug("JULD_DATA_MODE missing - pre-v3.2");
@@ -1678,7 +1551,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				 * juld_adj[n], juld_adj_status[n], juld_adj_qc[n]); } }
 				 */
 
-				if (ArgoDataFile.is_999_999_FillValue(juld_adj[n])) {
+				if (ArgoFileValidator.is_999_999_FillValue(juld_adj[n])) {
 					// ..data is missing - QC better be too
 					if (!(juld_adj_qc[n] == '9' || juld_adj_qc[n] == ' ')) {
 						notMiss.increment(n);
@@ -1697,7 +1570,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					// ..case 2: juld not missing, juld_adj not missing:
 					// .. - mode = 'A' or 'D'
 
-					if (!ArgoDataFile.is_999_999_FillValue(juld[n])) {
+					if (!ArgoFileValidator.is_999_999_FillValue(juld[n])) {
 						// ..juld not missing, juld_adj not missing -- mode must be 'A' or 'D'
 
 						// ..but ignore the "launch cycle" (-1)
@@ -1792,7 +1665,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		// .............check for reasonable juld dates.............
 		log.debug("..validate reasonable dates");
 
-		String update = readString("DATE_UPDATE");
+		String update = arFile.readString("DATE_UPDATE");
 		Date dateUpdate = ArgoDate.get(update);
 		long updateSec = dateUpdate.getTime();
 
@@ -1816,7 +1689,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			if (qc_index >= 0) {
 				// ..QC indicates "good"
 
-				if (!ArgoDataFile.is_999_999_FillValue(juld[n])) {
+				if (!ArgoFileValidator.is_999_999_FillValue(juld[n])) {
 
 					// ..check that JULD is after earliestDate and before DATE_UPDATE
 
@@ -1844,7 +1717,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				qc_index = goodJuldQC.indexOf(juld_adj_qc[n]);
 
 				if (qc_index >= 0) {
-					if (!ArgoDataFile.is_999_999_FillValue(juld_adj[n])) {
+					if (!ArgoFileValidator.is_999_999_FillValue(juld_adj[n])) {
 
 						// ..check that JULD_ADJUSTED is after earliestDate and before DATE_UPDATE
 
@@ -1897,7 +1770,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			// ..juld_adj is not in bio-trajectory
 
 			if (core) {
-				if (ArgoDataFile.is_999_999_FillValue(juld_adj[n])) {
+				if (ArgoFileValidator.is_999_999_FillValue(juld_adj[n])) {
 					fv[n].juld = juld[n];
 					fv[n].juld_status = juld_status[n];
 					fv[n].juld_qc = juld_qc[n];
@@ -1946,28 +1819,17 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		String name;
 		String str;
 
-		name = "PLATFORM_NUMBER";
-		str = readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (!str.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
-			validationResult.addError(name + ": '" + str + "': Invalid");
+		name = "PLATFORM_NUMBER"; // ..valid wmo id
+		str = arFile.readString(name).trim();
+		if (!super.validatePlatfomNumber(str)) {
+			validationResult.addError("PLATFORM_NUMBER" + ": '" + str + "': Invalid");
 		}
 
-		name = "DATA_CENTRE";
-		str = readString(name).trim();
-		log.debug("{}: '{}'   DAC: '{}'", name, str, dac);
-		if (dac != null) {
-			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
-				validationResult.addError(name + ": '" + str + "': Invalid for DAC '" + dac + "'");
-			}
-		} else { // ..incoming DAC not set
-			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
-				validationResult.addError(name + ": '" + str + "': Invalid (for all DACs)");
-			}
-		}
+		// DATA_CENTRE
+		super.validateDataCentre(dac);
 
 		name = "DATA_STATE_INDICATOR"; // ..ref table 6
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		info = ArgoReferenceTable.DATA_STATE_INDICATOR.contains(str);
@@ -1980,21 +1842,21 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		}
 
 		name = "FIRMWARE_VERSION"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "FLOAT_SERIAL_NO"; // ..not empty
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (str.length() <= 0) {
 			validationResult.addError(name + ": Empty");
 		}
 
 		name = "PLATFORM_TYPE"; // ..ref table 23
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		info = ArgoReferenceTable.PLATFORM_TYPE.contains(str);
@@ -2008,7 +1870,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		}
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug(name + ": '{}'", str);
 
 		info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str);
@@ -2022,7 +1884,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		}
 
 		name = "WMO_INST_TYPE";
-		str = readString(name).trim();
+		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
 		if (str.length() == 0) {
@@ -2067,9 +1929,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		// ..bio-traj exception: GROUNDED not in bio-traj files
 
-		if (fileType == FileType.TRAJECTORY) {
+		if (arFile.fileType() == FileType.TRAJECTORY) {
 			varName = "GROUNDED";
-			String g = readString(varName, true); // ..true -> include any NULLs
+			String g = arFile.readString(varName, true); // ..true -> include any NULLs
 
 			for (int n = 0; n < nCycle; n++) {
 				info = ArgoReferenceTable.GROUNDED.contains(g.charAt(n));
@@ -2091,7 +1953,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		}
 
 		varName = "CONFIG_MISSION_NUMBER";
-		int[] c = readIntArr(varName);
+		int[] c = arFile.readIntArr(varName);
 
 		// ..can be FillValue in real time
 		// ..cycle 0 can be FillValue in any case, so start loop at 1
@@ -2134,7 +1996,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			HashMap<Integer, Integer> CycNumIndex_cycle2index, Final_NMeasurement_Variables[] finalNMVar) {
 		log.debug(".....validateNCycleJuld: start.....");
 
-		if (fileType != FileType.TRAJECTORY) {
+		if (arFile.fileType() != FileType.TRAJECTORY) {
 			// ..implies this is a core-file NOT a bio-file
 			log.debug("bio-trajectory file.  skip all checks");
 			log.debug(".....validateNCycleJuld: end.....");
@@ -2193,9 +2055,9 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			log.debug("...reading '{}'", var);
 
-			double[] juldVar = readDoubleArr(var);
+			double[] juldVar = arFile.readDoubleArr(var);
 
-			String str = readString(var + "_STATUS", true); // ..true -> include any NULLs
+			String str = arFile.readString(var + "_STATUS", true); // ..true -> include any NULLs
 			char[] juldVar_status = new char[nCycle];
 			for (int n = 0; n < nCycle; n++) {
 				juldVar_status[n] = str.charAt(n);
@@ -2305,7 +2167,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				if (!juldCheck.checked[n]) {
 					// ..this value wasn't compared to a JULD value
 
-					if (!ArgoDataFile.is_999_999_FillValue(juldVar[n])) {
+					if (!ArgoFileValidator.is_999_999_FillValue(juldVar[n])) {
 						notJuld++;
 						if (a_notJuld < 0) {
 							a_notJuld = n + 1;
@@ -2391,7 +2253,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 		boolean core = false;
 
-		if (fileType == FileType.TRAJECTORY) {
+		if (arFile.fileType() == FileType.TRAJECTORY) {
 			// ..implies: 1) a v3.2+ file or 2) a pre-v3.2 core-file NOT a bio-file
 			core = true;
 		}
@@ -2412,7 +2274,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				continue; // ..TRAJ_PARAMS can have blank entries
 			}
 
-			Variable var = findVariable(varName);
+			Variable var = arFile.getNcReader().findVariable(varName);
 
 			Number fillValue = var.findAttribute("_FillValue").getNumericValue();
 			float fValue = fillValue.floatValue();
@@ -2475,7 +2337,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			// ..get the QC
 
-			String str = readString(varName + "_QC", true); // ..true -> include any NULLs
+			String str = arFile.readString(varName + "_QC", true); // ..true -> include any NULLs
 
 			if (str != null) {
 				prm_qc = new char[nMeasure];
@@ -2490,7 +2352,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			// ..Set the data mode for this parameter
 
-			String[] trajPrmDM = readStringArr("TRAJECTORY_PARAMETER_DATA_MODE");
+			String[] trajPrmDM = arFile.readStringArr("TRAJECTORY_PARAMETER_DATA_MODE");
 			if (trajPrmDM == null) {
 				log.debug("TRAJECTORY_PARAMETER_DATA_MODE missing - pre-v3.2");
 			} else {
@@ -2536,7 +2398,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 							depQC.increment(n);
 						}
 
-						if (ArgoDataFile.is_FillValue(fValue, prm[n])) {
+						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// ..data is missing - QC better be too
 							if (prm_qc[n] != '9' && prm_qc[n] != ' ') {
 								notMiss.increment(n);
@@ -2595,7 +2457,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			// .............param_adjusted...........
 
 			varName = param.trim() + "_ADJUSTED";
-			var = findVariable(varName);
+			var = arFile.getNcReader().findVariable(varName);
 
 			// ..bio-traj exception (pre-v3.2): PRES does not have *_ADJUSTED variables
 			// ..Intermediate PARAMS may or may not have them
@@ -2608,7 +2470,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				continue PARAM_LOOP;
 			}
 
-			Variable varErr = findVariable(varName + "_ERROR");
+			Variable varErr = arFile.getNcReader().findVariable(varName + "_ERROR");
 
 			float[] prm_adj;
 			char[] prm_adj_qc;
@@ -2672,7 +2534,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 			// ..get the QC
 
-			str = readString(varName + "_QC", true); // ..true -> include any NULLs
+			str = arFile.readString(varName + "_QC", true); // ..true -> include any NULLs
 			prm_adj_qc = new char[nMeasure];
 			for (int n = 0; n < nMeasure; n++) {
 				prm_adj_qc[n] = str.charAt(n);
@@ -2745,7 +2607,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 					// ........... r-mode ............
 
-					if (!ArgoDataFile.is_FillValue(fValue, prm_adj[n])) {
+					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 						rNotMiss.increment(n);
 					}
 
@@ -2753,7 +2615,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 						rQcNotMiss.increment(n);
 					}
 
-					if (!ArgoDataFile.is_FillValue(fValue, prm_adj_err[n])) {
+					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 						rErrNotMiss.increment(n);
 					}
 
@@ -2783,7 +2645,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 							incNotMeas.increment(n);
 
 						} else {
-							if (!ArgoDataFile.is_FillValue(fValue, prm_adj[n])) {
+							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								notNotMeas.increment(n);
 							}
 						}
@@ -2792,15 +2654,15 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 						// ..check if param (not param_adj!) is missing
 
-						if (ArgoDataFile.is_FillValue(fValue, prm[n])) {
+						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// .....param is missing.....
 
-							if (!ArgoDataFile.is_FillValue(fValue, prm_adj[n])) {
+							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								// ..param_adjusted is NOT missing - error
 								notMissAdj.increment(n);
 
 							}
-							if (!ArgoDataFile.is_FillValue(fValue, prm_adj_err[n])) {
+							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 								// ..param_adjusted_error is NOT missing - error
 								notMissErr.increment(n);
 							}
@@ -2812,13 +2674,13 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 						} else {
 							// .....param is NOT missing......
 
-							if (ArgoDataFile.is_FillValue(fValue, prm_adj[n])) {
+							if (ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								// ..param_adj is missing - QC must be 4 or 9
 								if (prm_adj_qc[n] != '4' && prm_adj_qc[n] != '9') {
 									missAdj.increment(n);
 								}
 
-								if (!ArgoDataFile.is_FillValue(fValue, prm_adj_err[n])) {
+								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 									errNotMiss.increment(n);
 								}
 
@@ -2972,7 +2834,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 
 				if (f == Float.NaN) {
 					is_nan = true;
-				} else if (!ArgoDataFile.is_FillValue(fillValue, f)) {
+				} else if (!ArgoFileValidator.is_FillValue(fillValue, f)) {
 					data = f;
 				}
 			}
@@ -3015,16 +2877,16 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		log.debug(".....validatePosition: start.....");
 		log.debug("nMeasure = {}", nMeasure);
 
-		double lat[] = readDoubleArr("LATITUDE");
-		double lon[] = readDoubleArr("LONGITUDE");
+		double lat[] = arFile.readDoubleArr("LATITUDE");
+		double lon[] = arFile.readDoubleArr("LONGITUDE");
 
-		String str = readString("POSITION_QC", true); // ..true -> include any NULLs
+		String str = arFile.readString("POSITION_QC", true); // ..true -> include any NULLs
 		char[] pos_qc = new char[nMeasure];
 		for (int n = 0; n < nMeasure; n++) {
 			pos_qc[n] = str.charAt(n);
 		}
 
-		str = readString("POSITION_ACCURACY", true); // ..true -> include any NULLs
+		str = arFile.readString("POSITION_ACCURACY", true); // ..true -> include any NULLs
 		char[] pos_acc = new char[nMeasure];
 		for (int n = 0; n < nMeasure; n++) {
 			pos_acc[n] = str.charAt(n);
@@ -3136,11 +2998,11 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 		boolean embeddedEmpty = false;
 		int last_empty = -1;
 
-		ArrayList<String> allowedParam = spec.getPhysicalParamNames(); // ..allowed <param>
+		ArrayList<String> allowedParam = arFile.getFileSpec().getPhysicalParamNames(); // ..allowed <param>
 		ArrayList<String> paramList = new ArrayList<String>(nParam);
 
 		// .....check that trajectory parameters are valid.....
-		String trajParam[] = readStringArr("TRAJECTORY_PARAMETERS");
+		String trajParam[] = arFile.readStringArr("TRAJECTORY_PARAMETERS");
 
 		for (int paramNum = 0; paramNum < nParam; paramNum++) {
 			paramList.add(""); // ..initialize this position in the list
@@ -3177,7 +3039,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 						log.debug("param #{}: '{}': accepted", paramNum, param);
 					}
 
-					if (spec.isDeprecatedPhysicalParam(param)) {
+					if (arFile.getFileSpec().isDeprecatedPhysicalParam(param)) {
 						// ..this is a deprecated parameter name
 
 						validationResult.addWarning("TRAJECTORY_PARAMETERS[" + (paramNum + 1) + "]: '" + param
@@ -3207,7 +3069,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 			if (p.length() == 0) {
 				continue; // ..TRAJ_PARAMS can contain blank entries
 			}
-			Variable var = findVariable(p);
+			Variable var = arFile.getNcReader().findVariable(p);
 			if (var == null) {
 				validationResult
 						.addError("TRAJECTORY_PARAMETERS: PARAM '" + p + "' specified. Variables not in data file.");
@@ -3221,7 +3083,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 				// ..p is an allowed param. p is NOT in TRAJECTORY_PARAMETERS
 				// ..is there a variable for it?
 
-				Variable var = findVariable(p);
+				Variable var = arFile.getNcReader().findVariable(p);
 				if (var != null) {
 					// ..this variable exists in the file
 					// ..technically, that is OK as long as it is all FillValue
@@ -3232,7 +3094,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 					Number fillValue = var.findAttribute("_FillValue").getNumericValue();
 
 					if (type == DataType.FLOAT) {
-						float[] data = readFloatArr(p);
+						float[] data = arFile.readFloatArr(p);
 						float fVal = fillValue.floatValue();
 
 						for (float d : data) {
@@ -3243,7 +3105,7 @@ public class ArgoTrajectoryFile extends ArgoDataFile {
 						}
 
 					} else if (type == DataType.DOUBLE) {
-						double[] data = readDoubleArr(p);
+						double[] data = arFile.readDoubleArr(p);
 						double fVal = fillValue.doubleValue();
 
 						for (double d : data) {
