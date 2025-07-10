@@ -698,10 +698,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
 		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-
-		if (!str.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
-			validationResult.addError(name + ": '" + str + "': Invalid");
+		if (!super.validatePlatfomNumber(str)) {
+			validationResult.addError("PLATFORM_NUMBER" + ": '" + str + "': Invalid");
 		}
 
 		boolean pmkrValid = false;

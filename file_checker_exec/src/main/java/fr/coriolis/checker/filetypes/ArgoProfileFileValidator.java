@@ -700,10 +700,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			// ..try newer first - should be more efficient
 
 			String calib_date = "SCIENTIFIC_CALIB_DATE";
-			Variable var = findVariable(calib_date);
+			Variable var = arFile.findVariable(calib_date);
 			if (var == null) {
 				calib_date = "CALIBRATION_DATE";
-				var = findVariable(calib_date);
+				var = arFile.findVariable(calib_date);
 			}
 
 			ArrayChar cDate = (ArrayChar) var.read();
@@ -731,11 +731,12 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								// (p+1)+"]: '"+dateCal+
 								// "': Before DATE_CREATION ('"+creation+"')");
 
-							} else if (haveUpdate) {
+							} else if (arFile.isHaveUpdateDate()) {
 								long dateSec = date.getTime();
-								if ((dateSec - updateSec) > oneDaySec) {
+								if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 									validationResult.addError(calib_date + "[" + (n + 1) + "," + (c + 1) + "," + (p + 1)
-											+ "]: '" + dateCal + "': After DATE_UPDATE ('" + update + "')");
+											+ "]: '" + dateCal + "': After DATE_UPDATE ('" + arFile.getUpdateDate()
+											+ "')");
 								}
 							}
 						} // ..end if (dateCal)
@@ -762,10 +763,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	public void validateDMode(int nProf, int nParam, int nCalib, int nHist) throws IOException {
 		log.debug(".....validateDMode: start.....");
 
-		String dMode = readString("DATA_MODE", true); // ..true -> return NULLs if present
-		String[] dState = readStringArr("DATA_STATE_INDICATOR");
-		ArrayChar params = (ArrayChar) findVariable("PARAMETER").read();
-		ArrayChar cmts = (ArrayChar) findVariable("SCIENTIFIC_CALIB_COMMENT").read();
+		String dMode = arFile.readString("DATA_MODE", true); // ..true -> return NULLs if present
+		String[] dState = arFile.readStringArr("DATA_STATE_INDICATOR");
+		ArrayChar params = (ArrayChar) arFile.findVariable("PARAMETER").read();
+		ArrayChar cmts = (ArrayChar) arFile.findVariable("SCIENTIFIC_CALIB_COMMENT").read();
 		// ArrayChar eqns =
 		// (ArrayChar) findVariable("SCIENTIFIC_CALIB_EQUATION").read();
 		// ArrayChar coefs =
@@ -776,10 +777,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		// ..try newer first - should be more efficient
 
 		String calib_date = "SCIENTIFIC_CALIB_DATE";
-		Variable var = findVariable(calib_date);
+		Variable var = arFile.findVariable(calib_date);
 		if (var == null) {
 			calib_date = "CALIBRATION_DATE";
-			var = findVariable(calib_date);
+			var = arFile.findVariable(calib_date);
 		}
 		ArrayChar dates = (ArrayChar) var.read();
 
@@ -820,7 +821,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							String qc;
 
 							if (!profQC.containsKey(pQcName)) {
-								qc = readString(pQcName, true); // ..true->return NULLs if present
+								qc = arFile.readString(pQcName, true); // ..true->return NULLs if present
 								if (qc == null) {
 									validationResult.addError("D-mode: " + pQcName + " does not exist for"
 											+ "PARAMETER[" + n + "," + c + "," + p + "]: '" + param + "'");
@@ -856,14 +857,14 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 											+ (c + 1) + "," + (p + 1) + "]: Not set for '" + param + "'");
 									log.warn(
 											"TEMP WARNING: {}: D-mode: SCIENTIFIC_CALIB_COMMENT[{},{},{}] not set for {}",
-											file.getName(), n, c, p, param);
+											arFile.getFile().getName(), n, c, p, param);
 								}
 								if (date.length() == 0) {
 									// ################# TEMPORARY WARNING ################
 									validationResult.addWarning("D-mode: " + calib_date + "[" + (n + 1) + "," + (c + 1)
 											+ "," + (p + 1) + "]: Not set for '" + param + "'");
-									log.warn("TEMP WARNING: {}: D-mode: {}[{},{},{}] not set for {}", file.getName(),
-											calib_date, n, c, p, param);
+									log.warn("TEMP WARNING: {}: D-mode: {}[{},{},{}] not set for {}",
+											arFile.getFile().getName(), calib_date, n, c, p, param);
 								}
 								// if (eqn.length() == 0) {
 								// validationResult.addError("D-mode: SCIENTIFIC_CALIB_EQUATION["+
@@ -937,10 +938,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	public void validateHighlyDesirable(int nProf) throws IOException {
 		log.debug(".....validateHighlyDesirable: start.....");
 
-		if (spec.getVariable("INST_REFERENCE") != null) {
+		if (arFile.getFileSpec().getVariable("INST_REFERENCE") != null) {
 			// ..INST_REF is in spec, check that it is set
 
-			String str[] = readStringArr("INST_REFERENCE");
+			String str[] = arFile.readStringArr("INST_REFERENCE");
 
 			for (int n = 0; n < nProf; n++) {
 				log.debug("INST_REFERENCE[" + n + "]: '" + str[n]);
@@ -951,10 +952,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			}
 		}
 
-		if (spec.getVariable("POSITIONING_SYSTEM") != null) {
+		if (arFile.getFileSpec().getVariable("POSITIONING_SYSTEM") != null) {
 			// ..POSIT_SYS is in spec, check that it is set
 
-			String str[] = readStringArr("POSITIONING_SYSTEM");
+			String str[] = arFile.readStringArr("POSITIONING_SYSTEM");
 
 			for (int n = 0; n < nProf; n++) {
 				log.debug("POSITIONING_SYSTEM[" + n + "]: '" + str[n] + "'");
@@ -999,13 +1000,13 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	public boolean validateMetaData(int nProf, ArgoReferenceTable.DACS dac, boolean singleCycle) throws IOException {
 		log.debug(".....validateMetaData: start.....");
 
-		String[] plNum = readStringArr("PLATFORM_NUMBER");
-		String dir = readString("DIRECTION", true);// ..true->return NULLs if present
-		String[] ds = readStringArr("DATA_STATE_INDICATOR");
-		String[] dc = readStringArr("DATA_CENTRE");
-		String[] wmo = readStringArr("WMO_INST_TYPE");
-		int[] cyc = readIntArr("CYCLE_NUMBER");
-		String[] vert = readStringArr("VERTICAL_SAMPLING_SCHEME");
+		String[] plNum = arFile.readStringArr("PLATFORM_NUMBER");
+		String dir = arFile.readString("DIRECTION", true);// ..true->return NULLs if present
+		String[] ds = arFile.readStringArr("DATA_STATE_INDICATOR");
+		String[] dc = arFile.readStringArr("DATA_CENTRE");
+		String[] wmo = arFile.readStringArr("WMO_INST_TYPE");
+		int[] cyc = arFile.readIntArr("CYCLE_NUMBER");
+		String[] vert = arFile.readStringArr("VERTICAL_SAMPLING_SCHEME");
 
 		String firstNum = new String(plNum[0].trim());
 		int firstCyc = cyc[0];
@@ -1020,7 +1021,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			log.debug("PLATFORM_NUMBER[{}]: '{}'", n, plNum[n]);
 
 			String s = plNum[n].trim();
-			if (!s.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}")) {
+			if (!super.validatePlatfomNumber(s)) {
 				validationResult.addError("PLATFORM_NUMBER[" + (n + 1) + "]: '" + s + "': Invalid");
 			}
 
@@ -1062,10 +1063,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 				// ..not checked above
 
-				float[] pres = readFloatArr("PRES", n);
+				float[] pres = arFile.readFloatArr("PRES", n);
 				if (pres != null) {
 					for (float d : pres) {
-						if (!ArgoDataFile.is_99_999_FillValue(d)) {
+						if (!ArgoFileValidator.is_99_999_FillValue(d)) {
 							has_data = true;
 							break;
 						}
@@ -1136,10 +1137,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				if (hasData == null) {
 					// ..not checked above
 
-					float[] pres = readFloatArr("PRES", n);
+					float[] pres = arFile.readFloatArr("PRES", n);
 					if (pres != null) {
 						for (float d : pres) {
-							if (!ArgoDataFile.is_99_999_FillValue(d)) {
+							if (!ArgoFileValidator.is_99_999_FillValue(d)) {
 								has_data = true;
 								break;
 							}
@@ -1175,7 +1176,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 							// ################# TEMPORARY WARNING ################
 							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFile().getName(), err);
 						}
 					} else {
 						if (s.startsWith("Primary sampling")) {
@@ -1186,7 +1187,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 							// ################# TEMPORARY WARNING ################
 							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFile().getName(), err);
 						}
 					}
 
@@ -1196,7 +1197,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 					// ################# TEMPORARY WARNING ################
 					validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-					log.warn("TEMP WARNING: {}: {}: {}", dacName, file.getName(), err);
+					log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFile().getName(), err);
 				}
 
 			}
@@ -1247,14 +1248,14 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	public void validateParams(int nProf, int nParam, int nLevel) throws IOException {
 		log.debug(".....validateParams: start.....");
 
-		ArrayList<String> allowedParam = spec.getPhysicalParamNames(); // ..allowed <param>
+		ArrayList<String> allowedParam = arFile.getFileSpec().getPhysicalParamNames(); // ..allowed <param>
 		profParam = new ArrayList<ArrayList<String>>(nProf); // ..allowed <param>
 
 		int maxParamUsed = -1; // ..max number of PARAMs used - all profiles
 		// int maxLevelUsed = -1; //..max number of LEVELS with data - all profiles
 
 		// ..read station parameters and data_mode
-		String dMode = readString("DATA_MODE", true); // incl NULLs
+		String dMode = arFile.readString("DATA_MODE", true); // incl NULLs
 
 		// ..need orgin/shape for 2-dim variables multiple time
 		int[] origin2 = { 0, 0 }; // ..will anchor read to {profNum, level=0}
@@ -1263,7 +1264,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		// ...........MAIN LOOP: over each profile in the file.............
 		for (int profNum = 0; profNum < nProf; profNum++) {
 
-			String[] stParam = readStringArr("STATION_PARAMETERS", profNum);
+			String[] stParam = arFile.readStringArr("STATION_PARAMETERS", profNum);
 
 			boolean fatalError = false;
 
@@ -1285,7 +1286,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			// .........check PARAMETER_DATA_MODE..............
 
-			String param_mode = readString("PARAMETER_DATA_MODE", profNum, true);// incl NULLs
+			String param_mode = arFile.readString("PARAMETER_DATA_MODE", profNum, true);// incl NULLs
 
 			if (param_mode != null) {
 				// ..is included in this file: optional variable
@@ -1321,7 +1322,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 					// ..check bio-prof file: PARAM_DATA_MODE("PRES") == "R"
 
-					if (fileType == FileType.BIO_PROFILE && stParam[paramNum].trim().startsWith("PRES")) {
+					if (arFile.fileType() == FileType.BIO_PROFILE && stParam[paramNum].trim().startsWith("PRES")) {
 						if (md != 'R') {
 							log.debug("PRES[{}]: PARAMETER_DATA_MODE[{},{}] = '{}'. must be 'R'", profNum, profNum,
 									paramNum, md);
@@ -1352,12 +1353,12 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			// .........check CONFIG_MISSION_NUMBER............
 
-			int msnNum = readInt("CONFIG_MISSION_NUMBER", profNum);
+			int msnNum = arFile.readInt("CONFIG_MISSION_NUMBER", profNum);
 
 			log.debug("CONFIG_MISSION_NUMBER[{}]: '{}'", profNum, msnNum);
 
 			if (msnNum == 99999) {
-				int cyc = readInt("CYCLE_NUMBER", profNum);
+				int cyc = arFile.readInt("CYCLE_NUMBER", profNum);
 				if (cyc != 0 && mode == 'D') {
 					validationResult.addError("CONFIG_MISSION_NUMBER[" + (profNum + 1) + "]: '" + msnNum
 							+ "': Cannot be FillValue in D-mode");
@@ -1417,7 +1418,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							nParamUsed++;
 						}
 
-						if (spec.isDeprecatedPhysicalParam(param)) {
+						if (arFile.getFileSpec().isDeprecatedPhysicalParam(param)) {
 							// ..this is a deprecated parameter name
 
 							validationResult.addWarning("STATION_PARAMETERS[" + (profNum + 1) + "," + (paramNum + 1)
@@ -1467,7 +1468,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			// ..the parameters are only required in profile 0
 			if (profNum == 0) {
 				for (String p : allowedParam) {
-					if (!spec.isOptional(p) && !profParam.get(profNum).contains(p)) {
+					if (!arFile.getFileSpec().isOptional(p) && !profParam.get(profNum).contains(p)) {
 						validationResult.addError("STATION_PARAMETERS[" + (profNum + 1) + ",*]: Required PARAM ('" + p
 								+ "') not specified");
 						fatalError = true;
@@ -1477,7 +1478,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			// ......check that all STATION_PARAMETERS have <param> variable........
 			for (String p : profParam.get(profNum)) {
-				Variable var = findVariable(p);
+				Variable var = arFile.findVariable(p);
 				if (var == null) {
 					validationResult.addError("STATION_PARAMETERS[" + (profNum + 1) + ",*]: PARAM '" + p
 							+ "' specified. Variables not in data file.");
@@ -1496,7 +1497,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					// ..see if the file contains the variable
 
 					boolean hasData = false;
-					Variable var = findVariable(p);
+					Variable var = arFile.findVariable(p);
 					if (var != null) {
 						log.debug(p + "[{}]: in file. Not in STATION_PARAMETERS", profNum);
 
@@ -1557,7 +1558,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							double fVal = fillValue.doubleValue();
 
 							for (double d : data) {
-								if (!ArgoDataFile.is_FillValue(fVal, d)) {
+								if (!ArgoFileValidator.is_FillValue(fVal, d)) {
 									hasData = true;
 									break;
 								}
@@ -1568,7 +1569,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							float fVal = fillValue.floatValue();
 
 							for (float d : data) {
-								if (!ArgoDataFile.is_FillValue(fVal, d)) {
+								if (!ArgoFileValidator.is_FillValue(fVal, d)) {
 									hasData = true;
 									break;
 								}
@@ -1643,9 +1644,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		PARAM_LOOP: for (String param : profParam.get(profNum)) {
 			String varName = param.trim();
-			Variable var = findVariable(varName);
-			Variable varQC = findVariable(varName.trim() + "_QC");
-			Variable profVarQC = findVariable("PROFILE_" + varName + "_QC");
+			Variable var = arFile.findVariable(varName);
+			Variable varQC = arFile.findVariable(varName.trim() + "_QC");
+			Variable profVarQC = arFile.findVariable("PROFILE_" + varName + "_QC");
 
 			Number fillValue = var.findAttribute("_FillValue").getNumericValue();
 			fValue = fillValue.floatValue();
@@ -1785,7 +1786,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 						if (Float.isNaN(f)) {
 							is_nan = true;
-						} else if (!ArgoDataFile.is_FillValue(fValue, f)) {
+						} else if (!ArgoFileValidator.is_FillValue(fValue, f)) {
 							data = f;
 						}
 					}
@@ -1853,7 +1854,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						depQC++;
 					}
 
-					if (ArgoDataFile.is_FillValue(fValue, prm[k])) {
+					if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 						// ..data is missing - QC better be too
 						if (prm_qc[k] != '9' && prm_qc[k] != '0') {
 							notMiss++;
@@ -1863,7 +1864,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						// ..data not missing - check QC value
 
 						if (prm_qc[k] == '0') {
-							if (!spec.isOptional(varName)) {
+							if (!arFile.getFileSpec().isOptional(varName)) {
 								noQC++;
 							}
 						} else if (prm_qc[k] > '4') {
@@ -1884,7 +1885,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				} else { // ..QC not is ref table 2, handle " " special case
 					if (prm_qc[k] == ' ') {
 						// ..qc set to NOT MEASURED, data better be missing
-						if (!ArgoDataFile.is_FillValue(fValue, prm[k])) {
+						if (!ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 							notNotMeas++;
 						}
 					} else {
@@ -1933,9 +1934,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						.addError(varName + "_QC[" + (profNum + 1) + "]: Blank (' ') QC when data is not missing at "
 								+ notNotMeas + " levels (of " + prm.length + ")");
 			}
-			if (fileType == FileType.PROFILE) {
+			if (arFile.fileType() == FileType.PROFILE) {
 				// ..in a core-file, only intermediate params can have 0 QC
-				if (!spec.isInterPhysParam(varName)) {
+				if (!arFile.getFileSpec().isInterPhysParam(varName)) {
 					if (n_noqc > 0) {
 						// .._QC can't be 0 in a core-file
 						paramErr = true;
@@ -1959,9 +1960,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				// ..no errors in param -- check _adjusted
 
 				varName = param.trim() + "_ADJUSTED";
-				var = findVariable(varName);
-				varQC = findVariable(varName + "_QC");
-				Variable varErr = findVariable(varName + "_ERROR");
+				var = arFile.findVariable(varName);
+				varQC = arFile.findVariable(varName + "_QC");
+				Variable varErr = arFile.findVariable(varName + "_ERROR");
 
 				// ..fillValue is the same for prm, prm_adj, prm_adj_err
 				// ..Number fillValue = var.findAttribute("_FillValue").getNumericValue();
@@ -2091,7 +2092,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 							if (Float.isNaN(f)) {
 								is_nan = true;
-							} else if (!ArgoDataFile.is_FillValue(fValue, f)) {
+							} else if (!ArgoFileValidator.is_FillValue(fValue, f)) {
 								data = f;
 							}
 						}
@@ -2233,21 +2234,21 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								incNotMeas++;
 							} else {
 
-								if (!ArgoDataFile.is_FillValue(fValue, prm_adj[k])) {
+								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
 									notNotMeas++;
 								}
 							}
 
 						} else {
 							// ..check if param (not param_adj!) is missing
-							if (ArgoDataFile.is_FillValue(fValue, prm[k])) {
+							if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 								// .....param is missing.....
 
-								if (!ArgoDataFile.is_FillValue(fValue, prm_adj[k])) {
+								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
 									// ..param_adjusted is NOT missing - error
 									missPrm++;
 								}
-								if (!ArgoDataFile.is_FillValue(fValue, prm_adj_err[k])) {
+								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[k])) {
 									// ..param_adjusted_error is NOT missing - error
 									errNotMiss++;
 								}
@@ -2259,7 +2260,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							} else {
 								// .....param is NOT missing......
 
-								if (ArgoDataFile.is_FillValue(fValue, prm_adj[k])) {
+								if (ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
 									// ..param_adj is missing - QC must be 4 or 9
 									if (prm_adj_qc[k] != '4') {
 										if (prm_adj_qc[k] != '9') {
@@ -2272,7 +2273,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 											}
 										}
 									}
-									if (!ArgoDataFile.is_FillValue(fValue, prm_adj_err[k])) {
+									if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[k])) {
 										errNotMiss++;
 									}
 
@@ -2356,7 +2357,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								.addError(varName + "_QC[" + (profNum + 1) + "]: Blank (' ') when data not missing at "
 										+ notNotMeas + " levels (of " + prm_adj.length + ")");
 					}
-					if (n_noqc > 0 && fileType == FileType.PROFILE) {
+					if (n_noqc > 0 && arFile.fileType() == FileType.PROFILE) {
 						// .._QC can't be 0 in a core-file
 						param_adjErr = true;
 						validationResult.addError(varName + "_QC[" + (profNum + 1) + "]: QC code '0' at " + n_noqc
@@ -2510,10 +2511,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		boolean paramErr = false;
 
 		for (int k = 0; k < prm_adj.length; k++) {
-			if (!ArgoDataFile.is_FillValue(fValue, prm_adj[k])) {
+			if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
 				missNot++;
 			}
-			if (!ArgoDataFile.is_FillValue(fValue, prm_adj_err[k])) {
+			if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[k])) {
 				errNotMiss++;
 			}
 			if (prm_adj_qc[k] != ' ') {
@@ -2562,8 +2563,8 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			log.debug(".....validateQC.....");
 		}
 
-		String juldQC = readString("JULD_QC", true);// ..true -> return NULLs if present
-		String posQC = readString("POSITION_QC", true);// ..true -> return NULLs if present
+		String juldQC = arFile.readString("JULD_QC", true);// ..true -> return NULLs if present
+		String posQC = arFile.readString("POSITION_QC", true);// ..true -> return NULLs if present
 
 		// ...........loop over each profile in the file.............
 		for (int n = 0; n < nProf; n++) {
@@ -2613,13 +2614,13 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		double[] stats = { 99999., 99999. };
 
-		if (fileType != FileType.PROFILE) {
-			log.debug("not a core-file. fileType = {}", fileType);
+		if (arFile.fileType() != FileType.PROFILE) {
+			log.debug("not a core-file. fileType = {}", arFile.fileType());
 			return (stats);
 		}
 
-		float[] p_adj = readFloatArr("PRES_ADJUSTED", 0);
-		String p_adj_qc = readString("PRES_ADJUSTED_QC", 0, true);
+		float[] p_adj = arFile.readFloatArr("PRES_ADJUSTED", 0);
+		String p_adj_qc = arFile.readString("PRES_ADJUSTED_QC", 0, true);
 
 		if (p_adj == null) {
 			log.debug("failed: no PRES_ADJUSTED variable");
@@ -2670,7 +2671,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		// ..is this mode = A or D (otherwise, the psal_adj)
 
-		char m = readString("DATA_MODE", true).charAt(0);
+		char m = arFile.readString("DATA_MODE", true).charAt(0);
 		log.debug("mode = {}", m);
 
 		if (m == 'R') {
@@ -2683,11 +2684,11 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		// ..get psal and psal_adj
 
-		float[] s = readFloatArr("PSAL", 0);
-		float[] sadj = readFloatArr("PSAL_ADJUSTED", 0);
+		float[] s = arFile.readFloatArr("PSAL", 0);
+		float[] sadj = arFile.readFloatArr("PSAL_ADJUSTED", 0);
 
-		String s_qc = readString("PSAL_QC", 0, true);
-		String sadj_qc = readString("PSAL_ADJUSTED_QC", 0, true);
+		String s_qc = arFile.readString("PSAL_QC", 0, true);
+		String sadj_qc = arFile.readString("PSAL_ADJUSTED_QC", 0, true);
 
 		if (s == null) {
 			log.debug("failed: no PSAL data");

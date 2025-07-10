@@ -293,6 +293,13 @@ public class ArgoFileValidator {
 		arFile.setUpdateSec(updateSec);
 	}
 
+	protected boolean validatePlatfomNumber(String platformNumberStr) {
+		log.debug("{}: '{}'", "PLATFORM_NUMBER", platformNumberStr);
+
+		return platformNumberStr.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}");
+
+	}
+
 	private void verifyGlobalAttributes(String dacName) {
 		for (String name : arFile.getFileSpec().getGlobalAttributeNames()) {
 			ArgoAttribute specAttr = arFile.getFileSpec().getGlobalAttribute(name);
@@ -1422,7 +1429,7 @@ public class ArgoFileValidator {
 	 * @param list the StringBuilder list
 	 * @param add  the String to add
 	 */
-	private void addToList(StringBuilder list, String add) {
+	protected void addToList(StringBuilder list, String add) {
 		if (list.length() == 0) {
 			list.append("'" + add + "'");
 		} else {
@@ -1436,7 +1443,7 @@ public class ArgoFileValidator {
 	 * @param list the StringBuilder list
 	 * @param add  the String to add
 	 */
-	private void addToList(StringBuilder list, int add) {
+	protected void addToList(StringBuilder list, int add) {
 		if (list.length() == 0) {
 			list.append(add);
 		} else {
