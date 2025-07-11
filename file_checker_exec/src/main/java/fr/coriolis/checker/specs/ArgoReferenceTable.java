@@ -418,11 +418,10 @@ public final class ArgoReferenceTable {
 				log.debug("add literal: '{}'", key);
 
 				if (allowAppendedDigit) {
-					if (pEndsInDigit.matcher(key).matches()) {
-						reg = key + "_\\d";
-					} else {
-						reg = key + "\\d";
-					}
+					// ADMT-2025 : duplicate SENSOR must be named <SENSOR>_<n>
+					// so if sensor finish by a number, the duplicate will be xxxx[number]_n
+					// if sensor don't finish by a number, the duplicate will alsobe xxxx_n.
+					reg = key + "_\\d";
 
 					Pattern pRegex = Pattern.compile(reg, flag);
 

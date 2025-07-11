@@ -9,8 +9,8 @@ The format checker has two directories:
 The rules files implement the Argo vocabularies managed on [NVS vocabulary server](https://vocab.nerc.ac.uk/search_nvs/).  
 Vocabularies and format changes are managed on [Argo Vocabs Task Team - AVTT GitHub](https://github.com/orgs/OneArgo/projects/4/views/1).
 
-With Release you will find :
-- file_checker_exec-[version].jar which consolidates both application's compiled code and all its dependencies into a single executable file.
+**With each release (from 2.9.2) you will find :**
+- **file_checker_exec-[version].jar** which consolidates both application's compiled code and all its dependencies into a single executable file.
 - source code 
 
 ## Run Argo NetCDF file format checker
