@@ -254,7 +254,7 @@ public class ArgoDataFile {
 
 	/** Retrieve the NetcdfFile reference */
 	public String getFileName() {
-		return ncFileName;
+		return file.getName();
 	}
 
 	/** Retrieve varList */
