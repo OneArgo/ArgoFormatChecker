@@ -39,7 +39,7 @@ import ucar.nc2.Variable;
  *          $
  * @version $Id: ArgoProfileFile.java 1269 2021-06-14 20:34:45Z ignaszewski $
  */
-public abstract class ArgoProfileFileValidator extends ArgoFileValidator {
+public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 	// .........................................
 	// VARIABLES
@@ -59,7 +59,7 @@ public abstract class ArgoProfileFileValidator extends ArgoFileValidator {
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoProfileFileValidator(ArgoDataFile arFile) throws IOException {
+	public ArgoProfileFileValidator(ArgoDataFile arFile) throws IOException {
 		super(arFile);
 	}
 

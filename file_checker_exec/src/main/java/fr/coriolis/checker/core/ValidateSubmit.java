@@ -373,7 +373,12 @@ public class ValidateSubmit {
 	 */
 	private static void checkArgoFileData(String dacName, boolean doNulls, boolean doBatteryChecks)
 			throws IOException, ValidateFileDataFailedException {
+
+		// argoFileValidator must be in the right specialized validation class:
+		instanciateSpecializedValidator();
+
 		if (argo.fileType() == FileType.METADATA) {
+
 			// Do metadata file validate data
 			boolean isValidateArgoMetadaFileDataCompleted = ((ArgoMetadataFileValidator) argoFileValidator)
 					.validateData(doNulls, doBatteryChecks);
@@ -413,6 +418,26 @@ public class ValidateSubmit {
 				throw new ValidateFileDataFailedException("Trajectory");
 			}
 		}
+	}
+
+	private static void instanciateSpecializedValidator() throws IOException {
+		ValidationResult formatResult = argoFileValidator.getValidationResult();
+
+		if (argo.fileType() == FileType.METADATA) {
+			argoFileValidator = new ArgoMetadataFileValidator(argo);
+		} else if (argo.fileType() == FileType.PROFILE || argo.fileType() == FileType.BIO_PROFILE) {
+			// Do profile file validate data
+			argoFileValidator = new ArgoProfileFileValidator(argo);
+		} else if (argo.fileType() == FileType.TECHNICAL) {
+			// Do Technical file validate data
+			argoFileValidator = new ArgoTechnicalFileValidator(argo);
+
+		} else if (argo.fileType() == FileType.TRAJECTORY || argo.fileType() == FileType.BIO_TRAJECTORY) {
+			argoFileValidator = new ArgoTrajectoryFileValidator(argo);
+		}
+		// copy the previous ValidationResult from format verification
+		argoFileValidator.setValidationResult(formatResult);
+
 	}
 
 	/**

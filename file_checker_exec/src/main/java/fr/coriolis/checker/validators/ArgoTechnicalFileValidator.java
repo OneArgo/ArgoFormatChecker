@@ -36,7 +36,7 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoTechnicalFileValidator(ArgoDataFile arFile) throws IOException {
+	public ArgoTechnicalFileValidator(ArgoDataFile arFile) throws IOException {
 		super(arFile);
 	}
 

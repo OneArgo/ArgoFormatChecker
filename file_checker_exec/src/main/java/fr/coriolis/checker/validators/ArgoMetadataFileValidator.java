@@ -71,7 +71,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoMetadataFileValidator(ArgoDataFile arFile) {
+	public ArgoMetadataFileValidator(ArgoDataFile arFile) {
 		super(arFile);
 	}
 

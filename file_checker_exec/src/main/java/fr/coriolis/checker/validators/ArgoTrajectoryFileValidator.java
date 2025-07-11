@@ -56,7 +56,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 	// CONSTRUCTORS
 	// .......................................
 
-	protected ArgoTrajectoryFileValidator(ArgoDataFile arFile) throws IOException {
+	public ArgoTrajectoryFileValidator(ArgoDataFile arFile) throws IOException {
 		super(arFile);
 	}
 

@@ -13,8 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.core.ArgoDataFile;
-import fr.coriolis.checker.core.ValidationResult;
 import fr.coriolis.checker.core.ArgoDataFile.FileType;
+import fr.coriolis.checker.core.ValidationResult;
 import fr.coriolis.checker.specs.ArgoAttribute;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoDimension;
@@ -1461,6 +1461,10 @@ public class ArgoFileValidator {
 
 	public ValidationResult getValidationResult() {
 		return validationResult;
+	}
+
+	public void setValidationResult(ValidationResult validationResult) {
+		this.validationResult = validationResult;
 	}
 
 }
