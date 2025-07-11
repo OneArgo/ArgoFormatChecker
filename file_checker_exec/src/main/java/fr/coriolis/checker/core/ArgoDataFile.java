@@ -170,8 +170,6 @@ public class ArgoDataFile {
 
 	private List<Variable> varList;
 
-	protected ValidationResult validationResult;
-
 	// .........................................
 	// CONSTRUCTORS
 	// .........................................
@@ -246,10 +244,6 @@ public class ArgoDataFile {
 
 	public ArgoReferenceTable.DACS getValidatedDac() {
 		return this.validatedDAC;
-	}
-
-	public ValidationResult getValidationResult() {
-		return validationResult;
 	}
 
 	/** Retrieve the NetcdfFile reference */
@@ -526,7 +520,6 @@ public class ArgoDataFile {
 		arFile.ncReader = nc;
 		arFile.ncFileName = inFile;
 		arFile.fileType = ft;
-		arFile.validationResult = new ValidationResult();
 		arFile.format_version = fv;
 		arFile.varList = nc.getVariables();
 
@@ -594,8 +587,6 @@ public class ArgoDataFile {
 		ncFileName = null;
 		fileType = null;
 		dacName = null;
-		validationResult.clearFormatErrors();
-		validationResult.clearFormatWarnings();
 
 		ValidationResult.lastMessage = BLANK_MESSAGE;
 	} // ..end close()

@@ -254,9 +254,9 @@ public class ValidateSubmit {
 				if (!specialPreV31FormatCheckPassed) {
 					out.oldDModeFile(dacName, argo.fileVersion());
 				} else {
-					out.statusAndPhase((argo.getValidationResult().nFormatErrors() == 0), phase);
+					out.statusAndPhase((argoFileValidator.getValidationResult().nFormatErrors() == 0), phase);
 					out.metaData(dacName, argo, formatPassed, options.isDoPsalStats());
-					out.errorsAndWarnings(argo);
+					out.errorsAndWarnings(argoFileValidator);
 				}
 
 				// .............................close Argo file......................
@@ -308,7 +308,7 @@ public class ValidateSubmit {
 
 		} else {
 			// ..verifyFormat completed -- chech error/warning counts to determine status
-			if (argo.getValidationResult().nFormatErrors() == 0) {
+			if (argoFileValidator.getValidationResult().nFormatErrors() == 0) {
 				log.debug("format ACCEPTED");
 				return true;
 

@@ -26,9 +26,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.core.ArgoDataFile;
-import fr.coriolis.checker.core.ValidationResult;
 import fr.coriolis.checker.core.ArgoDataFile.FileType;
+import fr.coriolis.checker.core.ValidationResult;
 import fr.coriolis.checker.specs.ArgoDate;
+import fr.coriolis.checker.validators.ArgoFileValidator;
 
 public class ResultsFile {
 
@@ -582,16 +583,16 @@ public class ResultsFile {
 
 	// ************************** errorsAndWarnings ************************
 
-	public void errorsAndWarnings(ArgoDataFile argo) throws XMLStreamException {
+	public void errorsAndWarnings(ArgoFileValidator argoFileValidator) throws XMLStreamException {
 		if (doXml) {
 			xml.writeStartElement("errors");
-			xml.writeAttribute("number", Integer.toString(argo.getValidationResult().nFormatErrors()));
+			xml.writeAttribute("number", Integer.toString(argoFileValidator.getValidationResult().nFormatErrors()));
 		} else {
 			out.println("FORMAT-ERRORS: start");
 		}
-		log.debug("format errors:" + argo.getValidationResult().nFormatErrors());
+		log.debug("format errors:" + argoFileValidator.getValidationResult().nFormatErrors());
 
-		for (String err : argo.getValidationResult().getErrors()) {
+		for (String err : argoFileValidator.getValidationResult().getErrors()) {
 			if (doXml) {
 				xml.writeStartElement("error");
 				xml.writeCharacters(err);
@@ -612,13 +613,13 @@ public class ResultsFile {
 		// ...............report warnings................
 		if (doXml) {
 			xml.writeStartElement("warnings");
-			xml.writeAttribute("number", Integer.toString(argo.getValidationResult().nFormatWarnings()));
+			xml.writeAttribute("number", Integer.toString(argoFileValidator.getValidationResult().nFormatWarnings()));
 		} else {
 			out.println("FORMAT-WARNINGS: start");
 		}
-		log.debug("format warnings: " + argo.getValidationResult().nFormatWarnings());
+		log.debug("format warnings: " + argoFileValidator.getValidationResult().nFormatWarnings());
 
-		for (String err : argo.getValidationResult().getWarnings()) {
+		for (String err : argoFileValidator.getValidationResult().getWarnings()) {
 			if (doXml) {
 				xml.writeStartElement("warning");
 				xml.writeCharacters(err);
