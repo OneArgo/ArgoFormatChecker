@@ -13,9 +13,6 @@ import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
-import fr.coriolis.checker.tables.ArgoNVSReferenceTableParser;
-import fr.coriolis.checker.tables.SkosCollection;
-import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
@@ -616,16 +613,6 @@ public class ArgoDataFile {
 		log.debug("specDir = '{}'", specDir);
 		log.debug("file type = {}", ft.specType);
 		log.debug("version = '{}'", version);
-
-		// DEV NVS TABLE
-		ArgoNVSReferenceTableParser nvsTablesReader = new ArgoNVSReferenceTableParser();
-		SkosCollection QCFlags = nvsTablesReader.getCollection(specDir + "/NVS/RD2.jsonld");
-		System.out.println(QCFlags.getId());
-		for (SkosConcept QCentry : QCFlags.getConceptMembers()) {
-			System.out.println(QCentry.getId());
-			System.out.println(QCentry.getAltLabel());
-			System.out.println(QCentry.getPrefLabel());
-		}
 
 		// ..could handle specialized "specs" by replacing "pure" with something else
 		// .. for example, when we were doing "merged" files, it was set to "merge"

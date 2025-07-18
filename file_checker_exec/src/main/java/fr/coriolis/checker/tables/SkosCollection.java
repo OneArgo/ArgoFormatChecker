@@ -1,6 +1,7 @@
 package fr.coriolis.checker.tables;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldId;
@@ -19,7 +20,7 @@ public class SkosCollection {
 	@JsonldProperty("skos:member")
 	private Set<SkosConceptId> membersIds;
 
-	private Set<SkosConcept> conceptMembers = new HashSet<>();
+	private Map<String, SkosConcept> conceptMembers = new HashMap<>();
 
 	// ===================
 	// GETTERS and SETTERS
@@ -40,7 +41,7 @@ public class SkosCollection {
 		return membersIds;
 	}
 
-	public Set<SkosConcept> getConceptMembers() {
+	public Map<String, SkosConcept> getConceptMembers() {
 		return conceptMembers;
 	}
 

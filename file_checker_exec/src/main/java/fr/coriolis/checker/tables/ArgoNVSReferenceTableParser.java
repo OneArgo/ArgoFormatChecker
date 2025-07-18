@@ -32,9 +32,8 @@ public class ArgoNVSReferenceTableParser {
 		return objectMapper;
 	}
 
-	public SkosCollection getCollection(String inputFilePath) throws IOException {
-		// read file :
-		File jsonLdFile = new File(inputFilePath);
+	public SkosCollection getCollection(File jsonLdFile) throws IOException {
+		// read json :
 
 		JsonNode root = objectMapper.readTree(jsonLdFile);
 		JsonNode graphArray = root.get("@graph");
@@ -104,7 +103,7 @@ public class ArgoNVSReferenceTableParser {
 			SkosConcept conceptMember = conceptsMap.get(conceptId.getId());
 			if (conceptMember != null) {
 				// add it to collection's concept members
-				collection.getConceptMembers().add(conceptMember);
+				collection.getConceptMembers().put(conceptMember.getId(), conceptMember);
 			}
 		}
 

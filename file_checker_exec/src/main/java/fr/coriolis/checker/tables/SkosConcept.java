@@ -1,6 +1,7 @@
 package fr.coriolis.checker.tables;
 
 import java.util.Map;
+import java.util.Set;
 
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldId;
 import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldProperty;
@@ -18,6 +19,11 @@ public class SkosConcept {
 	private Object prefLabel;
 	@JsonldProperty("skos:definition")
 	private Object definition;
+
+	@JsonldProperty("skos:related")
+	private Object relatedConceptIds;
+
+	// private Set<SkosConcept> relatedConcepts;
 
 	// ===================
 	// GETTERS and SETTERS
@@ -40,6 +46,34 @@ public class SkosConcept {
 
 	public String getDefinition() {
 		return getValue(definition);
+	}
+//
+//	public Set<SkosConcept> getRelatedConcepts() {
+//		return relatedConcepts;
+//	}
+
+	public Set<String> getRelatedConceptIds() {
+		if (relatedConceptIds == null) {
+			return Set.of();
+		}
+
+		// Only one id (map)
+		if (relatedConceptIds instanceof Map) {
+			String id = (String) ((Map<?, ?>) relatedConceptIds).get("@id");
+			return Set.of(id);
+		}
+		// multiple id (list)
+		if (relatedConceptIds instanceof Iterable) {
+			Set<String> ids = new java.util.HashSet<>();
+			for (Object obj : (Iterable<?>) relatedConceptIds) {
+				if (obj instanceof Map && ((Map<?, ?>) obj).containsKey("@id")) {
+					ids.add((String) ((Map<?, ?>) obj).get("@id"));
+				}
+			}
+			return ids;
+		}
+		// fallback
+		return Set.of();
 	}
 
 	/**
