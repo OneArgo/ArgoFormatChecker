@@ -2909,6 +2909,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker invCode = new ErrorTracker();
 		ArgoReferenceTable.ArgoReferenceEntry info;
 		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosCollection positionAccuracyTable = ArgoNVSReferenceTable.getNvsTableByName("POSITION_ACCURACY");
 		SkosConcept tableEntry;
 
 		for (int n = 0; n < nMeasure; n++) {
@@ -2939,9 +2940,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		for (int n = 0; n < nMeasure; n++) {
 			if (pos_acc[n] != ' ') {
-				info = ArgoReferenceTable.LOCATION_CLASS.contains(pos_acc[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				tableEntry = positionAccuracyTable.getConceptMembersByAltLabelMap().get(String.valueOf(pos_acc[n]));
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);
 					}
 

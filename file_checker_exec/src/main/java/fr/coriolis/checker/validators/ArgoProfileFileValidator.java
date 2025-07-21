@@ -2436,16 +2436,19 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			// ............check PROFILE_param_QC.............
 			char expProfQC = 'x';
-			ArgoReferenceTable.ArgoReferenceEntry info;
+			// ArgoReferenceTable.ArgoReferenceEntry info;
+			SkosCollection profQCFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("PROF_QC_FLAG");
+			SkosConcept tableEntry;
+			tableEntry = profQCFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(profQC));
 
-			info = ArgoReferenceTable.PROFILE_QC_FLAG.contains(profQC);
-			if (!info.isValid()) {
-				validationResult.addError("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + "': Invalid");
+			if (tableEntry == null) {
+				validationResult.addError("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + ": "
+						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 
 			} else {
-				if (info.isDeprecated) {
-					validationResult.addWarning(
-							"PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + "': Deprecated");
+				if (tableEntry.isDeprecated()) {
+					validationResult.addWarning("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + "': "
+							+ SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 				if (paramErr || param_adjErr) {

@@ -66,15 +66,15 @@ public final class ArgoReferenceTable {
 
 	// .....reference table 2: QC Flags.....
 	// .....reference table 2a: Profile QC Flags.....
-	public static CharTable QC_FLAG;
-	public static CharTable PROFILE_QC_FLAG;
+	// public static CharTable QC_FLAG;
+	// public static CharTable PROFILE_QC_FLAG;
 
 	// ....reference table 4 --- but not quite. Also includes DAC to center-code
 	// mapping......
 	public static final EnumMap<DACS, String> DacCenterCodes = new EnumMap<DACS, String>(DACS.class);
 
 	// .....reference table 5: location classes.....
-	public static CharTable LOCATION_CLASS;
+	// public static CharTable LOCATION_CLASS;
 
 	// .....reference table 6: Data State Indicators.....
 	public static StringTable DATA_STATE_INDICATOR;
@@ -189,11 +189,11 @@ public final class ArgoReferenceTable {
 
 		// .....reference table 2....
 		// .....reference table 2a....
-		QC_FLAG = new CharTable(prefix + "2");
-		PROFILE_QC_FLAG = new CharTable(prefix + "2a");
+		// QC_FLAG = new CharTable(prefix + "2");
+		// PROFILE_QC_FLAG = new CharTable(prefix + "2a");
 
 		// .....reference table 5....
-		LOCATION_CLASS = new CharTable(prefix + "5");
+		// LOCATION_CLASS = new CharTable(prefix + "5");
 
 		// .....reference table 6....
 		DATA_STATE_INDICATOR = new StringTable(prefix + "6");
