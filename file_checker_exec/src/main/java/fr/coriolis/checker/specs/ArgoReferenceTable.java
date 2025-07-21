@@ -77,10 +77,10 @@ public final class ArgoReferenceTable {
 	// public static CharTable LOCATION_CLASS;
 
 	// .....reference table 6: Data State Indicators.....
-	public static StringTable DATA_STATE_INDICATOR;
+	// public static StringTable DATA_STATE_INDICATOR;
 
 	// .....reference table 8.....
-	public static IntegerTable WMO_INST_TYPE;
+	// public static IntegerTable WMO_INST_TYPE;
 
 	// .....reference table 9.....
 	public static StringTable POSITIONING_SYSTEM;
@@ -196,10 +196,10 @@ public final class ArgoReferenceTable {
 		// LOCATION_CLASS = new CharTable(prefix + "5");
 
 		// .....reference table 6....
-		DATA_STATE_INDICATOR = new StringTable(prefix + "6");
+		// DATA_STATE_INDICATOR = new StringTable(prefix + "6");
 
 		// .....reference table 8....
-		WMO_INST_TYPE = new IntegerTable(prefix + "8");
+		// WMO_INST_TYPE = new IntegerTable(prefix + "8");
 
 		// .....reference table 9....
 		POSITIONING_SYSTEM = new StringTable(prefix + "9");

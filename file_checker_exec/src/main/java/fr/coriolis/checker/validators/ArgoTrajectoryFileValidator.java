@@ -1827,6 +1827,12 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String name;
 		String str;
 
+		// get nvs tables :
+		SkosCollection dataStateIndicatorTable = ArgoNVSReferenceTable.getNvsTableByName("DATA_STATE_INDICATOR");
+		SkosCollection wmoInstTypeTable = ArgoNVSReferenceTable.getNvsTableByName("ARGO_WMO_INST_TYPE");
+
+		SkosConcept tableEntry;
+
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
 		str = arFile.readString(name).trim();
 		if (!super.validatePlatfomNumber(str)) {
@@ -1840,13 +1846,14 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
-		info = ArgoReferenceTable.DATA_STATE_INDICATOR.contains(str);
-		if (info.isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = dataStateIndicatorTable.getConceptMembersByAltLabelMap().get(str);
+
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "FIRMWARE_VERSION"; // ..not empty
@@ -1902,14 +1909,14 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			try {
 				int N = Integer.valueOf(str);
 
-				info = ArgoReferenceTable.WMO_INST_TYPE.contains(N);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
-						validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+				tableEntry = wmoInstTypeTable.getConceptMembersByAltLabelMap().get(str);
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
+						validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 					}
 
 				} else {
-					validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+					validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 				}
 			} catch (Exception e) {
 				validationResult.addError(name + ": '" + str + "' Invalid. Must be integer.");

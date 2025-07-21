@@ -1011,6 +1011,12 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		ArgoReferenceTable.ArgoReferenceEntry info;
 
+		// get NVS tables :
+		SkosCollection wmoInstTypeTable = ArgoNVSReferenceTable.getNvsTableByName("ARGO_WMO_INST_TYPE");
+		SkosCollection dataStateIndicatorTable = ArgoNVSReferenceTable.getNvsTableByName("DATA_STATE_INDICATOR");
+
+		SkosConcept tableEntry;
+
 		for (int n = 0; n < nProf; n++) {
 			Boolean hasData = null;
 
@@ -1053,6 +1059,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			log.debug("DATA_STATE_INDICATOR[{}]: '{}'", n, ds[n]);
 
 			s = ds[n].trim();
+			tableEntry = dataStateIndicatorTable.getConceptMembersByAltLabelMap().get(s);
 			if (s.length() == 0) {
 				// ..set to _FillValue --- data must be missing
 				// ..use PRES as a proxy - if all PRES is missing assume all data is missing
@@ -1078,8 +1085,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					validationResult.addError("DATA_STATE_INDICATOR[" + (n + 1) + "]: '" + s + "' Not set");
 				}
 
-			} else if (!(info = ArgoReferenceTable.DATA_STATE_INDICATOR.contains(s)).isActive) {
-				validationResult.addError("DATA_STATE_INDICATOR[" + (n + 1) + "]: '" + s + "' Invalid");
+			} else if (tableEntry == null) {
+				validationResult.addError(
+						"DATA_STATE_INDICATOR[" + (n + 1) + "]: '" + s + "' " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 			// .....DATA_CENTRE.....
@@ -1106,15 +1114,15 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			} else {
 				try {
 					int N = Integer.valueOf(s);
-
-					if ((info = ArgoReferenceTable.WMO_INST_TYPE.contains(N)).isValid()) {
-						if (info.isDeprecated) {
-							validationResult
-									.addWarning("WMO_INST_TYPE[" + (n + 1) + "]: '" + s + "' Status: " + info.message);
+					tableEntry = wmoInstTypeTable.getConceptMembersByAltLabelMap().get(s);
+					if (tableEntry != null) {
+						if (tableEntry.isDeprecated()) {
+							validationResult.addWarning("WMO_INST_TYPE[" + (n + 1) + "]: '" + s + "' Status: "
+									+ SkosConcept.DEPRECATED_CONCEPT);
 						}
 					} else {
-						validationResult
-								.addError("WMO_INST_TYPE[" + (n + 1) + "]: '" + s + "' Status: " + info.message);
+						validationResult.addError("WMO_INST_TYPE[" + (n + 1) + "]: '" + s + "' Status: "
+								+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 					}
 
 				} catch (Exception e) {

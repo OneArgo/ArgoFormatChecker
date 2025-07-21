@@ -588,6 +588,11 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String name;
 		String str;
 
+		// get nvs Tables :
+		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosCollection wmoInstTypeTable = ArgoNVSReferenceTable.getNvsTableByName("ARGO_WMO_INST_TYPE");
+		SkosConcept tableEntry;
+
 		// ...........single valued variables..............
 
 		name = "CONTROLLER_BOARD_SERIAL_NO_PRIMARY"; // ..not empty
@@ -649,11 +654,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "LAUNCH_QC"; // ..ref table 2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
-		SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
 
-		if (qcFlagsTableEntry != null) {
-			if (qcFlagsTableEntry.isDeprecated()) {
+		tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
 				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
@@ -763,9 +767,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "START_DATE_QC"; // ..ref table 2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-		qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
-		if (qcFlagsTableEntry != null) {
-			if (qcFlagsTableEntry.isDeprecated()) {
+		tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
 				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
@@ -791,16 +795,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		log.debug("{}: '{}'", name, str);
 		try {
 			int N = Integer.valueOf(str);
+			tableEntry = wmoInstTypeTable.getConceptMembersByAltLabelMap().get(str);
 
-			if ((info = ArgoReferenceTable.WMO_INST_TYPE.contains(N)).isValid()) {
+			if (tableEntry != null) {
 				wmoValid = true;
 
-				if (info.isDeprecated) {
-					validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+				if (tableEntry.isDeprecated()) {
+					validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
-				validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+				validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 		} catch (Exception e) {
