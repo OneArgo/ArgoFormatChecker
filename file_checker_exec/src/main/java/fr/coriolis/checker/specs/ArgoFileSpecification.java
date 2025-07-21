@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.core.ArgoDataFile;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import ucar.ma2.DataType;
 
 /**
@@ -1096,7 +1097,7 @@ public class ArgoFileSpecification {
 		if (fullSpec) {
 			// ..initialize the reference tables..
 			ArgoReferenceTable ref = new ArgoReferenceTable(specDir);
-
+			ArgoNVSReferenceTable refnvs = new ArgoNVSReferenceTable(specDir + "/NVS");
 			// ..attribute regex file -- optional
 			status = parseAttrRegexFile();
 			if (!status) {

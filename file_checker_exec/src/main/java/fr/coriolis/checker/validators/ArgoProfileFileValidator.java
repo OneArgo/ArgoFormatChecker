@@ -14,6 +14,9 @@ import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosCollection;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.DataType;
@@ -1837,12 +1840,15 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					inf++;
 				}
 
-				ArgoReferenceTable.ArgoReferenceEntry info;
+				// ArgoReferenceTable.ArgoReferenceEntry info;
+				SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+				SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(prm_qc[k]));
 
-				if ((info = ArgoReferenceTable.QC_FLAG.contains(prm_qc[k])).isValid()) {
+				if (qcFlagsTableEntry != null) {
 					// ..valid QC flag (NOT " ")
 
-					if (info.isDeprecated) {
+					if (qcFlagsTableEntry.isDeprecated()) {
 						depQC++;
 					}
 

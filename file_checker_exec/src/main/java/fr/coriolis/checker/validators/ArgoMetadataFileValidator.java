@@ -1036,7 +1036,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String parameterValue = arFile.readString(parameterName).trim();
 
 		log.debug("{}: '{}'", parameterName, parameterValue);
-		if ((info = ArgoReferenceTable.PROGRAM_NAME.contains(parameterValue)).isValid()) {
+		if ((info = refTable.contains(parameterValue)).isValid()) {
 			if (info.isDeprecated) {
 				validationResult.addWarning(parameterName + ": '" + parameterValue + "' Status: " + info.message);
 			}
@@ -1048,7 +1048,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 	private void checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
 
-		Variable dataVar = arFile.getNcReader().findVariable("PROGRAM_NAME");
+		Variable dataVar = arFile.getNcReader().findVariable(parameterName);
 		if (dataVar != null) {
 			checkParameterValueAgainstRefTable(parameterName, refTable);
 		}

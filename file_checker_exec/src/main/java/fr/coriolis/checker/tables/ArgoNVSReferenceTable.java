@@ -11,7 +11,15 @@ import java.util.stream.Stream;
 public final class ArgoNVSReferenceTable {
 
 	public static enum RELEVANT_TABLES {
-		DM_QC_FLAG("DM_QC_FLAG"), PLATFORM_TYPE("PLATFORM_TYPE"), PLATFORM_MAKER("PLATFORM_MAKER");
+		DM_QC_FLAG("DM_QC_FLAG"), PLATFORM_TYPE("PLATFORM_TYPE"), PLATFORM_MAKER("PLATFORM_MAKER"),
+		PROF_QC_FLAG("PROF_QC_FLAG"), POSITION_ACCURACY("POSITION_ACCURACY"),
+		DATA_STATE_INDICATOR("DATA_STATE_INDICATOR"), HISTORY_ACTION("HISTORY_ACTION"),
+		ARGO_WMO_INST_TYPE("ARGO_WMO_INST_TYPE"), POSITIONING_SYSTEM("POSITIONING_SYSTEM"),
+		TRANS_SYSTEM("TRANS_SYSTEM"), VERTICAL_SAMPLING_SCHEME("VERTICAL_SAMPLING_SCHEME"), STATUS("STATUS"),
+		GROUNDED("GROUNDED"), PLATFORM_FAMILY("PLATFORM_FAMILY"), SENSOR("SENSOR"), SENSOR_MAKER("SENSOR_MAKER"),
+		SENSOR_MODEL("SENSOR_MODEL"), MEASUREMENT_CODE_ID("MEASUREMENT_CODE_ID"),
+		TECHNICAL_PARAMETER_NAME("TECHNICAL_PARAMETER_NAME"), CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME"),
+		PARAMETER("PARAMETER");
 
 		public final String name;
 
@@ -31,7 +39,7 @@ public final class ArgoNVSReferenceTable {
 
 	public static Map<RELEVANT_TABLES, SkosCollection> NVS_REFERENCE_TABLES;
 
-	public ArgoNVSReferenceTable(String nvsFolderPath) throws IOException {
+	public ArgoNVSReferenceTable(String nvsFolderPath) {
 		NVS_REFERENCE_TABLES = new HashMap<>();
 		// get list of nvs tables files :
 		Set<File> tablesFiles = listNvsTablesFiles(nvsFolderPath);
@@ -44,7 +52,12 @@ public final class ArgoNVSReferenceTable {
 
 		// loop over tables files
 		for (File tableFile : tablesFiles) {
-			SkosCollection table = nvsTablesParser.getCollection(tableFile);
+			SkosCollection table;
+			try {
+				table = nvsTablesParser.getCollection(tableFile);
+			} catch (IOException e) {
+				continue;
+			}
 			// is it a relevant table ?
 			RELEVANT_TABLES enumKey = RELEVANT_TABLES.fromName(table.getAltLabel());
 			if (enumKey != null) {
@@ -58,6 +71,13 @@ public final class ArgoNVSReferenceTable {
 
 //		//resolveAllCollectionsMembersRelatedConcepts(nvsReferenceTables, conceptsIndex);
 
+	}
+
+	public static SkosCollection getNvsTableByName(String tableName) {
+		if (RELEVANT_TABLES.fromName(tableName) == null) {
+			return null;
+		}
+		return NVS_REFERENCE_TABLES.get(RELEVANT_TABLES.fromName(tableName));
 	}
 
 	private Set<File> listNvsTablesFiles(String nvsFolderPath) {

@@ -19,6 +19,8 @@ public class SkosConcept {
 	private Object prefLabel;
 	@JsonldProperty("skos:definition")
 	private Object definition;
+	@JsonldProperty("owl:deprecated")
+	private boolean deprecated;
 
 	@JsonldProperty("skos:related")
 	private Object relatedConceptIds;
@@ -47,10 +49,15 @@ public class SkosConcept {
 	public String getDefinition() {
 		return getValue(definition);
 	}
+
 //
 //	public Set<SkosConcept> getRelatedConcepts() {
 //		return relatedConcepts;
 //	}
+
+	public boolean isDeprecated() {
+		return deprecated;
+	}
 
 	public Set<String> getRelatedConceptIds() {
 		if (relatedConceptIds == null) {
