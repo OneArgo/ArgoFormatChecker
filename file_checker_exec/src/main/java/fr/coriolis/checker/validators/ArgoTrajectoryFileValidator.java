@@ -15,6 +15,9 @@ import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosCollection;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -1333,10 +1336,13 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker notMiss = new ErrorTracker(); // ..count of juld missing & QC not miss
 		ErrorTracker noQC = new ErrorTracker(); // ..count of juld set & QC set to missing
 
+		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosConcept qcFlagsTableEntry;
 		for (int n = 0; n < nMeasure; n++) {
 			if (juld_qc[n] != ' ') {
-				if ((info = ArgoReferenceTable.QC_FLAG.contains(juld_qc[n])).isValid()) {
-					if (info.isDeprecated) {
+				qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(juld_qc[n]));
+				if (qcFlagsTableEntry != null) {
+					if (qcFlagsTableEntry.isDeprecated()) {
 						depQC.increment(n);
 					}
 				} else {
@@ -1345,9 +1351,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			}
 
 			if (juld_status[n] != ' ') {
-				info = ArgoReferenceTable.STATUS_FLAG.contains(juld_status[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(juld_status[n]));
+				if (qcFlagsTableEntry != null) {
+					if (qcFlagsTableEntry.isDeprecated()) {
 						depStatus.increment(n);
 					}
 
@@ -1499,9 +1505,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			for (int n = 0; n < nMeasure; n++) {
 				if (juld_adj_qc[n] != ' ') {
-					info = ArgoReferenceTable.QC_FLAG.contains(juld_adj_qc[n]);
-					if (info.isValid()) {
-						if (info.isDeprecated) {
+					qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
+							.get(String.valueOf(juld_adj_qc[n]));
+					if (qcFlagsTableEntry != null) {
+						if (qcFlagsTableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
 
@@ -2377,6 +2384,8 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			boolean fail = false;
 			ArgoReferenceTable.ArgoReferenceEntry info;
+			SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+			SkosConcept tableEntry;
 
 			ErrorTracker depQC = new ErrorTracker();
 			ErrorTracker invQC = new ErrorTracker();
@@ -2390,12 +2399,12 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				}
 
 				if (prm_qc != null) {
-					info = ArgoReferenceTable.QC_FLAG.contains(prm_qc[n]);
+					tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(prm_qc[n]));
 
-					if (prm_qc[n] == ' ' || info.isValid()) {
+					if (prm_qc[n] == ' ' || tableEntry != null) {
 						// ..valid QC flag or " "
 
-						if (info.isDeprecated) {
+						if (tableEntry != null && tableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
 
@@ -2628,9 +2637,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 					if (prm_adj_qc[n] != ' ') {
 
-						info = ArgoReferenceTable.QC_FLAG.contains(prm_adj_qc[n]);
-						if (info.isValid()) {
-							if (info.isDeprecated) {
+						tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(prm_adj_qc[n]));
+
+						if (tableEntry != null) {
+							if (tableEntry.isDeprecated()) {
 								depQC.increment(n);
 							}
 
@@ -2898,12 +2908,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker depCode = new ErrorTracker();
 		ErrorTracker invCode = new ErrorTracker();
 		ArgoReferenceTable.ArgoReferenceEntry info;
+		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosConcept tableEntry;
 
 		for (int n = 0; n < nMeasure; n++) {
 			if (pos_qc[n] != ' ') {
-				info = ArgoReferenceTable.QC_FLAG.contains(pos_qc[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(pos_qc[n]));
+
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);
 					}
 

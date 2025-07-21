@@ -9,6 +9,10 @@ import ioinformarics.oss.jackson.module.jsonld.annotation.JsonldType;
 
 @JsonldType("skos:Concept")
 public class SkosConcept {
+
+	public final static String INVALID_ALTLABEL_MESSAGE = "Invalid";
+	public final static String DEPRECATED_CONCEPT = "Deprecated";
+
 	@JsonldId
 	private String id;
 	@JsonldProperty("skos:notation")

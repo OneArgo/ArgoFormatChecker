@@ -16,6 +16,9 @@ import fr.coriolis.checker.specs.ArgoConfigTechParam;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import fr.coriolis.checker.specs.ArgoReferenceTable.StringTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosCollection;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
 import ucar.nc2.Variable;
 
@@ -374,9 +377,11 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "LAUNCH_QC"; // ..valid ref table 2 value
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
+		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
 
-		if (!(info = ArgoReferenceTable.QC_FLAG.contains(ch)).isActive) {
-			validationResult.addWarning(name + ": '" + ch + "' Status: " + info.message);
+		if (qcFlagsTableEntry == null) {
+			validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		// ..PARAMETER --> see below
@@ -420,9 +425,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "START_DATE_QC"; // ..valid ref table 2 value
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-
-		if (!(info = ArgoReferenceTable.QC_FLAG.contains(ch)).isActive) {
-			validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (qcFlagsTableEntry == null) {
+			validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "TRANS_SYSTEM"; // ..ref table 10
@@ -644,14 +649,16 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "LAUNCH_QC"; // ..ref table 2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
+		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
 
-		if ((info = ArgoReferenceTable.QC_FLAG.contains(ch)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + ch + "' Status: " + info.message);
+		if (qcFlagsTableEntry != null) {
+			if (qcFlagsTableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + ch + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "MANUAL_VERSION"; // ..not empty
@@ -756,14 +763,14 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "START_DATE_QC"; // ..ref table 2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-
-		if ((info = ArgoReferenceTable.QC_FLAG.contains(ch)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + ch + "' Status: " + info.message);
+		qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (qcFlagsTableEntry != null) {
+			if (qcFlagsTableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + ch + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "STANDARD_FORMAT_ID"; // ..not empty

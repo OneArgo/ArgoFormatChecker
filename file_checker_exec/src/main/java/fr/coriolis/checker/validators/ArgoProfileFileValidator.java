@@ -1840,7 +1840,6 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					inf++;
 				}
 
-				// ArgoReferenceTable.ArgoReferenceEntry info;
 				SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
 				SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
 						.get(String.valueOf(prm_qc[k]));
@@ -2210,11 +2209,12 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						}
 
 						// ..check the per level QC flag
-						ArgoReferenceTable.ArgoReferenceEntry info;
+						SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+						SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
+								.get(String.valueOf(prm_qc[k]));
 
-						info = ArgoReferenceTable.QC_FLAG.contains(prm_adj_qc[k]);
-						if (info.isValid()) {
-							if (info.isDeprecated) {
+						if (qcFlagsTableEntry != null) {
+							if (qcFlagsTableEntry.isDeprecated()) {
 								depQC++;
 							}
 
@@ -2563,30 +2563,38 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		String juldQC = arFile.readString("JULD_QC", true);// ..true -> return NULLs if present
 		String posQC = arFile.readString("POSITION_QC", true);// ..true -> return NULLs if present
-
+		// get table
+		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		SkosConcept tableEntry;
 		// ...........loop over each profile in the file.............
 		for (int n = 0; n < nProf; n++) {
-			ArgoReferenceTable.ArgoReferenceEntry info;
 			Character ch;
-
 			ch = juldQC.charAt(n);
-			if ((info = ArgoReferenceTable.QC_FLAG.contains(ch)).isValid()) {
-				if (info.isDeprecated) {
-					validationResult.addWarning("JULD_QC[" + (n + 1) + "]: '" + ch + "' Status: " + info.message);
+
+			tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+
+			if (tableEntry != null) {
+				if (tableEntry.isDeprecated()) {
+					validationResult.addWarning(
+							"JULD_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
-				validationResult.addError("JULD_QC[" + (n + 1) + "]: '" + ch + "' Status: " + info.message);
+				validationResult.addError(
+						"JULD_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 			ch = posQC.charAt(n);
-			if ((info = ArgoReferenceTable.QC_FLAG.contains(ch)).isValid()) {
-				if (info.isDeprecated) {
-					validationResult.addWarning("POSITION_QC[" + (n + 1) + "]: '" + ch + "' Status: " + info.message);
+			tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+			if (tableEntry != null) {
+				if (tableEntry.isDeprecated()) {
+					validationResult.addWarning(
+							"POSITION_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
-				validationResult.addError("POSITION_QC[" + (n + 1) + "]: '" + ch + "' Status: " + info.message);
+				validationResult.addError(
+						"POSITION_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 		}
 	}
