@@ -23,6 +23,7 @@ import fr.coriolis.checker.exceptions.NotAnArgoFileException;
 import fr.coriolis.checker.exceptions.ValidateFileDataFailedException;
 import fr.coriolis.checker.exceptions.VerifyFileFormatFailedException;
 import fr.coriolis.checker.output.ResultsFile;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.validators.ArgoFileValidator;
 import fr.coriolis.checker.validators.ArgoMetadataFileValidator;
 import fr.coriolis.checker.validators.ArgoProfileFileValidator;
@@ -199,6 +200,8 @@ public class ValidateSubmit {
 	 * @param filesToProcess
 	 */
 	private static void validateFiles(Options options, String dacName, List<String> filesToProcess) {
+		// initialize NVS tables :
+		ArgoNVSReferenceTable.initialize(options.getSpecDirName() + "/NVS");
 		// Loop through files list
 		for (String file : filesToProcess) {
 			// .... get file informations from options :
@@ -212,6 +215,7 @@ public class ValidateSubmit {
 
 			// ......open and process the input file.....
 			try {
+
 				// ..............open Argo file ....................
 				argo = openArgoFile(inFileName, options.getSpecDirName(), dacName);
 

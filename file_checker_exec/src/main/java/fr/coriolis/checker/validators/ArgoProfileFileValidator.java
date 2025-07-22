@@ -15,7 +15,6 @@ import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
-import fr.coriolis.checker.tables.SkosCollection;
 import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.Array;
 import ucar.ma2.ArrayChar;
@@ -935,6 +934,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	 */
 	public void validateHighlyDesirable(int nProf) throws IOException {
 		log.debug(".....validateHighlyDesirable: start.....");
+		// get NVS tables :
+
+		SkosConcept tableEntry;
 
 		if (arFile.getFileSpec().getVariable("INST_REFERENCE") != null) {
 			// ..INST_REF is in spec, check that it is set
@@ -958,11 +960,11 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			for (int n = 0; n < nProf; n++) {
 				log.debug("POSITIONING_SYSTEM[" + n + "]: '" + str[n] + "'");
 
-				ArgoReferenceTable.ArgoReferenceEntry info = ArgoReferenceTable.POSITIONING_SYSTEM
-						.contains(str[n].trim());
-				if (!info.isActive) {
-					validationResult.addWarning(
-							"POSITIONING_SYSTEM[" + (n + 1) + "]: '" + str[n] + "' Status: " + info.message);
+				tableEntry = ArgoNVSReferenceTable.POSITIONING_SYSTEM_TABLE.getConceptMembersByAltLabelMap()
+						.get(str[n].trim());
+				if (tableEntry == null) {
+					validationResult.addWarning("POSITIONING_SYSTEM[" + (n + 1) + "]: '" + str[n] + "' Status: "
+							+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 				}
 			}
 		}
@@ -1011,10 +1013,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		ArgoReferenceTable.ArgoReferenceEntry info;
 
-		// get NVS tables :
-		SkosCollection wmoInstTypeTable = ArgoNVSReferenceTable.getNvsTableByName("ARGO_WMO_INST_TYPE");
-		SkosCollection dataStateIndicatorTable = ArgoNVSReferenceTable.getNvsTableByName("DATA_STATE_INDICATOR");
-
+		// NVS table entry :
 		SkosConcept tableEntry;
 
 		for (int n = 0; n < nProf; n++) {
@@ -1059,7 +1058,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			log.debug("DATA_STATE_INDICATOR[{}]: '{}'", n, ds[n]);
 
 			s = ds[n].trim();
-			tableEntry = dataStateIndicatorTable.getConceptMembersByAltLabelMap().get(s);
+			tableEntry = ArgoNVSReferenceTable.DATA_STATE_INDICATOR_TABLE.getConceptMembersByAltLabelMap().get(s);
 			if (s.length() == 0) {
 				// ..set to _FillValue --- data must be missing
 				// ..use PRES as a proxy - if all PRES is missing assume all data is missing
@@ -1114,7 +1113,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			} else {
 				try {
 					int N = Integer.valueOf(s);
-					tableEntry = wmoInstTypeTable.getConceptMembersByAltLabelMap().get(s);
+					tableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE.getConceptMembersByAltLabelMap().get(s);
 					if (tableEntry != null) {
 						if (tableEntry.isDeprecated()) {
 							validationResult.addWarning("WMO_INST_TYPE[" + (n + 1) + "]: '" + s + "' Status: "
@@ -1167,10 +1166,12 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			} else {
 
-				if ((info = ArgoReferenceTable.VERTICAL_SAMPLING_SCHEME.contains(s)).isValid()) {
-					if (info.isDeprecated) {
-						validationResult.addWarning("VERTICAL_SAMPLING_SCHEME[" + (n + 1) + "]: Status: " + info.message
-								+ ": '" + s.trim() + "'");
+				tableEntry = ArgoNVSReferenceTable.VERTICAL_SAMPLING_SCHEME_TABLE.getConceptMembersByAltLabelMap()
+						.get(s);
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
+						validationResult.addWarning("VERTICAL_SAMPLING_SCHEME[" + (n + 1) + "]: Status: "
+								+ SkosConcept.DEPRECATED_CONCEPT + ": '" + s.trim() + "'");
 					}
 
 					if (n == 0) {
@@ -1848,8 +1849,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					inf++;
 				}
 
-				SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
-				SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
+				SkosConcept qcFlagsTableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 						.get(String.valueOf(prm_qc[k]));
 
 				if (qcFlagsTableEntry != null) {
@@ -2217,9 +2217,8 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						}
 
 						// ..check the per level QC flag
-						SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
-						SkosConcept qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
-								.get(String.valueOf(prm_qc[k]));
+						SkosConcept qcFlagsTableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE
+								.getConceptMembersByAltLabelMap().get(String.valueOf(prm_qc[k]));
 
 						if (qcFlagsTableEntry != null) {
 							if (qcFlagsTableEntry.isDeprecated()) {
@@ -2445,9 +2444,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			// ............check PROFILE_param_QC.............
 			char expProfQC = 'x';
 			// ArgoReferenceTable.ArgoReferenceEntry info;
-			SkosCollection profQCFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("PROF_QC_FLAG");
 			SkosConcept tableEntry;
-			tableEntry = profQCFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(profQC));
+			tableEntry = ArgoNVSReferenceTable.PROF_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+					.get(String.valueOf(profQC));
 
 			if (tableEntry == null) {
 				validationResult.addError("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + ": "
@@ -2574,15 +2573,15 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 		String juldQC = arFile.readString("JULD_QC", true);// ..true -> return NULLs if present
 		String posQC = arFile.readString("POSITION_QC", true);// ..true -> return NULLs if present
-		// get table
-		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+		// NVS table entry:
 		SkosConcept tableEntry;
 		// ...........loop over each profile in the file.............
 		for (int n = 0; n < nProf; n++) {
 			Character ch;
 			ch = juldQC.charAt(n);
 
-			tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+			tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+					.get(String.valueOf(ch));
 
 			if (tableEntry != null) {
 				if (tableEntry.isDeprecated()) {
@@ -2596,7 +2595,8 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			}
 
 			ch = posQC.charAt(n);
-			tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+			tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+					.get(String.valueOf(ch));
 			if (tableEntry != null) {
 				if (tableEntry.isDeprecated()) {
 					validationResult.addWarning(

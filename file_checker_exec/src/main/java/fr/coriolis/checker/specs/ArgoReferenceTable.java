@@ -83,16 +83,16 @@ public final class ArgoReferenceTable {
 	// public static IntegerTable WMO_INST_TYPE;
 
 	// .....reference table 9.....
-	public static StringTable POSITIONING_SYSTEM;
+	// public static StringTable POSITIONING_SYSTEM;
 
 	// .....reference table 10.....
-	public static StringTable TRANS_SYSTEM;
+	// public static StringTable TRANS_SYSTEM;
 
 	// .....reference table 16.....
-	public static StringTable VERTICAL_SAMPLING_SCHEME;
+	// public static StringTable VERTICAL_SAMPLING_SCHEME;
 
 	// .....reference table 19.....
-	public static CharTable STATUS_FLAG;
+	// public static CharTable STATUS_FLAG;
 
 	// .....reference table 20: Grounded flags.....
 	public static CharTable GROUNDED;
@@ -202,16 +202,16 @@ public final class ArgoReferenceTable {
 		// WMO_INST_TYPE = new IntegerTable(prefix + "8");
 
 		// .....reference table 9....
-		POSITIONING_SYSTEM = new StringTable(prefix + "9");
+		// POSITIONING_SYSTEM = new StringTable(prefix + "9");
 
 		// .....reference table 10....
-		TRANS_SYSTEM = new StringTable(prefix + "10");
+		// TRANS_SYSTEM = new StringTable(prefix + "10");
 
 		// .....reference table 16....
-		VERTICAL_SAMPLING_SCHEME = new StringTable(prefix + "16");
+		// VERTICAL_SAMPLING_SCHEME = new StringTable(prefix + "16");
 
 		// .....reference table 19....
-		STATUS_FLAG = new CharTable(prefix + "19");
+		// STATUS_FLAG = new CharTable(prefix + "19");
 
 		// .....reference table 20....
 		GROUNDED = new CharTable(prefix + "20");

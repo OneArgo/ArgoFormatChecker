@@ -16,7 +16,6 @@ import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
-import fr.coriolis.checker.tables.SkosCollection;
 import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -1192,6 +1191,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		boolean core = false;
 		ArgoReferenceTable.ArgoReferenceEntry info;
 
+		// NVS tables entry :
+		SkosConcept tableEntry;
+
 		if (arFile.fileType() == FileType.TRAJECTORY) {
 			// ..implies this is 1) a v3.2+ or 2) a pre-v3.2 core-file (NOT a bio-file)
 			core = true;
@@ -1336,13 +1338,12 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker notMiss = new ErrorTracker(); // ..count of juld missing & QC not miss
 		ErrorTracker noQC = new ErrorTracker(); // ..count of juld set & QC set to missing
 
-		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
-		SkosConcept qcFlagsTableEntry;
 		for (int n = 0; n < nMeasure; n++) {
 			if (juld_qc[n] != ' ') {
-				qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(juld_qc[n]));
-				if (qcFlagsTableEntry != null) {
-					if (qcFlagsTableEntry.isDeprecated()) {
+				tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(juld_qc[n]));
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
 						depQC.increment(n);
 					}
 				} else {
@@ -1351,9 +1352,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			}
 
 			if (juld_status[n] != ' ') {
-				qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(juld_status[n]));
-				if (qcFlagsTableEntry != null) {
-					if (qcFlagsTableEntry.isDeprecated()) {
+				tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(juld_status[n]));
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
 						depStatus.increment(n);
 					}
 
@@ -1505,10 +1507,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			for (int n = 0; n < nMeasure; n++) {
 				if (juld_adj_qc[n] != ' ') {
-					qcFlagsTableEntry = qcFlagsTable.getConceptMembersByAltLabelMap()
+					tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 							.get(String.valueOf(juld_adj_qc[n]));
-					if (qcFlagsTableEntry != null) {
-						if (qcFlagsTableEntry.isDeprecated()) {
+					if (tableEntry != null) {
+						if (tableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
 
@@ -1519,9 +1521,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				if (juld_adj_status[n] != ' ') {
 					if (juld_adj_status[n] != ' ') {
-						info = ArgoReferenceTable.STATUS_FLAG.contains(juld_adj_status[n]);
-						if (info.isValid()) {
-							if (info.isDeprecated) {
+						tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+								.get(String.valueOf(juld_adj_status[n]));
+						if (tableEntry != null) {
+							if (tableEntry.isDeprecated()) {
 								depStatus.increment(n);
 							}
 
@@ -1827,10 +1830,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String name;
 		String str;
 
-		// get nvs tables :
-		SkosCollection dataStateIndicatorTable = ArgoNVSReferenceTable.getNvsTableByName("DATA_STATE_INDICATOR");
-		SkosCollection wmoInstTypeTable = ArgoNVSReferenceTable.getNvsTableByName("ARGO_WMO_INST_TYPE");
-
+		// NVS tables entry :
 		SkosConcept tableEntry;
 
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
@@ -1846,7 +1846,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
-		tableEntry = dataStateIndicatorTable.getConceptMembersByAltLabelMap().get(str);
+		tableEntry = ArgoNVSReferenceTable.DATA_STATE_INDICATOR_TABLE.getConceptMembersByAltLabelMap().get(str);
 
 		if (tableEntry != null) {
 			if (tableEntry.isDeprecated()) {
@@ -1888,14 +1888,14 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug(name + ": '{}'", str);
 
-		info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str);
-		if (info.isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.POSITIONING_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "WMO_INST_TYPE";
@@ -1909,7 +1909,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			try {
 				int N = Integer.valueOf(str);
 
-				tableEntry = wmoInstTypeTable.getConceptMembersByAltLabelMap().get(str);
+				tableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
 				if (tableEntry != null) {
 					if (tableEntry.isDeprecated()) {
 						validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
@@ -2391,7 +2391,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			boolean fail = false;
 			ArgoReferenceTable.ArgoReferenceEntry info;
-			SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+			// NVS table entry
 			SkosConcept tableEntry;
 
 			ErrorTracker depQC = new ErrorTracker();
@@ -2406,7 +2406,8 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				}
 
 				if (prm_qc != null) {
-					tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(prm_qc[n]));
+					tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+							.get(String.valueOf(prm_qc[n]));
 
 					if (prm_qc[n] == ' ' || tableEntry != null) {
 						// ..valid QC flag or " "
@@ -2644,7 +2645,8 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 					if (prm_adj_qc[n] != ' ') {
 
-						tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(prm_adj_qc[n]));
+						tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+								.get(String.valueOf(prm_adj_qc[n]));
 
 						if (tableEntry != null) {
 							if (tableEntry.isDeprecated()) {
@@ -2915,13 +2917,13 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker depCode = new ErrorTracker();
 		ErrorTracker invCode = new ErrorTracker();
 		ArgoReferenceTable.ArgoReferenceEntry info;
-		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
-		SkosCollection positionAccuracyTable = ArgoNVSReferenceTable.getNvsTableByName("POSITION_ACCURACY");
+		// NVS table entry
 		SkosConcept tableEntry;
 
 		for (int n = 0; n < nMeasure; n++) {
 			if (pos_qc[n] != ' ') {
-				tableEntry = qcFlagsTable.getConceptMembersByAltLabelMap().get(String.valueOf(pos_qc[n]));
+				tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(pos_qc[n]));
 
 				if (tableEntry != null) {
 					if (tableEntry.isDeprecated()) {
@@ -2947,7 +2949,8 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		for (int n = 0; n < nMeasure; n++) {
 			if (pos_acc[n] != ' ') {
-				tableEntry = positionAccuracyTable.getConceptMembersByAltLabelMap().get(String.valueOf(pos_acc[n]));
+				tableEntry = ArgoNVSReferenceTable.POSITION_ACCURACY_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(pos_acc[n]));
 				if (tableEntry != null) {
 					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);

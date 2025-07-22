@@ -2,6 +2,7 @@ package fr.coriolis.checker.tables;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ArgoNVSReferenceTable {
+
+	private static PrintStream stderr = new PrintStream(System.err);
 
 	public static enum RELEVANT_TABLES {
 		DM_QC_FLAG("DM_QC_FLAG"), PLATFORM_TYPE("PLATFORM_TYPE"), PLATFORM_MAKER("PLATFORM_MAKER"),
@@ -37,15 +40,38 @@ public final class ArgoNVSReferenceTable {
 		}
 	};
 
-	public static Map<RELEVANT_TABLES, SkosCollection> NVS_REFERENCE_TABLES;
+	// ==========
+	// ALL TABLES
+	// ==========
+	public static SkosCollection DM_QC_FLAG_TABLE;
+	public static SkosCollection PLATFORM_TYPE_TABLE;
+	public static SkosCollection PLATFORM_MAKER_TABLE;
+	public static SkosCollection PROF_QC_FLAG_TABLE;
+	public static SkosCollection POSITION_ACCURACY_TABLE;
+	public static SkosCollection DATA_STATE_INDICATOR_TABLE;
+	public static SkosCollection HISTORY_ACTION_TABLE;
+	public static SkosCollection ARGO_WMO_INST_TYPE_TABLE;
+	public static SkosCollection POSITIONING_SYSTEM_TABLE;
+	public static SkosCollection TRANS_SYSTEM_TABLE;
+	public static SkosCollection VERTICAL_SAMPLING_SCHEME_TABLE;
+	public static SkosCollection STATUS_TABLE;
+	public static SkosCollection GROUNDED_TABLE;
+	public static SkosCollection PLATFORM_FAMILY_TABLE;
+	public static SkosCollection SENSOR_TABLE;
+	public static SkosCollection SENSOR_MAKER_TABLE;
+	public static SkosCollection SENSOR_MODEL_TABLE;
+	public static SkosCollection MEASUREMENT_CODE_ID_TABLE;
+	public static SkosCollection TECHNICAL_PARAMETER_NAME_TABLE;
+	public static SkosCollection CONFIG_PARAMETER_NAME_TABLE;
+	public static SkosCollection PARAMETER_TABLE;
 
-	public ArgoNVSReferenceTable(String nvsFolderPath) {
-		NVS_REFERENCE_TABLES = new HashMap<>();
+	// ====
+	// INIT
+	// ====
+	public static void initialize(String nvsFolderPath) {
+		Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables = new HashMap<>();
 		// get list of nvs tables files :
-		Set<File> tablesFiles = listNvsTablesFiles(nvsFolderPath);
-
-		// Index of all skos concept :
-		// Map<String, SkosConcept> conceptsIndex = new HashMap<>();
+		Set<File> tablesFiles = listFolderFiles(nvsFolderPath);
 
 		// table parser :
 		ArgoNVSReferenceTableParser nvsTablesParser = new ArgoNVSReferenceTableParser();
@@ -56,64 +82,50 @@ public final class ArgoNVSReferenceTable {
 			try {
 				table = nvsTablesParser.getCollection(tableFile);
 			} catch (IOException e) {
+				stderr.println("Failed to parse table file: " + tableFile + " (" + e.getMessage() + ")");
 				continue;
 			}
 			// is it a relevant table ?
 			RELEVANT_TABLES enumKey = RELEVANT_TABLES.fromName(table.getAltLabel());
 			if (enumKey != null) {
-				NVS_REFERENCE_TABLES.put(enumKey, table);
+				nvsReferenceTables.put(enumKey, table);
 			}
-
-			// add all its member in conceptsIndex
-			// conceptsIndex.putAll(table.getConceptMembers());
-
 		}
 
-//		//resolveAllCollectionsMembersRelatedConcepts(nvsReferenceTables, conceptsIndex);
-
+		populateStaticTables(nvsReferenceTables);
 	}
 
-	public static SkosCollection getNvsTableByName(String tableName) {
-		if (RELEVANT_TABLES.fromName(tableName) == null) {
-			return null;
-		}
-		return NVS_REFERENCE_TABLES.get(RELEVANT_TABLES.fromName(tableName));
+	// ==================
+	// CONVENIENT METHODS
+	// ==================
+
+	private static void populateStaticTables(Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables) {
+		DM_QC_FLAG_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.DM_QC_FLAG);
+		PLATFORM_TYPE_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PLATFORM_TYPE);
+		PLATFORM_MAKER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PLATFORM_MAKER);
+		PROF_QC_FLAG_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PROF_QC_FLAG);
+		POSITION_ACCURACY_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.POSITION_ACCURACY);
+		DATA_STATE_INDICATOR_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.DATA_STATE_INDICATOR);
+		HISTORY_ACTION_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.HISTORY_ACTION);
+		ARGO_WMO_INST_TYPE_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.ARGO_WMO_INST_TYPE);
+		POSITIONING_SYSTEM_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.POSITIONING_SYSTEM);
+		TRANS_SYSTEM_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.TRANS_SYSTEM);
+		VERTICAL_SAMPLING_SCHEME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.VERTICAL_SAMPLING_SCHEME);
+		STATUS_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.STATUS);
+		GROUNDED_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.GROUNDED);
+		PLATFORM_FAMILY_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PLATFORM_FAMILY);
+		SENSOR_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.SENSOR);
+		SENSOR_MAKER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.SENSOR_MAKER);
+		SENSOR_MODEL_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.SENSOR_MODEL);
+		MEASUREMENT_CODE_ID_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.MEASUREMENT_CODE_ID);
+		TECHNICAL_PARAMETER_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.TECHNICAL_PARAMETER_NAME);
+		CONFIG_PARAMETER_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.CONFIG_PARAMETER_NAME);
+		PARAMETER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PARAMETER);
 	}
 
-	private Set<File> listNvsTablesFiles(String nvsFolderPath) {
+	private static Set<File> listFolderFiles(String nvsFolderPath) {
 		File nvsDir = new File(nvsFolderPath);
 		return Stream.of(nvsDir.listFiles()).filter(file -> !file.isDirectory()).collect(Collectors.toSet());
 	}
-
-//	private void resolveAllCollectionsMembersRelatedConcepts(Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables2,
-//			Map<String, SkosConcept> conceptsIndex) {
-//		// Iterate through all NVS tables (collections)
-//		for (SkosCollection collection : nvsReferenceTables.values()) {
-//			resolveCollectionMembersRelatedConcepts(collection, conceptsIndex);
-//		}
-//
-//	}
-//
-//	private void resolveCollectionMembersRelatedConcepts(SkosCollection collection,
-//			Map<String, SkosConcept> conceptsIndex) {
-//		// For each NVS table, iterate throug its members (SkosConcept)
-//		for (SkosConcept concept : collection.getConceptMembers().values()) {
-//			resolveConceptRelatedConcept(concept, conceptsIndex);
-//		}
-//
-//	}
-//
-//	private void resolveConceptRelatedConcept(SkosConcept concept, Map<String, SkosConcept> conceptsIndex) {
-//		for (String relatedConceptId : concept.getRelatedConceptIds()) {
-//			// for each SkosConcept, iterate through its relatedConceptId, find the
-//			// associated SkosConcept in conceptsIndex and add it in the SkosConcept
-//			// relatedConcept Attributes.
-//			SkosConcept relatedContept = conceptsIndex.get(relatedConceptId);
-//			if (relatedContept != null) {
-//				concept.getRelatedConcepts().add(relatedContept);
-//			}
-//		}
-//
-//	}
 
 }
