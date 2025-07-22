@@ -1874,14 +1874,14 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
-		info = ArgoReferenceTable.PLATFORM_TYPE.contains(str);
-		if (info.isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.PLATFORM_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
@@ -1940,7 +1940,6 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String varName;
 		ErrorTracker dep = new ErrorTracker();
 		ErrorTracker inv = new ErrorTracker();
-		ArgoReferenceTable.ArgoReferenceEntry info;
 
 		// ..bio-traj exception: GROUNDED not in bio-traj files
 
@@ -1949,9 +1948,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			String g = arFile.readString(varName, true); // ..true -> include any NULLs
 
 			for (int n = 0; n < nCycle; n++) {
-				info = ArgoReferenceTable.GROUNDED.contains(g.charAt(n));
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				SkosConcept tableEntry = ArgoNVSReferenceTable.GROUNDED_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(g.charAt(n)));
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
 						dep.increment(n);
 					}
 

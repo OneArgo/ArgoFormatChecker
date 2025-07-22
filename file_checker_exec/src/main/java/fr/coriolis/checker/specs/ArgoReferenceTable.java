@@ -95,19 +95,19 @@ public final class ArgoReferenceTable {
 	// public static CharTable STATUS_FLAG;
 
 	// .....reference table 20: Grounded flags.....
-	public static CharTable GROUNDED;
+	// public static CharTable GROUNDED;
 
 	// .....reference table 22.....
-	public static StringTable PLATFORM_FAMILY;
+	// public static StringTable PLATFORM_FAMILY;
 
 	// .....reference table 23.....
-	public static StringTable PLATFORM_TYPE;
+	// public static StringTable PLATFORM_TYPE;
 
 	// .....reference table 24.....
-	public static StringTable PLATFORM_MAKER;
+	// public static StringTable PLATFORM_MAKER;
 
-	public static StringTableCrossReference PLATFORM_TYPExPLATFORM_MAKER;
-	public static StringTableCrossReference PLATFORM_TYPExWMO_INST;
+	// public static StringTableCrossReference PLATFORM_TYPExPLATFORM_MAKER;
+	// public static StringTableCrossReference PLATFORM_TYPExWMO_INST;
 
 	// .....reference table 25.....
 	public static StringTable SENSOR;
@@ -214,14 +214,14 @@ public final class ArgoReferenceTable {
 		// STATUS_FLAG = new CharTable(prefix + "19");
 
 		// .....reference table 20....
-		GROUNDED = new CharTable(prefix + "20");
+		// GROUNDED = new CharTable(prefix + "20");
 
 		// .....reference table 22....
 		// .....reference table 23....
 		// .....reference table 24....
-		PLATFORM_FAMILY = new StringTable(prefix + "22");
-		PLATFORM_TYPE = new StringTable(prefix + "23");
-		PLATFORM_MAKER = new StringTable(prefix + "24");
+		// PLATFORM_FAMILY = new StringTable(prefix + "22");
+		// PLATFORM_TYPE = new StringTable(prefix + "23");
+		// PLATFORM_MAKER = new StringTable(prefix + "24");
 
 		// ..platform_type/platform_maker cross-reference
 
@@ -231,12 +231,13 @@ public final class ArgoReferenceTable {
 
 		log.debug("...build PLATFORM_TYPE:PLATFORM_MAKER cross-reference...");
 
-		PLATFORM_TYPExPLATFORM_MAKER = new StringTableCrossReference(PLATFORM_TYPE, PLATFORM_TYPE_COLUMN,
-				PLATFORM_MAKER_COLUMN);
+//		PLATFORM_TYPExPLATFORM_MAKER = new StringTableCrossReference(PLATFORM_TYPE, PLATFORM_TYPE_COLUMN,
+//				PLATFORM_MAKER_COLUMN);
 
 		log.debug("...build PLATFORM_TYPE:WMO_INST cross-reference...");
 
-		PLATFORM_TYPExWMO_INST = new StringTableCrossReference(PLATFORM_TYPE, PLATFORM_TYPE_COLUMN, WMO_INST_COLUMN);
+		// PLATFORM_TYPExWMO_INST = new StringTableCrossReference(PLATFORM_TYPE,
+		// PLATFORM_TYPE_COLUMN, WMO_INST_COLUMN);
 
 		// .....reference table 25....
 		SENSOR = new StringTable(prefix + "25", true); // ..true = allowAppendedDigit
@@ -254,7 +255,7 @@ public final class ArgoReferenceTable {
 		// ..ADMT-19 confirmed this as a requirment
 
 		log.debug("...append PLATFORM_MAKER to SENSOR_MAKER...");
-		SENSOR_MAKER.add(PLATFORM_MAKER);
+		// SENSOR_MAKER.add(PLATFORM_MAKER);
 
 		// ..sensor_model/sensor cross-reference
 

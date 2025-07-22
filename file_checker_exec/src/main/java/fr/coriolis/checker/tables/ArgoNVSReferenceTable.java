@@ -68,6 +68,14 @@ public final class ArgoNVSReferenceTable {
 	// ====
 	// INIT
 	// ====
+	/**
+	 * Initialize NVS references tables (static variables) : loop over all files in
+	 * the specified folder and instanciate a SkosCollection if file is a NVS jsonld
+	 * table. Then populate all static variable of the Argo netcdf files checkers 's
+	 * useful tables.
+	 * 
+	 * @param nvsFolderPath
+	 */
 	public static void initialize(String nvsFolderPath) {
 		Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables = new HashMap<>();
 		// get list of nvs tables files :

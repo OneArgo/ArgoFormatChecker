@@ -1,5 +1,6 @@
 package fr.coriolis.checker.tables;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +30,12 @@ public class SkosConcept {
 	@JsonldProperty("skos:related")
 	private Object relatedConceptIds;
 
+	@JsonldProperty("skos:narrower")
+	private Object narrowerConceptIds;
+
+	@JsonldProperty("skos:broader")
+	private Object broaderConceptIds;
+
 	// private Set<SkosConcept> relatedConcepts;
 
 	// ===================
@@ -54,29 +61,43 @@ public class SkosConcept {
 		return getValue(definition);
 	}
 
-//
-//	public Set<SkosConcept> getRelatedConcepts() {
-//		return relatedConcepts;
-//	}
-
 	public boolean isDeprecated() {
 		return deprecated;
 	}
 
 	public Set<String> getRelatedConceptIds() {
-		if (relatedConceptIds == null) {
-			return Set.of();
+		return getSetOfIds(relatedConceptIds);
+	}
+
+	public Set<String> getNarrowerConceptIds() {
+		return getSetOfIds(narrowerConceptIds);
+	}
+
+	public Set<String> getBroaderConceptIds() {
+		return getSetOfIds(broaderConceptIds);
+	}
+
+	// ===================
+	// CONVENIENCE METHODS
+	// ===================
+
+	private Set<String> getSetOfIds(Object objectContainingIds) {
+		if (objectContainingIds == null) {
+			return Collections.emptySet();
 		}
 
 		// Only one id (map)
-		if (relatedConceptIds instanceof Map) {
-			String id = (String) ((Map<?, ?>) relatedConceptIds).get("@id");
-			return Set.of(id);
+		if (objectContainingIds instanceof Map) {
+			String id = (String) ((Map<?, ?>) objectContainingIds).get("@id");
+			if (id == null) {
+				return Collections.emptySet();
+			}
+			return Collections.singleton(id);
 		}
 		// multiple id (list)
-		if (relatedConceptIds instanceof Iterable) {
+		if (objectContainingIds instanceof Iterable) {
 			Set<String> ids = new java.util.HashSet<>();
-			for (Object obj : (Iterable<?>) relatedConceptIds) {
+			for (Object obj : (Iterable<?>) objectContainingIds) {
 				if (obj instanceof Map && ((Map<?, ?>) obj).containsKey("@id")) {
 					ids.add((String) ((Map<?, ?>) obj).get("@id"));
 				}
@@ -84,7 +105,7 @@ public class SkosConcept {
 			return ids;
 		}
 		// fallback
-		return Set.of();
+		return Collections.emptySet();
 	}
 
 	/**
@@ -102,4 +123,17 @@ public class SkosConcept {
 		}
 		return null;
 	}
+
+	public boolean checkRelatedReference(String otherConceptId) {
+		return this.getRelatedConceptIds().contains(otherConceptId);
+	}
+
+	public boolean checkNarowerReference(String otherConceptId) {
+		return this.getNarrowerConceptIds().contains(otherConceptId);
+	}
+
+	public boolean checkBroaderReference(String otherConceptId) {
+		return this.getBroaderConceptIds().contains(otherConceptId);
+	}
+
 }

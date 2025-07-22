@@ -693,14 +693,14 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "PLATFORM_FAMILY"; // ..ref table 22
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-
-		if ((info = ArgoReferenceTable.PLATFORM_FAMILY.contains(str)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.PLATFORM_FAMILY_TABLE.getConceptMembersByAltLabelMap().get(str);
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
@@ -714,16 +714,19 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String plfmMakerName = "PLATFORM_MAKER"; // ..ref table 24
 		String plfmMaker = arFile.readString(plfmMakerName).trim();
 		log.debug("{}: '{}'", plfmMakerName, plfmMaker);
-
-		if ((info = ArgoReferenceTable.PLATFORM_MAKER.contains(plfmMaker)).isValid()) {
+		SkosConcept plfmMakerTableEntry = ArgoNVSReferenceTable.PLATFORM_MAKER_TABLE.getConceptMembersByAltLabelMap()
+				.get(plfmMaker);
+		if (plfmMakerTableEntry != null) {
 			pmkrValid = true;
 
-			if (info.isDeprecated) {
-				validationResult.addWarning(plfmMakerName + ": '" + plfmMaker + "' Status: " + info.message);
+			if (plfmMakerTableEntry.isDeprecated()) {
+				validationResult
+						.addWarning(plfmMakerName + ": '" + plfmMaker + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(plfmMakerName + ": '" + plfmMaker + "' Status: " + info.message);
+			validationResult
+					.addError(plfmMakerName + ": '" + plfmMaker + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		boolean typValid = false;
@@ -731,21 +734,25 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String plfmTypeName = "PLATFORM_TYPE"; // ..ref table 23
 		String plfmType = arFile.readString(plfmTypeName).trim();
 		log.debug("{}: '{}'", plfmTypeName, plfmType);
-
-		if ((info = ArgoReferenceTable.PLATFORM_TYPE.contains(plfmType)).isValid()) {
+		SkosConcept pltmTypeTableEntry = ArgoNVSReferenceTable.PLATFORM_TYPE_TABLE.getConceptMembersByAltLabelMap()
+				.get(plfmType);
+		if (pltmTypeTableEntry != null) {
 			typValid = true;
 
-			if (info.isDeprecated) {
-				validationResult.addWarning(plfmTypeName + ": '" + plfmType + "' Status: " + info.message);
+			if (pltmTypeTableEntry.isDeprecated()) {
+				validationResult
+						.addWarning(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(plfmTypeName + ": '" + plfmType + "' Status: " + info.message);
+			validationResult
+					.addError(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		if (pmkrValid && typValid) {
 			if (!plfmType.equals("FLOAT")) {
-				if (!ArgoReferenceTable.PLATFORM_TYPExPLATFORM_MAKER.xrefContains(plfmType, plfmMaker)) {
+
+				if (!pltmTypeTableEntry.checkRelatedReference(plfmMakerTableEntry.getId())) {
 					validationResult.addError(plfmTypeName + "/" + plfmMakerName + ": Inconsistent: '" + plfmType
 							+ "'/'" + plfmMaker + "'");
 					log.debug("{}/{} xref inconsistent: plfmType, plfmMaker = '{}', '{}'", plfmTypeName, plfmMakerName,
@@ -802,14 +809,15 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "WMO_INST_TYPE"; // ..ref table 8
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-		try {
-			int N = Integer.valueOf(str);
-			tableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
 
-			if (tableEntry != null) {
+		SkosConcept wmoInstTypetableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE
+				.getConceptMembersByAltLabelMap().get(str);
+		try {
+			Integer.valueOf(str); // check if can be converted to integer
+			if (wmoInstTypetableEntry != null) {
 				wmoValid = true;
 
-				if (tableEntry.isDeprecated()) {
+				if (wmoInstTypetableEntry.isDeprecated()) {
 					validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
@@ -823,7 +831,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		if (wmoValid && typValid) {
 			if (!plfmType.equals("FLOAT")) {
-				if (!ArgoReferenceTable.PLATFORM_TYPExWMO_INST.xrefContains(plfmType, str)) {
+				if (!pltmTypeTableEntry.checkNarowerReference(wmoInstTypetableEntry.getId())) {
 					validationResult
 							.addError(plfmTypeName + "/" + name + ": Inconsistent: '" + plfmType + "'/'" + str + "'");
 					log.debug("{}/{} xref inconsistent: plfmType, wmo = '{}', '{}'", plfmTypeName, name, plfmType, str);
