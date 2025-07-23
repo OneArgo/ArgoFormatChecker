@@ -103,8 +103,10 @@ public class ArgoNVSReferenceTableParser {
 			SkosConcept conceptMember = conceptsMap.get(conceptId.getId());
 			if (conceptMember != null) {
 				// add it to collection's concept members
-				collection.getConceptMembersByIdsMap().put(conceptMember.getId(), conceptMember);
+				// collection.getConceptMembersByIdsMap().put(conceptMember.getId(),
+				// conceptMember);
 				collection.getConceptMembersByAltLabelMap().put(conceptMember.getAltLabel(), conceptMember);
+				collection.getConceptMembersByPrefLabelMap().put(conceptMember.getPrefLabel(), conceptMember);
 			}
 		}
 

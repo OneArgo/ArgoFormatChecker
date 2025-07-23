@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+
 /**
  * Implements features to check the Meta-data CONFIG_PARAMETER_NAME (including
  * LAUNCH_...) and TECHNICAL_PARAMETER_NAME. This includes the <i>units</i>
@@ -101,6 +103,7 @@ public class ArgoConfigTechParam {
 		Map<String, Set<String>> temp2 = new HashMap<>();
 		temp2.put("short_sensor_name", ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name);
 		temp2.put("Z", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
+		temp2.put("I", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
 		temp2.put("cycle_phase_name", ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name);
 		temp2.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
 		possibleValuesByKey = Collections.unmodifiableMap(temp2);
@@ -777,98 +780,111 @@ public class ArgoConfigTechParam {
 		log.debug(".....parseTechParamFile: start.....");
 
 		String[] fileNames = { tecParmFileName, tecParmFileName + ".deprecated" };
-		LinkedHashSet<String> paramList;
-		LinkedHashSet<String> paramCodeList;
-		LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex;
+//		LinkedHashSet<String> paramList;
+//		LinkedHashSet<String> paramCodeList;
+//		LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex;
 
-		// ....loop over the active and deprecated files.....
+		techParamList = new LinkedHashSet<String>(250);
+		techParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
+		techParamCodeList = new LinkedHashSet<String>(250);
 
-		for (int nFile = 0; nFile < fileNames.length; nFile++) {
-			String fileName = fileNames[nFile];
+		// ..pattern to recognize/replace templates
+		Pattern pTemplate = Pattern.compile("<([^>]+?)>");
 
-			log.debug("parsing '{}'", fileName);
-
-			// .......parse the tech param name file.......
-			// ..open the file
-			// TO DO : TRY CATCH exception handling with closing file in finally
-			File f = new File(fileName);
-			if (!f.isFile()) {
-
-				if (nFile == 0) {
-					// ..primary file MUST exist
-					log.error("Tech-Param-file '{}' does not exist", fileName);
-					throw new IOException("Tech-Parm-File '" + fileName + "' does not exist");
-				} else {
-					// ..deprecated file MAY NOT exist
-					log.debug("Deprecated-Tech-Param-file '{}' does not exist (optional)", fileName);
-					continue;
-				}
-
-			} else if (!f.canRead()) {
-				// ..file exists but cannot be read --> error
-				log.error("Tech-Param-File '{}' cannot be read", fileName);
-				throw new IOException("Tech-Parm-File '" + fileName + "' cannot be read");
-			}
-
-			// ..create list variables
-			// ..open file
-
-			if (nFile == 0) {
-				techParamList = new LinkedHashSet<String>(250);
-				techParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
-				techParamCodeList = new LinkedHashSet<String>(250);
-
-				paramList = techParamList;
-				paramCodeList = techParamCodeList;
-				paramRegex = techParamRegex;
-
-			} else {
-				techParamList_DEP = new LinkedHashSet<String>(25);
-				techParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
-				techParamCodeList_DEP = new LinkedHashSet<String>(25);
-
-				paramList = techParamList_DEP;
-				paramCodeList = techParamCodeList_DEP;
-				paramRegex = techParamRegex_DEP;
-			}
-
-			BufferedReader file = new BufferedReader(new FileReader(fileName));
-
-			// .....read through the file....
-
-			// ..pattern to recognize/replace templates
-			Pattern pTemplate = Pattern.compile("<([^>]+?)>");
-			log.debug("template regex: '{}'", pTemplate);
-
-			String line;
-			while ((line = file.readLine()) != null) {
-				if (pBlankOrComment.matcher(line).matches()) {
-					log.debug("blank/comment: '{}'", line);
-					continue;
-				}
-
-				// ..break the line into individual entries
-				String column[] = line.split("\\|");
-				for (int n = 0; n < column.length; n++) {
-					String s = column[n].trim();
-					column[n] = s;
-				}
-
-				parseTechParamName(paramList, paramCodeList, paramRegex, fileName, file, pTemplate, column);
-
-			} // ..end while (line)
-
-			file.close();
-		} // ..end for (fileNames)
+		// loop over tech paramaters PrefLabel list:
+		Set<String> techParamNamesPrefLabelList = ArgoNVSReferenceTable.TECHNICAL_PARAMETER_NAME_TABLE
+				.getConceptMembersByPrefLabelMap().keySet();
+		for (String techParamPrefLabel : techParamNamesPrefLabelList) {
+			parseTechParamName(techParamList, techParamCodeList, techParamRegex, "NVS R14 table", pTemplate,
+					techParamPrefLabel);
+		}
+// ....loop over the active and deprecated files.....
+//		for (int nFile = 0; nFile < fileNames.length; nFile++) {
+//			String fileName = fileNames[nFile];
+//
+//			log.debug("parsing '{}'", fileName);
+//
+//			// .......parse the tech param name file.......
+//			// ..open the file
+//			// TO DO : TRY CATCH exception handling with closing file in finally
+//			File f = new File(fileName);
+//			if (!f.isFile()) {
+//
+//				if (nFile == 0) {
+//					// ..primary file MUST exist
+//					log.error("Tech-Param-file '{}' does not exist", fileName);
+//					throw new IOException("Tech-Parm-File '" + fileName + "' does not exist");
+//				} else {
+//					// ..deprecated file MAY NOT exist
+//					log.debug("Deprecated-Tech-Param-file '{}' does not exist (optional)", fileName);
+//					continue;
+//				}
+//
+//			} else if (!f.canRead()) {
+//				// ..file exists but cannot be read --> error
+//				log.error("Tech-Param-File '{}' cannot be read", fileName);
+//				throw new IOException("Tech-Parm-File '" + fileName + "' cannot be read");
+//			}
+//
+//			// ..create list variables
+//			// ..open file
+//
+//			if (nFile == 0) {
+//				techParamList = new LinkedHashSet<String>(250);
+//				techParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
+//				techParamCodeList = new LinkedHashSet<String>(250);
+//
+//				paramList = techParamList;
+//				paramCodeList = techParamCodeList;
+//				paramRegex = techParamRegex;
+//
+//			} else {
+//				techParamList_DEP = new LinkedHashSet<String>(25);
+//				techParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
+//				techParamCodeList_DEP = new LinkedHashSet<String>(25);
+//
+//				paramList = techParamList_DEP;
+//				paramCodeList = techParamCodeList_DEP;
+//				paramRegex = techParamRegex_DEP;
+//			}
+//
+//			BufferedReader file = new BufferedReader(new FileReader(fileName));
+//
+//			// .....read through the file....
+//
+//			// ..pattern to recognize/replace templates
+//			Pattern pTemplate = Pattern.compile("<([^>]+?)>");
+//			log.debug("template regex: '{}'", pTemplate);
+//
+//			String line;
+//			while ((line = file.readLine()) != null) {
+//				if (pBlankOrComment.matcher(line).matches()) {
+//					log.debug("blank/comment: '{}'", line);
+//					continue;
+//				}
+//
+//				// ..break the line into individual entries
+//				String column[] = line.split("\\|");
+//				for (int n = 0; n < column.length; n++) {
+//					String s = column[n].trim();
+//					column[n] = s;
+//				}
+//
+//				parseTechParamName(paramList, paramCodeList, paramRegex, fileName, pTemplate, column[0]);
+//
+//			} // ..end while (line)
+//
+//			file.close();
+//		} // ..end for (fileNames)
 
 		log.debug(".....parseTechParamFile: end.....");
 	} // ..end parseTechParamFile
 
 	private void parseTechParamName(LinkedHashSet<String> paramList, LinkedHashSet<String> paramCodeList,
-			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String fileName, BufferedReader file,
-			Pattern pTemplate, String[] column) throws IllegalArgumentException {
+			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String fileName, Pattern pTemplate,
+			String parameterCode) throws IllegalArgumentException {
 
-		String parameterCode = column[0];
+		// String parameterCode = column[0];
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
 		String paramName = extractParamNameFromParamCode(fileName, parameterCode);

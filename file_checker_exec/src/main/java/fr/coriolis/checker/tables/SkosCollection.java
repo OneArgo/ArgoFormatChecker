@@ -20,8 +20,9 @@ public class SkosCollection {
 	@JsonldProperty("skos:member")
 	private Set<SkosConceptId> membersIds;
 
-	private Map<String, SkosConcept> conceptMembersByIdsMap = new HashMap<>();
+	// private Map<String, SkosConcept> conceptMembersByIdsMap = new HashMap<>();
 	private Map<String, SkosConcept> conceptMembersByAltLabelMap = new HashMap<>();
+	private Map<String, SkosConcept> conceptMembersByPrefLabelMap = new HashMap<>();
 
 	// ===================
 	// GETTERS and SETTERS
@@ -42,12 +43,16 @@ public class SkosCollection {
 		return membersIds;
 	}
 
-	public Map<String, SkosConcept> getConceptMembersByIdsMap() {
-		return conceptMembersByIdsMap;
-	}
+//	public Map<String, SkosConcept> getConceptMembersByIdsMap() {
+//		return conceptMembersByIdsMap;
+//	}
 
 	public Map<String, SkosConcept> getConceptMembersByAltLabelMap() {
 		return conceptMembersByAltLabelMap;
+	}
+
+	public Map<String, SkosConcept> getConceptMembersByPrefLabelMap() {
+		return conceptMembersByPrefLabelMap;
 	}
 
 }

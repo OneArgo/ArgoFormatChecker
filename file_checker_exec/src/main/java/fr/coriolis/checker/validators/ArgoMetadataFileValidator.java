@@ -918,71 +918,77 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String[] sensorModel = arFile.readStringArr(sensorModelName);
 
 		for (int n = 0; n < nSensor; n++) {
-			ArgoReferenceTable.ArgoReferenceEntry mdlInfo;
-			ArgoReferenceTable.ArgoReferenceEntry mkrInfo;
-			ArgoReferenceTable.ArgoReferenceEntry snsrInfo;
+			SkosConcept sensorModelTableEntry;
+			SkosConcept sensorTableEntry;
+			SkosConcept sensorMakerTableEntry;
 
 			// ..check SENSOR
 			boolean snsrValid = false;
 			String snsr = sensor[n].trim();
 			log.debug(sensorName + "[{}]: '{}'", n, snsr);
 
-			if ((snsrInfo = ArgoReferenceTable.SENSOR.contains(snsr)).isValid()) {
+			String normalizedSensorName = normalizeSensorName(snsr);
+			sensorTableEntry = ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap()
+					.get(normalizedSensorName);
+			if (sensorTableEntry != null) {
 				snsrValid = true;
-				if (snsrInfo.isDeprecated) {
-					validationResult
-							.addWarning(sensorName + "[" + (n + 1) + "]: '" + snsr + "' Status: " + snsrInfo.message);
+				if (sensorTableEntry.isDeprecated()) {
+					validationResult.addWarning(
+							sensorName + "[" + (n + 1) + "]: '" + snsr + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
-				validationResult.addError(sensorName + "[" + (n + 1) + "]: '" + snsr + "' Status: " + snsrInfo.message);
+				validationResult.addError(sensorName + "[" + (n + 1) + "]: '" + snsr + "' Status: "
+						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 			// ..check SENSOR_MAKER
 			String snsrMaker = sensorMaker[n].trim();
 			boolean smkrValid = false;
 			log.debug(sensorMakerName + "[{}]: '{}'", n, snsrMaker);
-
-			if ((mkrInfo = ArgoReferenceTable.SENSOR_MAKER.contains(snsrMaker)).isValid()) {
+			sensorMakerTableEntry = ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap()
+					.get(snsrMaker);
+			if (sensorMakerTableEntry != null) {
 				smkrValid = true;
-				if (mkrInfo.isDeprecated) {
-					validationResult.addWarning(
-							sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: " + mkrInfo.message);
+				if (sensorMakerTableEntry.isDeprecated()) {
+					validationResult.addWarning(sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: "
+							+ SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
-				validationResult.addError(
-						sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: " + mkrInfo.message);
+				validationResult.addError(sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: "
+						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 			// ..check SENSOR_MODEL
 			String snsrModel = sensorModel[n].trim();
 			boolean mdlValid = false;
 			log.debug(sensorModelName + "[{}]: '{}'", n, snsrModel);
-
-			if ((mdlInfo = ArgoReferenceTable.SENSOR_MODEL.contains(snsrModel)).isValid()) {
+			sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
+					.get(snsrModel);
+			if (sensorModelTableEntry != null) {
 				mdlValid = true;
-				if (mdlInfo.isDeprecated) {
-					validationResult.addWarning(
-							sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: " + mdlInfo.message);
+				if (sensorModelTableEntry.isDeprecated()) {
+					validationResult.addWarning(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
+							+ SkosConcept.DEPRECATED_CONCEPT);
 				}
 			} else {
-				validationResult.addError(
-						sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: " + mdlInfo.message);
+				validationResult.addError(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
+						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 			// ..cross-reference SENSOR_MODEL / SENSOR_MAKER
 			if (smkrValid && mdlValid) {
 				if (!snsrModel.equals("UNKNOWN")) {
-					String mkr = mkrInfo.getColumn(1);
-					String mdl = mdlInfo.getColumn(1);
 
-					if (!ArgoReferenceTable.SENSOR_MODELxSENSOR_MAKER.xrefContains(mdl, mkr)) {
+					if (!sensorModelTableEntry.checkBroaderReference(sensorMakerTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorMakerName + "[" + (n + 1) + "]: "
 								+ "Inconsistent: '" + snsrModel + "'/'" + snsrMaker + "'");
-						log.debug("SENSOR_MODEL/SENSOR_MAKER xref inconsistent: mdl, mkr = '{}', '{}'", mdl, mkr);
+						log.debug("SENSOR_MODEL/SENSOR_MAKER xref inconsistent: mdl, mkr = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorMakerTableEntry.getAltLabel());
 					} else {
-						log.debug("SENSOR_MODEL/SENSOR_MAKER xref valid: mdl, mkr = '{}', '{}'", mdl, mkr);
+						log.debug("SENSOR_MODEL/SENSOR_MAKER xref valid: mdl, mkr = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorMakerTableEntry.getAltLabel());
 					}
 				}
 			}
@@ -990,15 +996,15 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			// ..cross-reference SENSOR_MODEL / SENSOR
 			if (snsrValid && mdlValid) {
 				if (!snsrModel.equals("UNKNOWN")) {
-					String sn = snsrInfo.getColumn(1);
-					String mdl = mdlInfo.getColumn(1);
 
-					if (!ArgoReferenceTable.SENSOR_MODELxSENSOR.xrefContains(mdl, sn)) {
+					if (!sensorModelTableEntry.checkNarowerReference(sensorTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorName + "[" + (n + 1) + "]: "
 								+ "Inconsistent: '" + snsrModel + "'/'" + snsr + "'");
-						log.debug("SENSOR_MODEL/SENSOR xref inconsistent: mdl, sn = '{}', '{}'", mdl, sn);
+						log.debug("SENSOR_MODEL/SENSOR xref inconsistent: mdl, sn = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorTableEntry.getAltLabel());
 					} else {
-						log.debug("SENSOR_MODEL/SENSOR xref valid: mdl, sn = '{}', '{}'", mdl, sn);
+						log.debug("SENSOR_MODEL/SENSOR xref valid: mdl, sn = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorTableEntry.getAltLabel());
 					}
 				}
 			}
@@ -1530,5 +1536,23 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		} // ..end for ("launch_config", "config_")
 
 	} // ..end validateConfigParams
+
+	// ===================
+	// CONVENIENCE METHODS
+	// ===================
+
+	/**
+	 * Get base sensor name for table lookup // ADMT-2025 : duplicate SENSOR must be
+	 * named <SENSOR>_<n> // so if sensor finish by a number, the duplicate will be
+	 * xxxx[number]_n // if sensor don't finish by a number, the duplicate will also
+	 * be xxxx_n.
+	 * 
+	 * @param snsr
+	 * @return
+	 */
+	public static String normalizeSensorName(String snsr) {
+		// Matches something ending with "_number" (e.g., TEMP_2, CHLA_10)
+		return snsr.replaceFirst("_(\\d+)$", "");
+	}
 
 } // ..end class

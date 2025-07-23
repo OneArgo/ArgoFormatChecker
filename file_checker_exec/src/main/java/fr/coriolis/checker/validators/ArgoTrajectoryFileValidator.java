@@ -1277,16 +1277,13 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				// ..this is NOT a valid relative code
 
 				// ..is it a valid "specfic code"?
-				info = ArgoReferenceTable.MEASUREMENT_CODE_specific.contains(m_code[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				tableEntry = ArgoNVSReferenceTable.MEASUREMENT_CODE_ID_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(m_code[n]));
+				if (tableEntry != null) {
+					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);
 						log.debug("m_code[{}]: deprecated code = {}, rem = {}, rel = {}", n, m_code[n], rem, rel);
 					}
-
-				} else if (info.isDeleted) {
-					delCode.increment(n);
-					log.debug("m_code[{}]: deleted code = {}, rem = {}, rel = {}", n, m_code[n], rem, rel);
 
 				} else {
 					invCode.increment(n);

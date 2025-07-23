@@ -110,18 +110,18 @@ public final class ArgoReferenceTable {
 	// public static StringTableCrossReference PLATFORM_TYPExWMO_INST;
 
 	// .....reference table 25.....
-	public static StringTable SENSOR;
+	// public static StringTable SENSOR;
 
 	// .....reference table 26.....
-	public static StringTable SENSOR_MAKER;
+	// public static StringTable SENSOR_MAKER;
 
 	// .....reference table 27.....
-	public static StringTable SENSOR_MODEL;
+	// public static StringTable SENSOR_MODEL;
 
-	public static StringTableCrossReference SENSOR_MODELxSENSOR;
-	public static StringTableCrossReference SENSOR_MODELxSENSOR_MAKER;
+//	public static StringTableCrossReference SENSOR_MODELxSENSOR;
+//	public static StringTableCrossReference SENSOR_MODELxSENSOR_MAKER;
 
-	public static HashSet<String> SHORT_SENSOR_NAME;
+	// public static HashSet<String> SHORT_SENSOR_NAME;
 
 	// .....reference table 29.....
 	public static LinkedHashSet<String> BATTERY_TYPE_manufacturer;
@@ -135,7 +135,7 @@ public final class ArgoReferenceTable {
 	public static StringTable PROGRAM_NAME;
 
 	// .....Measurement_codes..........
-	public static IntegerTable MEASUREMENT_CODE_specific;
+	// public static IntegerTable MEASUREMENT_CODE_specific;
 	public static IntegerTable MEASUREMENT_CODE_toJuldVariable;
 
 	// .....Generic Parameter Templates.....
@@ -225,28 +225,28 @@ public final class ArgoReferenceTable {
 
 		// ..platform_type/platform_maker cross-reference
 
-		final int PLATFORM_TYPE_COLUMN = 1;
-		final int WMO_INST_COLUMN = 3;
-		final int PLATFORM_MAKER_COLUMN = 4;
+//		final int PLATFORM_TYPE_COLUMN = 1;
+//		final int WMO_INST_COLUMN = 3;
+//		final int PLATFORM_MAKER_COLUMN = 4;
 
-		log.debug("...build PLATFORM_TYPE:PLATFORM_MAKER cross-reference...");
+		// log.debug("...build PLATFORM_TYPE:PLATFORM_MAKER cross-reference...");
 
 //		PLATFORM_TYPExPLATFORM_MAKER = new StringTableCrossReference(PLATFORM_TYPE, PLATFORM_TYPE_COLUMN,
 //				PLATFORM_MAKER_COLUMN);
 
-		log.debug("...build PLATFORM_TYPE:WMO_INST cross-reference...");
+		// log.debug("...build PLATFORM_TYPE:WMO_INST cross-reference...");
 
 		// PLATFORM_TYPExWMO_INST = new StringTableCrossReference(PLATFORM_TYPE,
 		// PLATFORM_TYPE_COLUMN, WMO_INST_COLUMN);
 
 		// .....reference table 25....
-		SENSOR = new StringTable(prefix + "25", true); // ..true = allowAppendedDigit
+//		/ SENSOR = new StringTable(prefix + "25", true); // ..true = allowAppendedDigit
 
 		// .....reference table 26....
-		SENSOR_MAKER = new StringTable(prefix + "26");
+		// SENSOR_MAKER = new StringTable(prefix + "26");
 
 		// .....reference table 27....
-		SENSOR_MODEL = new StringTable(prefix + "27");
+		// SENSOR_MODEL = new StringTable(prefix + "27");
 
 		// .....reference table 41....
 		PROGRAM_NAME = new StringTable(prefix + "41");
@@ -254,21 +254,22 @@ public final class ArgoReferenceTable {
 		// ..append platform_maker entries to sensor_maker table
 		// ..ADMT-19 confirmed this as a requirment
 
-		log.debug("...append PLATFORM_MAKER to SENSOR_MAKER...");
+//		log.debug("...append PLATFORM_MAKER to SENSOR_MAKER...");
 		// SENSOR_MAKER.add(PLATFORM_MAKER);
 
 		// ..sensor_model/sensor cross-reference
 
-		log.debug("...build SENSOR_MODEL:SENSOR cross-reference...");
+//		log.debug("...build SENSOR_MODEL:SENSOR cross-reference...");
+//
+//		final int SENSOR_MODEL_COLUMN = 1;
+//		final int SENSOR_MAKER_COLUMN = 2;
+//		final int SENSOR_LIST_COLUMN = 4;
 
-		final int SENSOR_MODEL_COLUMN = 1;
-		final int SENSOR_MAKER_COLUMN = 2;
-		final int SENSOR_LIST_COLUMN = 4;
+		// SENSOR_MODELxSENSOR = new StringTableCrossReference(SENSOR_MODEL,
+		// SENSOR_MODEL_COLUMN, SENSOR_LIST_COLUMN);
 
-		SENSOR_MODELxSENSOR = new StringTableCrossReference(SENSOR_MODEL, SENSOR_MODEL_COLUMN, SENSOR_LIST_COLUMN);
-
-		SENSOR_MODELxSENSOR_MAKER = new StringTableCrossReference(SENSOR_MODEL, SENSOR_MODEL_COLUMN,
-				SENSOR_MAKER_COLUMN);
+//		SENSOR_MODELxSENSOR_MAKER = new StringTableCrossReference(SENSOR_MODEL, SENSOR_MODEL_COLUMN,
+//				SENSOR_MAKER_COLUMN);
 
 		// ..harvest short_sensor_name from ref table 27
 		// log.debug("...build short_sensor_name set...");
@@ -291,8 +292,8 @@ public final class ArgoReferenceTable {
 
 		// .....measurement codes - specific codes....
 		// .....measurement codes - map to JULD variables
-		MEASUREMENT_CODE_specific = new IntegerTable(
-				specDir.trim() + File.separator + "measurement_code-specific_codes");
+//		MEASUREMENT_CODE_specific = new IntegerTable(
+//				specDir.trim() + File.separator + "measurement_code-specific_codes");
 		MEASUREMENT_CODE_toJuldVariable = new IntegerTable(
 				specDir.trim() + File.separator + "measurement_code-juld_variables");
 
