@@ -106,7 +106,6 @@ public class ArgoNVSReferenceTableParser {
 				// collection.getConceptMembersByIdsMap().put(conceptMember.getId(),
 				// conceptMember);
 				collection.getConceptMembersByAltLabelMap().put(conceptMember.getAltLabel(), conceptMember);
-				collection.getConceptMembersByPrefLabelMap().put(conceptMember.getPrefLabel(), conceptMember);
 			}
 		}
 
