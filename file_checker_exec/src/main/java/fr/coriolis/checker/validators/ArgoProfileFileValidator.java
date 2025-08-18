@@ -2443,12 +2443,13 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			// ............check PROFILE_param_QC.............
 			char expProfQC = 'x';
-			// ArgoReferenceTable.ArgoReferenceEntry info;
+			char profileQCFillValue = ' ';
+
 			SkosConcept tableEntry;
 			tableEntry = ArgoNVSReferenceTable.PROF_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 					.get(String.valueOf(profQC));
 
-			if (tableEntry == null) {
+			if (profQC != profileQCFillValue && tableEntry == null) {
 				validationResult.addError("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + ": "
 						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 
@@ -2464,9 +2465,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 				} else {
 					double pctGood = (double) n_good / (double) n_data * 100.f;
-					expProfQC = ' ';
+					expProfQC = profileQCFillValue;
 					if (n_noqc == n_data) {
-						expProfQC = ' ';
+						expProfQC = profileQCFillValue;
 					} else if (n_good == n_data) {
 						expProfQC = 'A';
 					} else if (pctGood >= 75.d) {

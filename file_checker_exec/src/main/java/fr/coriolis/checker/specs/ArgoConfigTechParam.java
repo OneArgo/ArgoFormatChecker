@@ -633,6 +633,17 @@ public class ArgoConfigTechParam {
 		log.debug(".....parseConfigParamFiles: end.....");
 	} // ..end parseConfigParamFiles
 
+	/**
+	 * parse a line from the table 18 (ist of configurations parameters) and add
+	 * results (param name, regex pattern if exists) to the corresponding variable.
+	 * 
+	 * @param paramList
+	 * @param paramRegex
+	 * @param nFile
+	 * @param fileName
+	 * @param pTemplate
+	 * @param column
+	 */
 	private void parseConfigParamName(LinkedHashSet<String> paramList,
 			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, int nFile, String fileName,
 			Pattern pTemplate, String[] column) {

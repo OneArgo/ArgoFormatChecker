@@ -2042,17 +2042,17 @@ public class ArgoFileSpecification {
 				throw new IOException("Too few columns on line " + nLine + " in '" + prmFileName + "': '" + line + "'");
 			}
 
-			String prm = st[1].trim(); // ..parameter name
-			String prmLName = st[3].trim(); // ..long_name
-			String prmSName = st[4].trim(); // ..(cf_)standard_name
-			String prmUnits = st[6].trim(); // ..units
-			String prmVmin = st[7].trim(); // ..value min
-			String prmVmax = st[8].trim(); // ..value max
-			String prmCategory = st[9].trim(); // .."c", "b", "ic", "ib"
+			String prm = st[1].trim(); // ..parameter name // NVS altLabel
+			String prmLName = st[3].trim(); // ..long_name // NVS prefLabel
+			String prmSName = st[4].trim(); // ..(cf_)standard_name // needed in NVS
+			String prmUnits = st[6].trim(); // ..units // NVS relatede P06 ?
+			String prmVmin = st[7].trim(); // ..value min // needed in NVS
+			String prmVmax = st[8].trim(); // ..value max // needed in NVS
+			String prmCategory = st[9].trim(); // .."c", "b", "ic", "ib" // needed in NVS
 			String prmComment = st[14].trim(); // ..to be searched for extra dimension
-			String prmStatus = st[16].trim(); // .."active", "deprecated", etc
-			String prmFill = st[17].trim(); // ..fillValue
-			String prmType = st[18].trim(); // ..data type
+			String prmStatus = st[16].trim(); // .."active", "deprecated", etc // NVS deprecated
+			String prmFill = st[17].trim(); // ..fillValue // needed in NVS
+			String prmType = st[18].trim(); // ..data type // needed in NVS
 
 			// ..status codes of " " (blank), "active", "deprecated" are allowed
 

@@ -996,7 +996,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			// ..cross-reference SENSOR_MODEL / SENSOR
 			if (snsrValid && mdlValid) {
 				if (!snsrModel.equals("UNKNOWN")) {
-
+					// TO DO : check broader
 					if (!sensorModelTableEntry.checkNarowerReference(sensorTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorName + "[" + (n + 1) + "]: "
 								+ "Inconsistent: '" + snsrModel + "'/'" + snsr + "'");
