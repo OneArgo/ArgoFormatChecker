@@ -2454,7 +2454,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 
 			} else {
-				if (tableEntry.isDeprecated()) {
+				if (tableEntry != null && tableEntry.isDeprecated()) {
 					validationResult.addWarning("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + "': "
 							+ SkosConcept.DEPRECATED_CONCEPT);
 				}
