@@ -1011,8 +1011,6 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		String firstNum = new String(plNum[0].trim());
 		int firstCyc = cyc[0];
 
-		ArgoReferenceTable.ArgoReferenceEntry info;
-
 		// NVS table entry :
 		SkosConcept tableEntry;
 
@@ -1130,7 +1128,6 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			} // end if (wmo)
 
 			// .....VERTICAL_SAMPLING_SCHEME.....
-
 			log.debug("VERTICAL_SAMPLING_SCHEME[{}]: '{}'", n, vert[n]); // ..ref_table 16
 			s = vert[n].trim();
 			if (s.length() == 0) {
@@ -1165,8 +1162,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				}
 
 			} else {
+				// need to delete optionnal free text ([free text]) :
+				s = s.replaceAll("\\s*\\[[^\\]]*\\]\\s*", "").trim();
 
-				tableEntry = ArgoNVSReferenceTable.VERTICAL_SAMPLING_SCHEME_TABLE.getConceptMembersByAltLabelMap()
+				tableEntry = ArgoNVSReferenceTable.VERTICAL_SAMPLING_SCHEME_TABLE.getConceptMembersByPrefLabelMap()
 						.get(s);
 				if (tableEntry != null) {
 					if (tableEntry.isDeprecated()) {
