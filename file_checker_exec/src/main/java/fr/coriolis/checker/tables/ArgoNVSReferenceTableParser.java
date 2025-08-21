@@ -1,7 +1,9 @@
 package fr.coriolis.checker.tables;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,9 +35,15 @@ public class ArgoNVSReferenceTableParser {
 	}
 
 	public SkosCollection getCollection(File jsonLdFile) throws IOException {
-		// read json :
 
-		JsonNode root = objectMapper.readTree(jsonLdFile);
+		try (InputStream in = new FileInputStream(jsonLdFile)) {
+			return getCollection(in);
+		}
+	}
+
+	public SkosCollection getCollection(InputStream jsonLdStream) throws IOException {
+		// read json :
+		JsonNode root = objectMapper.readTree(jsonLdStream);
 		JsonNode graphArray = root.get("@graph");
 		if (graphArray == null || !graphArray.isArray()) {
 			throw new IllegalArgumentException("JSON-LD do not contains @graph array !");

@@ -71,6 +71,8 @@ public class Options {
 	private final String outDirName;
 	private final String inDirName;
 
+	private final boolean useOnlineTables;
+
 	// ..standard i/o shortcuts
 	static PrintStream stdout = new PrintStream(System.out);
 	static PrintStream stderr = new PrintStream(System.err);
@@ -80,7 +82,7 @@ public class Options {
 	private Options(boolean doBatteryChecks, boolean doNameCheck, boolean doNulls, boolean doFormatOnly,
 			boolean doFormatOnlyPre31, boolean doPsalStats, boolean version, boolean help, boolean doXml,
 			String listFile, List<String> inFileList, String dacName, String specDirName, String outDirName,
-			String inDirName) {
+			String inDirName, boolean useOnlineTables) {
 		super();
 		this.doBatteryChecks = doBatteryChecks;
 		this.doNameCheck = doNameCheck;
@@ -97,6 +99,8 @@ public class Options {
 		this.specDirName = specDirName;
 		this.outDirName = outDirName;
 		this.inDirName = inDirName;
+
+		this.useOnlineTables = useOnlineTables;
 
 		log.debug("doBatteryChecks = {}", doBatteryChecks);
 		log.debug("doFormatOnly = {}", doFormatOnly);
@@ -150,6 +154,8 @@ public class Options {
 		boolean help = false;
 		boolean doXml = true;
 
+		boolean useOnlineTables = false;
+
 		// loop trough the arguments provided and differentiate the option (start with
 		// "-") and the positional parameters.
 		int next = 0;
@@ -189,6 +195,9 @@ public class Options {
 			case "-psal-stats":
 				doPsalStats = true;
 				break;
+			case "-online-tables":
+				useOnlineTables = true;
+				break;
 			case "-list-file":
 				if (++next < args.length) {
 					listFile = args[next];
@@ -197,6 +206,7 @@ public class Options {
 					throw new IllegalArgumentException("Error: Missing argument after '-list-file'.");
 				}
 				break;
+
 			// ..obsolete arguments -- left in for backwards compatibility
 			case "-no-fresh":
 				log.error("Obsolete argument '-no-fresh' given. IGNORED");
@@ -227,7 +237,7 @@ public class Options {
 		}
 
 		return new Options(doBatteryChecks, doNameCheck, doNulls, doFormatOnly, doFormatOnlyPre31, doPsalStats, version,
-				help, doXml, listFile, inFileList, dacName, specDirName, outDirName, inDirName);
+				help, doXml, listFile, inFileList, dacName, specDirName, outDirName, inDirName, useOnlineTables);
 
 	}
 
@@ -349,6 +359,10 @@ public class Options {
 
 	public String getInDirName() {
 		return inDirName;
+	}
+
+	public boolean isUseOnlineTables() {
+		return useOnlineTables;
 	}
 
 }

@@ -53,6 +53,7 @@ public class ValidateSubmit {
 	private static boolean doXml = true;
 
 	private static final String UNKNOWN_VERSION = "unknown";
+	private static final String NVS_DEFAULT_BASE_URL = "https://vocab.nerc.ac.uk/collection/";
 	private static String fcVersion;
 	private static String spVersion;
 
@@ -201,7 +202,8 @@ public class ValidateSubmit {
 	 */
 	private static void validateFiles(Options options, String dacName, List<String> filesToProcess) {
 		// initialize NVS tables :
-		ArgoNVSReferenceTable.initialize(options.getSpecDirName() + "/NVS");
+		initializeNVSTables(options);
+
 		// Loop through files list
 		for (String file : filesToProcess) {
 			// .... get file informations from options :
@@ -272,6 +274,16 @@ public class ValidateSubmit {
 				log.debug("closing Results file");
 				handleResultsFileOperation(out, "close", "");
 			}
+		}
+	}
+
+	private static void initializeNVSTables(Options options) {
+		if (options.isUseOnlineTables()) {
+			String nvsBaseUrl = System.getenv().getOrDefault("NVS_BASE_URL",
+					codeProp.getProperty("nvs.baseurl.default", NVS_DEFAULT_BASE_URL));
+			ArgoNVSReferenceTable.initializeFromInternet(nvsBaseUrl);
+		} else {
+			ArgoNVSReferenceTable.initialize(options.getSpecDirName() + "/NVS");
 		}
 	}
 

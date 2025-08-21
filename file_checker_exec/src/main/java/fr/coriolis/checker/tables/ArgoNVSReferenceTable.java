@@ -1,7 +1,10 @@
 package fr.coriolis.checker.tables;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,25 +12,29 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fr.coriolis.checker.utils.NetUtils;
+
 public final class ArgoNVSReferenceTable {
 
 	private static PrintStream stderr = new PrintStream(System.err);
 
 	public static enum RELEVANT_TABLES {
-		DM_QC_FLAG("DM_QC_FLAG"), PLATFORM_TYPE("PLATFORM_TYPE"), PLATFORM_MAKER("PLATFORM_MAKER"),
-		PROF_QC_FLAG("PROF_QC_FLAG"), POSITION_ACCURACY("POSITION_ACCURACY"),
-		DATA_STATE_INDICATOR("DATA_STATE_INDICATOR"), HISTORY_ACTION("HISTORY_ACTION"),
-		ARGO_WMO_INST_TYPE("ARGO_WMO_INST_TYPE"), POSITIONING_SYSTEM("POSITIONING_SYSTEM"),
-		TRANS_SYSTEM("TRANS_SYSTEM"), VERTICAL_SAMPLING_SCHEME("VERTICAL_SAMPLING_SCHEME"), STATUS("STATUS"),
-		GROUNDED("GROUNDED"), PLATFORM_FAMILY("PLATFORM_FAMILY"), SENSOR("SENSOR"), SENSOR_MAKER("SENSOR_MAKER"),
-		SENSOR_MODEL("SENSOR_MODEL"), MEASUREMENT_CODE_ID("MEASUREMENT_CODE_ID"),
-		TECHNICAL_PARAMETER_NAME("TECHNICAL_PARAMETER_NAME"), CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME"),
-		PARAMETER("PARAMETER");
+		DM_QC_FLAG("DM_QC_FLAG", "RD2"), PLATFORM_TYPE("PLATFORM_TYPE", "R23"), PLATFORM_MAKER("PLATFORM_MAKER", "R24"),
+		PROF_QC_FLAG("PROF_QC_FLAG", "RP2"), POSITION_ACCURACY("POSITION_ACCURACY", "R05"),
+		DATA_STATE_INDICATOR("DATA_STATE_INDICATOR", "R06"), HISTORY_ACTION("HISTORY_ACTION", "R07"),
+		ARGO_WMO_INST_TYPE("ARGO_WMO_INST_TYPE", "R08"), POSITIONING_SYSTEM("POSITIONING_SYSTEM", "R09"),
+		TRANS_SYSTEM("TRANS_SYSTEM", "R10"), VERTICAL_SAMPLING_SCHEME("VERTICAL_SAMPLING_SCHEME", "R16"),
+		STATUS("STATUS", "R19"), GROUNDED("GROUNDED", "R20"), PLATFORM_FAMILY("PLATFORM_FAMILY", "R22"),
+		SENSOR("SENSOR", "R25"), SENSOR_MAKER("SENSOR_MAKER", "R26"), SENSOR_MODEL("SENSOR_MODEL", "R27"),
+		MEASUREMENT_CODE_ID("MEASUREMENT_CODE_ID", "R15"), TECHNICAL_PARAMETER_NAME("TECHNICAL_PARAMETER_NAME", "R14"),
+		CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME", "R18"), PARAMETER("PARAMETER", "R03");
 
 		public final String name;
+		public final String code;
 
-		RELEVANT_TABLES(String d) {
-			name = d;
+		RELEVANT_TABLES(String name, String code) {
+			this.name = name;
+			this.code = code;
 		}
 
 		public static RELEVANT_TABLES fromName(String name) {
@@ -37,6 +44,10 @@ public final class ArgoNVSReferenceTable {
 				}
 			}
 			return null;
+		}
+
+		public String getCode() {
+			return code;
 		}
 	};
 
@@ -77,35 +88,72 @@ public final class ArgoNVSReferenceTable {
 	 * @param nvsFolderPath
 	 */
 	public static void initialize(String nvsFolderPath) {
+		// MAp to store the tables
 		Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables = new HashMap<>();
 		// get list of nvs tables files :
 		Set<File> tablesFiles = listFolderFiles(nvsFolderPath);
 
-		// table parser :
-		ArgoNVSReferenceTableParser nvsTablesParser = new ArgoNVSReferenceTableParser();
-
 		// loop over tables files
 		for (File tableFile : tablesFiles) {
-			SkosCollection table;
-			try {
-				table = nvsTablesParser.getCollection(tableFile);
+			try (InputStream tableInputStream = new FileInputStream(tableFile)) {
+				processNVSTableFile(nvsReferenceTables, tableInputStream);
+			} catch (FileNotFoundException e) {
+				stderr.println("Table file not found : " + tableFile + " (" + e.getMessage() + ")");
+				break;
 			} catch (IOException e) {
 				stderr.println("Failed to parse table file: " + tableFile + " (" + e.getMessage() + ")");
-				continue;
-			}
-			// is it a relevant table ?
-			RELEVANT_TABLES enumKey = RELEVANT_TABLES.fromName(table.getAltLabel());
-			if (enumKey != null) {
-				nvsReferenceTables.put(enumKey, table);
+				break;
 			}
 		}
 
 		populateStaticTables(nvsReferenceTables);
 	}
 
+	/**
+	 * Initialize the NVS tables from the nerc server on internet.
+	 * 
+	 */
+
+	public static void initializeFromInternet(String baseUrl) {
+		Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables = new HashMap<>();
+
+		// Loop through relevant tables list :
+		for (RELEVANT_TABLES t : RELEVANT_TABLES.values()) {
+			String tableUrl = baseUrl + t.getCode() + "/current/?_profile=nvs&_mediatype=application/ld+json";
+			try (InputStream tableInputStream = NetUtils.openInputStream(tableUrl)) {
+				processNVSTableFile(nvsReferenceTables, tableInputStream);
+			} catch (IOException e) {
+				stderr.println("Table file not found on NVS : " + tableUrl + " (" + e.getMessage() + ")");
+				break;
+			} catch (InterruptedException e) {
+				stderr.println("Error while retrieving table on NVS : " + tableUrl + " (" + e.getMessage() + ")");
+				break;
+			}
+		}
+
+		populateStaticTables(nvsReferenceTables);
+
+	}
+
 	// ==================
 	// CONVENIENT METHODS
 	// ==================
+	private static void processNVSTableFile(Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables,
+			InputStream tableInput) throws IOException {
+		// table parser :
+		ArgoNVSReferenceTableParser nvsTablesParser = new ArgoNVSReferenceTableParser();
+
+		SkosCollection table;
+
+		// parse table :
+		table = nvsTablesParser.getCollection(tableInput);
+
+		// is it a relevant table ?
+		RELEVANT_TABLES enumKey = RELEVANT_TABLES.fromName(table.getAltLabel());
+		if (enumKey != null) {
+			nvsReferenceTables.put(enumKey, table);
+		}
+	}
 
 	private static void populateStaticTables(Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables) {
 		DM_QC_FLAG_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.DM_QC_FLAG);
