@@ -1,21 +1,19 @@
 ---
 include:
-  - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@~latest
-
-variables:
-  CONTAINER_IMAGE_BUILD_CONTEXT: ./file_checker_exec
-  CONTAINER_IMAGE_DOCKER_FILE_PATH: ./file_checker_exec/Dockerfile
-  JAVA_BUILDER_BUILD_COMMAND: clean package -f file_checker_exec/pom.xml
-  JAVA_BUILDER_TESTS_COMMAND: test -f file_checker_exec/pom.xml
-  JAVA_BUILDER_MAVEN_QUALITY_ENABLE: "false" #no script npm de linting
-  JAVA_BUILDER_QUALITY_COMMAND: checkstyle:check -f file_checker_exec/pom.xml
-  JAVA_BUILDER_ARTIFACTS_PATH: "**/target/*.{war,jar}"
-  JAVA_BUILDER_PUBLISH_COMMAND: deploy -f file_checker_exec/pom.xml
-  JAVA_BUILDER_MAVEN_SETTINGS_PATH: ./file_checker_exec/settings.xml
-  JAVA_PUBLISH_ENABLE: true
-  YAMLLINT_ENABLE: "false"
-  PIPELINE_ENABLE_SONARQUBE: false
-
+  - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@feature/inputs
+    inputs:
+      container_image_build_context: "./file_checker_exec"
+      container_image_docker_file_path: "./file_checker_exec/Dockerfile"
+      java_builder_artifacts_path: "**/target/*.{war,jar}"
+      java_builder_build_command: "clean package -f file_checker_exec/pom.xml"
+      java_builder_maven_quality_enable: "false"
+      java_builder_maven_settings_path: "./file_checker_exec/settings.xml"
+      java_builder_publish_command: "deploy -f file_checker_exec/pom.xml"
+      java_builder_quality_command: "checkstyle:check -f file_checker_exec/pom.xml"
+      java_builder_tests_command: "test -f file_checker_exec/pom.xml"
+      java_publish_enable: "true"
+      pipeline_enable_sonarqube: "false"
+      lint_yamllint_enable: "false"
 
 security:filesystem:scan 🛡️:
   rules:
