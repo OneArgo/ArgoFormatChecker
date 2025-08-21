@@ -30,4 +30,3 @@ check_container-image_scanning:
     - job: security:filesystem:scan 🛡️
       artifacts: true
   allow_failure: false  
-
