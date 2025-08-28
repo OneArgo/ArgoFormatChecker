@@ -222,17 +222,19 @@ public class Options {
 		}
 
 		// .....parse the positional parameters.....
-		validateNumberOfPositionalArguments(args, next); // exit system if too few arguments
+		validateNumberOfPositionalArguments(args, next, useOnlineTables); // exit system if too few arguments
 
 		String dacName = args[next++];
-		String specDirName = args[next++];
+		String specDirName = "";
+		if (!useOnlineTables) {
+			specDirName = args[next++];
+		}
 		String outDirName = args[next++];
 		String inDirName = args[next++];
 		if (next < args.length) {
 			inFileList = new ArrayList<String>(args.length - next);
 			for (; next < args.length; next++) {
 				inFileList.add(args[next]);
-
 			}
 		}
 
@@ -248,8 +250,10 @@ public class Options {
 	 * @param args list of arguments
 	 * @param next indice of the next argument
 	 */
-	private static void validateNumberOfPositionalArguments(String[] args, int next) throws IllegalArgumentException {
-		if (args.length < (4 + next)) {
+	private static void validateNumberOfPositionalArguments(String[] args, int next, boolean useOnlineTables)
+			throws IllegalArgumentException {
+		int minArgs = (useOnlineTables ? 3 : 4) + next;
+		if (args.length < minArgs) {
 			log.error("too few arguments: " + args.length);
 			throw new IllegalArgumentException("Too few arguments provided.");
 		}
@@ -263,8 +267,8 @@ public class Options {
 	 */
 	public void validateMandatoryArguments() {
 		checkDacName(dacName);
-		checkDirectory(inDirName);
-		checkDirectory(specDirName);
+		checkDirectory(inDirName, false);
+		checkDirectory(specDirName, useOnlineTables);
 	}
 
 	/**
@@ -292,9 +296,9 @@ public class Options {
 	 * 
 	 * @param directoryName
 	 */
-	protected static void checkDirectory(String directoryName) {
+	protected static void checkDirectory(String directoryName, boolean useOnlineTables) {
 		File dir = new File(directoryName);
-		if (!dir.isDirectory()) {
+		if (!useOnlineTables && !dir.isDirectory()) {
 			throw new IllegalArgumentException("ERROR: " + directoryName + " directory is not a directory");
 		}
 	}

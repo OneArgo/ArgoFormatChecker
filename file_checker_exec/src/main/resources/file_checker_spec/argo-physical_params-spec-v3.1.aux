@@ -1,0 +1,14 @@
+// Auxilliary settings for the Argo physical parameters
+// $Revision: 829 $
+// $Date: 2018-01-29 23:44:56 +0000 (Mon, 29 Jan 2018) $
+
+// Special codes:
+//    "<->" attribute cannot exist; "<*>" attribute optional, value ignored; <+> attribute must exist, value is ignored
+
+// They are NOT free-form.  The code looks for very specific <PARAM>:attribute names
+// Unknown names are an error
+
+ADJUSTED_ERROR:comment | <->
+ADJUSTED_ERROR:long_name | Contains the error on the adjusted values as determined by the delayed mode QC process
+PRES_ADJUSTED:axis | <*>
+

@@ -1,0 +1,26 @@
+// $Revision: 1019 $
+// $Date: 2019-01-03 00:23:05 +0000 (Thu, 03 Jan 2019) $
+//SENSOR_MAKER |  |  |  | 
+
+AANDERAA |  |  |  | 
+AMETEK |  |  |  | 
+DRUCK |  |  |  | 
+FSI |  |  |  | 
+KISTLER |  |  |  | 
+PAINE |  |  |  | 
+SBE |  |  |  | 
+SEASCAN |  |  |  | 
+WETLABS | Wetlabs Inc. |  |  | 
+MBARI | Monterey Bay Aquarium Research Institute |  |  | 
+SATLANTIC |  |  |  | 
+JAC | JFE Advantech Co., Ltd |  |  | 
+APL_UW | University of Washington, Applied Pysics Laboratory |  |  | 
+TSK | Tsurumi-Seiki Co., Ltd. |  |  | 
+RBR | RBR Ltd |  |  | 
+Unknown | Unknown sensor maker | The sensor maker should not be unknown, the use of this value should be exceptional | 22/06/2015 | request from Wataru Ito
+KELLER |  |  | 17/08/2015 | added by M.B.  for A.Thresher
+MICRON | Micron Instruments | A manufacturing company located in Simi Valley, California (United States of America), specialised in the production and supply of semiconductor strain gages, pressure transducers, temperature sensors and measuring systems. | 2021-02-11 | 
+SEAPOINT |  |  |  | 
+TURNER_DESIGN |  |  |  | 
+QUARTZDYNE | Quartzdyne Inc. |  | 26/12/2021 | added by T. Carval for AOML
+MENSOR | MENSOR | A manufacturing company located in San Marcos, Texas (United States of America), specialised in precision pressure products.	| 22/10/2023 | added by T. Carval for SOLO

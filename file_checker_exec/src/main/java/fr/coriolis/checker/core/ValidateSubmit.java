@@ -2,7 +2,6 @@ package fr.coriolis.checker.core;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import fr.coriolis.checker.exceptions.NotAnArgoFileException;
 import fr.coriolis.checker.exceptions.ValidateFileDataFailedException;
 import fr.coriolis.checker.exceptions.VerifyFileFormatFailedException;
 import fr.coriolis.checker.output.ResultsFile;
+import fr.coriolis.checker.specs.SpecIO;
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.validators.ArgoFileValidator;
 import fr.coriolis.checker.validators.ArgoMetadataFileValidator;
@@ -109,8 +109,11 @@ public class ValidateSubmit {
 			// validate Mandatory arguments :
 			options.validateMandatoryArguments(); // System exit with error if no validated
 
+			// initiate SpecIO
+			SpecIO.init(options.isUseOnlineTables(), options.getSpecDirName());
+
 			// .............load the spec version information..............
-			loadSpecVersionInfo(options.getSpecDirName());
+			loadSpecVersionInfo();
 
 			// ....................get list of input files.................
 			List<String> filesToProcess = getFilesToProcessList(options.getListFile(), options.getInFileList(), inDir);
@@ -683,9 +686,8 @@ public class ValidateSubmit {
 	 * 
 	 * @param specDirName : specifications directory path
 	 */
-	private static void loadSpecVersionInfo(String specDirName) {
-		try {
-			InputStream in = new FileInputStream(specDirName + File.separator + specPropFileName);
+	private static void loadSpecVersionInfo() {
+		try (InputStream in = SpecIO.getInstance().open(specPropFileName)) {
 
 			specProp = new Properties();
 			specProp.load(in);

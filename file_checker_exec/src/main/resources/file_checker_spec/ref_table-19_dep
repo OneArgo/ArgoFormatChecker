@@ -1,0 +1,12 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+// Status Flags (JULD_*_STATUS)
+
+0 | Value is estimated from pre-deployment information found in the metadata
+1 | Value is estimated using information not transmitted by the float or by procedures that rely on typical float behavior
+2 | Value is transmitted by the float
+3 | Value is directly computed from relevant, transmitted float information
+4 | Value is determined by satellite
+9 | Value is not immediately known, but believe it can be estimated later
+

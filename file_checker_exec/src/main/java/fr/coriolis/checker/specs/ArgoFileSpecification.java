@@ -1,9 +1,11 @@
 package fr.coriolis.checker.specs;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -718,9 +720,8 @@ public class ArgoFileSpecification {
 	 * @param version  the string version of the format
 	 * @throws IOException for I/O errors
 	 */
-	public ArgoFileSpecification(boolean fullSpec, String specDir, ArgoDataFile.FileType fType, String version)
-			throws IOException {
-		openSpecification(fullSpec, specDir, fType, version);
+	public ArgoFileSpecification(boolean fullSpec, ArgoDataFile.FileType fType, String version) throws IOException {
+		openSpecification(fullSpec, fType, version);
 	} // ..end constructor
 
 	// ............................................
@@ -1010,15 +1011,14 @@ public class ArgoFileSpecification {
 	 * @param fType    the file type
 	 * @param version  the string specification version
 	 */
-	public void openSpecification(boolean fullSpec, String specDir, ArgoDataFile.FileType fType, String version)
-			throws IOException {
+	public void openSpecification(boolean fullSpec, ArgoDataFile.FileType fType, String version) throws IOException {
 		// .....initialize variables.....
 
 		// ..specification name
 		specName = fType.specType + ":v" + version.trim();
 
 		// ..file names
-		String prefix = specDir.trim() + "/argo-";
+		String prefix = "argo-";
 		cdlFileName = prefix + fType.specType + "-spec-v" + version.trim() + ".cdl";
 		optFileName = prefix + fType.specType + "-spec-v" + version.trim() + ".opt";
 		prmFileName = prefix + "physical_params-spec-v" + version.trim();
@@ -1095,7 +1095,7 @@ public class ArgoFileSpecification {
 
 		if (fullSpec) {
 			// ..initialize the reference tables..
-			ArgoReferenceTable ref = new ArgoReferenceTable(specDir);
+			ArgoReferenceTable ref = new ArgoReferenceTable();
 
 			// ..attribute regex file -- optional
 			status = parseAttrRegexFile();
@@ -1105,12 +1105,12 @@ public class ArgoFileSpecification {
 
 			// ..meta-data configuration parameter file
 			if (fType == ArgoDataFile.FileType.METADATA && version.startsWith("3")) {
-				ConfigTech = new ArgoConfigTechParam(specDir, version, true, false);
+				ConfigTech = new ArgoConfigTechParam(version, true, false);
 			}
 
 			// ..technical parameter file
 			if (fType == ArgoDataFile.FileType.TECHNICAL) {
-				ConfigTech = new ArgoConfigTechParam(specDir, version, false, true);
+				ConfigTech = new ArgoConfigTechParam(version, false, true);
 
 				// ..for each <tech_param> entry, automatically make <tech_param>* variables too
 				addOptionnalTechParamVariables();
@@ -1230,111 +1230,110 @@ public class ArgoFileSpecification {
 		String specName;
 
 		log.debug(".....parseCdlFile: start.....");
+		// ..open the CDL specification file
+		try (InputStream in = SpecIO.getInstance().open(cdlFileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
 
-		// ..check the file
-		File f = new File(cdlFileName);
-		if (!f.isFile()) {
+			log.info("parsing spec CDL file '" + cdlFileName + "'");
+
+			// ..parse the file
+			while ((line = fileReader.readLine()) != null) {
+				log.debug("line: '{}'", line);
+
+				// ..check to see if there is a comment (has "//" in it)
+				Matcher mCmt = pComment.matcher(line);
+				if (mCmt.find()) {
+					log.debug("comment: '{}'", mCmt.group(1));
+
+					// ..if the line has "//@" parse the "special comment"
+					if (mCmt.group(1) != null) {
+						log.debug("special comment: '{}'  '{}'", mCmt.group(1), mCmt.group(2));
+
+						metaHash.put(mCmt.group(1), mCmt.group(2));
+
+						// if (mCmt.group(1).equalsIgnoreCase("PARAM")) {
+						// paramSet.add(mCmt.group(2));
+						// } else {
+						// //..save the "special information"
+						// metaHash.put(mCmt.group(1), mCmt.group(2));
+						// }
+					}
+				}
+
+				line = mCmt.replaceAll(""); // ..remove "//" comments
+
+				// ..parse what is left after the comment has been removed
+
+				Matcher mName = pOpenTag.matcher(line);
+				if (pBlankOrComment.matcher(line).matches()) {
+					// ..blank line (after comment removed) - do nothing
+
+				} else if (mName.matches()) { // ..this is the header line
+					specName = mName.group(1); // ..get the name off the line
+
+					if (log.isInfoEnabled()) {
+						log.info("spec Name: '" + specName + "'");
+					}
+
+				} else if (pGlblAttr.matcher(line).matches()) {
+					parseGlblAttrLine(line);
+
+				} else if (pDimTag.matcher(line).matches()) {
+					// .."dimensions:" line - start of the dimension definitions
+
+					inDim = true;
+					inVar = false;
+					log.debug("***  DIMENSIONS  ***");
+
+				} else if (pVarTag.matcher(line).matches()) {
+					// .."variables:" line - start of the variable definitions
+
+					inDim = false;
+					inVar = true;
+					log.debug("***  VARIABLES  ***");
+
+				} else if (pDataTag.matcher(line).matches() || pCloseTag.matcher(line).matches()) {
+					// ..the "data:" line or the closing "}"
+					// ..- nothing else needs to be done
+
+					inDim = false;
+					inVar = false;
+					log.debug("***  DATA  ***");
+
+					break;
+
+				} else if (inDim) {
+					// ..in the "dimensions" section - parse dimesion definitions
+
+					if (!parseDimLine(line)) {
+						fileReader.close();
+						return false;
+					}
+
+				} else if (inVar) {
+					// ..in the "variables" section - parse variables and attributes
+
+					if (!parseVarLine(line)) {
+						fileReader.close();
+						return false;
+					}
+				}
+
+			} // ..end while (file.readLine()
+
+			fileReader.close();
+			log.debug(".....parseCdlFile: end.....");
+
+			return true;
+
+		} catch (FileNotFoundException e) {
 			log.error("cdlFileName '" + cdlFileName + "' does not exist");
-			throw new IOException("cdlFileName ('" + cdlFileName + "') does not exist");
-		} else if (!f.canRead()) {
+			throw e;
+		} catch (IOException e) {
 			log.error("cdlFileName '" + cdlFileName + "' cannot be read");
-			throw new IOException("cdlFileName ('" + cdlFileName + "') cannot be read");
+			throw e;
 		}
 
-		// ..open the CDL specification file
-		BufferedReader file = new BufferedReader(new FileReader(cdlFileName));
-
-		log.info("parsing spec CDL file '" + cdlFileName + "'");
-
-		// ..parse the file
-		while ((line = file.readLine()) != null) {
-			log.debug("line: '{}'", line);
-
-			// ..check to see if there is a comment (has "//" in it)
-			Matcher mCmt = pComment.matcher(line);
-			if (mCmt.find()) {
-				log.debug("comment: '{}'", mCmt.group(1));
-
-				// ..if the line has "//@" parse the "special comment"
-				if (mCmt.group(1) != null) {
-					log.debug("special comment: '{}'  '{}'", mCmt.group(1), mCmt.group(2));
-
-					metaHash.put(mCmt.group(1), mCmt.group(2));
-
-					// if (mCmt.group(1).equalsIgnoreCase("PARAM")) {
-					// paramSet.add(mCmt.group(2));
-					// } else {
-					// //..save the "special information"
-					// metaHash.put(mCmt.group(1), mCmt.group(2));
-					// }
-				}
-			}
-
-			line = mCmt.replaceAll(""); // ..remove "//" comments
-
-			// ..parse what is left after the comment has been removed
-
-			Matcher mName = pOpenTag.matcher(line);
-			if (pBlankOrComment.matcher(line).matches()) {
-				// ..blank line (after comment removed) - do nothing
-
-			} else if (mName.matches()) { // ..this is the header line
-				specName = mName.group(1); // ..get the name off the line
-
-				if (log.isInfoEnabled()) {
-					log.info("spec Name: '" + specName + "'");
-				}
-
-			} else if (pGlblAttr.matcher(line).matches()) {
-				parseGlblAttrLine(line);
-
-			} else if (pDimTag.matcher(line).matches()) {
-				// .."dimensions:" line - start of the dimension definitions
-
-				inDim = true;
-				inVar = false;
-				log.debug("***  DIMENSIONS  ***");
-
-			} else if (pVarTag.matcher(line).matches()) {
-				// .."variables:" line - start of the variable definitions
-
-				inDim = false;
-				inVar = true;
-				log.debug("***  VARIABLES  ***");
-
-			} else if (pDataTag.matcher(line).matches() || pCloseTag.matcher(line).matches()) {
-				// ..the "data:" line or the closing "}"
-				// ..- nothing else needs to be done
-
-				inDim = false;
-				inVar = false;
-				log.debug("***  DATA  ***");
-
-				break;
-
-			} else if (inDim) {
-				// ..in the "dimensions" section - parse dimesion definitions
-
-				if (!parseDimLine(line)) {
-					file.close();
-					return false;
-				}
-
-			} else if (inVar) {
-				// ..in the "variables" section - parse variables and attributes
-
-				if (!parseVarLine(line)) {
-					file.close();
-					return false;
-				}
-			}
-
-		} // ..end while (file.readLine()
-
-		file.close();
-		log.debug(".....parseCdlFile: end.....");
-
-		return true;
 	} // ..end parseCdlFile
 
 	// ......................................................
@@ -1641,102 +1640,97 @@ public class ArgoFileSpecification {
 
 		log.debug(".....parseOptFile: start.....");
 
-		// ..check the file
-		File f = new File(optFileName);
-		if (!f.isFile()) {
-			// ..the optional parameter file is itself optional
+		try (InputStream in = SpecIO.getInstance().open(optFileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
 
+			// ..file exists and it can be read
+			// ..open it
+
+			// ..a "variable group" defined here over-rides those defined elsewhere
+			// ..for instance, parseParam sets "variable groups" for <PARAM> variables
+			// .. these will over-ride those
+			HashSet<String> newGroup = new HashSet<String>();
+
+			// ..parse the file
+			log.info("parsing \"option\" file '" + optFileName + "'");
+
+			while ((line = fileReader.readLine()) != null) {
+				log.debug("line = '" + line + "'");
+
+				if (pBlankOrComment.matcher(line).matches()) {
+					continue;
+				}
+
+				Matcher m = pOptVar.matcher(line);
+
+				if (!m.matches()) {
+					fileReader.close();
+					message = "Invalid line in '" + optFileName + "': '" + line + "'";
+					throw new IOException("Invalid line in '" + optFileName + "'");
+				}
+
+				// ..2 line format options:
+				// .. 1) "element-name" --- variable/dimension not in a group
+				// .. 2) "group-name : element-name" --- variable is a member of group
+				// .. in this case, the group-name is also an element name
+				String group = m.group(1);
+				String element = m.group(2);
+				log.debug("group, variable = '{}'   '{}'", group, element);
+
+				if (!newGroup.contains(group)) {
+					// ..first time this "primary name" (group or element) was seen
+					// ..in the option file
+
+					// ..over-rides any associations that pre-existed this OPT file
+					// ..- removes any group mapped to this name
+					// ..- removes any existing group with this name
+
+					if (varGroup.containsKey(group)) {
+						varGroup.remove(group);
+						log.debug("remove existing var-to-group mapping: variable '{}'", group);
+					}
+
+					if (groupMembers.containsKey(group)) {
+						groupMembers.remove(group);
+						log.debug("remove existing group '{}'", group);
+					}
+
+					newGroup.add(group);
+				}
+
+				if (element == null) {
+					// ..format (1) -- not part of a group ("group" is the element-name)
+					optVar.add(group); // ..make element optional
+					log.debug("add optional variable '{}' (no group)", group);
+
+				} else {
+					// ..format (2) -- part of a group
+					if (!groupMembers.containsKey(group)) { // ..new group, initialize
+						groupMembers.put(group, new HashSet<String>());
+						log.debug("create group '{}'", group);
+					}
+
+					varGroup.put(element, group); // ..associate this element with the group
+					groupMembers.get(group).add(element); // ..add this element to the group
+
+					optVar.add(element); // ..make element optional
+
+					log.debug("add optional variable '{}' to group '{}'", element, group);
+				}
+			} // ..end while (readLine)
+
+			fileReader.close();
+			log.debug(".....parseOptFile: end.....");
+			return true;
+
+		} catch (FileNotFoundException e) {
 			optionalVars = false;
 			return false;
-		}
-
-		if (!f.canRead()) {
+		} catch (IOException e) {
 			log.error("optFileName '" + optFileName + "' exists but cannot be read");
-			throw new IOException("optFileName ('" + optFileName + "') exists but cannot be read");
+			throw e;
 		}
 
-		// ..file exists and it can be read
-		// ..open it
-
-		BufferedReader file = new BufferedReader(new FileReader(optFileName));
-
-		// ..a "variable group" defined here over-rides those defined elsewhere
-		// ..for instance, parseParam sets "variable groups" for <PARAM> variables
-		// .. these will over-ride those
-		HashSet<String> newGroup = new HashSet<String>();
-
-		// ..parse the file
-		log.info("parsing \"option\" file '" + optFileName + "'");
-
-		while ((line = file.readLine()) != null) {
-			log.debug("line = '" + line + "'");
-
-			if (pBlankOrComment.matcher(line).matches()) {
-				continue;
-			}
-
-			Matcher m = pOptVar.matcher(line);
-
-			if (!m.matches()) {
-				file.close();
-				message = "Invalid line in '" + optFileName + "': '" + line + "'";
-				throw new IOException("Invalid line in '" + optFileName + "'");
-			}
-
-			// ..2 line format options:
-			// .. 1) "element-name" --- variable/dimension not in a group
-			// .. 2) "group-name : element-name" --- variable is a member of group
-			// .. in this case, the group-name is also an element name
-			String group = m.group(1);
-			String element = m.group(2);
-			log.debug("group, variable = '{}'   '{}'", group, element);
-
-			if (!newGroup.contains(group)) {
-				// ..first time this "primary name" (group or element) was seen
-				// ..in the option file
-
-				// ..over-rides any associations that pre-existed this OPT file
-				// ..- removes any group mapped to this name
-				// ..- removes any existing group with this name
-
-				if (varGroup.containsKey(group)) {
-					varGroup.remove(group);
-					log.debug("remove existing var-to-group mapping: variable '{}'", group);
-				}
-
-				if (groupMembers.containsKey(group)) {
-					groupMembers.remove(group);
-					log.debug("remove existing group '{}'", group);
-				}
-
-				newGroup.add(group);
-			}
-
-			if (element == null) {
-				// ..format (1) -- not part of a group ("group" is the element-name)
-				optVar.add(group); // ..make element optional
-				log.debug("add optional variable '{}' (no group)", group);
-
-			} else {
-				// ..format (2) -- part of a group
-				if (!groupMembers.containsKey(group)) { // ..new group, initialize
-					groupMembers.put(group, new HashSet<String>());
-					log.debug("create group '{}'", group);
-				}
-
-				varGroup.put(element, group); // ..associate this element with the group
-				groupMembers.get(group).add(element); // ..add this element to the group
-
-				optVar.add(element); // ..make element optional
-
-				log.debug("add optional variable '{}' to group '{}'", element, group);
-			}
-		} // ..end while (readLine)
-
-		file.close();
-		log.debug(".....parseOptFile: end.....");
-
-		return true;
 	} // ..end parseOptFile
 
 	// ............................................................
@@ -1758,100 +1752,99 @@ public class ArgoFileSpecification {
 
 		log.debug(".....parseAttrRegexFile: start.....");
 
-		// ..check the file
-		File f = new File(regFileName);
-		if (!f.isFile()) {
+		try (InputStream in = SpecIO.getInstance().open(regFileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+			// ..file exists and it can be read
+			// ..open it
+
+			// ..parse the file
+			log.info("parsing \"attr_regexp\" file '" + regFileName + "'");
+
+			// ..define the Hash for the information
+
+			while ((line = fileReader.readLine()) != null) {
+				log.debug("line = '" + line + "'");
+
+				if (pBlankOrComment.matcher(line).matches()) {
+					continue;
+
+				} else {
+					Matcher m = pAttrRegex.matcher(line);
+
+					if (!m.matches()) {
+						fileReader.close();
+						message = "Invalid line in '" + regFileName + "': '" + line + "'";
+						throw new IOException("Invalid line in '" + regFileName + "'");
+					}
+
+					// ..line format options:
+					// .. variable:attribute = regex; [WARN|NOWARN]
+					// .. where the "[...]" is optional (the bracket are NOT included on the line)
+					String var_attr = m.group(1);
+					String var = m.group(2);
+					String attr = m.group(3);
+					String regex = m.group(4);
+					String warn = m.group(5);
+					log.debug("variable:attribute, var, attr, regex, warn = '{}', '{}', '{}', '{}', '{}'", var_attr,
+							var, attr, regex, warn);
+
+					if (regex.length() == ATTR_SPECIAL_LENGTH && regex.matches(ATTR_SPECIAL_REGEX)) {
+						// ..this is a attribute special pattern: replace existing setting
+						ArgoVariable aVar = varHash.get(var);
+						if (aVar == null) {
+							fileReader.close();
+							throw new IOException(
+									"Invalid variable name in line '" + line + "' in '" + regFileName + "'");
+						}
+
+						addAttr(aVar, attr, regex, DataType.STRING);
+						log.debug("attribute special pattern (not a regex): over-write existing");
+
+					} else {
+						// ..treat it as a regular expression
+						Pattern p;
+						try {
+							p = Pattern.compile(regex);
+
+						} catch (Exception e) {
+							fileReader.close();
+							log.error("Attr Regex compile error: " + e);
+							message = "Invalid Regex: '" + line + "'";
+							throw new IOException("Invalid regex in '" + regFileName + "'");
+						}
+
+						AttrRegex a = new AttrRegex();
+						a.pattern = p;
+
+						if (warn == null || warn.equals("NOWARN")) {
+							log.debug("...nowarn");
+							a.warn = false;
+						} else { // ..the pattern will only match "NOWARN" or "WARN"
+							log.debug("...warn");
+							a.warn = true;
+						}
+
+						regexHash.put(var_attr, a);
+					}
+				}
+			} // ..end while (readLine)
+
+			fileReader.close();
+			log.debug(".....parseAttrRegexFile: end.....");
+
+			return true;
+
+		} catch (FileNotFoundException e) {
 			// ..the optional parameter file is itself optional
 
 			attrRegex = false;
 			return false;
-		}
-
-		if (!f.canRead()) {
+		} catch (IOException e) {
 			log.error("regFileName '" + regFileName + "' exists but cannot be read");
-			throw new IOException("regFileName ('" + regFileName + "') exists but cannot be read");
+			throw e;
 		}
 
-		// ..file exists and it can be read
-		// ..open it
-
-		BufferedReader file = new BufferedReader(new FileReader(regFileName));
-
-		// ..parse the file
-		log.info("parsing \"attr_regexp\" file '" + regFileName + "'");
-
-		// ..define the Hash for the information
-
-		while ((line = file.readLine()) != null) {
-			log.debug("line = '" + line + "'");
-
-			if (pBlankOrComment.matcher(line).matches()) {
-				continue;
-
-			} else {
-				Matcher m = pAttrRegex.matcher(line);
-
-				if (!m.matches()) {
-					file.close();
-					message = "Invalid line in '" + regFileName + "': '" + line + "'";
-					throw new IOException("Invalid line in '" + regFileName + "'");
-				}
-
-				// ..line format options:
-				// .. variable:attribute = regex; [WARN|NOWARN]
-				// .. where the "[...]" is optional (the bracket are NOT included on the line)
-				String var_attr = m.group(1);
-				String var = m.group(2);
-				String attr = m.group(3);
-				String regex = m.group(4);
-				String warn = m.group(5);
-				log.debug("variable:attribute, var, attr, regex, warn = '{}', '{}', '{}', '{}', '{}'", var_attr, var,
-						attr, regex, warn);
-
-				if (regex.length() == ATTR_SPECIAL_LENGTH && regex.matches(ATTR_SPECIAL_REGEX)) {
-					// ..this is a attribute special pattern: replace existing setting
-					ArgoVariable aVar = varHash.get(var);
-					if (aVar == null) {
-						file.close();
-						throw new IOException("Invalid variable name in line '" + line + "' in '" + regFileName + "'");
-					}
-
-					addAttr(aVar, attr, regex, DataType.STRING);
-					log.debug("attribute special pattern (not a regex): over-write existing");
-
-				} else {
-					// ..treat it as a regular expression
-					Pattern p;
-					try {
-						p = Pattern.compile(regex);
-
-					} catch (Exception e) {
-						file.close();
-						log.error("Attr Regex compile error: " + e);
-						message = "Invalid Regex: '" + line + "'";
-						throw new IOException("Invalid regex in '" + regFileName + "'");
-					}
-
-					AttrRegex a = new AttrRegex();
-					a.pattern = p;
-
-					if (warn == null || warn.equals("NOWARN")) {
-						log.debug("...nowarn");
-						a.warn = false;
-					} else { // ..the pattern will only match "NOWARN" or "WARN"
-						log.debug("...warn");
-						a.warn = true;
-					}
-
-					regexHash.put(var_attr, a);
-				}
-			}
-		} // ..end while (readLine)
-
-		file.close();
-		log.debug(".....parseAttrRegexFile: end.....");
-
-		return true;
 	} // ..end parseAttrRegexFile
 
 	// ........................................................
@@ -1914,63 +1907,62 @@ public class ArgoFileSpecification {
 		String pres_adjAxis = new String("Z");
 
 		// ..open the file
-		File f = new File(prmFileNameAux);
-		if (!f.isFile()) {
+		try (InputStream in = SpecIO.getInstance().open(prmFileNameAux);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+			// ..parse the file
+			log.info("parsing \"auxilliary parameter\" file '" + prmFileNameAux + "'");
+
+			// ..read through the file
+			String line;
+			while ((line = fileReader.readLine()) != null) {
+				log.debug("line: '" + line + "'");
+
+				if (pBlankOrComment.matcher(line).matches()) {
+					continue;
+				}
+
+				// .....parse the line into individual entries.....
+				String st[] = line.split("\\|");
+
+				// ..it's not a valid parameter definition line
+				// ..check for special settings
+
+				if (st[0].trim().equals("PRES:axis")) {
+					presAxis = st[1].trim();
+					log.debug("pres:axis line : '" + presAxis + "'");
+					continue;
+
+				} else if (st[0].trim().equals("PRES_ADJUSTED:axis")) {
+					pres_adjAxis = st[1].trim();
+					log.debug("pres_adjusted:axis line : '" + pres_adjAxis + "'");
+					continue;
+
+				} else if (st[0].trim().equals("ADJUSTED_ERROR:comment")) {
+					errComment = st[1].trim();
+					log.debug("adjusted_error:comment line : '" + errComment + "'");
+					continue;
+
+				} else if (st[0].trim().equals("ADJUSTED_ERROR:long_name")) {
+					errLongName = st[1].trim();
+					log.debug("adjusted_error:long_name line : '" + errLongName + "'");
+					continue;
+
+				} else {
+					fileReader.close();
+					log.error("Invalid line in '" + prmFileName + "': '" + line + "'");
+					throw new IOException("Invalid line in '" + prmFileName + "': '" + line + "'");
+				}
+			} // ..end while read(auxilliary param file)
+
+			fileReader.close();
+		} catch (FileNotFoundException e) {
 			log.error("prmFileName '" + prmFileNameAux + "' does not exist");
-			throw new IOException("prmFileName ('" + prmFileNameAux + "') does not exist");
-		} else if (!f.canRead()) {
+			throw e;
+		} catch (IOException e) {
 			log.error("prmFileName '" + prmFileNameAux + "' cannot be read");
-			throw new IOException("prmFileName ('" + prmFileNameAux + "') cannot be read");
+			throw e;
 		}
-
-		BufferedReader file = new BufferedReader(new FileReader(prmFileNameAux));
-
-		// ..parse the file
-		log.info("parsing \"auxilliary parameter\" file '" + prmFileNameAux + "'");
-
-		// ..read through the file
-		String line;
-		while ((line = file.readLine()) != null) {
-			log.debug("line: '" + line + "'");
-
-			if (pBlankOrComment.matcher(line).matches()) {
-				continue;
-			}
-
-			// .....parse the line into individual entries.....
-			String st[] = line.split("\\|");
-
-			// ..it's not a valid parameter definition line
-			// ..check for special settings
-
-			if (st[0].trim().equals("PRES:axis")) {
-				presAxis = st[1].trim();
-				log.debug("pres:axis line : '" + presAxis + "'");
-				continue;
-
-			} else if (st[0].trim().equals("PRES_ADJUSTED:axis")) {
-				pres_adjAxis = st[1].trim();
-				log.debug("pres_adjusted:axis line : '" + pres_adjAxis + "'");
-				continue;
-
-			} else if (st[0].trim().equals("ADJUSTED_ERROR:comment")) {
-				errComment = st[1].trim();
-				log.debug("adjusted_error:comment line : '" + errComment + "'");
-				continue;
-
-			} else if (st[0].trim().equals("ADJUSTED_ERROR:long_name")) {
-				errLongName = st[1].trim();
-				log.debug("adjusted_error:long_name line : '" + errLongName + "'");
-				continue;
-
-			} else {
-				file.close();
-				log.error("Invalid line in '" + prmFileName + "': '" + line + "'");
-				throw new IOException("Invalid line in '" + prmFileName + "': '" + line + "'");
-			}
-		} // ..end while read(auxilliary param file)
-
-		file.close();
 
 		// ........................read the MAIN parameter file.......................
 
@@ -2008,779 +2000,789 @@ public class ArgoFileSpecification {
 		}
 
 		// ..open the file
-		f = new File(prmFileName);
-		if (!f.isFile()) {
-			log.error("prmFileName '" + prmFileName + "' does not exist");
-			throw new IOException("prmFileName ('" + prmFileName + "') does not exist");
-		} else if (!f.canRead()) {
-			log.error("prmFileName '" + prmFileName + "' cannot be read");
-			throw new IOException("prmFileName ('" + cdlFileName + "') cannot be read");
-		}
 
-		file = new BufferedReader(new FileReader(prmFileName));
+		try (InputStream in = SpecIO.getInstance().open(prmFileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
 
-		// ..parse the file
-		log.info("parsing \"parameter\" file '{}'", prmFileName);
+			// ..parse the file
+			log.info("parsing \"parameter\" file '{}'", prmFileName);
 
-		// ..read through the file
-		// String line;
-		int nLine = 0;
-		while ((line = file.readLine()) != null) {
-			nLine++;
-			log.debug("line({}): '{}'", line);
+			// ..read through the file
+			// String line;
+			int nLine = 0;
+			String line;
+			while ((line = fileReader.readLine()) != null) {
+				nLine++;
+				log.debug("line({}): '{}'", line);
 
-			if (pBlankOrComment.matcher(line).matches()) {
-				continue;
-			}
-
-			// .....parse the line into individual entries.....
-			String st[] = line.split("\\|");
-
-			if (st.length < nParamFields) {
-				file.close();
-				log.error("too few columns on line {} in '{}'", nLine, prmFileName);
-				throw new IOException("Too few columns on line " + nLine + " in '" + prmFileName + "': '" + line + "'");
-			}
-
-			String prm = st[1].trim(); // ..parameter name // NVS altLabel
-			String prmLName = st[3].trim(); // ..long_name // NVS prefLabel
-			String prmSName = st[4].trim(); // ..(cf_)standard_name // needed in NVS
-			String prmUnits = st[6].trim(); // ..units // NVS relatede P06 ?
-			String prmVmin = st[7].trim(); // ..value min // needed in NVS
-			String prmVmax = st[8].trim(); // ..value max // needed in NVS
-			String prmCategory = st[9].trim(); // .."c", "b", "ic", "ib" // needed in NVS
-			String prmComment = st[14].trim(); // ..to be searched for extra dimension
-			String prmStatus = st[16].trim(); // .."active", "deprecated", etc // NVS deprecated
-			String prmFill = st[17].trim(); // ..fillValue // needed in NVS
-			String prmType = st[18].trim(); // ..data type // needed in NVS
-
-			// ..status codes of " " (blank), "active", "deprecated" are allowed
-
-			boolean isDeprecated = false;
-			if (prmStatus.length() > 0) {
-				if (!pActive.matcher(prmStatus).matches()) {
-					if (!pDeprecated.matcher(prmStatus).matches()) {
-						// ..not allowed
-						log.debug("prm is not valid: '{}'", prm);
-						continue;
-					} else {// ..it is deprecated
-						log.debug("deprecated prm: '{}'", prm);
-						isDeprecated = true;
-					}
+				if (pBlankOrComment.matcher(line).matches()) {
+					continue;
 				}
-			}
 
-			// ..set any special handling instructions for v3.1 and later files
+				// .....parse the line into individual entries.....
+				String st[] = line.split("\\|");
 
-			if (isPost3_0) {
-				if (prmSName.length() == 0 || prmSName.equals("-")) {
-					prmSName = ATTR_NOT_ALLOWED;
+				if (st.length < nParamFields) {
+					fileReader.close();
+					log.error("too few columns on line {} in '{}'", nLine, prmFileName);
+					throw new IOException(
+							"Too few columns on line " + nLine + " in '" + prmFileName + "': '" + line + "'");
 				}
-				if (prmVmin.length() == 0 || prmVmin.equals("-")) {
-					prmVmin = ATTR_NOT_ALLOWED;
-				}
-				if (prmVmax.length() == 0 || prmVmax.equals("-")) {
-					prmVmax = ATTR_NOT_ALLOWED;
-				}
-				if (prmLName.length() == 0 || prmLName.equals("-")) {
-					prmVmax = ATTR_IGNORE;
-				}
-			}
 
-			log.debug("parsed: {}|{}|{}|{}|{}|{}|{}|", prm, prmType, prmLName, prmSName, prmUnits, prmVmin, prmVmax,
-					prmStatus, prmFill);
+				String prm = st[1].trim(); // ..parameter name // NVS altLabel
+				String prmLName = st[3].trim(); // ..long_name // NVS prefLabel
+				String prmSName = st[4].trim(); // ..(cf_)standard_name // needed in NVS
+				String prmUnits = st[6].trim(); // ..units // NVS relatede P06 ?
+				String prmVmin = st[7].trim(); // ..value min // needed in NVS
+				String prmVmax = st[8].trim(); // ..value max // needed in NVS
+				String prmCategory = st[9].trim(); // .."c", "b", "ic", "ib" // needed in NVS
+				String prmComment = st[14].trim(); // ..to be searched for extra dimension
+				String prmStatus = st[16].trim(); // .."active", "deprecated", etc // NVS deprecated
+				String prmFill = st[17].trim(); // ..fillValue // needed in NVS
+				String prmType = st[18].trim(); // ..data type // needed in NVS
 
-			// ..array of automatic "number" variables
+				// ..status codes of " " (blank), "active", "deprecated" are allowed
 
-			String prmList[] = new String[4];
-			prmList[0] = prm;
-			// ADMT-25 : Always add an underscore to numbering duplicate sensor/parameters
-			// variable
-			prmList[1] = prm + "_2";
-			prmList[2] = prm + "_3";
-			prmList[3] = prm + "_4";
-
-			// ...LIST-ONLY MODE: grab the param name and continue with the next line
-			if (listOnly) {
-				for (String prmName : prmList) {
-					if (!physParamNameList.contains(prmName)) {// ..new param name
-						physParamNameList.add(prmName);
-						if (isDeprecated) {
-							depParamNameList.add(prmName);
+				boolean isDeprecated = false;
+				if (prmStatus.length() > 0) {
+					if (!pActive.matcher(prmStatus).matches()) {
+						if (!pDeprecated.matcher(prmStatus).matches()) {
+							// ..not allowed
+							log.debug("prm is not valid: '{}'", prm);
+							continue;
+						} else {// ..it is deprecated
+							log.debug("deprecated prm: '{}'", prm);
+							isDeprecated = true;
 						}
-
-						physParamNameList.add(prmName + "_STD");
-						physParamNameList.add(prmName + "_MED");
-
-					} else { // ..duplicate name is a no, no
-						log.error("Duplicate param name '" + prmFileName + "': '" + line + "'");
-						file.close();
-						throw new IOException("Duplicate param name in '" + prmFileName + "': '" + line + "'");
 					}
 				}
-				continue;
-			}
 
-			// ..check if there is an "extra dimension"
-			// ..at least for now, this is encoded in the data type
-			boolean prmExtra = false;
-			if (pN_VALUES.matcher(prmComment).matches()) {
-				prmExtra = true;
-				log.debug("variable with extra dimension: type = '{}'", prmType);
-			}
+				// ..set any special handling instructions for v3.1 and later files
 
-			// ..check the data type
-			String tmp = prmType;
-			switch (prmType) {
-			case "NC_DOUBLE":
-				prmType = "double";
-				break;
-			case "NC_FLOAT":
-				prmType = "float";
-				break;
-			case "NC_SHORT":
-				prmType = "short";
-				break;
-			}
-			if (log.isDebugEnabled() && !prmType.equals(tmp)) {
-				log.debug("reset prmType from {} to {}", tmp, prmType);
-			}
-
-			if (!(prmType.equals("float") || prmType.equals("double") || prmType.equals("short"))) {
-				log.error("Invalid data type = '" + line + "'");
-				throw new IOException("Invalid data type '" + prmType + "' (" + prmFileName + "; " + nLine + ")");
-			}
-
-			DataType ncDataType = DataType.getType(prmType);
-
-			// ..check for symbolic NETCDF fill values
-
-			if (prmFill.startsWith("NC_FILL_")) {
-				tmp = prmFill;
-				prmFill = NC_FILL_TYPES.get(tmp);
-
-				if (prmFill == null) {
-					log.debug("Invalid NC_FILL_: '" + tmp + "' in line '" + line + "'");
-					throw new IOException("Invalid NC_FILL_: '" + tmp + "' (" + prmFileName + "; " + nLine + ")");
+				if (isPost3_0) {
+					if (prmSName.length() == 0 || prmSName.equals("-")) {
+						prmSName = ATTR_NOT_ALLOWED;
+					}
+					if (prmVmin.length() == 0 || prmVmin.equals("-")) {
+						prmVmin = ATTR_NOT_ALLOWED;
+					}
+					if (prmVmax.length() == 0 || prmVmax.equals("-")) {
+						prmVmax = ATTR_NOT_ALLOWED;
+					}
+					if (prmLName.length() == 0 || prmLName.equals("-")) {
+						prmVmax = ATTR_IGNORE;
+					}
 				}
 
-				log.debug("Changed fill-value from {} to {}", tmp, prmFill);
-			}
+				log.debug("parsed: {}|{}|{}|{}|{}|{}|{}|", prm, prmType, prmLName, prmSName, prmUnits, prmVmin, prmVmax,
+						prmStatus, prmFill);
 
-			// ..check the PrmCat -- "c" = core, "b" = bio, "ic/ib" = intermediate -> core,
-			// bio
-			if (!(prmCategory.equals("c") || prmCategory.equals("b") || prmCategory.equals("ic")
-					|| prmCategory.equals("ib"))) {
-				log.debug("Invalid category '" + prmCategory + "' in line '" + line + "'");
-				throw new IOException("Invalid category '" + prmCategory + "' (" + prmFileName + "; " + nLine + ")");
-			}
+				// ..array of automatic "number" variables
 
-			// ..decide if this parameter is in this type of file
+				String prmList[] = new String[4];
+				prmList[0] = prm;
+				// ADMT-25 : Always add an underscore to numbering duplicate sensor/parameters
+				// variable
+				prmList[1] = prm + "_2";
+				prmList[2] = prm + "_3";
+				prmList[3] = prm + "_4";
 
-			boolean keep = false;
-			boolean opt = true;
-			boolean CORE = false;
-			boolean BIO = false;
+				// ...LIST-ONLY MODE: grab the param name and continue with the next line
+				if (listOnly) {
+					for (String prmName : prmList) {
+						if (!physParamNameList.contains(prmName)) {// ..new param name
+							physParamNameList.add(prmName);
+							if (isDeprecated) {
+								depParamNameList.add(prmName);
+							}
 
-			// ..check for a valid file type and decide if it's a keeper
-			if (prmCategory.equals("c")) {
-				CORE = true;
-				BIO = false;
+							physParamNameList.add(prmName + "_STD");
+							physParamNameList.add(prmName + "_MED");
 
-				if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()) {
-					// ..keep PRES / PRESn in all cases
-					opt = false;
-					keep = true;
+						} else { // ..duplicate name is a no, no
+							log.error("Duplicate param name '" + prmFileName + "': '" + line + "'");
+							fileReader.close();
+							throw new IOException("Duplicate param name in '" + prmFileName + "': '" + line + "'");
+						}
+					}
+					continue;
+				}
 
-					// ..treat PRES/PRESn like any other bio-parameter in Bio- files
-					if (isBioProf || isOldBioTraj) {
-						CORE = false;
+				// ..check if there is an "extra dimension"
+				// ..at least for now, this is encoded in the data type
+				boolean prmExtra = false;
+				if (pN_VALUES.matcher(prmComment).matches()) {
+					prmExtra = true;
+					log.debug("variable with extra dimension: type = '{}'", prmType);
+				}
+
+				// ..check the data type
+				String tmp = prmType;
+				switch (prmType) {
+				case "NC_DOUBLE":
+					prmType = "double";
+					break;
+				case "NC_FLOAT":
+					prmType = "float";
+					break;
+				case "NC_SHORT":
+					prmType = "short";
+					break;
+				}
+				if (log.isDebugEnabled() && !prmType.equals(tmp)) {
+					log.debug("reset prmType from {} to {}", tmp, prmType);
+				}
+
+				if (!(prmType.equals("float") || prmType.equals("double") || prmType.equals("short"))) {
+					log.error("Invalid data type = '" + line + "'");
+					throw new IOException("Invalid data type '" + prmType + "' (" + prmFileName + "; " + nLine + ")");
+				}
+
+				DataType ncDataType = DataType.getType(prmType);
+
+				// ..check for symbolic NETCDF fill values
+
+				if (prmFill.startsWith("NC_FILL_")) {
+					tmp = prmFill;
+					prmFill = NC_FILL_TYPES.get(tmp);
+
+					if (prmFill == null) {
+						log.debug("Invalid NC_FILL_: '" + tmp + "' in line '" + line + "'");
+						throw new IOException("Invalid NC_FILL_: '" + tmp + "' (" + prmFileName + "; " + nLine + ")");
 					}
 
-				} else if (isCoreProf || isTraj || isOldCoreTraj) {
-					// ..keep "c" parameters for core and traj (> v3.1) files
-					keep = true;
-					if (prm.equals("TEMP") && fileType == ArgoDataFile.FileType.PROFILE) {
+					log.debug("Changed fill-value from {} to {}", tmp, prmFill);
+				}
+
+				// ..check the PrmCat -- "c" = core, "b" = bio, "ic/ib" = intermediate -> core,
+				// bio
+				if (!(prmCategory.equals("c") || prmCategory.equals("b") || prmCategory.equals("ic")
+						|| prmCategory.equals("ib"))) {
+					log.debug("Invalid category '" + prmCategory + "' in line '" + line + "'");
+					throw new IOException(
+							"Invalid category '" + prmCategory + "' (" + prmFileName + "; " + nLine + ")");
+				}
+
+				// ..decide if this parameter is in this type of file
+
+				boolean keep = false;
+				boolean opt = true;
+				boolean CORE = false;
+				boolean BIO = false;
+
+				// ..check for a valid file type and decide if it's a keeper
+				if (prmCategory.equals("c")) {
+					CORE = true;
+					BIO = false;
+
+					if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()) {
+						// ..keep PRES / PRESn in all cases
 						opt = false;
-					}
-				}
+						keep = true;
 
-			} else if (prmCategory.equals("ic")) {
-				CORE = false;
-				BIO = false;
-
-				if (isCoreProf || isTraj || isOldCoreTraj) {
-					// ..keep "c" and "ic" parameters for core and traj (> v3.1) files
-					keep = true;
-				}
-
-			} else if (prmCategory.equals("b")) {
-				CORE = false;
-				BIO = true;
-
-				if (isBioProf || isTraj || isOldBioTraj) {
-					// ..keep "b" parameters for Bio-Argo and traj (> v3.1) files
-					keep = true;
-				}
-
-			} else if (prmCategory.equals("ib")) {
-				CORE = false;
-				BIO = false;
-
-				if (isBioProf || isTraj || isOldBioTraj) {
-					// ..keep "ib" parameters for Bio-Argo and traj (> v3.1) files
-					keep = true;
-				}
-
-			} else {
-				log.debug("Invalid param category (c,b,ic,ib) '" + prmCategory + "' in line '" + line + "'");
-				throw new IOException("Invalid parameter category (c,b,i) '" + prmCategory + "' (" + prmFileName + "; "
-						+ nLine + ")");
-			}
-
-			// ..for each <param> entry, automatically make <param>* variables too
-			for (String prmName : prmList) {
-
-				if (keep) {
-					// ..build the relevant variable entries
-					log.debug("keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
-
-					// ..add to list of valid parameter names
-					if (!physParamNameList.contains(prmName)) {// ..new param name
-						physParamNameList.add(prmName);
-						if (isDeprecated) {
-							depParamNameList.add(prmName);
+						// ..treat PRES/PRESn like any other bio-parameter in Bio- files
+						if (isBioProf || isOldBioTraj) {
+							CORE = false;
 						}
 
-					} else { // ..duplicate name is a no, no
-						log.error("Duplicate param name (line {}) '{}'", nLine, prmName);
-						throw new IOException(
-								"Duplicate param name in '" + prmFileName + "' (line " + nLine + "): '" + line + "'");
-					}
-
-					// ..create the variable group(s)
-					// -- see VARIABLE GROUPS documentation at the top
-
-					String group_qc = prmName + "_QC";
-					String group_adj = prmName + "_ADJUSTED";
-
-					if (CORE || BIO) { // ..a "full parameter"
-						if (!groupMembers.containsKey(prmName)) { // ..new group - init
-							groupMembers.put(prmName, new HashSet<String>());
-							log.debug("create group: '{}'", prmName);
-						}
-
-					} else { // ..implies an i-parameter
-						interPhysParam.add(prmName);
-						log.debug("add intermediate variable '{}'", prmName);
-
-						// ..make the _qc group
-						if (!groupMembers.containsKey(group_qc)) { // ..new group - init
-							groupMembers.put(group_qc, new HashSet<String>());
-							log.debug("create group: '{}'", group_qc);
-						}
-
-						// ..make the _adj group
-						if (!groupMembers.containsKey(group_adj)) { // ..new group - init
-							groupMembers.put(group_adj, new HashSet<String>());
-							log.debug("create group: '{}'", group_adj);
+					} else if (isCoreProf || isTraj || isOldCoreTraj) {
+						// ..keep "c" parameters for core and traj (> v3.1) files
+						keep = true;
+						if (prm.equals("TEMP") && fileType == ArgoDataFile.FileType.PROFILE) {
+							opt = false;
 						}
 					}
 
-					// ..PRES and Bio-argo files: In bio-argo files,
-					// .. - only PRES appears
-					// .. - there is no PROFILE_PRES_QC, PRES_QC, PRES_ADJ_QC, *_ADJ_ERR
+				} else if (prmCategory.equals("ic")) {
+					CORE = false;
+					BIO = false;
 
-					boolean bio_pres = false;
-					if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()
-							&& (fileType == ArgoDataFile.FileType.BIO_PROFILE
-									|| fileType == ArgoDataFile.FileType.BIO_TRAJECTORY)) {
-						bio_pres = true;
+					if (isCoreProf || isTraj || isOldCoreTraj) {
+						// ..keep "c" and "ic" parameters for core and traj (> v3.1) files
+						keep = true;
 					}
 
-					String varNm;
-					ArgoVariable aVar;
+				} else if (prmCategory.equals("b")) {
+					CORE = false;
+					BIO = true;
 
-					if (fileType == ArgoDataFile.FileType.PROFILE || fileType == ArgoDataFile.FileType.BIO_PROFILE) {
+					if (isBioProf || isTraj || isOldBioTraj) {
+						// ..keep "b" parameters for Bio-Argo and traj (> v3.1) files
+						keep = true;
+					}
 
-						/*
-						 * Build the parameter structure char PROFILE_<PARAM>_QC(N_PROF);
-						 * PROFILE_<PARAM>_QC:long_name = "Global quality flag of PRES profile";
-						 * PROFILE_<PARAM>_QC:conventions = "Argo reference table 2a";
-						 * PROFILE_<PARAM>_QC:_FillValue = " ";
-						 *
-						 * NOTE: PRES does not have this variable in BIO_PROFILE files
-						 */
-						if (!bio_pres) {
-							varNm = new String("PROFILE_" + prmName + "_QC");
-							aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, prmName);
-							addAttr(aVar, long_name, prfQcLName + prmName + " profile", DataType.STRING);
-							addAttr(aVar, conventions, prfQcConventions, DataType.STRING);
-							addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
+				} else if (prmCategory.equals("ib")) {
+					CORE = false;
+					BIO = false;
 
-							varHash.put(varNm, aVar);
-							physParamVarList.add(varNm);
+					if (isBioProf || isTraj || isOldBioTraj) {
+						// ..keep "ib" parameters for Bio-Argo and traj (> v3.1) files
+						keep = true;
+					}
 
-							// ..add to groups ... see VARIABLE GROUPS above
+				} else {
+					log.debug("Invalid param category (c,b,ic,ib) '" + prmCategory + "' in line '" + line + "'");
+					throw new IOException("Invalid parameter category (c,b,i) '" + prmCategory + "' (" + prmFileName
+							+ "; " + nLine + ")");
+				}
 
-							String group;
-							if (CORE || BIO) {
-								group = prmName;
+				// ..for each <param> entry, automatically make <param>* variables too
+				for (String prmName : prmList) {
 
-							} else { // ..this is an intermediate parameter
-								group = group_qc;
+					if (keep) {
+						// ..build the relevant variable entries
+						log.debug("keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
+
+						// ..add to list of valid parameter names
+						if (!physParamNameList.contains(prmName)) {// ..new param name
+							physParamNameList.add(prmName);
+							if (isDeprecated) {
+								depParamNameList.add(prmName);
 							}
 
-							varGroup.put(varNm, group);
-							groupMembers.get(group).add(varNm);
+						} else { // ..duplicate name is a no, no
+							log.error("Duplicate param name (line {}) '{}'", nLine, prmName);
+							throw new IOException("Duplicate param name in '" + prmFileName + "' (line " + nLine
+									+ "): '" + line + "'");
+						}
 
-							if (opt) {
-								// ..add to optional variables
-								optVar.add(varNm);
+						// ..create the variable group(s)
+						// -- see VARIABLE GROUPS documentation at the top
+
+						String group_qc = prmName + "_QC";
+						String group_adj = prmName + "_ADJUSTED";
+
+						if (CORE || BIO) { // ..a "full parameter"
+							if (!groupMembers.containsKey(prmName)) { // ..new group - init
+								groupMembers.put(prmName, new HashSet<String>());
+								log.debug("create group: '{}'", prmName);
 							}
 
-							log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, group, group);
+						} else { // ..implies an i-parameter
+							interPhysParam.add(prmName);
+							log.debug("add intermediate variable '{}'", prmName);
 
-						} else {
-							log.debug("skip: 'PROFILE_{}_QC' (bio_pres = true)", prmName);
-						}
-					} // ..end if (PROFILE)
+							// ..make the _qc group
+							if (!groupMembers.containsKey(group_qc)) { // ..new group - init
+								groupMembers.put(group_qc, new HashSet<String>());
+								log.debug("create group: '{}'", group_qc);
+							}
 
-					// ...build the <PARAM> structures....
-					// .. the profile structures are for both <PARAM> and <PARAM>_ADJUSTED
-
-					String P[] = { prmName, prmName + "_ADJUSTED" };
-
-					for (String v : P) {
-						/*
-						 * Build the parameter structure Profile: <ncDataType> <P>(N_PROF, N_LEVELS)
-						 * -or- <ncDataType> <P>(N_PROF, N_LEVELS,_extra_)
-						 *
-						 * Trajectory: <ncDataType> <P>(N_MEASUREMENT); -or- <ncDataType>
-						 * <P>(N_MEASUREMENT, _extra_)
-						 *
-						 * Attributes: <P>:long_name = "<param-specific>"; <P>:standard_name =
-						 * "<param-specific>"; <P>:_FillValue = <param-specific>; <P>:units =
-						 * "<param-specific>"; <P>:valid_min = <param-specific>; <P>:valid_max =
-						 * <param-specific>; <P>:comment = "<param-specific>"; (version-specific)
-						 * <P>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <P>:FORTRAN_format
-						 * = ATTR_IGNORE_VALUE; //..means ignore setting <P>:resolution =
-						 * ATTR_IGNORE_VALUE; <P>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
-						 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
-						 * versions if it showed up
-						 *
-						 * where <P> = <PARAM>, <PARAM>_ADJUSTED
-						 *
-						 * if <P> = PRES or PRES_ADJUSTED, add <P>:axis = "Z"
-						 *
-						 */
-						log.debug("...working on: {}", v);
-
-						aVar = new ArgoVariable(v, ncDataType, dimParam, prmName);
-
-						if (prmExtra) {
-							aVar.setHaveExtraDimension();
-						}
-
-						addAttr(aVar, long_name, prmLName, DataType.STRING);
-
-						if (version.compareTo("2.3") < 0) {
-							addAttr(aVar, comment, prmSName, DataType.STRING);
-						} else {
-							addAttr(aVar, standard_name, prmSName, DataType.STRING);
-						}
-
-						// aVar.addAttribute(fillValue, fillValueNum);
-						addAttr(aVar, fillValue, prmFill, ncDataType);
-						addAttr(aVar, units, prmUnits, DataType.STRING);
-						addAttr(aVar, valid_min, prmVmin, ncDataType);
-						addAttr(aVar, valid_max, prmVmax, ncDataType);
-						if (v.startsWith("PRES")) {
-							addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
-							addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.1", DataType.STRING);
-						} else {
-							addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.3f", DataType.STRING);
-							addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.3", DataType.STRING);
-						}
-						addAttr(aVar, resolution, ATTR_IGNORE + "99999.", ncDataType);
-						addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown", DataType.STRING);
-
-						if (v.equals("PRES")) {
-							addAttr(aVar, axis, presAxis, DataType.STRING);
-						} else if (v.equals("PRES_ADJUSTED")) {
-							addAttr(aVar, axis, pres_adjAxis, DataType.STRING);
-						}
-
-						varHash.put(v, aVar);
-						physParamVarList.add(v);
-
-						// ..add to group(s) -- see VARIABLE GROUPS above
-						if (CORE || BIO) {
-							varGroup.put(v, prmName);
-							groupMembers.get(prmName).add(v);
-							log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, prmName, prmName);
-
-						} else { // ..an i-parameter
-							// ..<PARAM> has no primary group and belongs to _qc and _adj groups
-							// ..<PARAM>_ADJ has primary and belongs to only _adj group
-							// ..(ADMT-16: <PARAM> can no longer exist by itself)
-
-							if (v.endsWith("_ADJUSTED")) {
-								varGroup.put(v, group_adj);
-								groupMembers.get(group_adj).add(v);
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, group_adj,
-										group_adj);
-
-							} else {
-								varGroup.put(v, group_qc);
-								groupMembers.get(group_adj).add(v);
-								groupMembers.get(group_qc).add(v);
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'/'{}'", v, opt, "", group_qc,
-										group_adj);
+							// ..make the _adj group
+							if (!groupMembers.containsKey(group_adj)) { // ..new group - init
+								groupMembers.put(group_adj, new HashSet<String>());
+								log.debug("create group: '{}'", group_adj);
 							}
 						}
 
-						if (opt) {
-							// ..add to optional variables
-							optVar.add(v);
+						// ..PRES and Bio-argo files: In bio-argo files,
+						// .. - only PRES appears
+						// .. - there is no PROFILE_PRES_QC, PRES_QC, PRES_ADJ_QC, *_ADJ_ERR
+
+						boolean bio_pres = false;
+						if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()
+								&& (fileType == ArgoDataFile.FileType.BIO_PROFILE
+										|| fileType == ArgoDataFile.FileType.BIO_TRAJECTORY)) {
+							bio_pres = true;
 						}
 
-						/*
-						 * Build the parameter structure Profile char <P>_QC(N_PROF, N_LEVELS);
-						 * Trajectory char <P>_QC(N_MEASUREMENT);
-						 *
-						 * <P>_QC:long_name = "quality flag"; <P>_QC:conventions =
-						 * "Argo reference table 2"; <P>_QC:_FillValue = " ";
-						 *
-						 * where <P> = <PARAM>, <PARAM>_ADJUSTED
-						 *
-						 * Don't put PRES_QC in bio-Argo file. (==> bio_pres = true)
-						 */
+						String varNm;
+						ArgoVariable aVar;
 
-						if (!bio_pres) {
-							varNm = new String(v + "_QC");
-							aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, prmName);
-							addAttr(aVar, long_name, prmQcLName, DataType.STRING);
-							addAttr(aVar, conventions, prmQcConventions, DataType.STRING);
-							addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
+						if (fileType == ArgoDataFile.FileType.PROFILE
+								|| fileType == ArgoDataFile.FileType.BIO_PROFILE) {
 
-							varHash.put(varNm, aVar);
-							physParamVarList.add(varNm);
+							/*
+							 * Build the parameter structure char PROFILE_<PARAM>_QC(N_PROF);
+							 * PROFILE_<PARAM>_QC:long_name = "Global quality flag of PRES profile";
+							 * PROFILE_<PARAM>_QC:conventions = "Argo reference table 2a";
+							 * PROFILE_<PARAM>_QC:_FillValue = " ";
+							 *
+							 * NOTE: PRES does not have this variable in BIO_PROFILE files
+							 */
+							if (!bio_pres) {
+								varNm = new String("PROFILE_" + prmName + "_QC");
+								aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, prmName);
+								addAttr(aVar, long_name, prfQcLName + prmName + " profile", DataType.STRING);
+								addAttr(aVar, conventions, prfQcConventions, DataType.STRING);
+								addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
 
-							// ..add to group -- see VARIABLE GROUPS above
+								varHash.put(varNm, aVar);
+								physParamVarList.add(varNm);
 
-							if (CORE || BIO) {
-								varGroup.put(varNm, prmName);
-								groupMembers.get(prmName).add(varNm);
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, prmName,
-										prmName);
+								// ..add to groups ... see VARIABLE GROUPS above
 
-							} else {
 								String group;
-								if (v.endsWith("_ADJUSTED")) {
-									group = group_adj;
-								} else {
+								if (CORE || BIO) {
+									group = prmName;
+
+								} else { // ..this is an intermediate parameter
 									group = group_qc;
 								}
 
 								varGroup.put(varNm, group);
 								groupMembers.get(group).add(varNm);
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}')", varNm, opt, group,
-										group);
+
+								if (opt) {
+									// ..add to optional variables
+									optVar.add(varNm);
+								}
+
+								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, group, group);
+
+							} else {
+								log.debug("skip: 'PROFILE_{}_QC' (bio_pres = true)", prmName);
+							}
+						} // ..end if (PROFILE)
+
+						// ...build the <PARAM> structures....
+						// .. the profile structures are for both <PARAM> and <PARAM>_ADJUSTED
+
+						String P[] = { prmName, prmName + "_ADJUSTED" };
+
+						for (String v : P) {
+							/*
+							 * Build the parameter structure Profile: <ncDataType> <P>(N_PROF, N_LEVELS)
+							 * -or- <ncDataType> <P>(N_PROF, N_LEVELS,_extra_)
+							 *
+							 * Trajectory: <ncDataType> <P>(N_MEASUREMENT); -or- <ncDataType>
+							 * <P>(N_MEASUREMENT, _extra_)
+							 *
+							 * Attributes: <P>:long_name = "<param-specific>"; <P>:standard_name =
+							 * "<param-specific>"; <P>:_FillValue = <param-specific>; <P>:units =
+							 * "<param-specific>"; <P>:valid_min = <param-specific>; <P>:valid_max =
+							 * <param-specific>; <P>:comment = "<param-specific>"; (version-specific)
+							 * <P>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <P>:FORTRAN_format
+							 * = ATTR_IGNORE_VALUE; //..means ignore setting <P>:resolution =
+							 * ATTR_IGNORE_VALUE; <P>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
+							 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
+							 * versions if it showed up
+							 *
+							 * where <P> = <PARAM>, <PARAM>_ADJUSTED
+							 *
+							 * if <P> = PRES or PRES_ADJUSTED, add <P>:axis = "Z"
+							 *
+							 */
+							log.debug("...working on: {}", v);
+
+							aVar = new ArgoVariable(v, ncDataType, dimParam, prmName);
+
+							if (prmExtra) {
+								aVar.setHaveExtraDimension();
+							}
+
+							addAttr(aVar, long_name, prmLName, DataType.STRING);
+
+							if (version.compareTo("2.3") < 0) {
+								addAttr(aVar, comment, prmSName, DataType.STRING);
+							} else {
+								addAttr(aVar, standard_name, prmSName, DataType.STRING);
+							}
+
+							// aVar.addAttribute(fillValue, fillValueNum);
+							addAttr(aVar, fillValue, prmFill, ncDataType);
+							addAttr(aVar, units, prmUnits, DataType.STRING);
+							addAttr(aVar, valid_min, prmVmin, ncDataType);
+							addAttr(aVar, valid_max, prmVmax, ncDataType);
+							if (v.startsWith("PRES")) {
+								addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.1", DataType.STRING);
+							} else {
+								addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.3f", DataType.STRING);
+								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.3", DataType.STRING);
+							}
+							addAttr(aVar, resolution, ATTR_IGNORE + "99999.", ncDataType);
+							addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown",
+									DataType.STRING);
+
+							if (v.equals("PRES")) {
+								addAttr(aVar, axis, presAxis, DataType.STRING);
+							} else if (v.equals("PRES_ADJUSTED")) {
+								addAttr(aVar, axis, pres_adjAxis, DataType.STRING);
+							}
+
+							varHash.put(v, aVar);
+							physParamVarList.add(v);
+
+							// ..add to group(s) -- see VARIABLE GROUPS above
+							if (CORE || BIO) {
+								varGroup.put(v, prmName);
+								groupMembers.get(prmName).add(v);
+								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, prmName, prmName);
+
+							} else { // ..an i-parameter
+								// ..<PARAM> has no primary group and belongs to _qc and _adj groups
+								// ..<PARAM>_ADJ has primary and belongs to only _adj group
+								// ..(ADMT-16: <PARAM> can no longer exist by itself)
+
+								if (v.endsWith("_ADJUSTED")) {
+									varGroup.put(v, group_adj);
+									groupMembers.get(group_adj).add(v);
+									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, group_adj,
+											group_adj);
+
+								} else {
+									varGroup.put(v, group_qc);
+									groupMembers.get(group_adj).add(v);
+									groupMembers.get(group_qc).add(v);
+									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'/'{}'", v, opt, "",
+											group_qc, group_adj);
+								}
 							}
 
 							if (opt) {
 								// ..add to optional variables
-								optVar.add(varNm);
+								optVar.add(v);
 							}
 
-						} else {
-							log.debug("skip: '{}_QC'  (bio_pres == true)", v);
+							/*
+							 * Build the parameter structure Profile char <P>_QC(N_PROF, N_LEVELS);
+							 * Trajectory char <P>_QC(N_MEASUREMENT);
+							 *
+							 * <P>_QC:long_name = "quality flag"; <P>_QC:conventions =
+							 * "Argo reference table 2"; <P>_QC:_FillValue = " ";
+							 *
+							 * where <P> = <PARAM>, <PARAM>_ADJUSTED
+							 *
+							 * Don't put PRES_QC in bio-Argo file. (==> bio_pres = true)
+							 */
+
+							if (!bio_pres) {
+								varNm = new String(v + "_QC");
+								aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, prmName);
+								addAttr(aVar, long_name, prmQcLName, DataType.STRING);
+								addAttr(aVar, conventions, prmQcConventions, DataType.STRING);
+								addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
+
+								varHash.put(varNm, aVar);
+								physParamVarList.add(varNm);
+
+								// ..add to group -- see VARIABLE GROUPS above
+
+								if (CORE || BIO) {
+									varGroup.put(varNm, prmName);
+									groupMembers.get(prmName).add(varNm);
+									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, prmName,
+											prmName);
+
+								} else {
+									String group;
+									if (v.endsWith("_ADJUSTED")) {
+										group = group_adj;
+									} else {
+										group = group_qc;
+									}
+
+									varGroup.put(varNm, group);
+									groupMembers.get(group).add(varNm);
+									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}')", varNm, opt, group,
+											group);
+								}
+
+								if (opt) {
+									// ..add to optional variables
+									optVar.add(varNm);
+								}
+
+							} else {
+								log.debug("skip: '{}_QC'  (bio_pres == true)", v);
+							}
+
+							/*
+							 * Do not put PRES_ADJUSTED in bio-argo file -- bio_pres = true ==> <PARAM> =
+							 * PRES && this is a bio-profile file
+							 */
+							if (bio_pres) {
+								log.debug("skip PRES_ADJUSTED: (bio_pres == true)");
+								break;
+							}
 						}
 
 						/*
-						 * Do not put PRES_ADJUSTED in bio-argo file -- bio_pres = true ==> <PARAM> =
-						 * PRES && this is a bio-profile file
+						 * Build the parameter structure Profile <ncDataType>
+						 * <PARAM>_ADJUSTED_ERROR(N_PROF, N_LEVELS); Trajectory <ncDataType>
+						 * <PARAM>_ADJUSTED_ERROR(N_MEASUREMENT);
+						 *
+						 * <PARAM>_ADJUSTED_ERROR:long_name = "<param-specific>";
+						 * <PARAM>_ADJUSTED_ERROR:_FillValue = <param-specific;
+						 * <PARAM>_ADJUSTED_ERROR:units = "<param-specific";
+						 * <PARAM>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
+						 * as determined by the delayed mode QC process.";
+						 * <PARAM>_ADJUSTED_ERROR:C_format = "%7.1f";
+						 * <PARAM>_ADJUSTED_ERROR:FORTRAN_format = "F7.1";
+						 * <PARAM>_ADJUSTED_ERROR:resolution = 0.1f;
 						 */
-						if (bio_pres) {
-							log.debug("skip PRES_ADJUSTED: (bio_pres == true)");
-							break;
-						}
-					}
 
-					/*
-					 * Build the parameter structure Profile <ncDataType>
-					 * <PARAM>_ADJUSTED_ERROR(N_PROF, N_LEVELS); Trajectory <ncDataType>
-					 * <PARAM>_ADJUSTED_ERROR(N_MEASUREMENT);
-					 *
-					 * <PARAM>_ADJUSTED_ERROR:long_name = "<param-specific>";
-					 * <PARAM>_ADJUSTED_ERROR:_FillValue = <param-specific;
-					 * <PARAM>_ADJUSTED_ERROR:units = "<param-specific";
-					 * <PARAM>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
-					 * as determined by the delayed mode QC process.";
-					 * <PARAM>_ADJUSTED_ERROR:C_format = "%7.1f";
-					 * <PARAM>_ADJUSTED_ERROR:FORTRAN_format = "F7.1";
-					 * <PARAM>_ADJUSTED_ERROR:resolution = 0.1f;
-					 */
-
-					if (!bio_pres) {
-						varNm = new String(prmName + "_ADJUSTED_ERROR");
-						aVar = new ArgoVariable(varNm, ncDataType, dimParam, prmName);
-
-						addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName), DataType.STRING);
-
-						addAttr(aVar, fillValue, prmFill, ncDataType);
-						addAttr(aVar, units, prmUnits, DataType.STRING);
-						addAttr(aVar, comment, errComment, DataType.STRING);
-						addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.4f", DataType.STRING);
-						addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.4", DataType.STRING);
-						addAttr(aVar, resolution, ATTR_IGNORE + prmFill, ncDataType);
-
-						varHash.put(varNm, aVar);
-						physParamVarList.add(varNm);
-
-						// ..add to group -- see VARIABLE GROUPS above
-
-						String group;
-						if (CORE || BIO) {
-							group = prmName;
-
-						} else { // ..an i-parameter
-							group = group_adj;
-						}
-
-						varGroup.put(varNm, group);
-						groupMembers.get(group).add(varNm);
-						log.debug("added: '{}'; opt '{}'; primary group'{}'; member '{}'", varNm, opt, group, group);
-
-						if (opt) {
-							// ..add to optional variables
-							optVar.add(varNm);
-						}
-					}
-
-					/*
-					 * **************************************************************** STAT
-					 * variables: Every parameter can have a <PARAM>_STD and/or <PARAM>_MED group
-					 * including the *_ADJUSTED variables --- all optional
-					 *
-					 * The STAT variables are only allowed in the file of the primary parameter core
-					 * param STAT only in core files bio param STAT only in bio files
-					 *
-					 */
-
-					if (!bio_pres) {
-						String STAT[] = { prmName + "_STD", prmName + "_MED" };
-						for (String statNm : STAT) {
-							// ..add to list of valid parameter names
-							physParamNameList.add(statNm);
-							interPhysParam.add(statNm); // they are "intermediate parameters"
-
-							// ..create the variable group
-							// ..each of these are there own group
-
-							String stat_qc = statNm + "_QC";
-							String stat_adj = statNm + "_ADJUSTED";
-
-							if (!groupMembers.containsKey(statNm)) { // ..new group - init
-								groupMembers.put(stat_qc, new HashSet<String>());
-								log.debug("create group: '{}'", statNm);
-								groupMembers.put(stat_adj, new HashSet<String>());
-								log.debug("create group: '{}_ADJUSTED'", statNm);
-							}
-
-							/*
-							 * ***** Apr 2015 Users of the STAT variables are not including PROFILE_*_QC So
-							 * don't allow them at all until there is some outcry
-							 *
-							 * ***** Update: Apr 2022 Handle these as "intermediate parameters"
-							 */
-
-							if (fileType == ArgoDataFile.FileType.PROFILE
-									|| fileType == ArgoDataFile.FileType.BIO_PROFILE) {
-
-								/*
-								 * Build the parameter structure char PROFILE_<STAT>_QC(N_PROF);
-								 * PROFILE_<STAT>_QC:long_name = "Global quality flag of <STAT> profile";
-								 * PROFILE_<STAT>_QC:conventions = "Argo reference table 2a";
-								 * PROFILE_<STAT>_QC:_FillValue = " ";
-								 *
-								 * where <STAT> = <PARAM>_STD, <PARAM>_MED
-								 */
-
-								varNm = new String("PROFILE_" + statNm + "_QC");
-								aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, statNm);
-								aVar.addAttribute(long_name, prfQcLName + statNm + " profile");
-								aVar.addAttribute(conventions, prfQcConventions);
-								aVar.addAttribute(fillValue, fillValueBLANK);
-
-								varHash.put(varNm, aVar);
-								physParamVarList.add(varNm);
-
-								// ..add to options
-								varGroup.put(varNm, stat_qc);
-								groupMembers.get(stat_qc).add(varNm);
-								optVar.add(varNm);
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, true, stat_qc,
-										stat_qc);
-							} // ..end if (PROFILE)
-
-							// ...build the <STAT> structures....
-							// .. the profile structures are for both <STAT> and <STAT>_ADJUSTED
-
-							String S[] = new String[] { statNm, statNm + "_ADJUSTED" };
-							String group = null;
-
-							for (String v : S) {
-
-								/*
-								 * Build the parameter STAT structure Profile: <ncDataType> <S>(N_PROF,
-								 * N_LEVELS); -or- <ncDataType> <S>(N_PROF, N_LEVELS,_extra_) Trajectory:
-								 * <ncDataType> <S>(N_MEASUREMENT); -or- <ncDataType> <S>(N_MEASUREMENT,
-								 * _extra_) <S>:long_name = "<param-specific>"; //<S>:standard_name =
-								 * "<param-specific>"; <S>:_FillValue = <param-specific>; <S>:units =
-								 * "<param-specific>"; <S>:valid_min = <param-specific>; <S>:valid_max =
-								 * <param-specific>; <S>:comment = "<param-specific>"; (version-specific)
-								 * <S>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <S>:FORTRAN_format
-								 * = ATTR_IGNORE_VALUE; //..means ignore setting <S>:resolution =
-								 * ATTR_IGNORE_VALUE; <S>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
-								 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
-								 * versions if it showed up
-								 *
-								 * 
-								 * where <S> = <STAT>, <STAT>_ADJUSTED
-								 */
-
-								aVar = new ArgoVariable(v, ncDataType, dimParam, statNm);
-
-								if (prmExtra) {
-									aVar.setHaveExtraDimension();
-								}
-
-								StringBuilder tmpLName;
-								if (statNm.endsWith("_STD")) {
-									tmpLName = new StringBuilder("Standard deviation of ");
-								} else {
-									tmpLName = new StringBuilder("Median value of ");
-								}
-								tmpLName.append(prmLName.substring(0, 1).toLowerCase()).append(prmLName.substring(1));
-
-								addAttr(aVar, long_name, tmpLName.toString(), DataType.STRING);
-
-								// aVar.addAttribute(fillValue, fillValueNum);
-								addAttr(aVar, fillValue, prmFill, ncDataType);
-								addAttr(aVar, units, prmUnits, DataType.STRING);
-								if (statNm.endsWith("_MED")) {
-									addAttr(aVar, valid_min, prmVmin, ncDataType);
-									addAttr(aVar, valid_max, prmVmax, ncDataType);
-								}
-								addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
-								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
-								addAttr(aVar, resolution, ATTR_IGNORE, ncDataType);
-								addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown",
-										DataType.STRING);
-
-								varHash.put(v, aVar);
-								physParamVarList.add(v);
-
-								// ..add to the appropriate groups
-
-								if (v.endsWith("_ADJUSTED")) {
-									group = stat_adj;
-									varGroup.put(v, stat_adj);
-									groupMembers.get(stat_adj).add(v); // ..add to the appropriate group
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, stat_adj,
-											stat_adj);
-
-								} else {
-									group = stat_qc;
-									varGroup.put(v, stat_qc);
-									groupMembers.get(stat_adj).add(v);
-									groupMembers.get(stat_qc).add(v);
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, "",
-											stat_adj);
-								}
-
-								optVar.add(v);
-
-								/*
-								 * Build the parameter structure char <S>_QC(N_PROF, N_LEVELS); <S>_QC:long_name
-								 * = "quality flag"; <S>_QC:conventions = "Argo reference table 2";
-								 * <S>_QC:_FillValue = " ";
-								 *
-								 * where <S> = <STAT>, <STAT>_ADJUSTED
-								 */
-
-								varNm = new String(v + "_QC");
-								aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, statNm);
-								aVar.addAttribute(long_name, prmQcLName);
-								aVar.addAttribute(conventions, prmQcConventions);
-								aVar.addAttribute(fillValue, fillValueBLANK);
-
-								// group = v+"_QC";
-								varHash.put(varNm, aVar);
-								groupMembers.get(group).add(varNm); // ..add to the prmName group of variables
-								physParamVarList.add(varNm);
-
-								log.debug("variable added: '{}'  (group '{}')", varNm, group);
-
-								// ..add to options
-								varGroup.put(varNm, group);
-								optVar.add(varNm);
-								log.debug("option added: '{}' (group '{})", varNm, group);
-							} // ..end for v : <STAT>, <STAT>_ADJUSTED
-
-							/*
-							 * Build the parameter structure <ncDataType> <STAT>_ADJUSTED_ERROR(N_PROF,
-							 * N_LEVELS); <STAT>_ADJUSTED_ERROR:long_name = "<param-specific>";
-							 * <STAT>_ADJUSTED_ERROR:_FillValue = <param-specific>;
-							 * <STAT>_ADJUSTED_ERROR:units = "<param-specific>";
-							 * <STAT>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
-							 * as determined by the delayed mode QC process.";
-							 * <STAT>_ADJUSTED_ERROR:C_format = ATTR_IGNORE_VALUE;
-							 * <STAT>_ADJUSTED_ERROR:FORTRAN_format = ATTR_IGNORE_VALUE;
-							 * <STAT>_ADJUSTED_ERROR:resolution = ATTR_IGNORE_VALUE;
-							 */
-
-							varNm = new String(statNm + "_ADJUSTED_ERROR");
-							aVar = new ArgoVariable(varNm, ncDataType, dimParam, statNm);
+						if (!bio_pres) {
+							varNm = new String(prmName + "_ADJUSTED_ERROR");
+							aVar = new ArgoVariable(varNm, ncDataType, dimParam, prmName);
 
 							addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName), DataType.STRING);
 
 							addAttr(aVar, fillValue, prmFill, ncDataType);
 							addAttr(aVar, units, prmUnits, DataType.STRING);
 							addAttr(aVar, comment, errComment, DataType.STRING);
-							addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
-							addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
-							addAttr(aVar, resolution, ATTR_IGNORE_VALUE, DataType.STRING);
+							addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.4f", DataType.STRING);
+							addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.4", DataType.STRING);
+							addAttr(aVar, resolution, ATTR_IGNORE + prmFill, ncDataType);
 
 							varHash.put(varNm, aVar);
-							optVar.add(varNm);
 							physParamVarList.add(varNm);
 
-							varGroup.put(varNm, stat_adj);
-							groupMembers.get(stat_adj).add(varNm); // ..add to the ADJUSTED group
+							// ..add to group -- see VARIABLE GROUPS above
 
-							log.debug("added: '{}': opt '{}' ; primary '{}'; 'member '{}'", varNm, true, stat_adj,
-									stat_adj);
-						} // ..end for <PARAM>_STD, <PARAM>_MED
+							String group;
+							if (CORE || BIO) {
+								group = prmName;
 
-					}
+							} else { // ..an i-parameter
+								group = group_adj;
+							}
 
-				} else {
-					log.debug("not keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
-				} // ..end if (keep)
+							varGroup.put(varNm, group);
+							groupMembers.get(group).add(varNm);
+							log.debug("added: '{}'; opt '{}'; primary group'{}'; member '{}'", varNm, opt, group,
+									group);
 
-				// ..make adjustments for numbered variables
-				opt = true; // ..every #d variable is optional
+							if (opt) {
+								// ..add to optional variables
+								optVar.add(varNm);
+							}
+						}
 
-			} // ..end for (prmList)
-		} // ..end while (readLine)
+						/*
+						 * **************************************************************** STAT
+						 * variables: Every parameter can have a <PARAM>_STD and/or <PARAM>_MED group
+						 * including the *_ADJUSTED variables --- all optional
+						 *
+						 * The STAT variables are only allowed in the file of the primary parameter core
+						 * param STAT only in core files bio param STAT only in bio files
+						 *
+						 */
 
-		file.close();
+						if (!bio_pres) {
+							String STAT[] = { prmName + "_STD", prmName + "_MED" };
+							for (String statNm : STAT) {
+								// ..add to list of valid parameter names
+								physParamNameList.add(statNm);
+								interPhysParam.add(statNm); // they are "intermediate parameters"
 
-		log.debug(".....parseParamFile: end.....");
-		return true;
+								// ..create the variable group
+								// ..each of these are there own group
+
+								String stat_qc = statNm + "_QC";
+								String stat_adj = statNm + "_ADJUSTED";
+
+								if (!groupMembers.containsKey(statNm)) { // ..new group - init
+									groupMembers.put(stat_qc, new HashSet<String>());
+									log.debug("create group: '{}'", statNm);
+									groupMembers.put(stat_adj, new HashSet<String>());
+									log.debug("create group: '{}_ADJUSTED'", statNm);
+								}
+
+								/*
+								 * ***** Apr 2015 Users of the STAT variables are not including PROFILE_*_QC So
+								 * don't allow them at all until there is some outcry
+								 *
+								 * ***** Update: Apr 2022 Handle these as "intermediate parameters"
+								 */
+
+								if (fileType == ArgoDataFile.FileType.PROFILE
+										|| fileType == ArgoDataFile.FileType.BIO_PROFILE) {
+
+									/*
+									 * Build the parameter structure char PROFILE_<STAT>_QC(N_PROF);
+									 * PROFILE_<STAT>_QC:long_name = "Global quality flag of <STAT> profile";
+									 * PROFILE_<STAT>_QC:conventions = "Argo reference table 2a";
+									 * PROFILE_<STAT>_QC:_FillValue = " ";
+									 *
+									 * where <STAT> = <PARAM>_STD, <PARAM>_MED
+									 */
+
+									varNm = new String("PROFILE_" + statNm + "_QC");
+									aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, statNm);
+									aVar.addAttribute(long_name, prfQcLName + statNm + " profile");
+									aVar.addAttribute(conventions, prfQcConventions);
+									aVar.addAttribute(fillValue, fillValueBLANK);
+
+									varHash.put(varNm, aVar);
+									physParamVarList.add(varNm);
+
+									// ..add to options
+									varGroup.put(varNm, stat_qc);
+									groupMembers.get(stat_qc).add(varNm);
+									optVar.add(varNm);
+									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, true, stat_qc,
+											stat_qc);
+								} // ..end if (PROFILE)
+
+								// ...build the <STAT> structures....
+								// .. the profile structures are for both <STAT> and <STAT>_ADJUSTED
+
+								String S[] = new String[] { statNm, statNm + "_ADJUSTED" };
+								String group = null;
+
+								for (String v : S) {
+
+									/*
+									 * Build the parameter STAT structure Profile: <ncDataType> <S>(N_PROF,
+									 * N_LEVELS); -or- <ncDataType> <S>(N_PROF, N_LEVELS,_extra_) Trajectory:
+									 * <ncDataType> <S>(N_MEASUREMENT); -or- <ncDataType> <S>(N_MEASUREMENT,
+									 * _extra_) <S>:long_name = "<param-specific>"; //<S>:standard_name =
+									 * "<param-specific>"; <S>:_FillValue = <param-specific>; <S>:units =
+									 * "<param-specific>"; <S>:valid_min = <param-specific>; <S>:valid_max =
+									 * <param-specific>; <S>:comment = "<param-specific>"; (version-specific)
+									 * <S>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <S>:FORTRAN_format
+									 * = ATTR_IGNORE_VALUE; //..means ignore setting <S>:resolution =
+									 * ATTR_IGNORE_VALUE; <S>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
+									 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
+									 * versions if it showed up
+									 *
+									 * 
+									 * where <S> = <STAT>, <STAT>_ADJUSTED
+									 */
+
+									aVar = new ArgoVariable(v, ncDataType, dimParam, statNm);
+
+									if (prmExtra) {
+										aVar.setHaveExtraDimension();
+									}
+
+									StringBuilder tmpLName;
+									if (statNm.endsWith("_STD")) {
+										tmpLName = new StringBuilder("Standard deviation of ");
+									} else {
+										tmpLName = new StringBuilder("Median value of ");
+									}
+									tmpLName.append(prmLName.substring(0, 1).toLowerCase())
+											.append(prmLName.substring(1));
+
+									addAttr(aVar, long_name, tmpLName.toString(), DataType.STRING);
+
+									// aVar.addAttribute(fillValue, fillValueNum);
+									addAttr(aVar, fillValue, prmFill, ncDataType);
+									addAttr(aVar, units, prmUnits, DataType.STRING);
+									if (statNm.endsWith("_MED")) {
+										addAttr(aVar, valid_min, prmVmin, ncDataType);
+										addAttr(aVar, valid_max, prmVmax, ncDataType);
+									}
+									addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
+									addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
+									addAttr(aVar, resolution, ATTR_IGNORE, ncDataType);
+									addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown",
+											DataType.STRING);
+
+									varHash.put(v, aVar);
+									physParamVarList.add(v);
+
+									// ..add to the appropriate groups
+
+									if (v.endsWith("_ADJUSTED")) {
+										group = stat_adj;
+										varGroup.put(v, stat_adj);
+										groupMembers.get(stat_adj).add(v); // ..add to the appropriate group
+										log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, stat_adj,
+												stat_adj);
+
+									} else {
+										group = stat_qc;
+										varGroup.put(v, stat_qc);
+										groupMembers.get(stat_adj).add(v);
+										groupMembers.get(stat_qc).add(v);
+										log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, "",
+												stat_adj);
+									}
+
+									optVar.add(v);
+
+									/*
+									 * Build the parameter structure char <S>_QC(N_PROF, N_LEVELS); <S>_QC:long_name
+									 * = "quality flag"; <S>_QC:conventions = "Argo reference table 2";
+									 * <S>_QC:_FillValue = " ";
+									 *
+									 * where <S> = <STAT>, <STAT>_ADJUSTED
+									 */
+
+									varNm = new String(v + "_QC");
+									aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, statNm);
+									aVar.addAttribute(long_name, prmQcLName);
+									aVar.addAttribute(conventions, prmQcConventions);
+									aVar.addAttribute(fillValue, fillValueBLANK);
+
+									// group = v+"_QC";
+									varHash.put(varNm, aVar);
+									groupMembers.get(group).add(varNm); // ..add to the prmName group of variables
+									physParamVarList.add(varNm);
+
+									log.debug("variable added: '{}'  (group '{}')", varNm, group);
+
+									// ..add to options
+									varGroup.put(varNm, group);
+									optVar.add(varNm);
+									log.debug("option added: '{}' (group '{})", varNm, group);
+								} // ..end for v : <STAT>, <STAT>_ADJUSTED
+
+								/*
+								 * Build the parameter structure <ncDataType> <STAT>_ADJUSTED_ERROR(N_PROF,
+								 * N_LEVELS); <STAT>_ADJUSTED_ERROR:long_name = "<param-specific>";
+								 * <STAT>_ADJUSTED_ERROR:_FillValue = <param-specific>;
+								 * <STAT>_ADJUSTED_ERROR:units = "<param-specific>";
+								 * <STAT>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
+								 * as determined by the delayed mode QC process.";
+								 * <STAT>_ADJUSTED_ERROR:C_format = ATTR_IGNORE_VALUE;
+								 * <STAT>_ADJUSTED_ERROR:FORTRAN_format = ATTR_IGNORE_VALUE;
+								 * <STAT>_ADJUSTED_ERROR:resolution = ATTR_IGNORE_VALUE;
+								 */
+
+								varNm = new String(statNm + "_ADJUSTED_ERROR");
+								aVar = new ArgoVariable(varNm, ncDataType, dimParam, statNm);
+
+								addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName),
+										DataType.STRING);
+
+								addAttr(aVar, fillValue, prmFill, ncDataType);
+								addAttr(aVar, units, prmUnits, DataType.STRING);
+								addAttr(aVar, comment, errComment, DataType.STRING);
+								addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
+								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
+								addAttr(aVar, resolution, ATTR_IGNORE_VALUE, DataType.STRING);
+
+								varHash.put(varNm, aVar);
+								optVar.add(varNm);
+								physParamVarList.add(varNm);
+
+								varGroup.put(varNm, stat_adj);
+								groupMembers.get(stat_adj).add(varNm); // ..add to the ADJUSTED group
+
+								log.debug("added: '{}': opt '{}' ; primary '{}'; 'member '{}'", varNm, true, stat_adj,
+										stat_adj);
+							} // ..end for <PARAM>_STD, <PARAM>_MED
+
+						}
+
+					} else {
+						log.debug("not keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
+					} // ..end if (keep)
+
+					// ..make adjustments for numbered variables
+					opt = true; // ..every #d variable is optional
+
+				} // ..end for (prmList)
+			} // ..end while (readLine)
+
+			fileReader.close();
+
+			log.debug(".....parseParamFile: end.....");
+			return true;
+
+		} catch (FileNotFoundException e) {
+			log.error("prmFileName '" + prmFileName + "' does not exist");
+			throw e;
+		} catch (IOException e) {
+			log.error("prmFileName '" + prmFileName + "' cannot be read");
+			throw e;
+		}
+
 	} // ..end parseParamFile
 
 	/**

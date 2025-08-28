@@ -1,0 +1,17 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+
+DOXY:valid_min = 0.0;           WARN 
+DOXY_ADJUSTED:valid_min = 0.0;  WARN
+DOXY_STD:valid_min = 0.0;	WARN
+DOXY_MED:valid_min = 0.0;	WARN
+
+C2PHASE_DOXY:valid_min = 10.0;	WARN
+C2PHASE_DOXY:valid_max = 70.0;	WARN
+C2PHASE_DOXY_ADJUSTED:valid_min = 10.0;	WARN
+C2PHASE_DOXY_ADJUSTED:valid_max = 70.0;	WARN
+C2PHASE_DOXY_STD:valid_min = 10.0;	WARN
+C2PHASE_DOXY_STD:valid_max = 70.0;	WARN
+C2PHASE_DOXY_MED:valid_min = 10.0;	WARN
+C2PHASE_DOXY_MED:valid_max = 70.0;	WARN

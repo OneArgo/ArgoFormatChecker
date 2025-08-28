@@ -1,0 +1,86 @@
+netcdf argo-technical-v3.0-spec {
+
+//@ DATA_TYPE = "Argo technical"
+//@ FORMAT_VERSION   = "3.1"
+//@ HANDBOOK_VERSION = "1.2"
+//@ REFERENCE_DATE_TIME = "19500101000000"
+//@ $Revision: 1228 $
+//@ $Date: 2021-03-03 16:22:15 +0000 (Wed, 03 Mar 2021) $
+
+
+// global attributes:
+	:title = "Argo float technical data file" ;
+	:institution = "<+>US GDAC" ;
+	:source = "Argo float" ;
+	:history = "<+>";
+	:references = "http://www.argodatamgt.org/Documentation" ;
+	:user_manual_version = "3.1" ;        /*REGEX = "3\..*" */
+	:Conventions = "Argo-3.1 CF-1.6" ;    /*REGEX = "Argo-3\..* +CF-.*" */
+
+dimensions:
+
+	DATE_TIME = 14;
+	STRING128 = 128; 
+	STRING32 = 32;
+	STRING8 = 8;
+	STRING4 = 4;
+	STRING2 = 2;
+	N_TECH_PARAM = UNLIMITED;
+	N_TECH_MEASUREMENT = UNLIMITED;
+
+variables:
+
+//  General information on the technical data file
+	char PLATFORM_NUMBER(STRING8);
+		PLATFORM_NUMBER:long_name = "Float unique identifier";
+		PLATFORM_NUMBER:conventions = "WMO float identifier : A9IIIII";
+		PLATFORM_NUMBER:_FillValue = " ";
+	char DATA_TYPE(STRING32);
+		DATA_TYPE:long_name = "Data type";
+		DATA_TYPE:conventions = "Argo reference table 1";
+		DATA_TYPE:_FillValue = " ";
+	char FORMAT_VERSION(STRING4);
+		FORMAT_VERSION:long_name = "File format version";
+		FORMAT_VERSION:_FillValue = " ";
+	char HANDBOOK_VERSION(STRING4);
+		HANDBOOK_VERSION:long_name = "Data handbook version";
+		HANDBOOK_VERSION:_FillValue = " ";
+	char DATA_CENTRE(STRING2);
+		DATA_CENTRE:long_name = "Data centre in charge of float data processing";
+		DATA_CENTRE:conventions = "Argo reference table 4";
+		DATA_CENTRE:_FillValue = " ";
+	char DATE_CREATION(DATE_TIME);
+		DATE_CREATION:long_name = "Date of file creation";
+		DATE_CREATION:conventions = "YYYYMMDDHHMISS";
+		DATE_CREATION:_FillValue = " ";
+	char DATE_UPDATE(DATE_TIME);
+		DATE_UPDATE:long_name = "Date of update of this file";
+		DATE_UPDATE:conventions = "YYYYMMDDHHMISS";
+		DATE_UPDATE:_FillValue = " ";
+
+//  Technical data
+	char TECHNICAL_PARAMETER_NAME(N_TECH_PARAM, STRING128);
+		TECHNICAL_PARAMETER_NAME:long_name = "Name of technical parameter";
+		TECHNICAL_PARAMETER_NAME:_FillValue = " ";
+	char TECHNICAL_PARAMETER_VALUE(N_TECH_PARAM, STRING128);
+		TECHNICAL_PARAMETER_VALUE:long_name = "Value of technical parameter";
+		TECHNICAL_PARAMETER_VALUE:_FillValue = " ";
+	int CYCLE_NUMBER(N_TECH_PARAM);
+		CYCLE_NUMBER:long_name = "Float cycle number";
+		CYCLE_NUMBER:conventions = "0...N, 0 : launch cycle (if exists), 1 : first complete cycle";
+		CYCLE_NUMBER:_FillValue = 99999;
+		
+// Timeseries of technical data (optional)
+	double JULD(N_TECH_MEASUREMENT);
+		JULD:long_name = "Julian day (UTC) of each measurement";
+		JULD:standard_name = "time";
+		JULD:units = "days since 1950-01-01 00:00:00 UTC";
+		JULD:conventions = "Relative julian days with decimal part (as parts of day)";
+		JULD:_FillValue = 999999;
+		JULD:axis = "T";
+	int CYCLE_NUMBER_MEAS (N_TECH_MEASUREMENT);
+	int MEASUREMENT_CODE(N_TECH_MEASUREMENT);
+		MEASUREMENT_CODE:long_name = "Flag referring to a measurement event in the cycle";
+		MEASUREMENT_CODE:conventions = "Argo reference table 15";
+		MEASUREMENT_CODE:_FillValue = 99999;
+		

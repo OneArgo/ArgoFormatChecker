@@ -1,0 +1,176 @@
+// $Revision: 1327 $
+// $Date: 2022-04-21 21:17:54 +0000 (Thu, 21 Apr 2022) $
+
+//SENSOR_MODEL | SENSOR_MAKER | COMMENTS | SENSOR | <parameter_sensor_name> | update date | update comment | parameter status operational/pilot/obsolete
+
+UNKNOWN |  | to use when necessary | UNKNOWN_SENSOR_MODEL |  |  |  
+
+//Conductivity/temperature sensors |  |  |  |  |  |  
+FSI | FSI |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE37 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41_V2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
+SBE41_V2.6 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41_V3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |
+SBE41_IDO | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2025-04-28 | added by y. lubac 
+SBE41CP_IDO | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2025-04-28 | added by y. lubac 
+SBE41_IDO_V1.0c | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-06-02 | added b. m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
+SBE41_IDO_V2.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-06-02 | updated CTD_IDO to CTD (10/06 2021) 
+SBE41CP_IDO_V2.0b | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-04-27 | added by t. carval for a. thresher updated CTD_IDO to CTD (10/06 2021) 
+SBE41_IDO_V3.0 | SBE | Seabird CTD module with IDO oxygen sensor | CTD_PRES, CTD_TEMP, CTD_CNDC,IDO_DOXY | CTD | 2015-07-23 | added by m. belbeoch for JAMSTEC. updated CTD_IDO to CTD (10/06 2021) 
+SBE41CP_V1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP_V1.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP_V1.2a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
+SBE41CP_V1.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.3b | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-27 | added by t. carval for a. thresher 
+SBE41CP_V1.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.7 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.8 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-04-23 | added by t. carval for j. gilson 
+SBE41CP_V1.9a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-09-08 | added by m. belbeoch for JAMSTEC 
+SBE41CP_V2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP_V3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP_V3.0a | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP_V3.0c | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41CP_V4.4.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2015-08-17 | added by M.B.  for A.Thresher 
+SBE41CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-08-17 | added by M.B.  for A.Thresher 
+SBE41CP_V5.3.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-01-21 | added by M.B.  for A.Thresher 
+SBE41CP_V5.3.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2018-12-18 | added by MB for M. Takahashi. 
+SBE41CP_V5.3.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2019-09-02 | added by MB for F. Akazawa 
+SBE41CP_V5.3.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-08-17 | https://github.com/nvs-vocabs/ArgoVocabs/issues/68
+SBE41CP_V5.3.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-08-17 | https://github.com/nvs-vocabs/ArgoVocabs/issues/68
+SBE41CP_V7.2.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-04-18 | added by MB for K. Sato 
+SBE41CP_V7.2.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2016-04-18 | added by MB for K. Sato 
+SBE41N | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41N_V5.3.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE41N_V5.3.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/02/2021 | *** added my Iggy for Fumihiko Akazawa *** Not in Google docs
+SBE41N_V5.3.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | *** added my Iggy for Fumihiko Akazawa *** Not in Google docs
+SBE41N_V5.3.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | *** added my Iggy for Fumihiko Akazawa *** Not in Google docs
+SBE41N_V5.3.4 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 28/12/2020 | added by TC for Fumihiko Akazawa
+SBE41N_V5.3.5 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 21/10/2022 | added by TC for Kanako Sato
+SBE41N_V5.4.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+SBE61CP_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 08/07/2022 | added by T. Carval for Z. Liu
+SBE61 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
+SBE61_V4.5.2 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/6/2015 | added by t. carval for j. gilson 
+SBE61_V4.5.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 10/6/2015 | added by t. carval for j. gilson 
+SBE61_V5.0.0 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 23/02/2016 | aded by MB for J. Gilson 
+SBE61_V5.0.1 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/01/2016 | added by M.Scanderbeg for J. Gilson 
+SBE61_V5.0.2 | SBE | Pressure calibration done correctly. | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 11/01/2019 | added by M. Scanderbeg for J. Gilson 
+SBE61_V5.0.3 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 26/12/2021 | added by T. Carval for C. Schmid 
+SBE61_V5.0.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2021-12-10 | added by T. Carval for C. Schmid 
+SBE61_V5.0.10 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-07-21 | https://github.com/nvs-vocabs/ArgoVocabs/issues/65
+SBE61_V5.0.12 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-07-21 | https://github.com/nvs-vocabs/ArgoVocabs/issues/65
+CTD_F01 | TSK | TSK model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+RBR | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+RBRoem_V1.16 | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC |  |  |  
+RBR_ARGO | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+RBR_ARGO3 | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+RBR_ARGO3_DEEP4K | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+RBR_ARGO3_DEEP6K | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+
+//Oxygen sensors |  |  |  |  |  |  
+RBR_CODA_T_ODO | RBR |  | OPTODE_DOXY | OPTODE |  | added by VT 28/07/2020 
+SBE43_IDO | SBE | Seabird Electrochemical Dissolved Oxygen IDO sensor (volt output) | IDO_DOXY | IDO |  |  
+SBE43I | SBE | configuration option | IDO_DOXY | IDO |  |  
+SBE43F_IDO | SBE | Seabird Electrochemical Dissolved Oxygen IDO sensor (frequency output) | IDO_DOXY | IDO |  |  
+SBE63_OPTODE | SBE | Seabird Optical Dissolved Oxygen Sensor | OPTODE_DOXY | OPTODE |  |  
+SBE83_OPTODE | SBE | Seabird Optical Dissolved Oxygen Sensor | OPTODE_DOXY | OPTODE | 2023-10-24 | https://github.com/nvs-vocabs/R27/issues/15
+//** following sensor is deprecated but not marked as such in the table
+AANDERAA_OPTODE | AANDERAA |  | OPTODE_DOXY | OPTODE |  | deprecated
+AANDERAA_OPTODE_3830 | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+AANDERAA_OPTODE_3835 | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+AANDERAA_OPTODE_3930 | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+AANDERAA_OPTODE_4330 | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+AANDERAA_OPTODE_4330F | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+AANDERAA_OPTODE_4831 | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+AANDERAA_OPTODE_4831F | AANDERAA |  | OPTODE_DOXY | OPTODE |  |
+ARO_FT | JAC | JAC RINKO | OPTODE_DOXY | OPTODE |  | added by MB 13/02/2018 
+AROD_FT | JAC | deep housing | OPTODE_DOXY | OPTODE |  | added by MB 13/02/2019 
+
+//Pressure sensors |  |  |  |  |  |  
+RBR_PRES | RBR |  | CTD_PRES | PRES |  | corrected from RBR_PRESA into RBR_PRES_A  2021-06-07 
+RBR_PRES_A | RBR |  | CTD_PRES | PRES |  |  
+DRUCK_2900PSIA | DRUCK |  | CTD_PRES | PRES |  |  
+DRUCK | DRUCK |  | CTD_PRES | PRES |  |  
+DRUCK_10153PSIA | DRUCK |  | CTD_PRES | PRES |  | add by MB  05/10/2016 
+PAINE | PAINE |  | CTD_PRES | PRES |  |  
+PAINE_1500PSIA | PAINE |  | CTD_PRES | PRES |  |  
+PAINE_1600PSIA | PAINE |  | CTD_PRES | PRES |  |  
+PAINE_2000PSIA | PAINE |  | CTD_PRES | PRES |  |  
+PAINE_2900PSIA | PAINE |  | CTD_PRES | PRES |  |  
+PAINE_3000PSIA | PAINE |  | CTD_PRES | PRES |  |  
+AMETEK | AMETEK |  | CTD_PRES | PRES |  |  
+AMETEK_3000PSIA | AMETEK |  | CTD_PRES |  |  | add by MB 05/10/2016 
+KISTLER | KISTLER |  | CTD_PRES | PRES |  |  
+KISTLER_2900PSIA | KISTLER |  | CTD_PRES | PRES |  |  
+KISTLER_10153PSIA | KISTLER |  | CTD_PRES | PRES | 10/6/2015 | added by t. carval for j. gilson 
+KELLER_PA8 | KELLER |  | CTD_PRES | PRES | 17/08/2015 | added by M.B.  for A.Thresher 
+SEASCAN_SSTD | SEASCAN |  | CTD_PRES | PRES | 4/9/2015 | added by M.B for AOML 
+MP40_C_2000_G | Micron Instruments MP40C-2000G pressure transducer | A flush mountable pressure transducer MP40 model, configured to performance specification 'C' and header option 'G' (gage), depth-rated to 2000 psi. The instrument was manufactured by Micron Instruments (also operating as Piezo-Metrics). | CTD_PRES | PRES | 11/5/2016 | added by M.B for AOML 
+DSB301-10-C85 | QUARTZDYNE | Deep SOLO with two pressure sensors | CTD_PRES | PRES | 06/04/2021 | added by M. Scanderbeg for J. Gilson, 20211226 T. Carval remove quartzdyne from name 
+MENSOR | MENSOR | Deep SOLO with two pressure sensors | CTD_PRES | PRES | 06/04/2021 | added by M. Scanderbeg for J. Gilson 
+
+//Near Surface conductivity and temperature sensors |  |  |  |  |  |  
+SBE_STS | SBE | SBE Near Surface Conductivity and Temperature Module | STS_CNDC,STS_TEMP | STS | |
+
+//Biogeochemical sensors |  | * Note that some biogeochemical sensors have different configurations, i.e. they are either in the pumped stream or not in the pumped stream. Sensor readings from those in the pumped vs unpumped stream can be very different. Some manufacturers do not distinguish this in the sensor model name. In order to capture this information there is a configuration parameter that specifies this, i.e. CONFIG_SensorInPumpedStream_LOGICAL, (Yes =1, No = 0). For the relevant sensors this configuration parameter should be filled in the metadata file for the launch configuration settings.  |  |  |  | 
+
+//Spectrophotometers |  |  |  |  |  |  
+SUNA | SBE SATLANTIC | UV absorption to derive nitrate and bisulfide (MBARI) | SPECTROPHOTOMETER_NITRATE, SPECTROPHOTOMETER_BISULFIDE | SUNA |  |  
+SUNA_V2 | SBE SATLANTIC | UV absorption to derive nitrate and bisulfide (SATLANTIC) | SPECTROPHOTOMETER_NITRATE, SPECTROPHOTOMETER_BISULFIDE | SUNA |  |  
+ISUS | MBARI | Nitrate (MBARI) | SPECTROPHOTOMETER_NITRATE | ISUS |  |  
+ISUS_V3 | SATLANTIC | Nitrate (SATLANTIC) | SPECTROPHOTOMETER_NITRATE | ISUS |  |  
+OPUS_DS | TRIOS | UV absorption to derive nitrate and bisulfide (TRIOS) | SPECTROPHOTOMETER_NITRATE, SPECTROPHOTOMETER_BISULFIDE | OPUS | 17/11/2020 | added by t. carval for h. bittig, pilot stage to be validated by BGC-Argo on https://github.com/nvs-vocabs/ArgoVocabs/issues/1 
+
+//Transmissometers |  |  |  |  |  |  
+C_ROVER | WETLABS | Transmissometer (WETLABS) | TRANSMISSOMETER_CP<nnn> | CROVER |  |  
+
+//pH Sensors |  |  |  |  |  |  
+DURA | MBARI | pH (MBARI) | TRANSISTOR_PH | DURAFET |  |  
+GDF | MBARI | New pH sensor design : similar root components (DURA), same sensor output and processing chain | TRANSISTOR_PH | DURAFET | 07/12/2022 | added by t. carval for t. maurer 
+SEAFET | SBE | pH (SEABIRD) | TRANSISTOR_PH | DURAFET |  | updated from DURAFET on 10/06/2021 
+
+//Radiometers |  |  |  |  |  |  
+OCR504_ICSW | SBE | Multispectral radiometer 4 channels with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR | 23/12/2021 | added by t. carval for c. schmid https://github.com/nvs-vocabs/R27/issues/11 
+OCR504_R10W | SBE | Multispectral radiometer 4 channels with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> | OCR | 27/12/2021 | added by t. carval for c. schmid https://github.com/nvs-vocabs/R27/issues/11 
+OCR507_ICSW | SBE | Multispectral radiometer 7 channels with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR | 27/12/2021 | added by t. carval for c. schmid https://github.com/nvs-vocabs/R27/issues/11 
+OCR507_R10W | SBE | Multispectral radiometer 7 channels with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> | OCR | 27/12/2021 | added by t. carval for c. schmid https://github.com/nvs-vocabs/R27/issues/11 
+OCR507_ICSWR10W | SBE | Multispectral radiometer 7 channels combination of cosine detector to measure irradiance and a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn> , RADIOMETER_PAR, RADIOMETER_UP_RAD<nnn> | OCR | 27/12/2021 | added by t. carval for c. schmid https://github.com/nvs-vocabs/R27/issues/11 
+SATLANTIC_OCR504_ICSW | SATLANTIC | Multispectral radiometer 4 channels (SATLANTIC) with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR |  |  
+SATLANTIC_OCR504_R10W | SATLANTIC | Multispectral radiometer 4 channels (SATLANTIC) with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> |  |  |  
+SATLANTIC_OCR507_ICSW | SATLANTIC | Multispectral radiometer 7 channels (SATLANTIC) with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | OCR |  |  
+SATLANTIC_OCR507_R10W | SATLANTIC | Multispectral radiometer 7 channels (SATLANTIC) with a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_UP_RAD<nnn> |  |  |  
+SATLANTIC_OCR507_ICSWR10W | SATLANTIC | Multispectral radiometer 7 channels (SATLANTIC) combination of cosine detector to measure irradiance and a 10° half-angle field of view to measure radiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn> , RADIOMETER_PAR, RADIOMETER_UP_RAD<nnn> |  |  |  
+SATLANTIC_PAR | SATLANTIC |  | RADIOMETER_PAR |  |  |  
+RAMSES_ACC | TRIOS | Hyperspectral radiometer 256 channels (TRIOS) with cosine detector to measure irradiance in water (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | RADIOMETER_DOWN_IRR<nnn>, RADIOMETER_PAR | RAMSES | 17/11/2020 | added by t. carval for h. bittig, pilot stage to be validated by BGC-Argo on https://github.com/nvs-vocabs/ArgoVocabs/issues/1 
+
+//Backscatteringmeters and Fluorometers combination |  |  |  |  |  |  
+ECO_BB | WETLABS | Wetlabs Eco optical sensor packages with one backscattering meter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FL | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) | FLUOROMETER_CHLA | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_NTU | WETLABS | Wetlabs Eco optical sensor packages with one backscattering meter measuring turbidity | BACKSCATTERINGMETER_TURBIDITY | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FLBB | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) and one backscattering meter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA, BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FLBB_AP2 | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) and one backscattering meter (wavelength specified in SENSOR) mounted on an Apex float | FLUOROMETER_CHLA, BACKSCATTERINGMETER_BBP<nnn> | ECO |  |  
+ECO_FLBBFL_AP2 | WETLABS | A three-channel optical sensor fitted with two single-wavelength chlorophyll fluorometers and a single-angle scattering meter, depth-rated to 2000 m and designed for float applications. The two fluorometers are configured to detect chlorophyll-a fluorescence at 470 nm (excitation) / 695 nm (emission) wavelengths and chlorophyll-a fluorescence at 435 nm (excitation) / 695 nm (emission) wavelengths respectively, whereas the scattering meter (in-water centroid angle of 124 deg) is configured to measure backscattering at 700 nm wavelength. The instrument is part of the Environmental Characterization Optics (ECO) series tools, manufactured by Sea-Bird Scientific. The sensor is fitted on an APEX float.| FLUOROMETER_CHLA,FLUOROMETER_CHLA435, BACKSCATTERINGMETER_BBP<nnn> | ECO | 2023-10-03 | added by added by TC and validated by BGC-Argo
+ECO_FLBB_2K | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) and one backscattering meter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) certified for applications down to 2000m | FLUOROMETER_CHLA, BACKSCATTERINGMETER_BBP<nnn> | ECO |  |  
+ECO_FLBBCD_AP2 | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR), one CDOM fluorescence channel, and one backscattering meter (wavelength specified in SENSOR) mounted on an Apex float | FLUOROMETER_CHLA,FLUOROMETER_CDOM, BACKSCATTERINGMETER_BBP<nnn> | ECO | 30/01/2019 | added by MB. validated by BioGCArgo 
+ECO_FLNTU | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) and one backscattering meter measuring turbidity | FLUOROMETER_CHLA, BACKSCATTERINGMETER_TURBIDITY | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_BB2 | WETLABS | Wetlabs Eco optical sensor packages with two backscatteringmeters (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FLBBCD | WETLABS | Wetlabs Eco optical sensor packages with two fluorometers (type specified in SENSOR) and one backscatteringmeter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA,FLUOROMETER_CDOM, BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FLBB2 | WETLABS | Wetlabs Eco optical sensor packages with one fluorometer (type specified in SENSOR) and two backscatteringmeters (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA,BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+ECO_FLBBFL | SBE | A three-channel optical sensor fitted with two single-wavelength chlorophyll fluorometers and a single-angle scattering meter, depth-rated to 2000 m and designed for float applications. The two fluorometers are configured to detect chlorophyll-a fluorescence at 470 nm (excitation) / 695 nm (emission) wavelengths and chlorophyll-a fluorescence at 435 nm (excitation) / 695 nm (emission) wavelengths respectively, whereas the scattering meter (in-water centroid angle of 124 deg) is configured to measure backscattering at 700 nm wavelength. The instrument is part of the Environmental Characterization Optics (ECO) series tools, manufactured by Sea-Bird Scientific. | FLUOROMETER_CHLA,FLUOROMETER_CHLA435, BACKSCATTERINGMETER_BBP<nnn> | ECO | 2022-11-21 | added by added by TC and validated by BGC-Argo
+ECO_BB3 | WETLABS | Wetlabs Eco optical sensor packages with 3 backscatteringmeters (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | BACKSCATTERINGMETER_BBP<nnn> | ECO | 11/5/2016 | added by MB. validated by BioGCArgo 
+MCOMS_FLBBCD | WETLABS | Wetlabs MCOMS optical sensor packages with two fluorometers CHLA, CDOM and one backscatteringmeter (at wavelength <nnn> specified in Table 3 BGC-Argo parameters list) | FLUOROMETER_CHLA,FLUOROMETER_CDOM,BACKSCATTERINGMETER_BBP<nnn> | MCOMS |  |  
+MCOMS_FLBB2 | WETLABS | Wetlabs MCOMS optical sensor packages with one fluorometer CHLA and two backscatteringmeters (wavelengths specified in SENSOR) | FLUOROMETER_CHLA, BACKSCATTERINGMETER_BBP<nnn> | MCOMS |  |  
+CYCLOPS_7_FLUOROMETER | TURNER_DESIGN | Turner designs Optical sensor | FLUOROMETER_CHLA, BACKSCATTERINGMETER_TURBIDITY | CYC | 11/5/2016 | added by MB. validated by BioGCArgo 
+SEAPOINT_TURBIDITY_METER | SEAPOINT | Seapoint turbidity meter | BACKSCATTERINGMETER_TURBIDITY | STM | 11/5/2016 | added by MB. validated by BioGCArgo 
+
+//Other sensors |  |  |  |  |  |  
+RAFOS |  | Receiver mounted on some floats for geopositioning under ice using RAFOS sound sources in the array in the Weddell Sea (Location derivation is done in Delayed Mode for under ice floats equipped with RAFOS receivers). | ACOUSTIC_GEOLOCATION | RAFOS |  |  
+PAL_UW | APL_UW | UW Passive acoustic listener | ACOUSTIC | PAL |  |  
+EM |  | Electromagnetic sensor package to measure velocity | EM | EM |  |  
+FLOATCLOCK |  |  | FLOATCLOCK_MTIME |  |  |  
+

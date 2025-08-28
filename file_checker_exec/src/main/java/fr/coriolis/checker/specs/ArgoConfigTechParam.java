@@ -1,9 +1,11 @@
 package fr.coriolis.checker.specs;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -177,13 +179,12 @@ public class ArgoConfigTechParam {
 	 * @throws IOException File I/O errors
 	 */
 
-	public ArgoConfigTechParam(String specDir, String version, boolean initConfig, boolean initTech)
-			throws IOException {
+	public ArgoConfigTechParam(String version, boolean initConfig, boolean initTech) throws IOException {
 		log.debug("...ArgoConfigTechParam: start...");
 
 		this.version = version.trim();
 
-		String prefix = specDir.trim() + "/argo-";
+		String prefix = "argo-";
 		coreCfgParmFileName = prefix + "core_config_names-spec-v" + this.version;
 		bioCfgParmFileName = prefix + "bio_config_names-spec-v" + this.version;
 		tecParmFileName = prefix + "tech_names-spec-v" + this.version;
@@ -559,73 +560,70 @@ public class ArgoConfigTechParam {
 			String fileName = fileNames[nFile];
 
 			log.debug("parsing '{}'", fileName);
-
 			// .......parse the config param name file.......
 			// ..open the file
-			File f = new File(fileName);
-			if (!f.isFile()) {
+			try (InputStream in = SpecIO.getInstance().open(fileName);
+					BufferedReader fileReader = new BufferedReader(
+							new InputStreamReader(in, StandardCharsets.UTF_8));) {
+				// ..create list variables
+				// ..open file
+				if (nFile == 0) {
+					configParamList = new LinkedHashSet<String>(250);
+					configParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
 
+					paramList = configParamList;
+					paramRegex = configParamRegex;
+
+				} else if (nFile == 2) {
+					// ..do this only for the first deprecated file
+					configParamList_DEP = new LinkedHashSet<String>(25);
+					configParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
+
+					paramList = configParamList_DEP;
+					paramRegex = configParamRegex_DEP;
+				}
+
+				// .....read through the files....
+
+				// ..pattern to recognize/replace templates
+				Pattern pTemplate = Pattern.compile("<([^>]+?)>");
+				log.debug("template regex: '{}'", pTemplate);
+
+				String line;
+				while ((line = fileReader.readLine()) != null) {
+					if (pBlankOrComment.matcher(line).matches()) {
+						log.debug("blank/comment: '{}'", line);
+						continue;
+					}
+
+					// ..break the line into individual entries
+					String column[] = line.split("\\|");
+					for (int n = 0; n < column.length; n++) {
+						String s = column[n].trim();
+						column[n] = s;
+					}
+
+					parseConfigParamName(paramList, paramRegex, nFile, fileName, pTemplate, column);
+				} // ..end while (line)
+
+				fileReader.close();
+
+			} catch (FileNotFoundException e) {
 				if (nFile <= 1) {
 					// ..both primary files MUST exist
 					log.error("Config-Param-file '{}' does not exist", fileName);
-					throw new IOException("Config-Parm-File '" + fileName + "' does not exist");
+					throw e;
 				} else {
 					// ..deprecated file MAY NOT exist
 					log.debug("Deprecated-Config-Param-file '{}' does not exist (optional)", fileName);
 					continue;
 				}
 
-			} else if (!f.canRead()) {
-				// ..file exists but cannot be read --> error
-				log.error("Config-Param-File '{}' cannot be read", fileName);
-				throw new IOException("Config-Parm-File '" + fileName + "' cannot be read");
+			} catch (IOException e) {
+				log.error("File '" + fileName + "' cannot be read");
+				throw e;
 			}
 
-			// ..create list variables
-			// ..open file
-
-			if (nFile == 0) {
-				configParamList = new LinkedHashSet<String>(250);
-				configParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
-
-				paramList = configParamList;
-				paramRegex = configParamRegex;
-
-			} else if (nFile == 2) {
-				// ..do this only for the first deprecated file
-				configParamList_DEP = new LinkedHashSet<String>(25);
-				configParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
-
-				paramList = configParamList_DEP;
-				paramRegex = configParamRegex_DEP;
-			}
-
-			BufferedReader file = new BufferedReader(new FileReader(fileName));
-
-			// .....read through the files....
-
-			// ..pattern to recognize/replace templates
-			Pattern pTemplate = Pattern.compile("<([^>]+?)>");
-			log.debug("template regex: '{}'", pTemplate);
-
-			String line;
-			while ((line = file.readLine()) != null) {
-				if (pBlankOrComment.matcher(line).matches()) {
-					log.debug("blank/comment: '{}'", line);
-					continue;
-				}
-
-				// ..break the line into individual entries
-				String column[] = line.split("\\|");
-				for (int n = 0; n < column.length; n++) {
-					String s = column[n].trim();
-					column[n] = s;
-				}
-
-				parseConfigParamName(paramList, paramRegex, nFile, fileName, pTemplate, column);
-			} // ..end while (line)
-
-			file.close();
 		} // ..end for (fileNames)
 
 		log.debug("configParamList: {}", configParamList);
@@ -736,11 +734,6 @@ public class ArgoConfigTechParam {
 	public void parseTechParamFile() throws IOException {
 		log.debug(".....parseTechParamFile: start.....");
 
-		String[] fileNames = { tecParmFileName, tecParmFileName + ".deprecated" };
-//		LinkedHashSet<String> paramList;
-//		LinkedHashSet<String> paramCodeList;
-//		LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex;
-
 		techParamList = new LinkedHashSet<String>(250);
 		techParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
 		techParamCodeList = new LinkedHashSet<String>(250);
@@ -760,85 +753,6 @@ public class ArgoConfigTechParam {
 						pTemplate, techParamEntry.getPrefLabel());
 			}
 		}
-
-// ....loop over the active and deprecated files.....
-//		for (int nFile = 0; nFile < fileNames.length; nFile++) {
-//			String fileName = fileNames[nFile];
-//
-//			log.debug("parsing '{}'", fileName);
-//
-//			// .......parse the tech param name file.......
-//			// ..open the file
-//			// TO DO : TRY CATCH exception handling with closing file in finally
-//			File f = new File(fileName);
-//			if (!f.isFile()) {
-//
-//				if (nFile == 0) {
-//					// ..primary file MUST exist
-//					log.error("Tech-Param-file '{}' does not exist", fileName);
-//					throw new IOException("Tech-Parm-File '" + fileName + "' does not exist");
-//				} else {
-//					// ..deprecated file MAY NOT exist
-//					log.debug("Deprecated-Tech-Param-file '{}' does not exist (optional)", fileName);
-//					continue;
-//				}
-//
-//			} else if (!f.canRead()) {
-//				// ..file exists but cannot be read --> error
-//				log.error("Tech-Param-File '{}' cannot be read", fileName);
-//				throw new IOException("Tech-Parm-File '" + fileName + "' cannot be read");
-//			}
-//
-//			// ..create list variables
-//			// ..open file
-//
-//			if (nFile == 0) {
-//				techParamList = new LinkedHashSet<String>(250);
-//				techParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
-//				techParamCodeList = new LinkedHashSet<String>(250);
-//
-//				paramList = techParamList;
-//				paramCodeList = techParamCodeList;
-//				paramRegex = techParamRegex;
-//
-//			} else {
-//				techParamList_DEP = new LinkedHashSet<String>(25);
-//				techParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
-//				techParamCodeList_DEP = new LinkedHashSet<String>(25);
-//
-//				paramList = techParamList_DEP;
-//				paramCodeList = techParamCodeList_DEP;
-//				paramRegex = techParamRegex_DEP;
-//			}
-//
-//			BufferedReader file = new BufferedReader(new FileReader(fileName));
-//
-//			// .....read through the file....
-//
-//			// ..pattern to recognize/replace templates
-//			Pattern pTemplate = Pattern.compile("<([^>]+?)>");
-//			log.debug("template regex: '{}'", pTemplate);
-//
-//			String line;
-//			while ((line = file.readLine()) != null) {
-//				if (pBlankOrComment.matcher(line).matches()) {
-//					log.debug("blank/comment: '{}'", line);
-//					continue;
-//				}
-//
-//				// ..break the line into individual entries
-//				String column[] = line.split("\\|");
-//				for (int n = 0; n < column.length; n++) {
-//					String s = column[n].trim();
-//					column[n] = s;
-//				}
-//
-//				parseTechParamName(paramList, paramCodeList, paramRegex, fileName, pTemplate, column[0]);
-//
-//			} // ..end while (line)
-//
-//			file.close();
-//		} // ..end for (fileNames)
 
 		log.debug(".....parseTechParamFile: end.....");
 	} // ..end parseTechParamFile
@@ -1068,70 +982,71 @@ public class ArgoConfigTechParam {
 
 			// .......parse the param unit file.......
 			// ..open the file
-			File f = new File(fileName);
-			if (!f.isFile()) {
 
+			try (InputStream in = SpecIO.getInstance().open(fileName);
+					BufferedReader fileReader = new BufferedReader(
+							new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+				// ..create list variables
+				// ..open file
+
+				if (n == 0) {
+					unitList = new LinkedHashMap<String, ConfigTechValueType>(100);
+					list = unitList;
+
+				} else {
+					unitList_DEP = new LinkedHashMap<String, ConfigTechValueType>(25);
+					list = unitList_DEP;
+				}
+
+				// .....read through the file....
+				log.debug("parsing config/tech unit file '" + fileName + "'");
+
+				String line;
+				while ((line = fileReader.readLine()) != null) {
+					if (pBlankOrComment.matcher(line).matches()) {
+						log.debug("blank/comment: '{}'", line);
+						continue;
+					}
+
+					// .....split the line: col 1 = unit name; col 2 = data type.....
+					String st[] = line.split("\\|");
+
+					if (st[0].length() > 0) {
+						String unit_name = st[0].trim();
+
+						ConfigTechValueType dt;
+
+						if (st.length > 1) {
+							dt = ConfigTechValueType.getType(st[1].trim());
+						} else {
+							dt = ConfigTechValueType.UNKNOWN;
+						}
+
+						log.debug("add unit: '{}' / '{}'", unit_name, dt);
+
+						list.put(st[0].trim(), dt);
+					}
+				}
+
+				fileReader.close();
+
+			} catch (FileNotFoundException e) {
 				if (n == 0) {
 					// ..primary file MUST exist
 					log.error("Config-Tech-Unit-file '{}' does not exist", fileName);
-					throw new IOException("Config-Tech-Unit-File '" + fileName + "' does not exist");
+					throw e;
 				} else {
 					// ..deprecated file MAY NOT exist
 					log.debug("Deprecated-Config-Tech-Unit-file '{}' does not exist (optional)", fileName);
 					continue;
 				}
 
-			} else if (!f.canRead()) {
-				// ..file exists but cannot be read --> error
+			} catch (IOException e) {
 				log.error("Config-Tech-Unit-File '{}' cannot be read", fileName);
-				throw new IOException("Config-Tech-Unit-File '" + fileName + "' cannot be read");
+				throw e;
 			}
 
-			// ..create list variables
-			// ..open file
-
-			if (n == 0) {
-				unitList = new LinkedHashMap<String, ConfigTechValueType>(100);
-				list = unitList;
-
-			} else {
-				unitList_DEP = new LinkedHashMap<String, ConfigTechValueType>(25);
-				list = unitList_DEP;
-			}
-
-			BufferedReader file = new BufferedReader(new FileReader(fileName));
-
-			// .....read through the file....
-			log.debug("parsing config/tech unit file '" + fileName + "'");
-
-			String line;
-			while ((line = file.readLine()) != null) {
-				if (pBlankOrComment.matcher(line).matches()) {
-					log.debug("blank/comment: '{}'", line);
-					continue;
-				}
-
-				// .....split the line: col 1 = unit name; col 2 = data type.....
-				String st[] = line.split("\\|");
-
-				if (st[0].length() > 0) {
-					String unit_name = st[0].trim();
-
-					ConfigTechValueType dt;
-
-					if (st.length > 1) {
-						dt = ConfigTechValueType.getType(st[1].trim());
-					} else {
-						dt = ConfigTechValueType.UNKNOWN;
-					}
-
-					log.debug("add unit: '{}' / '{}'", unit_name, dt);
-
-					list.put(st[0].trim(), dt);
-				}
-			}
-
-			file.close();
 		}
 
 	} // ..end parseUnitFile

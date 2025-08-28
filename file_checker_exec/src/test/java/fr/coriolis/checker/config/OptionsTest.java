@@ -123,7 +123,7 @@ class OptionsTest {
 		String notValidDir = "unexistent dir";
 
 		// ACT & ASSERT
-		assertThatThrownBy(() -> Options.checkDirectory(notValidDir)).isInstanceOf(IllegalArgumentException.class)
+		assertThatThrownBy(() -> Options.checkDirectory(notValidDir, false)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("is not a directory");
 
 	}

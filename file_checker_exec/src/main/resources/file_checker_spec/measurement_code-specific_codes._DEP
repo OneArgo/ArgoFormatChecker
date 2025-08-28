@@ -1,0 +1,27 @@
+// $Revision: 1181 $
+// $Date: 2020-10-23 16:48:02 +0000 (Fri, 23 Oct 2020) $
+
+101 | DM Traj file only | This MC is used in the DM Traj file when new cycles have been recovered during DM operations ( the TECH file, where surface pressure measurements usually belong, is not updated during TRAJ DM). |
+110 | | Any in-water samples taken as part of a surface sequence. (e.g. O2 samples taken prior to air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+111 | | Any in-air samples taken as part of a surface sequence. (e.g. O2 samples taken after in air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+203 | | Deepest bin reached during descending profile |
+275 | RAFOS | RAFOS positions and times determined during drift | All float types with RAFOS capabilities | RAFOS
+301 | | Representative Park <PARAM> found either from measurements taken during drift or from metafile information |
+501 | | Down-time end time: end date of the down-time parameter reported by APEX floats | APEX
+502 | | Ascent start time directly transmitted by APEX floats | APEX
+503 | | Deepest bin reached during ascending profile |
+602 | AET | Time of MC=701 minus 10 minutes |
+610 | | Any in-water samples taken as part of a surface sequence. (e.g. O2 samples taken prior to air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+611 | | Any in-air samples taken as part of a surface sequence. (e.g. O2 samples taken after in air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+701 | | Transmission start time directly transmitted by APEX float | APEX
+702 | FMT | Earliest time of all messages received by telecommunications system . may or may not have a location fix.  Time (JULD_FIRST_MESSAGE) | All Argos floats. Iridium floats that send timing of messages. This includes SBD Iridium floats
+703 | | Surface times and locations (if available) during surface drift. Should be listed in chronological order. | All floats
+704 | LMT | Latest time of all messages received by telecommunications system . may or may not have a location fix.  Time (JULD_LAST_MESSAGE) | All Argos floats. Iridium floats that send timing of messages. This includes SBD Iridium floats.
+710 | | Any in-water samples taken as part of a surface sequence. (e.g. O2 samples taken prior to air-bladder inflation or max buoyancy as part of in-air measurement sequence) | 
+711 | | Any in-air samples taken as part of a surface sequence. (e.g. O2 samples taken after in air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+810 | | Any in-water samples taken as part of a surface sequence. (e.g. O2 samples taken prior to air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+811 | | Any in-air samples taken as part of a surface sequence. (e.g. O2 samples taken after in air-bladder inflation or max buoyancy as part of in-air measurement sequence) |
+901 | | Grounded flag. Configuration phase |
+902 | | Last time before float recovery. For floats that have been recovered, it is important to know when this occurred. This time in the JULD array will be the last time before the float was recovered. Determined by inspection of data | 
+903 | | Pressure offset used to correct APEX pressure measurements | APEX
+

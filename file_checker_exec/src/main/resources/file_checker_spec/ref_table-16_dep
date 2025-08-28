@@ -1,0 +1,12 @@
+Primary sampling: averaged<*>
+Primary sampling: discrete<*>
+Primary sampling: mixed<*>
+Secondary sampling: averaged<*>
+Secondary sampling: discrete<*>
+Secondary sampling: mixed<*>
+Near-surface sampling: averaged<*>
+Near-surface sampling: discrete<*>
+Near-surface sampling: mixed<*>
+Bounce sampling: averaged<*>
+Bounce sampling: discrete<*>
+Bounce sampling: mixed<*>

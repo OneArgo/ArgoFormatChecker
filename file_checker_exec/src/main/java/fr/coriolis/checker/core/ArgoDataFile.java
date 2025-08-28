@@ -559,7 +559,7 @@ public class ArgoDataFile {
 
 		// ..create the specification
 		try {
-			arFile.spec = openSpecification(fullSpec, specDir, arFile.fileType, arFile.format_version);
+			arFile.spec = openSpecification(fullSpec, arFile.fileType, arFile.format_version);
 		} catch (IOException e) {
 			if (e.getMessage().matches("cdlFileName.*does not exist")) {
 				ValidationResult.lastMessage = "File type / version not valid in the FileChecker: " + arFile.fileType
@@ -607,17 +607,16 @@ public class ArgoDataFile {
 	 *         False if the specification could not be opened
 	 * @throws IOException If an I/O error occurs
 	 */
-	public static ArgoFileSpecification openSpecification(boolean fullSpec, String specDir, FileType ft, String version)
+	public static ArgoFileSpecification openSpecification(boolean fullSpec, FileType ft, String version)
 			throws IOException {
 		log.debug("fullSpec = {}", fullSpec);
-		log.debug("specDir = '{}'", specDir);
 		log.debug("file type = {}", ft.specType);
 		log.debug("version = '{}'", version);
 
 		// ..could handle specialized "specs" by replacing "pure" with something else
 		// .. for example, when we were doing "merged" files, it was set to "merge"
 
-		String specType = specDir + ";" + ft.specType + ";" + version.trim() + ";" + "pure";
+		String specType = ft.specType + ";" + version.trim() + ";" + "pure";
 
 		// ..full-specs are cached (so they can be reused)
 		// ..full-spec will work as a template spec too
@@ -642,7 +641,7 @@ public class ArgoDataFile {
 		// ..build a specification for this file
 		ArgoFileSpecification s = null;
 		try {
-			s = new ArgoFileSpecification(fullSpec, specDir, ft, version);
+			s = new ArgoFileSpecification(fullSpec, ft, version);
 
 		} catch (IOException e) {
 			ValidationResult.lastMessage = "Failed in ArgoFileSpecification";

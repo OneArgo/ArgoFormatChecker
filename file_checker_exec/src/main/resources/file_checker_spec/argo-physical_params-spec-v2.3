@@ -1,0 +1,27 @@
+// $Revision: 878 $
+// $Date: 2018-04-04 13:55:45 +0000 (Wed, 04 Apr 2018) $
+
+// Special codes:
+//    "<->" attribute cannot exist; "<*>" attribute optional, value ignored; <+> attribute must exist, value is ignored
+
+//Col 0 |       1        |                2             |     3     |         4        |           5          |   6  |     7     |     8     |          9            |        10         |           11      |     12      |     13      |   14    |     15      |   16   |    17     |    18     |
+//Order | parameter name | Parameter name short version | long_name | cf_standard_name | cf_standard_name_uri | unit | valid_min | valid_max | core/bio/intermediate | sdn_parameter_urn | sdn_parameter_uri | sdn_uom_urn | sdn_uom_uri | comment | update date | status | Fillvalue | Data Type |
+
+ | CNDC | CNDC | ELECTRICAL CONDUCTIVITY | sea_water_electrical_conductivity | | mhos/m | 0.f | 8.5f | c | | | | | | | | 99999. | float |
+ | PRES | PRES | SEA PRESSURE | <*> | | decibar | 0.f | 12000.f | c | | | | | | | | 99999. | float |
+ | PRES_DOXY | PRES_DOXY | Sea water pressure at the depth of oxygen sampling | | | decibar | 0.f | 12000.f | c | | | | | | | | 99999. | float | 
+ | PSAL | PSAL | PRACTICAL SALINITY | <*> | | psu | 0.f | 42.f | c | | | | | | | | 99999. | float |  
+ | TEMP | TEMP | SEA TEMPERATURE IN SITU ITS-90 SCALE | <*> | | degree_Celsius | -2.f | 40.f | c | | | | | | | | 99999. | float |
+ | DOXY | DOXY | DISSOLVED OXYGEN | moles_of_oxygen_per_unit_mass_in_sea_water | | micromole/kg | 0.f | 650.f | c | | | | | | | | 99999. | float |
+ | BPHASE_DOXY | BPHASE_DOXY | Uncalibrated phase shift reported by oxygen sensor | <*> | | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+ | COUNT_DOXY | COUNT_DOXY | COUNT_DOXY | <*> | | <*> | 0.f | 100.f | c | | | | | | | | 99999. | float |
+ | C1PHASE_DOXY | C1PHASE_DOXY | Uncalibrated phase shift reported by oxygen sensor | | <*> | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+ | C2PHASE_DOXY | C1PHASE_DOXY | Uncalibrated phase shift reported by oxygen sensor | | <*> | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+ | DPHASE_DOXY | DPHASE_DOXY | DPHASE_DOXY | <*> | | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+ | FREQUENCY_DOXY | FREQUENCY_DOXY | FREQUENCY_DOXY | <*> | | hertz | 0.f | 25000.f | c | | | | | | | | 99999. | float |
+ | MOLAR_DOXY | MOLAR_DOXY | MOLAR_DOXY | mole_concentration_of_dissolved_molecular_oxygen_in_sea_water | | micromole/litre | 0.f | 650.f | c | | | | | | | | 99999. | float |
+ | MLPL_DOXY | MLPL_DOXY | Oxygen concentration reported by the oxygen sensor | <*> | | ml/l | 0.f | 650.f | c | | | | | | | | 99999. | float |
+ | PHASE_DOXY | PHASE_DOXY | Phase shift reported by oxygen sensor | <*> | | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+ | TEMP_DOXY  | TEMP_DOXY  | SEA TEMPERATURE FROM DOXY SENSOR (ITS-90 SCALE) | temperature_of_sensor_for_oxygen_in_sea_water | | degree_Celsius | -2.f | 40.f | c | | | | | | | | 99999. | float |
+ | TPHASE_DOXY | TPHASE_DOXY | Uncalibrated phase shift reported by oxygen sensor | <*> | | degree | 10.f | 70.f | c | | | | | | | | 99999. | float |
+ | VOLTAGE_DOXY  | VOLTAGE_DOXY  | VOLTAGE_DOXY | <*> | | volt | 0.f | 100.f | c | | | | | | | | 99999. | float |
