@@ -148,6 +148,7 @@
 			<resource>
 		      <directory>src/main/resources/file_checker_spec</directory>
 		      <filtering>false</filtering>
+		      <targetPath>file_checker_spec</targetPath>
     		</resource>
 			
 		</resources>
