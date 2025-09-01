@@ -2032,7 +2032,7 @@ public class ArgoFileSpecification {
 				String prm = st[1].trim(); // ..parameter name // NVS altLabel
 				String prmLName = st[3].trim(); // ..long_name // NVS prefLabel
 				String prmSName = st[4].trim(); // ..(cf_)standard_name // needed in NVS
-				String prmUnits = st[6].trim(); // ..units // NVS relatede P06 ?
+				String prmUnits = st[6].trim(); // ..units // needed in NVS
 				String prmVmin = st[7].trim(); // ..value min // needed in NVS
 				String prmVmax = st[8].trim(); // ..value max // needed in NVS
 				String prmCategory = st[9].trim(); // .."c", "b", "ic", "ib" // needed in NVS
@@ -2070,7 +2070,7 @@ public class ArgoFileSpecification {
 						prmVmax = ATTR_NOT_ALLOWED;
 					}
 					if (prmLName.length() == 0 || prmLName.equals("-")) {
-						prmVmax = ATTR_IGNORE;
+						prmLName = ATTR_IGNORE;
 					}
 				}
 

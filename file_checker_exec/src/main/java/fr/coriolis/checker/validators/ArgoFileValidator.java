@@ -171,139 +171,6 @@ public class ArgoFileValidator {
 		return true;
 	} // ..end validateFormat
 
-	/**
-	 * Before checking data, verify if the file had not failed the format
-	 * validations and if a valid dac name hase been passed in command line. Nulls
-	 * in the "char" variables are also checked.
-	 *
-	 * @param dacName name of the DAC for this file
-	 * @param ckNulls true = check all strings for NULL values; false = skip
-	 * @return success indicator. true - validation was performed. false -
-	 *         validation could not be performed (getMessage() will return the
-	 *         reason).
-	 * @throws IOException If an I/O error occurs
-	 */
-	public boolean basicDataValidation(boolean ckNulls) throws IOException {
-		// before checking data, verify if the file had not failed the format validation
-		// :
-		if (!validationResult.isValid()) {
-			ValidationResult.lastMessage = new String(
-					"File must be verified (verifyFormat) " + "successfully before validation");
-			return false;
-		}
-
-		// check dacName passed in argument line:
-		if (!checkDacNameArgument()) {
-			ValidationResult.lastMessage = new String("Unknown DAC name = '" + arFile.getDacName() + "'");
-			return false;
-		}
-
-		if (ckNulls) {
-			validateStringNulls();
-		}
-
-		return true;
-	}
-
-	protected void validateCreationUpdateDates(Date fileTime) {
-		long fileSec = fileTime.getTime();
-
-		String creation = arFile.readString("DATE_CREATION").trim();
-		String update = arFile.readString("DATE_UPDATE").trim();
-		arFile.setCreationDate(creation);
-		arFile.setUpdateDate(update);
-
-		log.debug("DATE_CREATION:    '{}'", creation);
-		log.debug("DATE_UPDATE:      '{}'", update);
-
-		// ...........creation date checks:.............
-		// ..set, after earliestDate, and before file time
-		Date dateCreation = null;
-		boolean haveCreation = false;
-		long creationSec = 0;
-
-		if (creation.trim().length() <= 0) {
-			validationResult.addError("DATE_CREATION: Not set");
-
-		} else {
-			dateCreation = ArgoDate.get(creation);
-			haveCreation = true;
-
-			if (dateCreation == null) {
-				haveCreation = false;
-				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
-
-			} else {
-				creationSec = dateCreation.getTime();
-
-				if (dateCreation.before(earliestDate)) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': Before earliest allowed date ('"
-							+ ArgoDate.format(earliestDate) + "')");
-
-				} else if ((arFile.getCreationSec() - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
-		arFile.setHaveCreationDate(haveCreation);
-		arFile.setCreationSec(creationSec);
-		// ............update date checks:...........
-		// ..set, not before creation time, before file time
-		Date dateUpdate = null;
-		boolean haveUpdate = false;
-		long updateSec = 0;
-
-		if (update.trim().length() <= 0) {
-			validationResult.addError("DATE_UPDATE: Not set");
-		} else {
-			dateUpdate = ArgoDate.get(update);
-			haveUpdate = true;
-
-			if (dateUpdate == null) {
-				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
-				haveUpdate = false;
-
-			} else {
-				updateSec = dateUpdate.getTime();
-
-				if (arFile.isHaveCreationDate() && dateUpdate.before(dateCreation)) {
-					validationResult
-							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
-				}
-
-				if ((updateSec - fileSec) > oneDaySec) {
-					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
-							+ ArgoDate.format(fileTime) + "')");
-				}
-			}
-		}
-		arFile.setHaveUpdateDate(haveUpdate);
-		arFile.setUpdateSec(updateSec);
-	}
-
-	protected boolean validatePlatfomNumber(String platformNumberStr) {
-		log.debug("{}: '{}'", "PLATFORM_NUMBER", platformNumberStr);
-
-		return platformNumberStr.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}");
-	}
-
-	protected void validateDataCentre(ArgoReferenceTable.DACS dac) {
-		String name = "DATA_CENTRE"; // ..ref table 4 (and valid for DAC)
-		String str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (dac != null) {
-			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
-				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid for DAC " + dac);
-			}
-
-		} else { // ..incoming DAC not set
-			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
-				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid (for all DACs)");
-			}
-		}
-	}
-
 	private void verifyGlobalAttributes(String dacName) {
 		for (String name : arFile.getFileSpec().getGlobalAttributeNames()) {
 			ArgoAttribute specAttr = arFile.getFileSpec().getGlobalAttribute(name);
@@ -1013,6 +880,142 @@ public class ArgoFileValidator {
 			}
 		}
 		return true;
+	}
+
+	// =========================
+	// DATA validation
+	// =========================
+	/**
+	 * Before checking data, verify if the file had not failed the format
+	 * validations and if a valid dac name hase been passed in command line. Nulls
+	 * in the "char" variables are also checked.
+	 *
+	 * @param dacName name of the DAC for this file
+	 * @param ckNulls true = check all strings for NULL values; false = skip
+	 * @return success indicator. true - validation was performed. false -
+	 *         validation could not be performed (getMessage() will return the
+	 *         reason).
+	 * @throws IOException If an I/O error occurs
+	 */
+	public boolean basicDataValidation(boolean ckNulls) throws IOException {
+		// before checking data, verify if the file had not failed the format validation
+		// :
+		if (!validationResult.isValid()) {
+			ValidationResult.lastMessage = new String(
+					"File must be verified (verifyFormat) " + "successfully before validation");
+			return false;
+		}
+
+		// check dacName passed in argument line:
+		if (!checkDacNameArgument()) {
+			ValidationResult.lastMessage = new String("Unknown DAC name = '" + arFile.getDacName() + "'");
+			return false;
+		}
+
+		if (ckNulls) {
+			validateStringNulls();
+		}
+
+		return true;
+	}
+
+	protected void validateCreationUpdateDates(Date fileTime) {
+		long fileSec = fileTime.getTime();
+
+		String creation = arFile.readString("DATE_CREATION").trim();
+		String update = arFile.readString("DATE_UPDATE").trim();
+		arFile.setCreationDate(creation);
+		arFile.setUpdateDate(update);
+
+		log.debug("DATE_CREATION:    '{}'", creation);
+		log.debug("DATE_UPDATE:      '{}'", update);
+
+		// ...........creation date checks:.............
+		// ..set, after earliestDate, and before file time
+		Date dateCreation = null;
+		boolean haveCreation = false;
+		long creationSec = 0;
+
+		if (creation.trim().length() <= 0) {
+			validationResult.addError("DATE_CREATION: Not set");
+
+		} else {
+			dateCreation = ArgoDate.get(creation);
+			haveCreation = true;
+
+			if (dateCreation == null) {
+				haveCreation = false;
+				validationResult.addError("DATE_CREATION: '" + creation + "': Invalid date");
+
+			} else {
+				creationSec = dateCreation.getTime();
+
+				if (dateCreation.before(earliestDate)) {
+					validationResult.addError("DATE_CREATION: '" + creation + "': Before earliest allowed date ('"
+							+ ArgoDate.format(earliestDate) + "')");
+
+				} else if ((arFile.getCreationSec() - fileSec) > oneDaySec) {
+					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
+							+ ArgoDate.format(fileTime) + "')");
+				}
+			}
+		}
+		arFile.setHaveCreationDate(haveCreation);
+		arFile.setCreationSec(creationSec);
+		// ............update date checks:...........
+		// ..set, not before creation time, before file time
+		Date dateUpdate = null;
+		boolean haveUpdate = false;
+		long updateSec = 0;
+
+		if (update.trim().length() <= 0) {
+			validationResult.addError("DATE_UPDATE: Not set");
+		} else {
+			dateUpdate = ArgoDate.get(update);
+			haveUpdate = true;
+
+			if (dateUpdate == null) {
+				validationResult.addError("DATE_UPDATE: '" + update + "': Invalid date");
+				haveUpdate = false;
+
+			} else {
+				updateSec = dateUpdate.getTime();
+
+				if (arFile.isHaveCreationDate() && dateUpdate.before(dateCreation)) {
+					validationResult
+							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
+				}
+
+				if ((updateSec - fileSec) > oneDaySec) {
+					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
+							+ ArgoDate.format(fileTime) + "')");
+				}
+			}
+		}
+		arFile.setHaveUpdateDate(haveUpdate);
+		arFile.setUpdateSec(updateSec);
+	}
+
+	protected boolean validatePlatfomNumber(String platformNumberStr) {
+		log.debug("{}: '{}'", "PLATFORM_NUMBER", platformNumberStr);
+
+		return platformNumberStr.matches("[1-9][0-9]{4}|[1-9]9[0-9]{5}");
+	}
+
+	protected void validateDataCentre(ArgoReferenceTable.DACS dac) {
+		String name = "DATA_CENTRE"; // ..ref table 4 (and valid for DAC)
+		String str = arFile.readString(name).trim();
+		log.debug("{}: '{}'", name, str);
+		if (dac != null) {
+			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
+				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid for DAC " + dac);
+			}
+
+		} else { // ..incoming DAC not set
+			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
+				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid (for all DACs)");
+			}
+		}
 	}
 
 	// .........................................................

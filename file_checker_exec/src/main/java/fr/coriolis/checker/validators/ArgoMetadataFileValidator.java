@@ -977,7 +977,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
-			// ..cross-reference SENSOR_MODEL / SENSOR_MAKER
+			// ..cross-reference SENSOR_MODEL R27 / SENSOR_MAKER R26
 			if (smkrValid && mdlValid) {
 				if (!snsrModel.equals("UNKNOWN")) {
 
@@ -993,10 +993,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				}
 			}
 
-			// ..cross-reference SENSOR_MODEL / SENSOR
+			// ..cross-reference SENSOR_MODEL R27 / SENSOR R25
 			if (snsrValid && mdlValid) {
 				if (!snsrModel.equals("UNKNOWN")) {
-					if (!sensorModelTableEntry.checkBroaderReference(sensorTableEntry.getId())) {
+					if (!sensorModelTableEntry.checkRelatedReference(sensorTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorName + "[" + (n + 1) + "]: "
 								+ "Inconsistent: '" + snsrModel + "'/'" + snsr + "'");
 						log.debug("SENSOR_MODEL/SENSOR xref inconsistent: mdl, sn = '{}', '{}'",
