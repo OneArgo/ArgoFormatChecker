@@ -1,6 +1,6 @@
 ---
 include:
-  - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@feature/inputs
+  - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@~latest
     inputs:
       container_image_build_context: "./file_checker_exec"
       container_image_docker_file_path: "./file_checker_exec/Dockerfile"
