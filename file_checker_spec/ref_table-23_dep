@@ -1,0 +1,45 @@
+// $Revision: 1194 $
+// $Date: 2020-11-13 15:54:33 +0000 (Fri, 13 Nov 2020) $
+//PLATFORM_TYPE | PLATFORM_TYPE_KEY | IXIXIX (1770) | PLATFORM_MAKER | Description | FLOAT_SERIAL_NO SAMPLE
+
+PALACE | 000 | 831 | WRC | 1st float model by WRC | 
+APEX | 001 | 845 846 847 877 | WRC/TWR |  | 
+APEX_EM | 005 | 848 | WRC/TWR | Electro-magnetic float  (measures velocity and mixing) | 
+APEX_D | 020 | 849 | TWR | Deep APEX | 
+PROVOR_MT | 100 | 840 841 842 | METOCEAN | Metocean PROVOR | 
+PROVOR | 101 | 840 841 842 | MARTEC KANNAD NKE |  | 
+ARVOR | 102 | 844 878 | NKE | NKE ARVOR float | 
+PROVOR_II | 103 | 839 | NKE MARTEC | dual board PROVOR | 
+PROVOR_III | 104 | 836 | NKE | dual board PROVOR new generation CTS4 | 
+PROVOR_III_JUMBO | 108 | 836 | NKE | PROVOR float with additional battery pack | 
+PROVOR_IV | 105 | 835 | NKE | PROVOR CTS5 | 
+PROVOR_V | 106 | 834 | NKE |  | 
+PROVOR_V_JUMBO | 107 | 834 | NKE | PROVOR float with additional battery pack | 
+ARVOR_L |  | 844 |  | ARVOR with light battery pack | 
+ARVOR_C | 110 | 837 | NKE | coastal ARVOR | 
+ARVOR_D | 120 | 838 | NKE | Deep ARVOR | 
+POPS_PROVOR | 130 | 843 | NKE | Polar Ocean Profiling System with a PROVOR | 
+SOLO | 200 | 850 851 852 | SIO_IDG | SIO SOLO | 
+SOLO_BGC | 206 | 884 885 | SIO_IDG | MBARI SOLO | 
+SOLO_BGC_MRV | 207 | 886 887 | MRV | MRV SOLO |
+SOLO_W | 201 | 850 851 852 | WHOI |  WHOI SOLO | 
+SOLO_II | 202 | 853 879 | SIO_IDG | SIO SOLOII | 
+SOLO_D | 220 | 862 | SIO_IDG | Deep SOLO | 
+SOLO_D_MRV | 221 | 874 | MRV |  | 
+S2A | 204 or 202 | 854 880 | MRV | MRV SOLOII | 
+S2X | 203 | 872 | MRV | Designed for US Navy | 
+ALTO | 205 | 873 875 876 | MRV | Hybrid SOLO2  (ALAMO engine in SOLO2 hull) | 
+NINJA | 300 | 855 856 857 858 | TSK |  | 
+NINJA_D | 320 | 864 | TSK | Deep NINJA | 
+NEMO | 400 | 859 860 861 | OPTIMARE | OPTIMARE Float | 
+POPS_NEMO | 430 | 843 | OPTIMARE | Polar Ocean Profiling System with a NEMO | 
+NAVIS_EBR | 501 | 869 | SBE | SBE FLoat. serial >=590  | 
+NAVIS_A | 500 | 863 | SBE | SBE Float | 
+NOVA | 600 | 865 | METOCEAN | METOCEAN Float | http://www.metocean.com/sites/default/files/files/products/pdfs/metocean_iridium_profiling_floats_1.pdf
+HM2000 | 700 | 870 | HSOE | manufactured by HSOE | 
+HM4000 | 700 | 881 | HSOE | Xuanwu deep 4000 float manufactured by HSOE for LAOSHAN LABORATORY |
+XUANWU | 700 | 882 | LaoshanLaboratory | Xuanwu deep 6000 float |
+COPEX | 701 | 871 | SOA/NOTC | The COPEX is developed by National Ocean Technology Center (NOTC), SOA, which uses BEIDOU satellite for data transmission and positioning  | 
+ITP | 901 | 901 | WHOI | http://www.whoi.edu/website/itp/overview | 
+ALAMO | 800 | 866 867 868 | MRV | MRV/WHOI new micro float | 
+FLOAT | 999 |  |  | Generic value when unknown | 

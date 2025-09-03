@@ -1,0 +1,18 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+//PLATFORM_MAKER | Description | Comment | update date | update comment
+
+MARTEC | Martec |  |  | 
+METOCEAN | MetOcean |  |  | 
+MRV | MRV Systems |  |  | 
+NKE | NKE Instrumentation |  |  | 
+OPTIMARE | Optimare |  |  | 
+SBE | Seabird |  |  | 
+SIO_IDG | Scripps Institution of Ocenaography - Instrument Development Group |  |  | 
+TSK | Tsurumi-Seiki Co., Ltd. |  |  | 
+TWR | Teledyne Webb Research (formerly Webb Research Corporation) |  |  | 
+WHOI | Woods Hole Oceanographic Institution |  |  | 
+WRC | Webb Research Corporation |  |  | 
+HSOE | Qingdao Hisun Ocean Equipment Corporation Limited  |  | 4/9/2015 | MB for Argo CHINA
+LaoshanLaboratory | Laoshan Laboratory |  | 2023-06-17 | TC for Argo CHINA
+Unknown | Unknown platform maker | The platform maker should not be unknown, the use of this value should be exceptional | 22/06/2015 | request from Wataru Ito
