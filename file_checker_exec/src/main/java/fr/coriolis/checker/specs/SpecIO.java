@@ -13,8 +13,8 @@ public final class SpecIO {
 	private static volatile SpecIO specIOInstance;
 
 	private final String RESOURCES_BASE_PATH = "/file_checker_spec";
-	private final boolean onlineMode;
-	private final Path offlineBaseDir; // needed if onlineMode == false
+	private final boolean internalSpecs;
+	private final Path externalBaseDir; // needed if internalSpecs == false
 
 	public static SpecIO getInstance() {
 		if (specIOInstance == null) {
@@ -23,22 +23,22 @@ public final class SpecIO {
 		return specIOInstance;
 	}
 
-	public static void init(boolean onlineMode, String offlineBaseDir) {
+	public static void init(boolean internalSpecs, String externBaseDir) {
 		if (specIOInstance != null) {
 			return;
 		}
 		synchronized (SpecIO.class) {
 			if (specIOInstance == null) {
-				specIOInstance = new SpecIO(onlineMode, (offlineBaseDir == null ? null : Paths.get(offlineBaseDir)));
+				specIOInstance = new SpecIO(internalSpecs, (externBaseDir == null ? null : Paths.get(externBaseDir)));
 			}
 		}
 	}
 
-	private SpecIO(boolean onlineMode, Path offlineBaseDir) {
-		this.onlineMode = onlineMode;
-		this.offlineBaseDir = offlineBaseDir;
+	private SpecIO(boolean internalSpecs, Path externalBaseDir) {
+		this.internalSpecs = internalSpecs;
+		this.externalBaseDir = externalBaseDir;
 
-		if (!onlineMode && offlineBaseDir == null) {
+		if (!internalSpecs && externalBaseDir == null) {
 			throw new IllegalArgumentException("spec dir required in offline mode");
 		}
 	}
@@ -46,7 +46,7 @@ public final class SpecIO {
 	// Public methods :
 	public InputStream open(String fileName) throws IOException {
 
-		if (onlineMode) {
+		if (internalSpecs) {
 			String resourcePath = RESOURCES_BASE_PATH + "/" + fileName; // ex: "/specs/spec.properties"
 			InputStream in = SpecIO.class.getResourceAsStream(resourcePath);
 			if (in == null) {
@@ -54,7 +54,7 @@ public final class SpecIO {
 			}
 			return in;
 		} else {
-			Path p = offlineBaseDir.resolve(fileName).normalize();
+			Path p = externalBaseDir.resolve(fileName).normalize();
 			if (!Files.exists(p)) {
 				throw new FileNotFoundException("File not found: " + p);
 			}

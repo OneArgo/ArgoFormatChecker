@@ -71,7 +71,8 @@ public class Options {
 	private final String outDirName;
 	private final String inDirName;
 
-	private final boolean useOnlineTables;
+	private final boolean useOnlineNVS;
+	private final boolean useInternalSpecs;
 
 	// ..standard i/o shortcuts
 	static PrintStream stdout = new PrintStream(System.out);
@@ -82,7 +83,7 @@ public class Options {
 	private Options(boolean doBatteryChecks, boolean doNameCheck, boolean doNulls, boolean doFormatOnly,
 			boolean doFormatOnlyPre31, boolean doPsalStats, boolean version, boolean help, boolean doXml,
 			String listFile, List<String> inFileList, String dacName, String specDirName, String outDirName,
-			String inDirName, boolean useOnlineTables) {
+			String inDirName, boolean useOnlineNVS, boolean useInternalSpecs) {
 		super();
 		this.doBatteryChecks = doBatteryChecks;
 		this.doNameCheck = doNameCheck;
@@ -100,7 +101,8 @@ public class Options {
 		this.outDirName = outDirName;
 		this.inDirName = inDirName;
 
-		this.useOnlineTables = useOnlineTables;
+		this.useOnlineNVS = useOnlineNVS;
+		this.useInternalSpecs = useInternalSpecs;
 
 		log.debug("doBatteryChecks = {}", doBatteryChecks);
 		log.debug("doFormatOnly = {}", doFormatOnly);
@@ -114,22 +116,35 @@ public class Options {
 		log.debug("outDirName = '{}'", outDirName);
 		log.debug("inDirName = '{}'", inDirName);
 		log.debug("number of inFileList = " + (inFileList == null ? "null" : inFileList.size()));
+		log.debug("useOnlineNVS = {}", useOnlineNVS);
+		log.debug("useInternalSpecs = {}", useInternalSpecs);
 	}
 
 	/**
-	 * Retrieves the singleton instance of {@code Options}, parsing command-line
-	 * arguments with {@code extractOptionsFromArgs} if instance is null .
 	 * 
-	 * @param args : The command-line arguments passed to the application.
 	 * @return The singleton instance of {@code Options}.
 	 */
-	public static synchronized Options getInstance(String args[]) throws IllegalArgumentException {
+	public static synchronized Options getInstance() throws IllegalArgumentException {
 
 		if (instance == null) {
 
-			instance = extractOptionsFromArgs(args);
+			throw new IllegalStateException("Options not initialized");
 		}
 		return instance;
+	}
+
+	/**
+	 * initiate the singleton of {@code Options}, parsing command-line arguments
+	 * with {@code extractOptionsFromArgs} if instance is null .
+	 * 
+	 * @param args : The command-line arguments passed to the application.
+	 */
+	public static void init(String args[]) {
+		if (instance != null) {
+			return;
+		} else {
+			instance = extractOptionsFromArgs(args);
+		}
 	}
 
 	/**
@@ -154,7 +169,8 @@ public class Options {
 		boolean help = false;
 		boolean doXml = true;
 
-		boolean useOnlineTables = false;
+		boolean useOnlineNVS = false;
+		boolean useInternalSpecs = false;
 
 		// loop trough the arguments provided and differentiate the option (start with
 		// "-") and the positional parameters.
@@ -195,8 +211,11 @@ public class Options {
 			case "-psal-stats":
 				doPsalStats = true;
 				break;
-			case "-online-tables":
-				useOnlineTables = true;
+			case "-online-nvs":
+				useOnlineNVS = true;
+				break;
+			case "-internal-specs":
+				useInternalSpecs = true;
 				break;
 			case "-list-file":
 				if (++next < args.length) {
@@ -222,11 +241,12 @@ public class Options {
 		}
 
 		// .....parse the positional parameters.....
-		validateNumberOfPositionalArguments(args, next, useOnlineTables); // exit system if too few arguments
+		validateNumberOfPositionalArguments(args, next, useInternalSpecs); // exit system if too few arguments
 
 		String dacName = args[next++];
 		String specDirName = "";
-		if (!useOnlineTables) {
+
+		if (!useInternalSpecs) {
 			specDirName = args[next++];
 		}
 		String outDirName = args[next++];
@@ -239,7 +259,8 @@ public class Options {
 		}
 
 		return new Options(doBatteryChecks, doNameCheck, doNulls, doFormatOnly, doFormatOnlyPre31, doPsalStats, version,
-				help, doXml, listFile, inFileList, dacName, specDirName, outDirName, inDirName, useOnlineTables);
+				help, doXml, listFile, inFileList, dacName, specDirName, outDirName, inDirName, useOnlineNVS,
+				useInternalSpecs);
 
 	}
 
@@ -250,9 +271,9 @@ public class Options {
 	 * @param args list of arguments
 	 * @param next indice of the next argument
 	 */
-	private static void validateNumberOfPositionalArguments(String[] args, int next, boolean useOnlineTables)
+	private static void validateNumberOfPositionalArguments(String[] args, int next, boolean useInternalSpecs)
 			throws IllegalArgumentException {
-		int minArgs = (useOnlineTables ? 3 : 4) + next;
+		int minArgs = (useInternalSpecs ? 3 : 4) + next;
 		if (args.length < minArgs) {
 			log.error("too few arguments: " + args.length);
 			throw new IllegalArgumentException("Too few arguments provided.");
@@ -268,7 +289,7 @@ public class Options {
 	public void validateMandatoryArguments() {
 		checkDacName(dacName);
 		checkDirectory(inDirName, false);
-		checkDirectory(specDirName, useOnlineTables);
+		checkDirectory(specDirName, useInternalSpecs);
 	}
 
 	/**
@@ -365,8 +386,12 @@ public class Options {
 		return inDirName;
 	}
 
-	public boolean isUseOnlineTables() {
-		return useOnlineTables;
+	public boolean isUseOnlineNVS() {
+		return useOnlineNVS;
+	}
+
+	public boolean isUseInternalSpecs() {
+		return useInternalSpecs;
 	}
 
 }

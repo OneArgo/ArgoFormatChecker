@@ -1,7 +1,6 @@
 package fr.coriolis.checker.tables;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import fr.coriolis.checker.specs.SpecIO;
 import fr.coriolis.checker.utils.NetUtils;
 
 public final class ArgoNVSReferenceTable {
@@ -81,27 +81,26 @@ public final class ArgoNVSReferenceTable {
 	// ====
 	/**
 	 * Initialize NVS references tables (static variables) : loop over all files in
-	 * the specified folder and instanciate a SkosCollection if file is a NVS jsonld
-	 * table. Then populate all static variable of the Argo netcdf files checkers 's
-	 * useful tables.
+	 * the spec folder (from SpecIO) and instanciate a SkosCollection if file is a
+	 * NVS jsonld table. Then populate all static variable of the Argo netcdf files
+	 * checkers 's useful tables.
 	 * 
 	 * @param nvsFolderPath
 	 */
-	public static void initialize(String nvsFolderPath) {
+	public static void initialize() {
 		// MAp to store the tables
 		Map<RELEVANT_TABLES, SkosCollection> nvsReferenceTables = new HashMap<>();
-		// get list of nvs tables files :
-		Set<File> tablesFiles = listFolderFiles(nvsFolderPath);
 
-		// loop over tables files
-		for (File tableFile : tablesFiles) {
-			try (InputStream tableInputStream = new FileInputStream(tableFile)) {
+		// loop over relevant table list
+		for (RELEVANT_TABLES t : RELEVANT_TABLES.values()) {
+			String fileRableName = "NVS/" + t.getCode() + ".jsonld";
+			try (InputStream tableInputStream = SpecIO.getInstance().open(fileRableName)) {
 				processNVSTableFile(nvsReferenceTables, tableInputStream);
 			} catch (FileNotFoundException e) {
-				stderr.println("Table file not found : " + tableFile + " (" + e.getMessage() + ")");
+				stderr.println("Table file not found : " + fileRableName + " (" + e.getMessage() + ")");
 				break;
 			} catch (IOException e) {
-				stderr.println("Failed to parse table file: " + tableFile + " (" + e.getMessage() + ")");
+				stderr.println("Failed to parse table file: " + fileRableName + " (" + e.getMessage() + ")");
 				break;
 			}
 		}

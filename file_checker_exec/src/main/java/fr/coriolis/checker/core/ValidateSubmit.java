@@ -94,7 +94,8 @@ public class ValidateSubmit {
 		log.info("{}:  START", ClassName);
 		// .....extract the options from command-line arguments....
 		try {
-			Options options = Options.getInstance(args);
+			Options.init(args);
+			Options options = Options.getInstance();
 
 			doXml = options.isDoXml();
 			String dacName = options.getDacName();
@@ -110,7 +111,7 @@ public class ValidateSubmit {
 			options.validateMandatoryArguments(); // System exit with error if no validated
 
 			// initiate SpecIO
-			SpecIO.init(options.isUseOnlineTables(), options.getSpecDirName());
+			SpecIO.init(options.isUseInternalSpecs(), options.getSpecDirName());
 
 			// .............load the spec version information..............
 			loadSpecVersionInfo();
@@ -281,12 +282,12 @@ public class ValidateSubmit {
 	}
 
 	private static void initializeNVSTables(Options options) {
-		if (options.isUseOnlineTables()) {
+		if (options.isUseOnlineNVS()) {
 			String nvsBaseUrl = System.getenv().getOrDefault("NVS_BASE_URL",
 					codeProp.getProperty("nvs.baseurl.default", NVS_DEFAULT_BASE_URL));
 			ArgoNVSReferenceTable.initializeFromInternet(nvsBaseUrl);
 		} else {
-			ArgoNVSReferenceTable.initialize(options.getSpecDirName() + "/NVS");
+			ArgoNVSReferenceTable.initialize();
 		}
 	}
 
@@ -705,7 +706,7 @@ public class ValidateSubmit {
 
 	public static void Help() {
 		stdout.println("\n" + "Purpose: Validates the files in a directory\n" + "\n" + "Usage: java  " + ClassName
-				+ " [options] dac-name spec-dir output-dir input-dir [file-names]\n" + "Options:\n"
+				+ " [options] dac-name [spec-dir] output-dir input-dir [file-names]\n" + "Options:\n"
 				+ "   -help | -H | -U   Help -- this message\n" + "   -no-name-check Do not check the file name\n"
 				+ "   -null-warn     Perform 'nulls-in-string' check (warning)\n"
 				+ "                  default: do NOT check for nulls\n"
@@ -721,8 +722,11 @@ public class ValidateSubmit {
 				+ "                  default: don't compute this information\n" + "\n"
 				+ "   -format-only-pre3.1  (default) Only perform format checks on files format pre-3.1\n"
 				+ "      ***deprecated - now the default - retained for backwards compatibility***\n" + "\n"
+				+ "   -internal-specs  Use specs files wich are included in the JAR archive.\n"
+				+ "                     With this option, spec-dir argument should not be provided.\n "
+				+ "   -online-nvs  Use directly up-to-date NVS from internet. NVS forlder in spec dir will therefore be ignored.\n"
 				+ "Arguments:\n" + "   dac-name       Name of DAC that owns the input files\n"
-				+ "   spec-dir       Directory path of specification files\n"
+				+ "   spec-dir       Directory path of specification files. Do not specify if -internal-specs is used\n"
 				+ "   output-dir     Directory path where results files will be placed\n"
 				+ "   input-dir      Directory path where input files reside\n"
 				+ "   file-names     (Optional) List of files names to process (see below)\n" + "\n" + "Input Files:\n"
