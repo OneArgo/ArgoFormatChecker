@@ -1243,8 +1243,9 @@ public class ArgoFileValidator {
 				}
 			}
 
-			validationResult.addError("Incorrect file name\n\tDAC file name:       '" + name
-					+ "'\n\tFile name from data: '" + expected.toString() + "'");
+			validationResult.addError("Inconsistent file name\n\tDAC file name       '" + name
+					+ "'\n\tExpected file name according to file type, DIRECTION, DATA_MODE, CYCLE_NUMBER and PLATFORM_NUMBER : '"
+					+ expected.toString() + "'");
 			log.debug("validateGdacFileName: FAILED: expected, name = '{}', '{}'", expected, name);
 
 			return false;
