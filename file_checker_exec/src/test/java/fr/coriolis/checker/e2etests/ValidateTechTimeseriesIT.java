@@ -20,7 +20,8 @@ class ValidateTechTimeseriesIT {
 	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
 	@CsvSource({ "3901682_tech.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
 			"3901682_tech_No-JULD.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
-			"6903283_tech_No-Timeseries.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION" })
+			"6903283_tech_No-Timeseries.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+			"3901682_tech_bad_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION" })
 	void fileChecker_shouldAcceptTechTimeseries_WhenConformToSpec(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 
