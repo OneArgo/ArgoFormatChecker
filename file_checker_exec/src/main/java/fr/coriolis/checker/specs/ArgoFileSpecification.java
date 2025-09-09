@@ -1160,25 +1160,41 @@ public class ArgoFileSpecification {
 	 * variables contained in the groupe(if exists) "TECH_TIMESERIES".
 	 */
 	private void addOptionnalTechParamVariables() {
-		// get tech param full names (with unit)
-		for (String techParamName : ConfigTech.getTechCodeList()) {
+		// get tech param names (without unit)
+		for (String techParamName : ConfigTech.getTechParamList()) {
 			createAndAddToGroupOptionnalTechParamVariable(techParamName);
-
 		}
-		// add variable containing regex :
 
-		// TO DO :
-		// For refactor Create table for ArgoProfilPAram parsing like for TechParam ?
-		// IN BOTH CASE ADD THE PARSING OF ATTRIBUTE WITH REGEX
 	}
 
+	/**
+	 * Build the <TECH_PARAM> variable. The long_name and unit are retrieved from
+	 * 
+	 * @param techParamName : variable name (without the unit).
+	 */
 	private void createAndAddToGroupOptionnalTechParamVariable(String techParamName) {
 		// 1 - create the <tech_param> variable :
 		ArgoDimension dimTechParam[] = new ArgoDimension[1];
 		dimTechParam[0] = dimHash.get("N_TECH_MEASUREMENT");
 		ArgoVariable techParamVar = new ArgoVariable(techParamName, DataType.FLOAT, dimTechParam, techParamName);
-		addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
-		addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+
+		// may have multiple units or longç_name for a same parameter name. In those
+		// cases, we ignore units and/or long_name:
+		if (ConfigTech.getParamAuthorizedLongName().get(techParamName) == null
+				|| ConfigTech.getParamAuthorizedLongName().get(techParamName).size() != 1) {
+			addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+		} else {
+			addAttr(techParamVar, long_name, ConfigTech.getParamAuthorizedLongName().get(techParamName).get(0),
+					DataType.STRING);
+		}
+		if (ConfigTech.getParamAuthorizedUnits().get(techParamName) == null
+				|| ConfigTech.getParamAuthorizedUnits().get(techParamName).size() != 1) {
+			addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+		} else {
+			addAttr(techParamVar, units, ConfigTech.getParamAuthorizedUnits().get(techParamName).get(0),
+					DataType.STRING);
+		}
+
 		varHash.put(techParamName, techParamVar);
 		// 2 - add it to the optionnal variables :
 		optVar.add(techParamName);

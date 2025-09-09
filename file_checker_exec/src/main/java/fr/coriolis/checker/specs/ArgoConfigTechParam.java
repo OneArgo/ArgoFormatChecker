@@ -34,7 +34,7 @@ import org.apache.logging.log4j.Logger;
  *          $
  */
 public class ArgoConfigTechParam {
-
+// TODO : 2025/08 need a refactor to better extract tech param, unit and longname !
 //............................................
 //               VARIABLES
 //............................................
@@ -142,6 +142,12 @@ public class ArgoConfigTechParam {
 
 	private LinkedHashSet<String> techParamList_DEP; // ..tech param fixed names (deprctd)
 	private LinkedHashSet<String> techParamCodeList_DEP;
+
+	// The following map is needed to check TECH time series variable (same variable
+	// name but different units and long_name posssible) :
+	private Map<String, List<String>> paramAuthorizedUnits = new HashMap<>();
+	private Map<String, List<String>> paramAuthorizedLongName = new HashMap<>();
+
 	// private LinkedHashSet<Pattern> techParamRegex; //..tech param regex names
 	// private LinkedHashSet<Pattern> techParamRegex_DEP; //..tech param regex names
 	// (deprctd)
@@ -403,6 +409,14 @@ public class ArgoConfigTechParam {
 
 	public LinkedHashSet<String> getTechCodeList() {
 		return techParamCodeList;
+	}
+
+	public Map<String, List<String>> getParamAuthorizedUnits() {
+		return paramAuthorizedUnits;
+	}
+
+	public Map<String, List<String>> getParamAuthorizedLongName() {
+		return paramAuthorizedLongName;
 	}
 
 	/**
@@ -855,29 +869,178 @@ public class ArgoConfigTechParam {
 				}
 
 				parseTechParamName(paramList, paramCodeList, paramRegex, fileName, file, pTemplate, column);
-
 			} // ..end while (line)
 
 			file.close();
-		} // ..end for (fileNames)
 
+		} // ..end for (fileNames)
 		log.debug(".....parseTechParamFile: end.....");
 	} // ..end parseTechParamFile
 
+	/**
+	 * Parse a argo-tech_names-spec file line. The first column is
+	 * <TECH_PARAM>_unit, the second column is definition which are used for
+	 * long_name. Need to exctract and link the 3 informations : param name, unit
+	 * and long_name. It may have multiple units and long_name available for the
+	 * same parameter name.
+	 * 
+	 * @param paramList
+	 * @param paramCodeList
+	 * @param paramRegex
+	 * @param fileName
+	 * @param file
+	 * @param pTemplate
+	 * @param column
+	 * @throws IllegalArgumentException
+	 */
 	private void parseTechParamName(LinkedHashSet<String> paramList, LinkedHashSet<String> paramCodeList,
 			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String fileName, BufferedReader file,
 			Pattern pTemplate, String[] column) throws IllegalArgumentException {
 
 		String parameterCode = column[0];
+		String parameterLongName = column[1];
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
-		String paramName = extractParamNameFromParamCode(fileName, parameterCode);
+		String[] paramNameAndUnit = extractParamNameAndUnitFromParamCode(fileName, parameterCode);
+		String paramName = paramNameAndUnit[0];
+		String unit = paramNameAndUnit[1];
+
+		// add list to authorized unit list for this parameter
+		if (paramAuthorizedUnits.containsKey(paramName)) {
+			paramAuthorizedUnits.get(paramName).add(unit);
+		} else {
+			paramAuthorizedUnits.put(paramName, new ArrayList<>(Arrays.asList(unit)));
+		}
+
+		// add list to authorized long_name list for this parameter
+		processParamAndLongNameFields(paramName, parameterLongName, pTemplate);
 
 		// ..process the parameter name (can contain regex) and add to right list
 		// (paramList or paramRegex)
 		processParameterField(paramList, paramRegex, pTemplate, paramName);
-		processParameterField(paramCodeList, paramRegex, pTemplate, parameterCode);
 
+	}
+
+	/**
+	 * tech paramater's variable's name and long_name may contain
+	 * <short_sensor_name>. This function compute the list of different possibility
+	 * for a given tech parameter name.
+	 * 
+	 * @param field
+	 */
+	private void processParamAndLongNameFields(String paramName, String longName, Pattern pTemplate) {
+		Matcher matcherParamName = pTemplate.matcher(paramName);
+		Matcher matcherLongName = pTemplate.matcher(longName);
+
+		if (!matcherParamName.find()) {
+
+			List<String> longNameListFromRegex;
+			// no <short_sensor_name> in tech param's name. Check if there is one in
+			// long_name. In this case all possibilities are authorized :
+			if (matcherLongName.find()) {
+				// ..contains <*> structures in long_name, build list of possibilities
+				String regexString = convertParamStringToRegex(longName, matcherLongName);
+
+				Pattern pRegex = Pattern.compile(regexString.toString());
+
+				longNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
+
+			} else {
+				// no <sensor_short_name> in paramName nor in longName.
+				longNameListFromRegex = new ArrayList<>(Arrays.asList(longName));
+			}
+
+			// add list to authorized long_name list for this parameter
+			if (paramAuthorizedLongName.containsKey(paramName)) {
+				paramAuthorizedLongName.get(paramName).addAll(longNameListFromRegex);
+			} else {
+				paramAuthorizedLongName.put(paramName, longNameListFromRegex);
+			}
+
+		} else {
+			// ..contains <*> structures -- convert to a regex and build list of param name
+			String regexString = convertParamStringToRegex(paramName, matcherParamName);
+
+			Pattern pRegex = Pattern.compile(regexString.toString());
+			List<String> paramNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
+
+			// for each paramName, apply this function (recursivity) :
+			for (String paramNameWithNoRegex : paramNameListFromRegex) {
+				// need to repace the short_sensor_name and Z in longName by the same found in
+				// paramName :
+				String shortSensorNamefound = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex,
+						"short_sensor_name");
+				String zValue = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex, "Z");
+
+				// onlys sort_sensor_name and Z are found in paramName. Replace value if found
+				// in corresponding longName
+				String completedLongName = longName;
+				if (shortSensorNamefound != null) {
+					completedLongName = completedLongName.replace("<short_sensor_name>", shortSensorNamefound);
+				}
+
+				if (zValue != null) {
+					completedLongName = completedLongName.replace("<Z>", zValue);
+				}
+
+				processParamAndLongNameFields(paramNameWithNoRegex, completedLongName, pTemplate);
+
+			}
+		}
+
+	}
+
+	public String extractSpecificValueFromPattern(String originalPattern, String actualString, Pattern pRegex,
+			String placeholderName) {
+		Map<String, String> values = extractValuesFromPattern(originalPattern, actualString, pRegex);
+		return values.get(placeholderName);
+	}
+
+	/**
+	 * Exctract the value which has been used to replace placeholder <*> in a
+	 * string. return a Map with placeholder name as key and exctrated value as
+	 * value. Example : originalPattern :
+	 * "NUMBER_<short_sensor_name>AscentSamplesDepthZone<Z>" actual string :
+	 * "NUMBER_CroverAscentSamplesDepthZone1" => result = ["short_sensor_name"
+	 * :"Crover", "Z" : "1"]
+	 *
+	 * @param template
+	 * @param concreteValue
+	 * @param pRegex
+	 * @return
+	 */
+	private Map<String, String> extractValuesFromPattern(String originalPattern, String concreteValue, Pattern pRegex) {
+
+		Map<String, String> extractedValues = new HashMap<>();
+
+		List<String> placeholderNames = extractPlaceholderNames(originalPattern);
+
+		// presence of <*>
+		Matcher matcher = pRegex.matcher(concreteValue);
+
+		if (matcher.matches()) {
+			// Associate each captured group to his placeholder name
+			for (int i = 0; i < placeholderNames.size() && i < matcher.groupCount(); i++) {
+				String placeholderName = placeholderNames.get(i);
+				String value = matcher.group(i + 1); // group start at 1
+				extractedValues.put(placeholderName, value);
+			}
+		}
+
+		return extractedValues;
+
+	}
+
+	private List<String> extractPlaceholderNames(String pattern) {
+		List<String> names = new ArrayList<>();
+		Pattern placeholderPattern = Pattern.compile("<([^>]+)>");
+		Matcher matcher = placeholderPattern.matcher(pattern);
+
+		while (matcher.find()) {
+			names.add(matcher.group(1));
+		}
+
+		return names;
 	}
 
 	/**
@@ -913,13 +1076,13 @@ public class ArgoConfigTechParam {
 			// Build additional paramList using regex and referenceTable and add it to the
 			// paramList
 			List<String> paramListFromRegex = generateParamListFromPattern(pRegex.pattern());
+
 			paramList.addAll(paramListFromRegex);
 
 		}
 	}
 
 	private List<String> generateParamListFromPattern(String pRegex) {
-
 		List<String> regexList = new ArrayList<>(Arrays.asList(pRegex));
 		boolean replacedAtLeastOne = false;
 
@@ -1046,7 +1209,7 @@ public class ArgoConfigTechParam {
 	 * @return parameterName
 	 * @throws IOException
 	 */
-	private String extractParamNameFromParamCode(String fileName, String parameterCode)
+	private String[] extractParamNameAndUnitFromParamCode(String fileName, String parameterCode)
 			throws IllegalArgumentException {
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
@@ -1061,7 +1224,9 @@ public class ArgoConfigTechParam {
 		// ..well formed named, break it apart
 
 		String parameterName = parameterCode.substring(0, index);
-		return parameterName;
+		String parameterUnit = parameterCode.substring(index + 1, parameterCode.length());
+		String[] results = { parameterName, parameterUnit };
+		return results;
 	}
 
 	// ............................................................
