@@ -21,7 +21,10 @@ class ValidateTechTimeseriesIT {
 	@CsvSource({ "3901682_tech.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
 			"3901682_tech_No-JULD.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
 			"6903283_tech_No-Timeseries.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
-			"3901682_tech_bad_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION" })
+			"3901682_tech_bad_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
+			"6990728_tech_unitsNotInR14ButInUnitsList.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+			"6990728_tech_BadUnits.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION"
+			})
 	void fileChecker_shouldAcceptTechTimeseries_WhenConformToSpec(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 

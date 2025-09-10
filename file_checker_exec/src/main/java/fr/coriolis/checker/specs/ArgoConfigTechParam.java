@@ -905,12 +905,12 @@ public class ArgoConfigTechParam {
 		String paramName = paramNameAndUnit[0];
 		String unit = paramNameAndUnit[1];
 
-		// add list to authorized unit list for this parameter
-		if (paramAuthorizedUnits.containsKey(paramName)) {
-			paramAuthorizedUnits.get(paramName).add(unit);
-		} else {
-			paramAuthorizedUnits.put(paramName, new ArrayList<>(Arrays.asList(unit)));
-		}
+		// add list to authorized unit list for this parameter. TO USE LATER. FOR NOW USE AUTHORIZE ALL UNITS FROM UNITS TABLE
+//		if (paramAuthorizedUnits.containsKey(paramName)) {
+//			paramAuthorizedUnits.get(paramName).add(unit);
+//		} else {
+//			paramAuthorizedUnits.put(paramName, new ArrayList<>(Arrays.asList(unit)));
+//		}
 
 		// add list to authorized long_name list for this parameter
 		processParamAndLongNameFields(paramName, parameterLongName, pTemplate);

@@ -1179,22 +1179,27 @@ public class ArgoFileSpecification {
 		ArgoVariable techParamVar = new ArgoVariable(techParamName, DataType.FLOAT, dimTechParam, techParamName);
 
 		// may have multiple units or longç_name for a same parameter name. In those
-		// cases, we ignore units and/or long_name:
-		if (ConfigTech.getParamAuthorizedLongName().get(techParamName) == null
-				|| ConfigTech.getParamAuthorizedLongName().get(techParamName).size() != 1) {
-			addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
-		} else {
-			addAttr(techParamVar, long_name, ConfigTech.getParamAuthorizedLongName().get(techParamName).get(0),
-					DataType.STRING);
-		}
-		if (ConfigTech.getParamAuthorizedUnits().get(techParamName) == null
-				|| ConfigTech.getParamAuthorizedUnits().get(techParamName).size() != 1) {
-			addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
-		} else {
-			addAttr(techParamVar, units, ConfigTech.getParamAuthorizedUnits().get(techParamName).get(0),
-					DataType.STRING);
-		}
-
+		// cases, we ignore units and/or long_name: IGNORE THIS
+//		if (ConfigTech.getParamAuthorizedLongName().get(techParamName) == null
+//				|| ConfigTech.getParamAuthorizedLongName().get(techParamName).size() != 1) {
+//			addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+//		} else {
+//			addAttr(techParamVar, long_name, ConfigTech.getParamAuthorizedLongName().get(techParamName).get(0),
+//					DataType.STRING);
+//		}
+//		if (ConfigTech.getParamAuthorizedUnits().get(techParamName) == null
+//				|| ConfigTech.getParamAuthorizedUnits().get(techParamName).size() != 1) {
+//			addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+//		} else {
+//			addAttr(techParamVar, units, ConfigTech.getParamAuthorizedUnits().get(techParamName).get(0),
+//					DataType.STRING);
+//		}
+//		
+		//2025-09 : as it may have multiple units (in fact all units from reference units table) and multiple long_name (defined in R14), we will have a special check for this. 
+		// For the generic test, we ignore these attributes.
+		addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+		addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+		
 		varHash.put(techParamName, techParamVar);
 		// 2 - add it to the optionnal variables :
 		optVar.add(techParamName);

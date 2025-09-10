@@ -390,6 +390,13 @@ public class ArgoFileValidator {
 				returnVal = false;
 				continue;
 			}
+			// 2025-09 :  special check for TECH_PARAM variable that authorized multiple units and long_name for a same variable name:
+			// (not ideal and should be changed when tech_param names and units handling in NVS change.
+			if (!checkSpecialTechParamVarAttributeValue(dataVar, varName, dataAttr, attrName, specAttr, specialHandling)) {
+				returnVal = false;
+				continue;
+			}
+			
 		} // ..end for (dataAttr)
 		return returnVal;
 	} // ..end ckVarAttr
@@ -472,6 +479,41 @@ public class ArgoFileValidator {
 		} else {
 			log.debug("ckVarAttr: '{}': marked as IGNORE", attrName);
 		} // ..end if (marked IGNORE)
+		return true;
+	}
+	
+	/**
+	 * Special case with <TECH_PARAM> wich for a same variable name have list of units possble and may have different long_name.
+	 * First, identify if the variable name is in the ConfigTech's param list. 
+	 * Then, if attribute to check is units or long_name, check the authorized list : all units from reference table are authorized for all parameters and list of long_name by parameter.
+	 */
+	private boolean checkSpecialTechParamVarAttributeValue (Variable dataVar, String varName, Attribute dataAttr, String attrName,
+			ArgoAttribute specAttr, ArgoAttribute.AttrHandling specialHandling) {
+		if (arFile.getFileSpec().ConfigTech
+				.findTechParam(varName) != null) {
+			// this variable is TECH_PARAM variable, check its attribut with list of units and long_name.
+			//dataAtt type already check in checkVarAttributeValue
+			String dataAttrValue = dataAttr.getStringValue();
+			if (attrName.equals("units") && !arFile.getFileSpec().ConfigTech.isConfigTechUnit(dataAttrValue) && !arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(dataAttrValue)) {
+				//dataAtt type already check in checkVarAttributeValue				
+				// units not found in reference table !
+				validationResult.addError("attribute: " + varName + ":" + attrName
+				+ ": Definitions differ " + "\n\tSpecification = See argo-tech_units-spec units list, definition column"
+				+ "\n\tData File     = '" + dataAttrValue + "'");
+			
+			}
+			List<String> authorizedLongName = arFile.getFileSpec().ConfigTech.getParamAuthorizedLongName().get(varName);
+			if (attrName.equals("long_name") && authorizedLongName != null && !authorizedLongName.contains(dataAttrValue)) {
+				
+				validationResult.addError("attribute: " + varName + ":" + attrName
+						+ ": Definitions differ " + "\n\tSpecification = See argo-tech_names-spec list"
+						+ "\n\tData File     = '" + dataAttrValue + "'");
+				
+			}
+			
+			
+		}
+		
 		return true;
 	}
 
@@ -820,13 +862,13 @@ public class ArgoFileValidator {
 				// ..- don't have to check values because the data var attr values were checked
 				// above
 				for (String attrName : specVar.getAttributeNames()) {
-					checkSpevVarAttributePresenceInData(name, specVar, dataVar, attrName);
+					checkSpecVarAttributePresenceInData(name, specVar, dataVar, attrName);
 				}
 			}
 		} // end for (spec-Var-name)
 	}
 
-	private void checkSpevVarAttributePresenceInData(String name, ArgoVariable specVar, Variable dataVar,
+	private void checkSpecVarAttributePresenceInData(String name, ArgoVariable specVar, Variable dataVar,
 			String attrName) {
 		ArgoAttribute attr = specVar.getAttribute(attrName);
 		ArgoAttribute.AttrHandling handling = attr.getHandling();
