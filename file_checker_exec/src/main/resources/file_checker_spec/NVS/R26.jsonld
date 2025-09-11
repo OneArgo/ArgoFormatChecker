@@ -231,6 +231,37 @@
             "skos:altLabel": "PAINE"
         },
         {
+            "@id": "http://vocab.nerc.ac.uk/collection/R26/current/WRC/",
+            "pav:authoredOn": "2025-08-29 10:15:12.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/WRC/1/"
+            },
+            "dce:identifier": "SDN:R26::WRC",
+            "pav:version": "1",
+            "skos:notation": "SDN:R26::WRC",
+            "skos:altLabel": "WRC",
+            "dc:date": "2025-08-29 10:15:12.0",
+            "owl:versionInfo": "1",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Webb Research Corporation"
+            },
+            "dc:identifier": "SDN:R26::WRC",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "owl:deprecated": "false",
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Webb Research Corporation."
+            },
+            "@type": "skos:Concept"
+        },
+        {
             "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TRIOS/",
             "pav:authoredOn": "2021-02-11 14:21:39.0",
             "@type": "skos:Concept",
@@ -608,6 +639,37 @@
             "skos:notation": "SDN:R26::DRUCK",
             "pav:version": "1",
             "dce:identifier": "SDN:R26::DRUCK"
+        },
+        {
+            "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TWR/",
+            "pav:authoredOn": "2025-08-29 10:15:12.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TWR/1/"
+            },
+            "dce:identifier": "SDN:R26::TWR",
+            "pav:version": "1",
+            "skos:notation": "SDN:R26::TWR",
+            "skos:altLabel": "TWR",
+            "dc:date": "2025-08-29 10:15:12.0",
+            "owl:versionInfo": "1",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Teledyne Webb Research"
+            },
+            "dc:identifier": "SDN:R26::TWR",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "owl:deprecated": "false",
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Teledyne Webb Research (formerly Webb Research Corporation)."
+            },
+            "@type": "skos:Concept"
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R26/current/FSI/",
@@ -1313,6 +1375,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R26/current/PAINE/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/WRC/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TRIOS/"
                 },
                 {
@@ -1338,6 +1403,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R26/current/DRUCK/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TWR/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R26/current/FSI/"
@@ -1381,8 +1449,8 @@
             "dc:description": "Terms describing developers and manufacturers of sensors mounted on Argo floats. Argo netCDF variable SENSOR_MAKER is populated by R26 altLabel.",
             "dc:title": "Argo sensor manufacturers",
             "skos:prefLabel": "Argo sensor manufacturers",
-            "owl:versionInfo": "6",
-            "dc:date": "2025-08-29 03:00:01.0",
+            "owl:versionInfo": "7",
+            "dc:date": "2025-08-30 03:00:01.0",
             "skos:altLabel": "SENSOR_MAKER",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "SENSOR_MAKER",
