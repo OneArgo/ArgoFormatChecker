@@ -567,14 +567,14 @@ public class ArgoConfigTechParam {
 							new InputStreamReader(in, StandardCharsets.UTF_8));) {
 				// ..create list variables
 				// ..open file
-				if (nFile == 0) {
+				if (nFile == 0) { // argo-core_config_param
 					configParamList = new LinkedHashSet<String>(250);
 					configParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
 
 					paramList = configParamList;
 					paramRegex = configParamRegex;
 
-				} else if (nFile == 2) {
+				} else if (nFile == 2) { // argo-core_config_param.deprecetaed
 					// ..do this only for the first deprecated file
 					configParamList_DEP = new LinkedHashSet<String>(25);
 					configParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
@@ -596,7 +596,7 @@ public class ArgoConfigTechParam {
 						continue;
 					}
 
-					// ..break the line into individual entries
+					// ..break the line into individual entries and trim the content
 					String column[] = line.split("\\|");
 					for (int n = 0; n < column.length; n++) {
 						String s = column[n].trim();
@@ -645,6 +645,23 @@ public class ArgoConfigTechParam {
 	private void parseConfigParamName(LinkedHashSet<String> paramList,
 			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, int nFile, String fileName,
 			Pattern pTemplate, String[] column) {
+		// for CORE config name (nfile = 0):
+		// column[0] : Parameter label
+		// column[1] : Explanation (with values for <PARAM>
+		// column[2] : MANDATORY (M) / OPTIONAL (O)
+		// column[3] : Comment/Action
+
+		// column[4] : Float Type
+		// for BIO config name (nfile = 1)
+		// column[0] : Parameter label
+		// column[1] : Parameter definition
+		// column[2] : values for <short sensor name>
+		// column[3] : values for <param>
+		// column[4] : values for <cycle_phase_name>
+		// column[5] : values for numbers (<I>, <N>, <S>, <Subs>)
+		// column[6] : FLOAT TYPE (PLATFORM_TYPE ?)
+		// column[7] : MANDATORY (M) / OPTIONAL (O)
+		// column[8] : CHANGEABLE (C) /SET (S)
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
 		String param = extractParamNameFromParamCode(fileName, column[0]);
@@ -679,7 +696,7 @@ public class ArgoConfigTechParam {
 
 			HashMap<String, HashSet<String>> matchList = null;
 
-			if (nFile == 1 || nFile == 3) {
+			if (nFile == 1 || nFile == 3) { // BIO config name files
 				// ..bio-config file has matching list in these columns
 				String[] templates = { "shortsensorname", "param", "cyclephasename" };
 				int[] nColumn = { 2, 3, 4, 5 }; // .."0-based"
