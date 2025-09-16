@@ -8,10 +8,12 @@ on:
       - develop
     paths:
       - file_checker_exec/**
+      - file_checker_spec/**
   pull_request:
     # Run for any pull requests
     paths:
       - file_checker_exec/**
+      - file_checker_spec/**
   release:
     types: [created]
 
@@ -19,11 +21,11 @@ jobs:
   container-image-build:    
     uses: ./.github/workflows/component-container-image.yml
     with:
-      context: filechecker
+      context: file_checker_exec
       image-path: ghcr.io/OneArgo/ArgoFormatChecker/app
   container-image-security:
     needs: [container-image-build]
     uses: ./.github/workflows/component-container-image-security.yml
     with:
-      context: filechecker
+      context: file_checker_exec
       image-path: ghcr.io/OneArgo/ArgoFormatChecker/app
