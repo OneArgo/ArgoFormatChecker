@@ -1,0 +1,29 @@
+name: Image build
+
+on:
+  push:
+    branches:
+      # Run on our main branch
+      - main
+      - develop
+    paths:
+      - file_checker_exec/**
+  pull_request:
+    # Run for any pull requests
+    paths:
+      - file_checker_exec/**
+  release:
+    types: [created]
+
+jobs:
+  container-image-build:    
+    uses: ./.github/workflows/component-container-image.yml
+    with:
+      context: filechecker
+      image-path: ghcr.io/OneArgo/ArgoFormatChecker/app
+  container-image-security:
+    needs: [container-image-build]
+    uses: ./.github/workflows/component-container-image-security.yml
+    with:
+      context: filechecker
+      image-path: ghcr.io/OneArgo/ArgoFormatChecker/app

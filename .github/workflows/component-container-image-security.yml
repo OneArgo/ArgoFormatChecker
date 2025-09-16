@@ -1,0 +1,64 @@
+name: Generic security scan
+
+on:
+  workflow_call:
+    inputs:
+      context:
+        description: "Path to the Dockerfile directory to analyse"
+        required: true
+        default: "."
+        type: string
+      image-path:
+        description: "Path of the docker image to analyse"
+        default: "ghcr.io/${{ github.repository }}/app"
+        type: string
+
+permissions:
+  contents: read # for actions/checkout to fetch code
+  security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+
+jobs:
+  security-dependency-trivy:
+    name: Trivy dependency scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      # need to format as github.repository contains uppercase
+      # and pull request workflow contains slashes
+      - id: format
+        name: Format proper image path and tag
+        env:
+          IMAGE_PATH: ${{ inputs.image-path }}
+        run: |
+          echo "image-tag=${GITHUB_REF_NAME/\//-}" >> $GITHUB_OUTPUT
+          echo "image-path=${IMAGE_PATH@L}" >> $GITHUB_OUTPUT
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        if: ${{ github.event_name != 'release' }}
+        with:
+          context: "{{defaultContext}}:${{ inputs.context }}"
+          tags: "${{ steps.format.outputs.image-path }}:${{ steps.format.outputs.image-tag }}"
+          push: false
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        env:
+          TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db
+          TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db,aquasec/trivy-java-db,ghcr.io/aquasecurity/trivy-java-db
+        with:
+          image-ref: "${{ steps.format.outputs.image-path }}:${{ steps.format.outputs.image-tag }}"
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          ignore-unfixed: true
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+      - name: Inspect bandit SARIF report
+        if: always()
+        run: cat trivy-results.sarif
