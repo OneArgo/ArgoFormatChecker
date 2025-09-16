@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build  (pull request)
         uses: docker/build-push-action@v6
-        if: ${{ github.event_name == 'pull_request'}
+        if: ${{ github.event_name == 'pull_request'}}
         with:
           context: "{{defaultContext}}:${{ inputs.context }}"
           tags: "${{ steps.format.outputs.lowercase }}:develop"
