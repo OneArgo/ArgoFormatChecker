@@ -75,10 +75,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		super(arFile);
 	}
 
-//	public ArgoMetadataValidator(String specDir, String version) {
-//		// super(specDir, FileType.METADATA, version);
-//	}
-
 	// ..........................................
 	// METHODS
 	// ..........................................
