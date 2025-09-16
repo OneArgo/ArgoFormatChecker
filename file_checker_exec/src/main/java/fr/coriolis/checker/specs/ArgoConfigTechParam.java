@@ -34,7 +34,6 @@ import org.apache.logging.log4j.Logger;
  *          $
  */
 public class ArgoConfigTechParam {
-// TODO : 2025/08 need a refactor to better extract tech param, unit and longname !
 //............................................
 //               VARIABLES
 //............................................
@@ -905,7 +904,8 @@ public class ArgoConfigTechParam {
 		String paramName = paramNameAndUnit[0];
 		String unit = paramNameAndUnit[1];
 
-		// add list to authorized unit list for this parameter. TO USE LATER. FOR NOW USE AUTHORIZE ALL UNITS FROM UNITS TABLE
+		// add list to authorized unit list for this parameter. TO USE LATER. FOR NOW
+		// USE AUTHORIZE ALL UNITS FROM UNITS TABLE
 //		if (paramAuthorizedUnits.containsKey(paramName)) {
 //			paramAuthorizedUnits.get(paramName).add(unit);
 //		} else {
