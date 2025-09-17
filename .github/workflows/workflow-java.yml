@@ -15,10 +15,6 @@ on:
   release:
     types: [created]
     
-permissions:
-  contents: read
-  security-events: write
-  actions: read
 
 jobs:
   container-image-build:    

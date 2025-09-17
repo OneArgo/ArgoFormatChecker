@@ -28,7 +28,7 @@ jobs:
           string: ${{ inputs.image-path }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
-        if: ${{ github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/develop') }}
+        if: ${{ github.event_name == 'release' || github.event_name == 'push'  }}
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -46,6 +46,13 @@ jobs:
         with:
           context: "{{defaultContext}}:${{ inputs.context }}"
           tags: "${{ steps.format.outputs.lowercase }}:develop"
+          push: true
+      - name: Build and push (main)
+        uses: docker/build-push-action@v6
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          context: "{{defaultContext}}:${{ inputs.context }}"
+          tags: "${{ steps.format.outputs.lowercase }}:latest"
           push: true
       - name: Build and push (release)
         uses: docker/build-push-action@v6

@@ -135,10 +135,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		}
 		// .......do meta-data file specific validations..........
 
-//		if (ckNulls) {
-//			validateStringNulls();
-//		}
-
 		validateDates();
 
 		if (this.arFile.fileVersion().trim().compareTo("2.2") <= 0) {
