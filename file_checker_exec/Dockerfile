@@ -1,5 +1,14 @@
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
+LABEL org.opencontainers.image.authors="yvan.lubac@euro-argo.eu"
+LABEL org.opencontainers.image.description="Docker Image for Argo netcdf File Checler"
+LABEL org.opencontainers.image.url="https://github.com/OneArgo/ArgoFormatChecker"
+LABEL org.opencontainers.image.source="https://github.com/OneArgo/ArgoFormatChecker"
+LABEL org.opencontainers.image.documentation="https://github.com/OneArgo/ArgoFormatChecker"
+LABEL org.opencontainers.image.licenses="TBD"
+LABEL org.opencontainers.image.vendor="OneArgo"
+
+
 WORKDIR /build
 
 COPY ./.mvn ./.mvn

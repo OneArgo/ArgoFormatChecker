@@ -1,0 +1,11 @@
+services:
+  argo-netcdf-checker:
+    container_name: ArgoFormatChecker
+    image: ${FILECHECKER_IMAGE}:${FILECHECKER_IMAGE_TAG}
+    env_file:
+      - .env
+    volumes:
+      - ${FILECHECKER_SPEC_VOLUME}:/app/file_checker_spec:ro
+      - ${FILECHECKER_INPUT_VOLUME}:/app/data:ro
+      - ${FILECHECKER_OUTPUT_VOLUME}:/app/results:rw
+    command: ${FILECHECKER_OPTIONS} ${DAC_NAME} ./file_checker_spec ./results ./data ${FILES_NAMES}
