@@ -28,6 +28,12 @@ RUN set -e \
 && addgroup --system --gid 1001 gcontainer \
 && adduser --system --uid 1001 -G gcontainer fileCheckerRunner
 
+RUN set -e \
+&& mkdir -p /app/results /app/data /app/file_checker_spec; \
+&& chown root:gcontainer /app/results /app/data /app/file_checker_spec; \
+&& chmod 2775 /app/results; \
+&& chmod 2755 /app/data /app/file_checker_spec
+
 # Copy the built jar file to the runtime stage
 COPY --from=builder --chown=root:gcontainer --chmod=750 /build/target/file_checker*.jar app.jar
 # Specify the default command for running the app
