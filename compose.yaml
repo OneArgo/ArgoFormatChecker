@@ -2,8 +2,9 @@ services:
   argo-netcdf-checker:
     container_name: ArgoFormatChecker
     image: ${FILECHECKER_IMAGE}:${FILECHECKER_IMAGE_TAG}
-    env_file:
-      - .env
+    user: "${DOCKER_UID:-0}:${DOCKER_GID:-0}"
+    group_add:
+      - 1001
     volumes:
       - ${FILECHECKER_SPEC_VOLUME}:/app/file_checker_spec:ro
       - ${FILECHECKER_INPUT_VOLUME}:/app/data:ro
