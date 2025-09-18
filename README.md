@@ -53,7 +53,7 @@ To facilitate the use of Argo file checker a compose.yaml and .env files are pro
 - Prepare your data.
 - Copy `.env.docs` as `.env` file, and customize variables to configure the file checker for your environment.
 - Download compose.yaml
-- Run te service using Docker Compose:
+- Run the service using Docker Compose:
 
 ```bash
 docker compose -f compose.yaml up
@@ -99,11 +99,17 @@ git clone https://github.com/OneArgo/ArgoFormatChecker.git
 ./run-file-checker-linux.sh
 ```
 
+or for Windows :
+
+```bash
+./run-file-checker-windows.bat
+```
+
 output files will be generated in `./demo/outputs`.
 
 ### Test data
 
-To test the Argo File Checker, you will find argo data here : https://www.argodatamgt.org/DataAccess.html
+To further test the Argo File Checker, you will find argo data here : https://www.argodatamgt.org/DataAccess.html
 
 The Argo File Checker is not yet designed to checking *prof.nc and *Sprof.nc. It checks only TRAJ, META, TECH and PROFILES files.
 
