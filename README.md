@@ -29,7 +29,7 @@ $FILES_NAMES is a list of file's name from the INPUT_DIR. It is optional : witho
 ### Run the application using Docker
 
 ```bash
-docker run --rm -v [ABSOLUTE_PATH_TO_SPEC]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results ghcr.io/oneargo/argoformatchecker/app:{TAG} $DAC_NAME ./file_checker_spec ./results ./data [$FILES_NAMES]
+docker run --rm -v [ABSOLUTE_PATH_TO_SPEC]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results ghcr.io/oneargo/argoformatchecker/app:{TAG} [$OPTIONS] $DAC_NAME ./file_checker_spec ./results ./data [$FILES_NAMES]
 ```
 
 You need to mount external directories to the container :
