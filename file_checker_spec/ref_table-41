@@ -1,23 +1,21 @@
 // $Revision: 0001 $
-// $Date: 2025-13-06 
+// $Date: 2025-23-09 
 //CODNAM 
 
-
-AOML Hurricane ALAMO Floats
 Argo ARGENTINA
 Argo AUSTRALIA
-Argo AUSTRALIA eq.
+Argo eq. AUSTRALIA 
 Argo AWI
-Argo BGC, AOML
+Argo BGC - AOML
 Argo BRAZIL
 Argo BSH
 Argo CANADA
 Argo CANADA Dalhousie University
-Argo CANADA eq.
+Argo eq. CANADA
 Argo CANADA ONC
 Argo CHILE
 Argo CHINA
-Argo Colombia
+Argo COLOMBIA
 Argo COSTA RICA
 Argo Deep, CHINA
 Argo DENMARK
@@ -42,7 +40,6 @@ Argo eq. NRIFS
 Argo eq. OIST
 Argo eq. ORI
 Argo eq. PMEL
-Argo eq. POMME
 Argo eq. SAGE
 Argo eq. TNFRI
 Argo eq. TSK
@@ -59,9 +56,9 @@ Argo GERMANY 2025
 Argo GO-BGC, SIO
 Argo GO-BGC, UW
 Argo GO-BGC, WHOI
-Argo GOM-BOEM eq.
+Argo eq. GOM-BOEM
 Argo Greenland Ocean Observations
-Argo HU eq.
+Argo eq. HU 
 Argo IFM-GEOMAR
 Argo INDIA
 Argo INDONESIA
@@ -73,7 +70,7 @@ Argo KENYA
 Argo KIOST
 Argo LEBANON
 Argo MAURITIUS
-Argo MEX-CO-US
+Argo MEXICO-US
 Argo MEXICO
 Argo MOROCCO
 Argo NETHERLANDS
@@ -83,55 +80,38 @@ Argo NORWAY
 Argo PERU
 Argo PMEL
 Argo POLAND
-Argo Portugal
+Argo PORTUGAL
 Argo ROMANIA
 Argo RUSSIA
 Argo SAUDI ARABIA
 Argo SIO
-Argo SIO eq (ASIRI)
-Argo SIO .eq. (BGCSOLONOPP)
-Argo SIO eq. (OKMC)
-Argo SIO eq. (SBE61NOPP)
+Argo eq. SIO (ASIRI)
+Argo eq. SIO (BGCSOLONOPP)
+Argo eq. SIO (OKMC)
+Argo eq. SIO (SBE61NOPP)
 Argo SOUTH AFRICA
 Argo SPAIN
 Argo SRI LANKA
 Argo TWR Engineering
 Argo UK
 Argo UK Bio
-Argo UK eq.
+Argo eq. UK
 Argo UW
-Argo UW-APL eq.
-Argo UW eq.
-Argo UW-MBARI
-Argo UW-SPURS  eq. 
-Argo UW-TPOS eq.
-Argo UW-UA eq.
+Argo eq. UW, APL
+Argo eq. UW
+Argo UW, MBARI
+Argo eq. UW (SPURS)
+Argo eq. UW (TPOS)
+Argo eq. UW (UA)
 Argo WHOI
-Argo WHOI eq.
-Argo WHOI eq. IR
-Argo WHOI-Loop Current eq.
-Argo WHOI-MRV eq.
-Argo WHOI-SODA eq.
-AtlantOS_H2020
-BioArgo UMaine
-BulArgo
-Coriolis
-Coriolis-BIOArgo
-Coriolis-CONGAS
-Coriolis-DRAKE
-Coriolis-EGYPT
-Coriolis-FLOPS
-Coriolis-FLOSTRAL
-Coriolis-FNOB-JCOMMOPS
-Coriolis-FRONTALIS
-Coriolis-Good Hope
-Coriolis-OVIDE
-Coriolis-PIRATA
-Coriolis-Previmer
-Coriolis-PROSAT
-Coriolis-remOcean
-Coriolis-SPICE
-Coriolis-TRACK
+Argo eq. WHOI
+Argo eq. WHOI (IR)
+Argo eq. WHOI (LOOP CURRENT)
+Argo eq. WHOI, MRV
+Argo eq. WHOI (SODA)
+AtlantOS H2020
+Argo Bio UMaine
+Argo Bulgaria
 DEKOSIM
 E-AIMS
 Euro-Argo
@@ -146,18 +126,17 @@ MOCCA-IT
 MOCCA-NETH
 MOCCA-POL
 NAOS-Canada
-NAOS-France
-REFINE
-SOCLIM
-Coriolis-EGEE
 Argo GREECE
-Argo UW-SOCCOM
+Argo UW (SOCCOM)
 Argo BRAZIL Navy
-Argo SIO eq. (ARCTIC SOLO)
-Euro-Argo RISE
-Argo FPAII-GMMC
+Argo eq. SIO (ARCTIC SOLO)
+Euro-Argo (RISE)
 Meridian Goodhope
-Argo CHINA SOA
-Coriolis-CANOA
-Argo Ukraine
-Argo Sweden
+Argo CHINA, SOA
+Coriolis (CANOA)
+Argo UKRAINE
+Argo SWEDEN
+Argo FRANCE
+Argo eq. FRANCE
+ITINERIS
+Argo AOML
