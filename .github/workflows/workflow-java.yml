@@ -22,9 +22,3 @@ jobs:
     with:
       context: file_checker_exec
       image-path: ghcr.io/OneArgo/ArgoFormatChecker/app
-  container-image-security:
-    needs: [container-image-build]
-    uses: ./.github/workflows/component-container-image-security.yml
-    with:
-      context: file_checker_exec
-      image-path: ghcr.io/OneArgo/ArgoFormatChecker/app

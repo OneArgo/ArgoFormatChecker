@@ -1,0 +1,32 @@
+---
+include:
+  - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@~latest
+    inputs:
+      container_image_build_context: "./file_checker_exec"
+      container_image_docker_file_path: "./file_checker_exec/Dockerfile"
+      java_builder_artifacts_path: "**/target/*.{war,jar}"
+      java_builder_build_command: "clean package -f file_checker_exec/pom.xml"
+      java_builder_maven_quality_enable: "false"
+      java_builder_maven_settings_path: "./file_checker_exec/settings.xml"
+      java_builder_publish_command: "deploy -f file_checker_exec/pom.xml"
+      java_builder_quality_command: "checkstyle:check -f file_checker_exec/pom.xml"
+      java_builder_tests_command: "test -f file_checker_exec/pom.xml"
+      java_publish_enable: "true"
+      pipeline_enable_sonarqube: "false"
+      lint_yamllint_enable: "false"
+
+security:filesystem:scan 🛡️:
+  rules:
+    - when: always
+
+check_container-image_scanning:
+  stage: security
+  image: alpine:latest
+  script:
+    - CRITICAL_COUNT=$(grep -o '<tr class="severity-CRITICAL">' scanning-report.html | wc -l || echo 0) 
+    - echo "Number of critical vulnerabilities:${CRITICAL_COUNT}"
+    - if [ "$CRITICAL_COUNT" -gt 0 ]; then echo "Critical vulnerabilities detected"; exit 1; fi
+  needs:
+    - job: security:filesystem:scan 🛡️
+      artifacts: true
+  allow_failure: false  
