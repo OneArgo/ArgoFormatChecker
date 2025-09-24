@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 LABEL org.opencontainers.image.authors="yvan.lubac@euro-argo.eu"
 LABEL org.opencontainers.image.description="Docker Image for Argo netcdf File Checler"
@@ -20,7 +20,7 @@ COPY ./src ./src
 RUN chmod +x ./mvnw \
 && ./mvnw clean package
 
-FROM eclipse-temurin:8-jre-alpine AS runtime
+FROM eclipse-temurin:8-jre-jammy AS runtime
 
 WORKDIR /app
 
