@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk-jammy AS builder
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
 LABEL org.opencontainers.image.authors="yvan.lubac@euro-argo.eu"
 LABEL org.opencontainers.image.description="Docker Image for Argo netcdf File Checler"
@@ -20,13 +20,13 @@ COPY ./src ./src
 RUN chmod +x ./mvnw \
 && ./mvnw clean package
 
-FROM eclipse-temurin:8-jre-jammy AS runtime
+FROM eclipse-temurin:8-jre-alpine AS runtime
 
 WORKDIR /app
 
 RUN set -e \ 
 && addgroup --system --gid 1001 gcontainer \
-&& adduser --system --uid 1001 --gid 1001 --no-create-home fileCheckerRunner
+&& adduser --system --uid 1001 -G gcontainer fileCheckerRunner
 
 RUN set -e \
 && mkdir -p /app/results /app/data /app/file_checker_spec \
