@@ -26,7 +26,7 @@ WORKDIR /app
 
 RUN set -e \ 
 && addgroup --system --gid 1001 gcontainer \
-&& adduser --system --uid 1001 -G gcontainer fileCheckerRunner
+&& adduser --system --uid 1001 --gid 1001 --no-create-home fileCheckerRunner
 
 RUN set -e \
 && mkdir -p /app/results /app/data /app/file_checker_spec \
