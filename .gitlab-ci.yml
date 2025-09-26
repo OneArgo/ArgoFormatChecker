@@ -2,8 +2,6 @@
 include:
   - component: $CI_SERVER_FQDN/dev-ops/templates/automatisation/ci-cd/pipeline-java-container-image@~latest
     inputs:
-      container_image_build_context: "./file_checker_exec"
-      container_image_docker_file_path: "./file_checker_exec/Dockerfile"
       java_builder_artifacts_path: "**/target/*.{war,jar}"
       java_builder_build_command: "clean package -f file_checker_exec/pom.xml"
       java_builder_maven_quality_enable: "false"
