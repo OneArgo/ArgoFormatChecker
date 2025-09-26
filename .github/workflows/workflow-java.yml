@@ -8,10 +8,14 @@ on:
       - develop
     paths:
       - file_checker_exec/**
+      - file_checker_spec/**
+      - Dockerfile
   pull_request:
     # Run for any pull requests
     paths:
       - file_checker_exec/**
+      - file_checker_spec/**
+      - Dockerfile
   release:
     types: [created]
     
@@ -20,5 +24,5 @@ jobs:
   container-image-build:    
     uses: ./.github/workflows/component-container-image.yml
     with:
-      context: file_checker_exec
+      context: .
       image-path: ghcr.io/OneArgo/ArgoFormatChecker/app
