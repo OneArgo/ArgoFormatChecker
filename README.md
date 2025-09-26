@@ -29,12 +29,18 @@ $FILES_NAMES is a list of file's name from the INPUT_DIR. It is optional : witho
 ### Run the application using Docker
 
 ```bash
+docker run --rm -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results ghcr.io/oneargo/argoformatchecker/app:{TAG} [$OPTIONS] $DAC_NAME ./file_checker_spec ./results ./data [$FILES_NAMES]
+```
+
+Or if you want to use your own specification files :
+
+```bash
 docker run --rm -v [ABSOLUTE_PATH_TO_SPEC]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results ghcr.io/oneargo/argoformatchecker/app:{TAG} [$OPTIONS] $DAC_NAME ./file_checker_spec ./results ./data [$FILES_NAMES]
 ```
 
 You need to mount external directories to the container :
 
-[ABSOLUTE_PATH_TO_SPEC] : the file_checker_spec directory path.
+[ABSOLUTE_PATH_TO_SPEC] : OPTIONAL - The file_checker_spec directory path.
 
 [ABSOLUTE_PATH_TO_DATA_FOLDER] : Path to directory containing the argo necdf files to be checked. The fileChecker will not seek files in subfolders
 
@@ -43,7 +49,7 @@ You need to mount external directories to the container :
 Example :
 
 ```bash
-docker run --rm -v D:\test_file_checker\file_checker_spec:/app/file_checker_spec -v D:\test_file_checker\datatest:/app/data -v D:\test_file_checker\results:/app/results ghcr.io/oneargo/argoformatchecker/app:develop  -no-name-check coriolis ./file_checker_spec ./results ./data
+docker run --rm -v D:\test_file_checker\datatest:/app/data -v D:\test_file_checker\results:/app/results ghcr.io/oneargo/argoformatchecker/app:develop  -no-name-check coriolis ./file_checker_spec ./results ./data
 ```
 
 ### Run the application using Docker Compose
