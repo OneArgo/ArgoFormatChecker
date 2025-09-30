@@ -40,7 +40,7 @@ docker run --rm -v [ABSOLUTE_PATH_TO_SPEC]:/app/file_checker_spec -v [ABSOLUTE_P
 
 You need to mount external directories to the container :
 
-[ABSOLUTE_PATH_TO_SPEC] : OPTIONAL - The file_checker_spec directory path.
+[ABSOLUTE_PATH_TO_SPEC] : OPTIONAL - The file_checker_spec directory path (if you don't want to use the specs included in the docker container).
 
 [ABSOLUTE_PATH_TO_DATA_FOLDER] : Path to directory containing the argo necdf files to be checked. The fileChecker will not seek files in subfolders
 
@@ -79,7 +79,6 @@ FILECHECKER_IMAGE=ghcr.io/oneargo/argoformatchecker/app
 FILECHECKER_IMAGE_TAG=develop
 
 # External directories to mount to the container
-FILECHECKER_SPEC_VOLUME='D:\test_compose\file_checker_spec'
 FILECHECKER_INPUT_VOLUME='D:\test_compose\data'
 FILECHECKER_OUTPUT_VOLUME='D:\test_compose\results'
 
