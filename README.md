@@ -118,6 +118,10 @@ To further test the Argo File Checker, you will find argo data here : https://ww
 
 The Argo File Checker is not yet designed to checking *prof.nc and *Sprof.nc. It checks only TRAJ, META, TECH and PROFILES files.
 
+## Run File checker using Python and an API
+
+In folder /argo-file-checker-python you will find a python wrapper and an API to facilitate the use of Argo FileChecker.
+
 ## TOOLS
 
 ### Maven Wrapper

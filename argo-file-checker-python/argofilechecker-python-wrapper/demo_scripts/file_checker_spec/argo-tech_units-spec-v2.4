@@ -1,0 +1,78 @@
+// Table of Units for Technical and Configuration files - updated 11 May 2016 |  |  | 
+// SI version of approved units - these are the NEW approved units in ALL cases | data format | definition | Notes:
+
+COUNT | integer | no SI equivalent | a number of times something happened
+NUMBER | integer | no equivalent and already in use | 
+LOGICAL | logical | "true/yes/1, false/no/0 (already used in upper case)" | "true/false, 0/1,  yes/ no"
+hex | hex | no SI or UD equivalent but this is conventional usage | hexadecimal
+bit | integer | UD unit | 
+byte | integer | no SI or UD equivalent but this is conventional usage | 
+kbyte | integer | kilobyte | kilobyte
+
+days | integer | elapsed period or duration in days or possibly day of year number | a number of days
+hours | float | elapsed period or duration in hours - can be decimal | a number of hours
+minutes | integer | elapsed period or duration in minutes | number of minutes
+seconds   | integer | elapsed period or duration in seconds | number of seconds
+dsec | integer | deci-seconds | decisecond
+csec | integer | centi seconds - no SI nor UD unit equivalent | centisecond
+msec | integer | milliseconds | milliseconds
+usec | integer | microseconds | 
+FloatDay | integer | the number of days since the day of the first dive (FloatDAY = 0) | "relative to reference day - for eg., day of year "
+dsec/day | float | no SI or UD equivalent | 
+
+DDMMYYYY | date/time | "no SI or UD equivalent but this is conventional usage - padded to 8 characters, no non-numeric characters " | calendar - day/month/year
+YYYYMMDD | date/time | "no SI or UD equivalent but this is conventional usage - padded to 8 characters, no non-numeric characters " | 
+HHMMSS        | date/time | "no SI or UD equivalent but this is conventional usage - padded to 6 characters, no non-numeric characters " | clock - hours/minutes/seconds
+YYYYMMDDHHMMSS | date/time | conventional usage - note - no non-numeric characters are allowed - example: 20150504123000 = 12:30 4 April 2015 |  clock/calendar - year/month/day/year/minutes/seconds
+DD | date/time | "integer day padded to two characters, no non-numeric characters" | calendar - day
+HH | date/time | "integer hours  padded to two characters, no non-numeric characters" | clock - hour
+MM | date/time | "integer month  padded to two characters, no non-numeric characters" | calendar - month
+YYYY | date/time | "integer year - require 4 characters, no non-numeric characters" | calendar - year
+MMSS | date/time | "integer minutes:seconds - padded to 4 characters only, no non-numeric characters" | clock - minutes/seconds
+HHMM | date/time | "integer hours:minutes - padded to 4 characters only, no non-numeric characters" | clock - hours/minutes
+
+bar | float | SI unit | 
+cbar | float | centibar | 
+dbar | float | decibar | 
+mbar | float | millibar | milliBar
+mbarRange | string |  | 
+inHg | float | no SI equivalent but this is the UDunit | inches of mercury - a measure of pressure
+PercentAtm | float | percent atmosphere | 
+percent | float | percent saturation (for example) | 
+
+degC | float | SI unit doesn't work but this is the UDunit | 
+mdegC | float | millidegrees | millidegrees
+psu | float | convention seems to be lower case but no SI or UD equivalent | Practical Salinity Units
+mpsu | float | milli-PSU units | milli-PSU units
+
+ppb | float | not in any unit list. | parts per billion
+
+hertz | float | frequency | frequency
+amps | float | ampere - SI unit | 
+mA | float | milliamps | 
+volts | float | SI unit | 
+mV | float | millivolts | 
+voltseconds | float | volt seconds - no equivalent | integrated measure volts*seconds
+
+mmol/L | float | spell it out for clarity - Udunit | milli moles per liter
+umol/L | float | micromoles/litre | micromoles per liter
+umol/kg | float | micromoles/kilogram | micromoles per kilogram
+ug/L | float | micrograms/litre | micrograms per liter
+kg/m^3 | float | kilograms per metre cubed | kilograms per meter cubed
+mg/m^3 | float | milligrams per meter cubed | milligrams per meter cubed
+mm/s | float | millimeters per second | millimeters per second
+ml/L | float | millilitre per litre | 
+
+angularDeg | float | no SI or UD equivalent  - use D to make it more readable and 'angular' to distinguish it from other types of degrees | angular degree
+
+m^-1  | float | per meter - note - this is the only time this will not use '/' to denote denominator | per meter
+cm/s | float | SI unit | centimeters per second
+cm^3 | float | centimeters cubed - conforms to neither SI nor U units | centimeters cubed
+
+mho/m | float | milli ohms per metre - do we require the use of siemens? | conductance - reciprocal ohm
+siemens | float | siemens - equivalent to mho | practical unit of conductance = Mho
+siemens/cm | float | siemens per centimeter | 
+NTU | integer | Nephelometric Turbidity Units | Nephelometric Turbidity Units
+m^-1/sr | float | per meter per steradian | 
+uW/cm^2/nm | float | micro watts/cm squared/nannometer | 
+nm | float | nanometer | 

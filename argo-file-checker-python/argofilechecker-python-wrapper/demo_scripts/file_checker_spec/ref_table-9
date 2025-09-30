@@ -1,0 +1,15 @@
+// $Revision: 1156 $
+// $Date: 2020-10-20 20:57:52 +0000 (Tue, 20 Oct 2020) $
+//POSITIONING_SYSTEM	
+
+ARGOS | ARGOS positioning system
+GPS | GPS positioning system
+RAFOS | RAFOS positioning system
+IRIDIUM | Iridium positioning system
+BEIDOU | Beidou navigation satellite system
+GLONASS | GLONASS navigation satellite system
+GALILEO | Galileo navigation satellite system
+GNSS | Global Navigation Satellite System
+NONE | For profile file only: if an estimated position is based on two or more positioning systems, or if the estimation does not rely on information from positioning systems
+
+

@@ -1,0 +1,37 @@
+//THE FOLLOWING NAMES ARE ADDED HERE ONLY FOR THOSE DACS WHO HAVE NOT YET CONVERTED T OVERSION 3.1 TRAJ FILES - THEY WILL NOT BE ALLOWED INDEFINITELY IN THE TECH FILES SO PLEASE DISCONTINUE USE HERE AS SOON AS POSSIBLE TO AVOID FUTURE CHAOS! |  |  |  |  |  |  |  | 
+
+PRES_ParkGrounded_dbar | Deprecated -  PRES during Park phase when float is grounded | MC901 references grounding information | T | Deprecated |  |  |  | 
+PRES_ParkMean_dbar | Deprecated - mean PRES during the park phase | There are MC codes for this:  MC minus 4 or 296 | T | Deprecated |  |  |  | 
+PRES_ParkMaximum_dbar | Deprecated - maximum PRES during park phase | There are MC codes for this:  MC minus 2 or 298 | T | Deprecated |  |  |  | 
+PRES_ParkMinimum_dbar | Deprecated - minimum PRES during park phase | There are MC codes for this:  MC minus 3 or 297 | T | Deprecated |  |  |  | 
+PRES_ParkStandardDeviation_dbar | Deprecated - standard deviation of PRES during the park phase | This is MC minus 6 or 294 | T | Deprecated |  |  |  | 
+PRES_WhenMaximumTemperatureAtPark_dbar | Deprecated - pressure where the max TEMP was measured during park phase | This is MC minus 12 or 288 | T | Deprecated |  |  |  | 
+PRES_WhenMinimumTemperatureAtPark_dbar | Deprecated - pressure where the min TEMP was measured during park phase | This is MC minus 13 or 287 | T | Deprecated |  |  |  | 
+TEMP_ParkMaximum_degC | Deprecated - TEMP max during park phase | There are MC codes for this:  MC minus 2 or 298 | T | Deprecated |  |  |  | 
+TEMP_ParkMean_degC | Deprecated - mean TEMP during park phase | There are MC codes for this:  MC minus 4 or 296 | T | Deprecated |  |  |  | 
+TEMP_ParkMinimum_degC | Deprecated - TEMP min during park phase | There are MC codes for this:  MC minus 3 or 297 | T | Deprecated |  |  |  | 
+TEMP_ParkStandardDeviation_degC | Deprecated - standard deviation of TEMP during the park phase | This is MC minus 6 or 294 | T | Deprecated |  |  |  | 
+CLOCK_FirstMessageTime_YYYYMMDDHHMMSS | Deprecated - time when the first message is sent. | spoke with Kanako about this and decided not to include it in traj file for Deep Ninja - it is basically same time as first message received by satellite (MC=702) | T | Deprecated | NINJA_D | 5/19/2014 | 5/19/2014 | 
+CLOCK_DateGrounded_DDMMYYYY | Deprecated - date the float grounded | MC901 references grounding information | T | Deprecated  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_1stSettlingBeforePark_YYYYMMDDHHMMSS | Deprecated - time when float was settled at the parking depth for the 1st time | MC189 - buoyancy action | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_1stSettlingBeforePark_dbar | Deprecated - pressure when float was settled at the parking depth for the 1st time | MC189 - buoyancy action | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_2ndSettlingBeforePark_YYYYMMDDHHMMSS | Deprecated - time when float was settled at the parking depth for the 2nd time | MC189 - buoyancy action | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_2ndSettlingBeforePark_dbar | Deprecated - pressure when float was settled at the parking depth for the 2nd time | MC189 - buoyancy action | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_3rdSettlingBeforePark_YYYYMMDDHHMMSS | Deprecated - time when float was settled at the parking depth for the 3rd time | MC189 - buoyancy action | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_3rdSettlingBeforePark_dbar | Deprecated - pressure when float was settled at the parking depth for the 3rd time | MC189 - buoyancy action | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+TEMP_LastAscentPumpedRawSample_degC | Deprecated - Last (shallowest) pumped raw temperature sample acquired during the ascent from the profile depth to the surface (i.e. just before the cut-off pressure where the pump is stopped) (in in degC). | MC599 |  | Deprecated |  |  |  | 
+PSAL_LastAscentPumpedRawSample_psu | Deprecated - Last (shallowest) pumped raw salinity sample acquired during the ascent from the profile depth to the surface (i.e. just before the cut-off pressure where the pump is stopped) (in PSU). | MC599 |  | Deprecated |  |  |  | 
+PRES_DescentStartToPark_dbar | Deprecated - Pressure taken at the end of piston retraction  | JULD_PARK_START and JULD with MC = 250 | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentStartToProfile_dbar | Deprecated - Pressure taken at the end of piston retraction  | JULD_DEEP_PARK_START and JULD with MC = 450 | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentToParkEnd_dbar  | Deprecated - pressure when the float reaches park depth but still goes through settling etc so not quite equivalent to ParkStart | JULD_DESCENT_END and JULD with MC=200 | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentToParkMaxPressure_dbar | Deprecated - Descent to park - Max pressure | we have an MC for this:  MC minus 2  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentToParkMinPressure_dbar | Deprecated - Descent to park - Min pressure | we have an MC for this:  MC minus 3  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentToProfileMaxPressure_dbar | Deprecated - Descent to profile- Max pressure | we have an MC for this:  MC minus 2  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentToProfileMinPressure_dbar | Deprecated - Descent to profile - Min pressure | we have an MC for this:  MC minus 3  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_Grounded_dbar | Deprecated - the grounded pressure if the float hit bottom. | MC901 references grounding information |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_InitialStabilizationDuringDescentToPark_dbar | Deprecated - pressure when first stabilization appears during descent to park (dbar) | use MC 150 | T | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_MaximumDescentToPark_dbar | "Deprecated - max recorded pressure (dbar) during descent, before stabilisation at park pressure" | we have an MC for this:  MC minus 2  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_MaximumDescentToProfile_dbar | "Deprecated - max recorded pressure during descent, before stabilisation at profile pressure" | we have an MC for this:  MC minus 2  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_MaximumDuringProfileDrift_dbar | Deprecated - maximum PRES during drifting at profile depth | we have an MC for this:  MC minus 2  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_MinimumDescentToProfile_dbar | Deprecated - min pressure recorded during descent to profile | we have an MC for this:  MC minus 3  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 
+PRES_MinimumDuringProfileDrift_dbar | Deprecated - minimum PRES during drifting at profile depth | we have an MC for this:  MC minus 3  |  | Deprecated |  | 1/5/2012 | 1/5/2012 | 

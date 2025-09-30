@@ -1,0 +1,32 @@
+// $Revision: 1018 $
+// $Date: 2019-01-03 00:21:44 +0000 (Thu, 03 Jan 2019) $
+//SENSOR | Comment | Status
+
+ACOUSTIC |  | 
+ACOUSTIC_GEOLOCATION |  | 
+CTD_PRES |  | 
+CTD_TEMP |  | 
+CTD_CNDC |  | 
+CTD_TEMP_CNDC |  |
+EM |  | 
+FLUOROMETER_CDOM |  | 
+FLUOROMETER_CHLA |  | 
+IDO_DOXY |  | 
+OPTODE_DOXY |  | 
+RADIOMETER_DOWN_IRR |  | deprecated
+RADIOMETER_DOWN_IRR<nnn> | Radiometer measuring downwelling irradiance at wavelength <nnn> specified in Table 3 BGC-Argo parameters list | 
+RADIOMETER_PAR |  | 
+RADIOMETER_UP_RAD |  | deprecated
+RADIOMETER_UP_RAD<nnn> | Radiometer measuring upwelling radiance at wavelength <nnn> specified in Table 3 BGC-Argo parameters list | 
+SCATTEROMETER_BBP |  | deprecated
+BACKSCATTERINGMETER_BBP<nnn> | Backscattering meter measuring backscattering at wavelength <nnn> specified in Table 3 BGC-Argo parameters list | 
+SCATTEROMETER_TURBIDITY |  | deprecated
+BACKSCATTERINGMETER_TURBIDITY |  | 
+SPECTROPHOTOMETER_NITRATE |  | 
+SPECTROPHOTOMETER_BISULFIDE |  | 
+STS_CNDC |  | 
+STS_TEMP |  | 
+TRANSISTOR_PH |  | 
+TRANSMISSOMETER_CP |  | deprecated
+TRANSMISSOMETER_CP<nnn> | Transmissometer measuring attenuation at wavelength <nnn> specified in Table 3 BGC-Argo parameters list | 
+FLOATCLOCK_MTIME |  |

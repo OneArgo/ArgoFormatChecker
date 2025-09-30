@@ -1,0 +1,256 @@
+netcdf argo-profile-v2.1-spec {
+
+//@ DATA_TYPE = "Argo profile"
+//@ FORMAT_VERSION   = "3.0"
+//@ HANDBOOK_VERSION = "1.2"
+//@ REFERENCE_DATE_TIME = "19500101000000"
+//@ $Revision: 656 $
+//@ $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+// global attributes:
+                :title = "Argo float vertical profile" ;
+                :institution = "<+>US GDAC" ;
+                :source = "Argo float" ;
+                :history = "<+>";
+                :references = "http://www.argodatamgt.org/Documentation" ;
+                :user_manual_version = "3.1" ;        /*REGEX = "3\..*" */
+                :Conventions = "Argo-3.1 CF-1.6" ;    /*REGEX = "Argo-3\..* +CF-.*" */
+                :featureType = "trajectoryProfile" ;
+
+dimensions:
+	DATE_TIME = 14;
+	STRING256 = 256; 
+	STRING64   =  64; 
+	STRING32   =  32;
+	STRING16   =  16;
+	STRING8     =   8;
+	STRING4     =   4;
+	STRING2     =   2;
+	N_PROF = _unspecified_;
+	N_PARAM = _unspecified_;
+	N_LEVELS = _unspecified_;
+	N_CALIB = _unspecified_;
+	N_HISTORY = UNLIMITED;
+	
+variables:
+//  General information on the profile file.
+	char DATA_TYPE(STRING16);
+		DATA_TYPE:long_name = "Data type";
+		DATA_TYPE:_FillValue = " ";
+	char FORMAT_VERSION(STRING4);
+		FORMAT_VERSION:long_name = "File format version";
+		FORMAT_VERSION:_FillValue = " ";
+	char HANDBOOK_VERSION(STRING4);
+		HANDBOOK_VERSION:long_name = "Data handbook version";
+		HANDBOOK_VERSION:_FillValue = " ";
+	char REFERENCE_DATE_TIME(DATE_TIME);
+		REFERENCE_DATE_TIME:long_name = "Date of reference for Julian days";
+		REFERENCE_DATE_TIME:conventions = "YYYYMMDDHHMISS";
+		REFERENCE_DATE_TIME:_FillValue = " ";
+	char DATE_CREATION(DATE_TIME);
+		DATE_CREATION:long_name = "Date of file creation";
+		DATE_CREATION:conventions = "YYYYMMDDHHMISS";
+		DATE_CREATION:_FillValue = " ";
+	char DATE_UPDATE(DATE_TIME);
+		DATE_UPDATE:long_name = "Date of update of this file";
+		DATE_UPDATE:conventions = "YYYYMMDDHHMISS";
+		DATE_UPDATE:_FillValue = " ";
+//  General information on each profile.
+	char PLATFORM_NUMBER(N_PROF, STRING8);
+		PLATFORM_NUMBER:long_name = "Float unique identifier";
+		PLATFORM_NUMBER:conventions = "WMO float identifier : A9IIIII";
+		PLATFORM_NUMBER:_FillValue = " ";
+	char PROJECT_NAME(N_PROF, STRING64);
+		PROJECT_NAME:long_name = "Name of the project";
+		PROJECT_NAME:_FillValue = " ";
+	char PI_NAME (N_PROF, STRING64);
+		PI_NAME:long_name = "Name of the principal investigator";
+		PI_NAME:_FillValue = " ";
+	char STATION_PARAMETERS(N_PROF, N_PARAM,STRING16);
+		STATION_PARAMETERS:long_name = "List of available parameters for the station";
+		STATION_PARAMETERS:conventions = "Argo reference table 3";
+		STATION_PARAMETERS:_FillValue = " ";
+	int CYCLE_NUMBER(N_PROF);
+		CYCLE_NUMBER:long_name = "Float cycle number";
+		CYCLE_NUMBER:conventions = "0..N, 0 : launch cycle (if exists), 1 : first complete cycle";
+		CYCLE_NUMBER:_FillValue = 99999;
+	char DIRECTION(N_PROF);
+		DIRECTION:long_name = "Direction of the station profiles";
+		DIRECTION:conventions = "A: ascending profiles, D: descending profiles";
+		DIRECTION:_FillValue = " ";
+	char DATA_CENTRE(N_PROF, STRING2);
+		DATA_CENTRE:long_name = "Data centre in charge of float data processing";
+		DATA_CENTRE:conventions = "Argo reference table 4";
+		DATA_CENTRE:_FillValue = " ";
+	char DC_REFERENCE(N_PROF, STRING32);
+		DC_REFERENCE:long_name = "Station unique identifier in data centre";
+		DC_REFERENCE:conventions = "Data centre convention";
+		DC_REFERENCE:_FillValue = " ";
+	char DATA_STATE_INDICATOR(N_PROF, STRING4);
+		DATA_STATE_INDICATOR:long_name = "Degree of processing the data have passed through";
+		DATA_STATE_INDICATOR:conventions = "Argo reference table 6";
+		DATA_STATE_INDICATOR:_FillValue = " ";
+	char DATA_MODE(N_PROF);
+		DATA_MODE:long_name = "Delayed mode or real time data";
+		DATA_MODE:conventions = "R : real time; D : delayed mode; A : real time with adjustment";
+		DATA_MODE:_FillValue = " ";
+	char PLATFORM_TYPE(N_PROF, STRING32); 
+		PLATFORM_TYPE:long_name = "Type of float"; 
+		PLATFORM_TYPE:_FillValue = " ";
+	char FLOAT_SERIAL_NO(N_PROF, STRING16);
+		FLOAT_SERIAL_NO:long_name = "Serial number of the float";
+		FLOAT_SERIAL_NO:_FillValue = " ";
+	char FIRMWARE_VERSION(N_PROF, STRING16);
+		FIRMWARE_VERSION:long_name = "Instrument version";
+		FIRMWARE_VERSION:_FillValue = " ";
+	char WMO_INST_TYPE(N_PROF, STRING4);
+		WMO_INST_TYPE:long_name = "Coded instrument type";
+		WMO_INST_TYPE:conventions = "Argo reference table 8";
+		WMO_INST_TYPE:_FillValue = " ";
+	double JULD(N_PROF);
+		JULD:long_name = "Julian day (UTC) of the station relative to REFERENCE_DATE_TIME";
+		JULD:standard_name = "time";
+		JULD:units = "days since 1950-01-01 00:00:00 UTC";
+		JULD:conventions = "Relative julian days with decimal part (as parts of day)";
+		JULD:_FillValue = 999999.;
+		JULD:axis = "T";
+	char JULD_QC(N_PROF);
+		JULD_QC:long_name = "Quality on Date and Time";
+		JULD_QC:conventions = "Argo reference table 2";
+		JULD_QC:_FillValue = " ";
+	double JULD_LOCATION(N_PROF);
+		JULD_LOCATION:long_name = "Julian day (UTC) of the location relative to REFERENCE_DATE_TIME";
+		JULD_LOCATION:units = "days since 1950-01-01 00:00:00 UTC";
+		JULD_LOCATION:conventions = "Relative julian days with decimal part (as parts of day)";
+		JULD_LOCATION:_FillValue = 999999.;
+	double LATITUDE(N_PROF);
+		LATITUDE:long_name = "Latitude of the station, best estimate";
+		LATITUDE:standard_name = "latitude";
+		LATITUDE:units = "degree_north";
+		LATITUDE:_FillValue = 99999.;
+		LATITUDE:valid_min = -90.;
+		LATITUDE:valid_max = 90.;
+		LATITUDE:axis = "Y";
+	double LONGITUDE(N_PROF);
+		LONGITUDE:long_name = "Longitude of the station, best estimate";
+		LONGITUDE:standard_name = "longitude";
+		LONGITUDE:units = "degree_east";
+		LONGITUDE:_FillValue = 99999.;
+		LONGITUDE:valid_min = -180.;
+		LONGITUDE:valid_max = 180.;
+		LONGITUDE:axis = "X";
+	char POSITION_QC(N_PROF);
+		POSITION_QC:long_name = "Quality on position (latitude and longitude)";
+		POSITION_QC:conventions = "Argo reference table 2";
+		POSITION_QC:_FillValue = " ";
+	char POSITIONING_SYSTEM(N_PROF, STRING8);
+		POSITIONING_SYSTEM:long_name = "Positioning system";
+		POSITIONING_SYSTEM:_FillValue = " ";
+	char VERTICAL_SAMPLING_SCHEME (N_PROF, STRING256); 
+		VERTICAL_SAMPLING_SCHEME:long_name = "Vertical sampling scheme"; 
+		VERTICAL_SAMPLING_SCHEME:conventions = "Argo reference table 16"; 
+		VERTICAL_SAMPLING_SCHEME:_FillValue = " "; 
+	int CONFIG_MISSION_NUMBER (N_PROF); 
+		CONFIG_MISSION_NUMBER:long_name = "Float's mission number for each profile"; 
+		CONFIG_MISSION_NUMBER:conventions = "0..N, 0 : launch mission (if exists), 1 : first complete mission"; 
+		CONFIG_MISSION_NUMBER:_FillValue = 99999;
+
+//  Measurements for each profile:
+//  The "physical parameter" variables (including PROFILE_*_QC) are 
+//  built dynamically based on the entries in argo-physical_params-spec-v*
+//
+//  The basic template is:
+//     char PROFILE_<PARAM>_QC(N_PROF);
+//         PROFILE_<PARAM>_QC:long_name = "Global quality flag of PRES profile";
+//         PROFILE_<PARAM>_QC:conventions = "Argo reference table 2a";
+//         PROFILE_<PARAM>_QC:_FillValue = " ";
+//
+//     float <P>(N_PROF, N_LEVELS);
+//         <P>:long_name = "<param-specific>";
+//         <P>:standard_name = "<param-specific>";
+//         <P>:_FillValue = fillValuePARAM
+//         <P>:units = "<param-specific>";
+//         <P>:valid_min = "<param-specific>";
+//         <P>:valid_max = "<param-specific>";
+//         <P>:comment = "<param-specific>";  (version-specific)
+//         <P>:C_format = ATTR_IGNORE_VALUE;   //..means ignore setting
+//         <P>:FORTRAN_format = ATTR_IGNORE_VALUE; //..means ignore setting
+//         <P>:resolution = ATTR_IGNORE_VALUE; 
+//         <P>:comment_on_resolution = ATTR_IGNORE; ///..means ignore entirely
+//                              only in v3.1 and beyond (but technically would
+//                              be allowed in earlier versions if it showed up
+//
+//     char <P>_QC(N_PROF, N_LEVELS);
+//        <P>_QC:long_name = "quality flag";
+//        <P>_QC:conventions = "Argo reference table 2";
+//        <P>_QC:_FillValue = " ";
+//
+//   where <P> = <PARAM>, <PARAM>_ADJUSTED
+//
+//  Calibration information for each profile
+	char PARAMETER(N_PROF, N_CALIB, N_PARAM,STRING16);
+		PARAMETER:long_name = "List of parameters with calibration information";
+		PARAMETER:conventions = "Argo reference table 3";
+		PARAMETER:_FillValue = " ";
+	char SCIENTIFIC_CALIB_EQUATION(N_PROF, N_CALIB, N_PARAM,STRING256);
+		SCIENTIFIC_CALIB_EQUATION:long_name = "Calibration equation for this parameter";
+		SCIENTIFIC_CALIB_EQUATION:_FillValue = " ";
+	char SCIENTIFIC_CALIB_COEFFICIENT(N_PROF, N_CALIB, N_PARAM,STRING256);
+		SCIENTIFIC_CALIB_COEFFICIENT:long_name = "Calibration coefficients for this equation";
+		SCIENTIFIC_CALIB_COEFFICIENT:_FillValue = " ";
+	char SCIENTIFIC_CALIB_COMMENT(N_PROF, N_CALIB, N_PARAM,STRING256);
+		SCIENTIFIC_CALIB_COMMENT:long_name = "Comment applying to this parameter calibration";
+		SCIENTIFIC_CALIB_COMMENT:_FillValue = " ";
+	char SCIENTIFIC_CALIB_DATE(N_PROF, N_CALIB, N_PARAM, DATE_TIME);
+		SCIENTIFIC_CALIB_DATE:_FillValue = " ";
+		SCIENTIFIC_CALIB_DATE:long_name = "Date of calibration";
+//  History information for each profile
+	char HISTORY_INSTITUTION ( N_HISTORY, N_PROF, STRING4);
+		HISTORY_INSTITUTION:long_name = "Institution which performed action";
+		HISTORY_INSTITUTION:conventions = "Argo reference table 4";
+		HISTORY_INSTITUTION:_FillValue = " ";
+	char HISTORY_STEP ( N_HISTORY, N_PROF, STRING4);
+		HISTORY_STEP:long_name = "Step in data processing";
+		HISTORY_STEP:conventions = "Argo reference table 12";
+		HISTORY_STEP:_FillValue = " ";
+	char HISTORY_SOFTWARE ( N_HISTORY, N_PROF, STRING4);
+		HISTORY_SOFTWARE:long_name = "Name of software which performed action";
+		HISTORY_SOFTWARE:conventions = "Institution dependent";
+		HISTORY_SOFTWARE:_FillValue = " ";
+	char HISTORY_SOFTWARE_RELEASE ( N_HISTORY, N_PROF, STRING4);
+		HISTORY_SOFTWARE_RELEASE:long_name = "Version/release of software which performed action";
+		HISTORY_SOFTWARE_RELEASE:conventions = "Institution dependent";
+		HISTORY_SOFTWARE_RELEASE:_FillValue = " ";
+	char HISTORY_REFERENCE ( N_HISTORY, N_PROF, STRING64);
+		HISTORY_REFERENCE:long_name = "Reference of database";
+		HISTORY_REFERENCE:conventions = "Institution dependent";
+		HISTORY_REFERENCE:_FillValue = " ";
+	char HISTORY_DATE( N_HISTORY, N_PROF, DATE_TIME);
+		HISTORY_DATE:long_name = "Date the history record was created";
+		HISTORY_DATE:conventions = "YYYYMMDDHHMISS";
+		HISTORY_DATE:_FillValue = " ";
+	char HISTORY_ACTION( N_HISTORY, N_PROF, STRING4);
+		HISTORY_ACTION:long_name = "Action performed on data";
+		HISTORY_ACTION:conventions = "Argo reference table 7";
+		HISTORY_ACTION:_FillValue = " ";
+	char HISTORY_PARAMETER( N_HISTORY, N_PROF, STRING16);
+		HISTORY_PARAMETER:long_name = "Station parameter action is performed on";
+		HISTORY_PARAMETER:conventions = "Argo reference table 3";
+		HISTORY_PARAMETER:_FillValue = " ";
+	float HISTORY_START_PRES( N_HISTORY, N_PROF);
+		HISTORY_START_PRES:long_name = "Start pressure action applied on";
+		HISTORY_START_PRES:_FillValue = 99999.f;
+		HISTORY_START_PRES:units = "decibar";
+	float HISTORY_STOP_PRES( N_HISTORY, N_PROF);
+		HISTORY_STOP_PRES:long_name = "Stop pressure action applied on";
+		HISTORY_STOP_PRES:_FillValue = 99999.f;
+		HISTORY_STOP_PRES:units = "decibar";
+	float HISTORY_PREVIOUS_VALUE( N_HISTORY, N_PROF);
+		HISTORY_PREVIOUS_VALUE:long_name = "Parameter/Flag previous value before action";
+		HISTORY_PREVIOUS_VALUE:_FillValue = 99999.f;
+	char HISTORY_QCTEST( N_HISTORY, N_PROF, STRING16);
+		HISTORY_QCTEST:long_name = "Documentation of tests performed, tests failed (in hex form)";
+		HISTORY_QCTEST:conventions = "Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$";
+		HISTORY_QCTEST:_FillValue = " ";
+
+}

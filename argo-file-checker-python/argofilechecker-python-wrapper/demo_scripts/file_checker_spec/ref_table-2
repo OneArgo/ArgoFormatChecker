@@ -1,0 +1,11 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+0 | No QC was performed
+1 | Good data
+2 | Probably good data
+3 | Bad data that are potentially correctable
+4 | Bad data
+5 | Value changed
+8 | Estimated value
+9 | Missing value
