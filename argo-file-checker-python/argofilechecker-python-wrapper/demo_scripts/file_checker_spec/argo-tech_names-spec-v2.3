@@ -1,0 +1,640 @@
+//parameter code | description | comment | transmitted/calculated | parameter type | float type | creation date | update date | obsolete date
+//"Non-technical data (statistics, QC and diagnostic data)" |  |  |  |  |  |  |  | 
+FLAG_GreyListPSAL_LOGICAL | "Y=yes, N=no (or field is absent)" |  |  |  |  |  |  | 
+FLAG_GreyListTEMP_LOGICAL | "Y=yes, N=no (or field is absent)" |  |  |  |  |  |  | 
+FLAG_SpeedMaximumCheck_NUMBER | needs valid definitions… |  |  |  |  |  |  | 
+TEMP_MixedLayerMedian_degC | median of the mixed layer samples taken |  |  |  |  | 1/15/2013 | 1/15/2013 | 
+TEMP_MixedLayerInfimum_degC | infimum of the mixed-layer median temperature since the last successful telemetry |  |  |  |  | 1/15/2013 | 1/15/2013 | 
+CURRENT_MotorMeanOfProfile_amps | Mean of motor current during upcast |  | T |  |  |  |  | 
+BACKSCATTERING_MeanBeforeAscent_m^-1/sr | Bio parameter statistic |  |  |  |  |  | 1/5/2012 | 
+CDOM_MeanBeforeAscent_ppb | Bio parameter statistic |  |  |  |  |  | 1/5/2012 | 
+CHLT_MeanBeforeAscent_mg/m^3 | Bio parameter statistic |  |  |  |  |  | 1/5/2012 | 
+IRRADIANCE_W1_MeanBeforeAscent_uW/cm^2/nm | Bio parameter statistic |  |  |  |  |  | 1/5/2012 | 
+IRRADIANCE_W2_MeanBeforeAscent_uW/cm^2/nm | Bio parameter statistic |  |  |  |  |  | 1/5/2012 | 
+IRRADIANCE_W3_MeanBeforeAscent_uW/cm^2/nm | Bio parameter statistic |  |  |  |  |  | 1/5/2012 | 
+
+//Surface Pressure Offset variable names - note that this table is also appended to the Argo User's manual as table ?? |  |  |  |  |  |  |  | 
+
+PRES_SurfaceOffsetTruncatedPlus5dbar_dbar | "Surface pressure recorded just before the previous descent - Note: cumulative offset, negative offsets truncated to 0, 5dbar addedNot autocorrected" | "Subtract 5 db. In real-time, subtract the cumulative offset from the reported pressures of the present profile.  In DMQC, apply this value to the reported pressures of the PREVIOUS profile." | T |  | "R1-SBE, APEX-SBE, all APEX up to APEX APF8s" |  | 5/29/2012 | 
+PRES_SurfaceOffsetTruncatedPlus3dbar_dbar | "Surface pressure recorded just before the previous descent - Note:  this is a cumulative offset, negative offsets truncated to 0, 3dbar addedNot autocorrected" | "Subtract 3 db. In real-time, subtract the cumulative offset from the reported pressures of the present profile.  In DMQC, apply this value to the reported pressures of the PREVIOUS profile." | T |  | R1-SBE |  | 5/29/2012 | 
+PRES_SurfaceOffsetTruncated_dbar | "Surface pressure recorded just before the previous descent - Note: cumulative offset, negative offsets truncated to 0Not autocorrected" | " In real-time, subtract the cumulative offset from the reported pressures of the present profile.  In DMQC, apply this value to the reported pressures of the PREVIOUS profile.  NOTE - unlike the previous name, it DOES NOT have 5db added and so this does not need to be removed before use." | T |  | 2 ALACE R1 FSI floats  |  | 1/5/2012 | 
+PRES_SurfaceOffsetNotTruncated_dbar | "Surface pressure recorded just before the previous descent - Note: cumulative offset, This IS NOT used to correct pressure on boardNot autocorrected" | "In real-time, subtract the cumulative offset from the reported pressures of the present profile.  In DMQC, apply this value to the reported pressures of the PREVIOUS profile." | T |  | "APEX APF9, pre 2002 SOLO-SIO, Metocean PROVOR, NEMO (SN>=90), PALACE " |  | 1/5/2012 | 
+PRES_SurfaceOffsetNotTruncated_approx5dbarResolution_dbar | "Surface pressure recorded just before the previous descent - Note:  this is a cumulative offset, This IS NOT used to correct pressure on board. Also note that the resolution varies because counts are repoted and converted using different calibration coefficients for each floatNot autocorrected" |   | T |  | APEX APF1 |  | 1/5/2012 | 
+PRES_SurfaceOffsetNotTruncatedPlus5dbar_dbar | "Surface pressure recorded just before the previous descent - Note: this is a cumulative offset with 5dbar added.Not autocorrected" | "Subtract 5 db. In real-time, subtract the cumulative offset from the reported pressures of the present profile.  In DMQC, apply this value to the reported pressures of the PREVIOUS profile." | T |  | APEX APF-8 after firmware update 14-12-07 |  | 5/29/2012 | 
+PRES_SurfaceOffsetCorrectedNotReset_1dbarResolution_dbar | "Surface pressure recorded just before the previous descent but data is corrected on board the float. Note: cumulative offset but no further correction required.Autocorrected" | Cumulative offset but the data is autocorrected so no adjustment in either RT or DM typically required | T |  | "Provor T,CTF2, CTF3, and  CTS2, JAMSTEC's MetOcean PROVOR  " |  | 1/5/2012 | 
+PRES_SurfaceOffsetCorrectedNotReset_1cBarResolution_dbar | "Surface pressure recorded just before the previous descent but data is corrected on board the float. Note: cumulative offset but no further correction required.Autocorrected" | Cumulative offset but the data is autocorrected so no adjustment in either RT or DM typically required | T |  | "JAMSTEC's PROVOR-CTS3,  NINJA (2003) and MetOcean PROVOR" |  | 1/5/2012 | 
+PRES_SurfaceOffsetCorrectedNotResetNegative_1dbarResolution_dbar | "Surface pressure recorded just before the previous descent but data is corrected on board the float. Note: cumulative NEGATIVE  offset  (real offset * -1) but no further correction required.Autocorrected" | Cumulative offset but the data is autocorrected so no adjustment in either RT or DM typically required | T |  | "PROVOR CTS3, PROVOR-DO and ARVOR" |  | 1/5/2012 | 
+PRES_SurfaceOffsetCorrectedNotResetNegative_1cBarResolution_dbar | "Surface pressure recorded just before the previous descent but data is corrected on board the float. Note: cumulative NEGATIVE   offset  (real offset * -1) but no further correction required.Autocorrected" | Cumulative offset but the data is autocorrected so no adjustment in either RT or DM typically required | T |  | "PROVOR CTS3, PROVOR-DO and ARVOR" |  | 1/5/2012 | 
+PRES_SurfaceOffsetCorrectedNotResetNegative_1mBarResolution_dbar | Surface pressure recorded just before the previous descent but data is corrected on board the float. Note: cumulative NEGATIVE offset (real offset * -1) but no further correction required. Autocorrected | The CTS5 provides the Poffset with a 1 mBar resolution. | T |  | PROVOR CTS5 | 2/1/2016 |  | 
+PRES_SurfaceOffsetBeforeReset_dbar | Surface pressure measurement which is then used to correct pressure on board the float. Note: thus is a relative offset and no further correction is required. | Autocorrecting so no adjustment in either RT or DM typically required | T |  | SOLO-SIO |  | 1/5/2012 | 
+PRES_SurfaceOffsetBeforeResetTruncated_dbar | "Surface pressure measurement which is then used to correct pressure on board the float.  Note: this is a CUMULATIVE offset and no further correction is required. Negative offsets truncated to 0.Autocorrected" | "Autocorrecting so no adjustment in either RT or DM typically required. NOTE: if the SPO is >40 for the Argo CTD, then the autocorrection is PARTIALLY applied (40 is subtracted, leaving the 'excess' offset uncorrected) and the pressures may need to be adjusted in RT and DM." | T |  | NEMO(SN<80) |  | 1/5/2012 | 
+PRES_SurfaceOffsetAfterReset_dbar | "Surface pressure measured after  pressure has been corrected on board the float.  This is a relative measurement and no further correction is required. Autocorrected" | "Autocorrecting so no adjustment in either RT or DM typically required.  This value used as a check on the autocorrecting of pressure onboard the float.  Significant values may indicate a need for additional correction" | T |  | SOLO-SIO (secondary name used in conjunction with PRES_SurfaceOffsetBeforeReset_dbar ) |  | 1/5/2012 | 
+PRES_SurfaceOffsetBeforeReset_1dBarResolution_dbar  | "Surface pressure measured just before the float dives which is then used to correct pressure on board the float for the next profile.  Note: this is a relative offset and no further correction is possible.Autocorrected" | Autocorrecting so no adjustment in either RT or DM possible | T |  | "French PROVOR-CTS3, PROVOR-DO, ARVOR - may be used for other floats as well." |  | 1/5/2012 | 
+PRES_SurfaceOffsetBeforeReset_1cBarResolution_dbar | "Surface pressure measured just before the float dives which is then used to correct pressure on board the float for the next profile.  Note: this is a relative offset.Autocorrected" | Autocorrecting so no adjustment in either RT or DM typically required but this could be applied in DMQC. | T |  | "French PROVOR-CTS3, PROVOR-DO, ARVOR,  SOLO-WHOI, SOLO-SIO - may be used for other floats as well." |  | 1/5/2012 | 
+PRES_SurfaceOffsetAfterReset_1cBarResolution_dbar | "Surface pressure offset measured after the pressure correction has been applied.  Note: this is a relative offset and no further correction is required.Autocorrected" | Autocorrecting so no adjustment in either RT or DM typically required | T |  | SOLO-SIO |  | 1/5/2012 | 
+PRES_SurfaceOffsetBeforeReset_5cBarResolution_dbar | "Surface pressure offset measurement which is then used to correct pressure on board the float. Used for SOLO-SIO floats that transmit surface pressure before reset with 0.5db resolution - may be used for other floats as well. Note: this is a relative offset and no further correction is required.Autocorrected" | Autocorrecting so no adjustment in either RT or DM typically required | T |  | SOLO-SIO |  | 1/5/2012 | 
+PRES_SurfaceOffsetAfterReset_5cBarResolution_dbar | "Surface pressure offset measured after the pressure correction has been applied. Used for SOLO-SIO floats that transmit surface pressure after reset with 0.5db resolution - may be used for other floats as well. Note: this is a relative offset and no further correction is required.Autocorrected" | Autocorrecting so no adjustment in either RT or DM typically required | T |  | SOLO-SIO |  | 1/5/2012 | 
+PRES_SurfaceOffsetBeforeReset_2mBarResolution_dbar | "Surface pressure offset measurement which is then used to correct pressure on board the float. Used for SOLO-SIO floats that transmit surface pressure before reset with 0.04db resolution - may be used for other floats as well. Note: this is a relative offset and no further correction is required.Autocorrected" | Autocorrecting so no adjustment in either RT or DM typically required (changed from 4 to 2mBar resolution as per Gilson request) | T |  | SOLO II-SIO |  | 1/6/2013 | 
+PRES_SurfaceOffsetAfterReset_2mBarResolution_dbar | "Surface pressure offset measured after the pressure correction has been applied. Used for SOLO-SIO floats that transmit surface pressure after reset with 0.04db resolution - may be used for other floats as well. Note: this is a relative offset and no further correction is required.Autocorrected" | Autocorrecting so no adjustment in either RT or DM typically required (changed from 4 to 2mBar resolution as per Gilson request) | T |  | SOLO II-SIO |  | 1/6/2013 | 
+PRES_SensorAutoAdjustment_dbar  | TOTAL Surface pressure offset applied by the float since deployment - this is a cumulative offset (with limitations) and cannot be used for pressure correction | This is a surface pressure name for reference only | T |  | SOLO II-SIO |  |  | 
+
+//end surface pressure offset section... |  |  |  |  |  |  |  | 
+
+CLOCK_EndAscentToSurface_hours | "ascent end time, just before Argos transmission  - note units can vary and the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time." | JULD_ASCENT_END and JULD with MC=600 |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_StartAscentToSurface_hours | ascent start time - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | JULD_ASCENT_START and JULD with MC=500 |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_EndDescentToPark_hours | time when park pressure is reached  - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | JULD_DESCENT_END or JULD_PARK_START and JULD with MC=200 or JULD with MC=250 |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_StartDescentToPark_hours | time after the crossing  the gap threshold  - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | not sure where this is - at the surface? |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_EndDescentToProfile_hours | time when float reaches profile pressure  - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | JULD_DEEP_DESCENT_END or JULD_DEEP_PARK_START and JULD with MC=400 or JULD with MC=450 |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_StartDescentToProfile_hours | time when descent to profile pressure starts - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time.   | JULD_PARK_END and JULD with MC=300 |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_StartDescentProfile_hours | time when descent profile starts - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | JULD_DESCENT_START and JULD with MC=100 assuming descending profile starts when float leaves the surface;  otherwise choose the appropriate timing variable |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_EndDescentProfile_hours | time when descent profile ends  - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | JULD_DESCENT_END or JULD_PARK_START and JULD with MC=200 or JULD with MC=250 assuming descending profile ends with a park phase;  otherwise choose the appropriate timing variable |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_EndAscentToSurfaceEstimated_HHMMSS | Theoretical time of end of ascent to surface |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_TimeFromStartUp_hours | Time from start up - note that you should also store the time of the satellite message from which this was calculated. |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_StartInternalCycle_FloatDay | the time of the (internal) cycle start for floats with multiple sub-cycles |  |  |  |  |  |  | 
+CLOCK_RealTimeDrift_seconds | The difference (seconds)between apf9's real time clock (rtc) and gps time representing clock drift | "is also represented in the traj files.  We have CLOCK_OFFSET which is defined as:  Decimal part of day that float clock has drifted. Float clockdrift is defined as Float time (provided by the inboard RealTime Clock (RTC) of the float) – UT time.    " | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_FloatTime_HHMMSS | float internal clock time |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_FloatTimeCorrection_MMSS | float internal clock time correction |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_DateFirstParkSample_YYYYMMDD | float internal clock date of the first park sample |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_TimeFirstParkSample_hours | float internal clock time of the first park sample |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_InitialStabilizationDuringDescentToPark_hours | time when first stabilization appears during descent to park  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_InitialValveActionDescentToPark_HHMM | Time in the day when the float first activated the valve during its descent |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+TIME_ValveActionsAtSurface_minutes | duration of the basic valve actions which is computed by the float from preceding cycles |  |  |  |  | 7/8/2014 | 7/8/2014 | 
+CLOCK_ValveActionsAtSurface_HHMM | the time when the float moves the  valve to acquire additional buoyancy for surface drift. |  |  |  |  |  |  | 
+CLOCK_PumpActionsAtSurface_HHMM | the time when the float moves the  pump to acquire additional buoyancy for surface drift. |  |  |  |  | 7/8/2014 | 7/8/2014 | 
+CLOCK_Satellite_HHMMSS | time derived from satellite communications |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_TransmissionStart_HHMMSS | time of the first transmission for this cycle   NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | TRANSMISSION_START_TIME and in JULD with MC=700 | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_TransmissionEndTime_YYYYMMDDHHMMSS | time when transmission is ended - NOTE - the raw values can be in the tech file only if it's not possible to calculate the final JULD in real time. | TRANSMISSION_END_TIME and JULD with MC=800 | T |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+CLOCK_LastIridiumGPSFix_DD | Day of month of last GPS fix/Time of Last GPS Fix (HH) |  |  |  |  |  |  | 
+CLOCK_FloatDayOfYear_days | internal float day of year |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_FloatDate_YYYYMMDD | internal float date |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_FloatDateTimeDownTimeExpired_YYYYMMDDHHMMSS | Time of expiry of the descent time and beginning of ascent  |  |  |  |  | 29/0512 | 29/0512 | 
+CLOCK_AscentInitiationFromDownTimeExpiryOffset_minutes  | "Profile initiation time (minutes) 2's compliment signed integer (positive values - profile initiated after down time expired, negative values - profile initiated before down time expired)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_EOLStart_YYYYMMDDHHMMSS | Clock time when End of Life mode starts |  |  |  |  | 10/9/2014 | 10/9/2014 | 
+CLOCK_TimeGrounded_HHMM | time the float grounded |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_BuoyancyInversionStart_FloatDay  | Time when the float starts the buoyancy inversion phase when ice was detected during ascent. | "When the ascent profil is aborted because of the Ice detection algorithm, the float starts a 'buoyancy inversion phase'. The current label reports the start time of this phase and NUMBER_BuoyancyInversionValveActions__COUNT  the number of valve actions needed to invert float buoyancy. See 132,1" | T |  | Provor CTS4 | 5/24/2018 | 5/24/2018 | 
+CLOCK_ReceptionEndDateTime_YYYYMMDDHHMMSS | End date-time of argos message reception |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ReceptionEndDateTime_NUMBER | "Status of the end date-time of argos message reception (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_ReceptionStartDateTime_YYYYMMDDHHMMSS | Start date-time of argos message reception |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ReceptionStartDateTime_NUMBER | "Status of the start date-time of argos message reception (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_LastReset_YYYYMMDDHHMMSS | Clock time of the last reset of the float |  | T |  |  | 10/9/2014 | 10/9/2014 | 
+CLOCK_DateOfEmergencyAscent_DDMMYYYY | date of emergency ascent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_TimeOfFirstEmergencyAscent_HHMMSS | time of first emergency ascent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CLOCK_PressureActivationStart_YYYYMMDDHHMMSS | pressure activation scrutation start date | The pressure activation phase starts after the first successfull auto-test and ends (with the start of the float mission) at the end of the CONFIG_PressureActivationTimeout_seconds period. During this phase the float checks the external pressure and can start its mission as soon as a CONFIG_PressureActivation_dbar pressure is measured. | T |  | Provor CTS5  | 24/10/2018 | 24/10/2018 | 
+CLOCK_PressureActivationStop_YYYYMMDDHHMMSS | pressure activation scrutation end date | The pressure activation phase starts after the first successfull auto-test and ends (with the start of the float mission) at the end of the CONFIG_PressureActivationTimeout_seconds period. During this phase the float checks the external pressure and can start its mission as soon as a CONFIG_PressureActivation_dbar pressure is measured. | T |  | Provor CTS5 | 24/10/2018 | 24/10/2018 | 
+NUMBER_PumpActionsOnFirstEmergencyAscent_COUNT | Emergency ascent - pump actions at emergency depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_FirstEmergencyAscent_dbar | Pressure that triggered the first emergency ascent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_EmergencyAscents_COUNT | Number of Emergency ascents - Internal count |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_EmergencyAscent_LOGICAL | Was an emergency ascent performed? |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+PRES_LastAscentPumpedRawSample_dbar | Last (shallowest) pumped raw pressure sample acquired during the ascent from the profile depth to the surface (i.e. just before the cut-off pressure where the pump is stopped) (in dbars).- note this may be duplicated in the traj files with MC599 |  |  |  |  |  |  | 
+NUMBER_ParkAndProfileCycleCounter_COUNT  | this is an indication of how often the float does a profile deeper than its park depth. |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentArgosMessages_COUNT | number of transmitted Argos messages with ascent data |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentArgosMessages_COUNT | number of transmitted Argos messages with descent data |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ParkArgosMessages_COUNT | number of transmitted Argos messages with park data |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentIridiumMessages_COUNT | number of transmitted Iridium messages with ascent data |  | C |  |  | 5/25/2012 | 5/25/2012 | 
+NUMBER_DescentIridiumMessages_COUNT | number of transmitted Iridium messages with descent data |  | C |  |  | 5/25/2012 | 5/25/2012 | 
+NUMBER_ParkIridiumMessages_COUNT | number of transmitted Iridium messages with park data |  | C |  |  | 5/25/2012 | 5/25/2012 | 
+NUMBER_IridiumResets_COUNT | Number of Power Resets iridium |  |  |  |  | 5/25/2012 | 5/25/2012 | 
+NUMBER_IridiumPacketsReceivedPreviousSession_COUNT | Number of Incoming Iridium Packets Received during previous session |  |  |  |  | 5/25/2012 | 10/10/2014 | 
+NUMBER_IridiumMessagesReceivedPreviousSession_COUNT | Number of Incoming Iridium Messages Received during previous session |  |  |  |  | 10/10/2014 | 10/10/2014 | 
+NUMBER_IridiumMessagesSentPreviousSession_COUNT | Number of Incoming Iridium Messages Sent during previous session |  |  |  |  | 10/10/2014 | 10/10/2014 | 
+NUMBER_NearSurfaceIridiumPackets_COUNT | "Number of Iridium packets used to transmit sensor data collected during the ""near surface measurement"" phase." | internal counter measured by the float | C |  |  | 7/14/2016 | 7/14/2016 | 
+NUMBER_InAirIridiumPackets_COUNT | "Number of Iridium packets used to transmit sensor data collected during the ""in air measurement"" phase." | internal counter measured by the float | C |  |  | 7/14/2016 | 7/14/2016 | 
+NUMBER_RemoteControlCommandKO_COUNT | Number of remote control commands rejected by the float. | See also ID 309  | T |  |  | 7/14/2016 | 7/14/2016 | 
+NUMBER_RemoteControlCommandOK_COUNT | Number of remote control commands successfully considered. | The float can receive message with multiple remote commands. It reports the number of received messages (in FLAG_RemoteControlMessageOK_COUNT and FLAG_RemoteControlMessageKO_COUNT) and also the the number of received commands (in these 2 new labels). See ID 310 | T |  |  | 7/14/2016 | 7/14/2016 | 
+NUMBER_GPSResets_COUNT | Number of Power Resets GPS |  |  |  |  | 5/25/2012 | 5/25/2012 | 
+NUMBER_RetriesForGPSAcquisition_COUNT | Number of times the GPS had to try to get a valid fix |  |  |  |  | 10/14/2014 | 10/14/2014 | 
+NUMBER_PRESIridiumMessages_COUNT | number of iridium messages containing PRES data |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+NUMBER_HydraulicRecords_COUNT | Number of hydraulic (pump or valve) actions performed during the cycle. Due to transmission limitations some of them may not be transmitted (in the NUMBER_HydraulicPackets_COUNT transmitted packets). |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+
+NUMBER_BinsWithBadData_COUNT | number of pressure bins with bad data |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_BinsWithData_COUNT    | number of pressure bins with data |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentToParkEntriesInParkMargin_COUNT | "descent to park pressure: number of entries in margin around park pressure target - specifically, how many times the float enters the band of pressure surrounding the target park pressure (generally +/- 30db)" |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentToProfileEntriesInProfileMargin_COUNT | "descent to profile pressure: number of entries in margin around profile pressure target  - specifically, how many times the float enters the band of pressure surrounding the target profile pressure (generally +/- 30db)" |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentToParkAndToProfEntriesInParkMargin_COUNT | "Cumulated numbers of entries in both parking zones (at park and profile depth). Specifically, how many times the float enters the band of pressure surrounding the target park/profile pressure (thus 2 is the nominal value for a float which never experienced stabilization issues)." |  |  |  |  |  |  | 
+NUMBER_HydraulicPackets_COUNT | Number of hydraulic packets used to transmit hydraulic (pump or valve) actions performed during the cycle. |  |  |  |  |  |  | 
+NUMBER_NearSurfaceSamples_COUNT | Near surface  measurements - Internal counter |  | T |  |  | 7/14/2016 | 7/14/2016 | 
+NUMBER_InAirSamples_COUNT | In air  measurements - Internal counter |  | T |  |  | 7/14/2016 | 7/14/2016 | 
+NUMBER_MixedLayerSamples_COUNT | number of CTD samples taken in the mixed layer |  |  |  |  | 1/15/2013 | 1/15/2013 | 
+NUMBER_ProfileSamples_COUNT  | "the number of STP spot samples collected during the profile, not including the park-level spot sample " |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ParkSamples_COUNT | number of samples collected during park phase |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_PumpActionsToStartAscent_COUNT | Number of pump actions needed to start the ascent. |  |  |  |  | 4/30/2015 | 4/30/2015 | 
+NUMBER_PumpActionsDuringAscentToSurface_COUNT | number of pump actions between start and end of ascent  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_PumpActionsAtSurface_COUNT | number of pump actions at emergence before transmission |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_PumpActionsDuringPark_COUNT | number of pump actions while at park depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_PumpActionsDuringDescentToPark_COUNT | number of pump actions between the crossing  of the gap threshold and the end of descent at park pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_PumpActionsDuringDescentToProfile_COUNT | number of pump actions during descent to start profile pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_RepositionsDuringPark_COUNT | number of times the float readjusts its buoyancy during park phase - using either the pump or EV |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_RepositionsAtProfileDepth_COUNT | "at profile pressure stand-by, number of times the float readjusts its buoyancy - using either the pump or EV" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ValveActionsDuringPark_COUNT | number of valve actions during park phase |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ValveActionsDuringDescentToPark_COUNT | number of valve actions between the crossing  of the gap threshold and the end of descent at park pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ValveActionsDuringDescentToProfile_COUNT | number of valve actions during descent to start profile pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ValveActionsAtSurfaceDuringDescent_COUNT | number of solenoid valve actions at the surface until the crossing of the GAP threshold |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_CumulatedValveActionsAtSurfaceDuringDescent_COUNT | Number of solenoid valve actions at the surface until the crossing of the GAP threshold. Number computed by the float from previous cycles behaviour. | "This float version provides 2 counts for surface valve actions performed before the GAP threshold (threshold used to detect 'float descent start', see 126).  This first one (NUMBER_CumulatedValveActionsAtSurfaceDuringDescent_COUNT ) is computed from  what happened during the previous cycles (i.e. the total number of action used to reach the gap THRESHOLD). It needs to be combined with the second (NUMBER_AdditionalValveActionsAtSurfaceDuringDescent_COUNT, see 126´,2) to get the parameter defined in 126 NUMBER_ValveActionsAtSurfaceDuringDescent_COUNT= NUMBER_CumulatedValveActionsAtSurfaceDuringDescent_COUNT + NUMBER_AdditionalValveActionsAtSurfaceDuringDescent_COUNT " | T |  | Provor CTS4 | 24/05/2018 | 24/05/2018 | 
+NUMBER_AdditionalValveActionsAtSurfaceDuringDescent_COUNT | Number of solenoid valve actions at the surface until the crossing of the GAP threshold. These actions are performed after the NUMBER_CumulatedValveActionsAtSurfaceDuringDescent_COUNT previous ones. | "see above (126,1 and 126). NUMBER_AdditionalValveActionsAtSurfaceDuringDescent_COUNT is the number of additional actions needed to reach the GAP threshold." | T |  | Provor CTS4 | 24/05/2018 | 24/05/2018 | 
+NUMBER_ValveActionsDuringProfileDrift_COUNT | number of valve actions while drifting at profile depth | The first one: NUMBER_CumulatedValveActionsAtSurfaceDuringDescent_COUNT is computed from what happened during the previous cycles (i.e. the total number of action used to reach the gap THRESHOLD). | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ValveActionsForGroundingDetection_COUNT | Number of valve actions done at constant pressure to set the grounded flag | The second one: NUMBER_AdditionalValveActionsAtSurfaceDuringDescent_COUNT is the number of additional actions needed to reach the GAP threshold. | T |  |  | 10/9/2014 | 10/9/2014 | 
+NUMBER_ValveActionsForFirstGroundingDetection_COUNT | Number of valve actions done at constant pressure to set the grounded flag for the first grounding event | Thus NUMBER_CumulatedValveActionsAtSurfaceDuringDescent_COUNT + NUMBER_AdditionalValveActionsAtSurfaceDuringDescent_COUNT = NUMBER_ValveActionsAtSurfaceDuringDescent_COUNT | T |  |  | 5/5/2015 | 5/5/2015 | 
+NUMBER_ValveActionsForSecondGroundingDetection_COUNT | Number of valve actions done at constant pressure to set the grounded flag for the second grounding event |  | T |  |  | 5/5/2015 | 5/5/2015 | 
+NUMBER_PumpActionsWhenGroundedAtProfilePressure_COUNT | number of pump actions needed to leave the sea bottom when grounded at profile pressure |  | T |  |  | 10/9/2014 | 10/9/2014 | 
+NUMBER_MotorActionsDuringProfileDrift_COUNT | number of motor actions while drifting at profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_MotorActionsDuringDescentToPark_COUNT | number of motor actions between surface and parking depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_MotorActionsDuringDescentParkToProfile_COUNT | number of motor actions between parking depth and deepest position |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_MotorActionsDuringDescentToProfile_COUNT | number of motor actions between start and end ofdescent from park depth to profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_MotorActionsDuringAscentToSurface_COUNT | number of motor actions between start and end of descent  to profile depth |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_BuoyancyInversionValveActions_COUNT | Number of solenoid valve actions needed to perform the buoyancy inversion phase when ice was detected during ascent. | "see 76 and 76,1" | T |  | Provor CTS4 | 24/05/2018 | 24/05/2018 | 
+NUMBER_AscentSamples_COUNT | ascent: total number of samples collected during ascent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples1stBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples2ndBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples3rdBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples4thBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples5thBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples6thBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscentSamples7thBounceProfile_COUNT | bounce profile length for this bounce |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FltnuAscentSamples_COUNT | ascent: Flntu profile length |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DeepSamplesDuringAscent_COUNT | ascent: number of samples collected in deep area during ascent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ShallowSamplesDuringAscent_COUNT | ascent: number of samples collected in shallow area during ascent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DeepSamplesDuringDescent_COUNT | descent: number of samples collected in deep area during descent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ShallowSamplesDuringDescent_COUNT | descent: number of samples collected in shallow area during descent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_RangeOverflowDuringAscent_COUNT | number of range overflows in measurements during ascent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_RangeOverflowDuringPark_COUNT | number of range overflows in measurements during parking |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ArgosPositioningClass0_COUNT | positioning (ARGOS message) - Class 0 - accuracy >1500m radius |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositioningClass1_COUNT | positioning (ARGOS message) - Class 1 - accuracy better than 1500m radius |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositioningClass2_COUNT | positioning (ARGOS message) - Class 2 - accuracy better than 500m radius |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositioningClass3_COUNT | positioning (ARGOS message) - Class 3 - accuracy better than 250m radius |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositions_COUNT | total number of Argos positions received. |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ArgosPositioningClassA_COUNT | positioning (ARGOS message) - Class A |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositioningClassB_COUNT | positioning (ARGOS message) - Class B |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositioningClassZ_COUNT | positioning (ARGOS message) - Class Z |  | C |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_ArgosPositioningMessageRejected_COUNT | positioning (ARGOS message) - Rejected |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+NUMBER_GPSSatellites_COUNT | number of GPS satellites seen by the float  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ProfileOldNotSent_COUNT | Number of older profiles not sent. |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ProfileSamplesLowResolution_COUNT | number of low resolution profile samples |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_Ascending<short_sensor_name>SamplesDeepAbsolute_COUNT | Ascending profile  measurements - Deep absolute | Note - JP indicates that depth and surface are inaccurate terms here and deep/shallow are better so I have made this change for all of these variables  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesDeepRelative_COUNT | Ascending profile  measurements - Deep relative | "Note also that these variables now can be used for any sensor, <short_sensor_name> being replaced with the relevant variable…" |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesDeepTotal_COUNT | Ascending profile  measurements - Deep total |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesShallowAbsolute_COUNT | Ascending profile  measurements - Shallow absolute |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesShallowRelative_COUNT | Ascending profile  measurements - Shallow relative |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesShallowTotal_COUNT | Ascending profile  measurements - Shallow total |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesTotal_COUNT | Ascending profile  measurements - Profile total |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesAbsolute_COUNT | Ascending profile  measurements - Profile absolute |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesRelative_COUNT | Ascending profile  measurements - Profile relative |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesDeepInternalCounter_COUNT | Ascending profile  measurements - Deep internal counter  |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesShallowInternalCounter_COUNT | Ascending profile  measurements - Shallow internal counter  |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Ascending<short_sensor_name>SamplesInternal_COUNT | Ascending profile  measurements - Internal count |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_AscendingProfileReductionLowerPart_COUNT | Ascending profile reduction Number of slices in deep zone |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AscendingProfileReductionUpperPart_COUNT | Ascending profile reduction Number of slices in shallow zone  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+NUMBER_DescendingProfileReductionLowerPart_COUNT | Descending profile reduction Number of slices in deep zone  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescendingProfileReductionUpperPart_COUNT | Descending profile reduction Number of slices in shallow zone  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_Descending<short_sensor_name>SamplesAbsolute_COUNT | Descending profile  measurements - Profile absolute |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_Descending<short_sensor_name>SamplesRelative_COUNT | Descending profile  measurements - Profile relative |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_Descending<short_sensor_name>SamplesTotal_COUNT | Descending profile  measurements - Profile total |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+NUMBER_Descending<short_sensor_name>SamplesDeepAbsolute_COUNT | Descending profile  measurements - Depth absolute |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Descending<short_sensor_name>SamplesDeepRelative_COUNT | Descending profile  measurements - Depth relative |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Descending<short_sensor_name>SamplesDeepTotal_COUNT | Descending profile  measurements - Depth total |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Descending<short_sensor_name>SamplesShallowAbsolute_COUNT | Descending profile  measurements - Surface absolute |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Descending<short_sensor_name>SamplesShallowRelative_COUNT | Descending profile  measurements - Surface relative |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Descending<short_sensor_name>SamplesShallowTotal_COUNT | Descending profile  measurements - Surface total |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+
+NUMBER_PRESSamplesDuringDescentToPark_COUNT | number of pressure samples collected as the float descends from the Shallow to the park pressure. |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_PRESSamplesDuringDescentToProfile_COUNT | "number of pressure samples collected after park, during descent to the profile depth - see PRES_1HourIntoDescentToProfile_dbar for the data collected" |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescendingPRESSamples_COUNT | number of descending Profile pressure measurements  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentToParkEntriesInGap_COUNT | Descent to park float control - number of entries in gap order |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentToProfileEntriesInGap_COUNT | Descent to profile float control - number of entries in gap order |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentEntriesInGap_COUNT | Descent float control - number of entries in gap order |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_<short_sensor_name>FramesEmittedOnAscendingProfile_COUNT | Distinct <short_sensor_name> frames emitted on ascending profile | "Note - similarly to above, DOXY etc have been repaced by <short_sensor_name> making these more flexible" |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_<short_sensor_name>FramesEmittedOnDescendingProfile_COUNT | Distinct <short_sensor_name> frames emitted on descending profile |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_<short_sensor_name>FramesEmittedOnPark_COUNT | Distinct <Semsor> frames emitted on immersion profile |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_FloatFramesCompleteOnDescendingProfile_COUNT | Provor frames complete on descending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+NUMBER_FloatFramesOkOnDescendingProfile_COUNT | Provor frames ok on descending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+NUMBER_FloatFramesReceivedOnDescendingProfile_COUNT | Provor frames received on descending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FloatPTOrPTCFrames_COUNT | Transmission (PROVOR frames) - PT or PTC frames |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FloatPTOrPFramesOk_COUNT | Transmission (PROVOR frames) - PT or PTC OK |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesCompleteOnAscendingProfile_COUNT | Frames complete on ascending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesCompleteOnPark_COUNT | Frames complete on immersion profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesCrcOkOnDescendingProfile_COUNT | Distinct frames received with crc ok on descending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesCrcOkOnPark_COUNT | Distinct frames received with crc ok on immersion profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesEmittedOnDescendingProfile_COUNT | Distinct frames emitted on descending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesEmittedOnAscendingProfile_COUNT | Distinct frames emitted on ascending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesEmittedOnPark_COUNT | Distinct frames emitted on immersion profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesOkOnAscendingProfile_COUNT | Frames ok on ascending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesOkOnPark_COUNT | Frames ok on immersion profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesReceivedCrcOkOnAscendingProfile_COUNT | Distinct frames received with crc ok on ascending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesReceivedOnAscendingProfile_COUNT | Frames received on ascending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesReceivedOnPark_COUNT | Frames received on immersion profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesRecombinedOnAscendingProfile_COUNT | Frames recombined on ascending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesRecombinedOnDescendingProfile_COUNT | Frames recombined on descending profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_FramesRecombinedOnPark_COUNT | Frames recombined on immersion profile |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_RecordsInDataset<digit>_COUNT | "The number of records in each dataset type [1-5] as transmitted - dataset 1=test data, 2=park data if profile, GPS data if test, 3=not used, 4=profile data, 5=GPS data for profile. This is currently applicable to NEMO floats only." |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_<short_sensor_name>FramesEmittedOnAscendingProfile1_COUNT | Distinct optique frames emitted on ascending profile - Profile 1 |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_<short_sensor_name>FramesEmittedOnAscendingProfile2_COUNT | Distinct optique frames emitted on ascending profile - Profile 2 |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_<short_sensor_name>FramesEmittedOnAscendingProfile3_COUNT | Distinct optique frames emitted on ascending profile - Profile 3 |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Profile<short_sensor_name>MeasurementsProfile1_COUNT | Ascending profile optique measurements - Internal counter  - Profile 1 |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Profile<short_sensor_name>MeasurementsProfile2_COUNT | Ascending profile optique measurements - Internal counter  - Profile 2 |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Profile<short_sensor_name>MeasurementsProfile3_COUNT | Ascending profile optique measurements - Internal counter  - Profile 3 |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_SpyFramesEmitted_COUNT | Distinct spy frames emitted |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_Park<short_sensor_name>SamplesAbsolute_COUNT | Park  measurements - Drift absolute |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Park<short_sensor_name>SamplesInternal_COUNT | Park  measurements - Internal counter |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Park<short_sensor_name>SamplesRelative_COUNT | Park  measurements - Drift relative |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_Park<short_sensor_name>SamplesTotal_COUNT | Park  measurements - Drift total |  |  |  |  | 1/5/2012 | 12/18/2013 | 
+NUMBER_ParkGapOrder_COUNT | Park float control - Gap order |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TemporaryCycleIdentification_COUNT | Temporary - used to identify the recalculated Apex tech_cycle_data |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TransmissionFloatFramesComplete_COUNT | Transmission (PROVOR frames) - Complete |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TransmissionFloatFramesCrcOk_COUNT | Transmission (PROVOR frames) - CRC OK |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TransmissionFloatFramesReceived_COUNT | Transmission (PROVOR frames) - Received |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TransmissionFloatFramesRecombined_COUNT | Transmission (PROVOR frames) - Recombined |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TransmissionFloatFramesTechnical_COUNT | Transmission (PROVOR frames) - Technical frames |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TransmissionFloatFramesTechnicalOk_COUNT | Transmission (PROVOR frames) - Technical OK |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TelemetryRetransmission_COUNT | Number of repeated transmissions of float data for each Argos message |  |  |  |  |  |  | 
+NUMBER_AscentPTMessages_COUNT | NUMBER OF ASCENT PT MESSAGES  |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_DescentPTMessages_COUNT | NUMBER OF DESCENT PT MESSAGES |  | C |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ParkPTMessages_COUNT | NUMBER OF DRIFT PT MESSAGES |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ParkDriftEntriesInParkMargin_COUNT | "drift at park pressure: number of entries in margin around park pressure target - specifically, how many times the float enters the band of pressure surrounding the target park pressure (generally +/- 30db)" |  | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+NUMBER_ParkDriftExitsFromParkMargin_COUNT | "drift at park pressure: number of exits from margin around park pressure target - specifically, how many times the float exits the band of pressure surrounding the target park pressure (generally +/- 30db)" |  | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+NUMBER_DOXYErrorsAscending_COUNT | Number of O2_ Optode errors during profile. Zero if no sensor installed. |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_RAFOSErrorsAscending_COUNT | Number of RAFOS errors during profile. Zero if no rafos module installed. |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_MotorErrorDuringProfile_COUNT | Number of moter errors during profile |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_CTDReset_COUNT | CTD reset count |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_CTDError_COUNT | CTD error count |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_CTDAcquisitionsFailed_COUNT | Number of Failed  CTD Acquisitions |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+NUMBER_MiddleSamplesDuringAscent_COUNT | ascent: number of samples in middle area |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_AirPumpPulsesToInflateBladder_COUNT | number of 6-second pulses of the air pump required to inflate the air bladder |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TEMPSampleErrorDeepZoneDuringAscending_COUNT | error of temperature measurements in deep zone during ascent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TEMPSampleErrorDeepZoneDuringDescending_COUNT | error of temperature measurements in deep zone during descent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TEMPSampleErrorShallowZoneDuringAscending_COUNT | error of temperature measurements in deep shallow during ascent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_TEMPSampleErrorShallowZoneDuringDescending_COUNT | error of temperature measurements in shallow zone during descent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ProfileCrossCalibrationSamples_COUNT | " the number of Near Surface Temperature monitoring cross calibration samples (pumped PTS,non-pumped PT)." |  |  |  |  | 2/2/2016 | 2/2/2016 | 
+NUMBER_ProfileNearSurfaceTemperatureSamples_COUNT | the number of Near Surface Temperature monitoring PT samples (non-pumped PT) |  |  |  |  | 2/2/2016 | 2/2/2016 | removed |  | configuration variable - do not use |  |  |  | 1/5/2012 | 1/5/2012 | 11/1/2014
+NUMBER_SensorAnomaly_COUNT | number of anomalous sensor readings (?) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_CoherenceProblem_COUNT | SBE sensor data check used to diagnose problems |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+NUMBER_ExceptionProgramCounter_NUMBER | "Exception Program Counter (EPC) used to store the address of theinstruction that was executing when the exception was generated." | "The  new 'Emergency' Apex-APF11 float message provide a 4 bytes information called 'PC: The exception program counter'. Customers would report emergency messages to Teledyne, and from that TWR will identify the source of the problem.
+
+//Actual instruction addresses in the running program change for every version of code released." | T |  | APEX with APF-11 | 5/24/2018 | 5/24/2018 | 
+DIAGNOSTICbit_CPUBatteryVoltage_bit | bit indicating the status of the CPU battery voltage |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+DIAGNOSTICbit_CurrentWithMotorOut_bit | bit indicating the current with motor out  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+DIAGNOSTICbit_PressureOffsetAfterReset_bit | bit indicating the status of the pressure offset after reset |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+DIAGNOSTICbit_VacuumPressure_bit | bit indicating the status of the pressure of the vacuum |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+DIAGNOSTICbit_TimeMotorOut_bit | bit indicating the status of the time motor out |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+DIAGNOSTICbit_BatteryPumpVoltage_bit | bit indicating the status of the pump battery voltage |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+DIAGNOSTICbit_ArgosTransmitterBootFailure_bit | was there an Argos transmitter boot failure |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterUnexpectedResponse_bit | was there an Argos transmitter unexpected response |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterNonresponsive_bit | is the Argos transmitter non responsive |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterNegativeAcknowledgeRecieved_bit | was there an Argos transmitter negative acknowledge recieved |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterRebootDetected_bit | was there an Argos transmitter reboot detected |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterPowerCycled_bit | did the Argos transmitter power cycled |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterIncommunicado_bit | did the Argos transmitter attempt to communicate fail |  |  |  |  |  |  | 
+DIAGNOSTICbit_ArgosTransmitterXmitFail_bit | did the Argos transmitter transmission attempt fail |  |  |  |  |  |  | 
+
+FLAG_8BitProfileCounterOverflowed_LOGICAL | The 8-bit profile counter overflowed (Yes/1 or No/0_ |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_AirInflationSystemByPassedExcessiveEnergyConsumption_LOGICAL | Air inflation system by-passed; excessive energy consumption (Yes/1 or No/0) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_AntennaStatus_NUMBER | Flag indicating the status of the antenna (see manual) |  | T |  |  | 7/14/2016 | 7/14/2016 | 
+FLAG_AscendingProfile_NUMBER | Status of profile upcast. 0=UPCAST_BUSY 1=UPCST_DONE 2=UPCAST_TIMEOUT 3=UPCAST_ICE_DETECTION |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_AscentError_NUMBER | "0=normal, 81=too shallow (grounding?) , 82=over 2100dbar, 84=sensor error" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_AscentTimeOutExpired_LOGICAL | Ascent time out expired (Yes/1 or No/0) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_BitMaskMonthsIceDetectionActive_ NUMBER | when is ice detection active - months in reverse order |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_CTDStatus_NUMBER | Flag indicating the status of the CTD (see manual) (could be reported as hex) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_CTDFastPressureError_LOGICAL |  Flag for Error on CTD Fast Pressure Command |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+FLAG_CTDStartProfileError_LOGICAL |  Flag for Error on CTD Start Profile Command |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+FLAG_CTDStopProfileError_LOGICAL |  Flag for Error on CTD Stop Profile Command |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+FLAG_CTDDownloadError_LOGICAL |  Flag for Error on CTD Download Command |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+FLAG_CTDAverageError_LOGICAL |  Flag for Error on CTD Average Command |  |  |  |  | 2/11/2014 | 2/11/2014 | 
+FLAG_DataEntryError_LOGICAL | Data entry error (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_DataStateIndicator_LOGICAL | "Data state indicator - again, duplicated from the profile file)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_DeepProfile_LOGICAL |  The current profile is a deep profile (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlntuNoResponse_LOGICAL | Flntu : No response (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlntuNullArgumentDetectedDuringMeasurement_LOGICAL | Flntu : Null argument detected during measurement (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlntuPowerDownFailed_LOGICAL | Flntu : Power down failed (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlntuPowerUpFailed_LOGICAL | Flntu : Power up failed (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlntuResponseFailedRegexMatch_LOGICAL | Flntu : Response failed regex match (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlntuStatus_NUMBER | Flag indicating the status of the FLNTU (see manual) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FlbbStatus_NUMBER | Flag indicating the status of the FLBB (see manual) |  | T |  |  | 22/08/2066 | 22/08/2016 | 
+FLAG_FloatStatus_NUMBER | Flag indicating the status of the Float (see manual) (could be reported as hex) |  | T/C |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_InitialMemoryIntegrityCheck_LOGICAL | Software check on the float memory contents (0 if problems were found and 1 if no problem occured) | Check the consistency of  the default values stored in the dedicated memory  | T |  |  | 22/08/2016 | 22/08/2016 | 
+FLAG_GPSStatus_LOGICAL | Flag indicating whether GPS is valid (1) or not valid (0) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Grounded_NUMBER | "grounded flag , diagnostic bit - could also be logical?  Yes/no? 0/1? Or can be number of profiles during which the float grounded" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_FirstGroundingCyclePhase_NUMBER | Phase of the float life or cycle when the first grounding occurred.  See the manual for phase definition - this will vary with float type |  |  |  |  | 5/30/2015 | 5/30/2015 | 
+FLAG_SecondGroundingCyclePhase_NUMBER | Phase of the float life or cycle when the second grounding occurred.  See the manual for phase definition - this will vary with float type |  |  |  |  | 5/30/2015 | 5/30/2015 | 
+FLAG_CTDErrorCyclePhase_NUMBER | Phase of the float life or cycle when the CTD error occurred.  See the manual for phase definition - this will vary with float type |  |  |  |  | 5/30/2015 | 5/30/2015 | 
+FLAG_Beached_NUMBER | is the float beached? - could be logical |  | C |  |  | 5/28/2012 | 5/28/2012 | 
+FLAG_IceDetected_COUNT | aborted profile count - increments by one for each profile interrupted by ice detection. If units are 'bit' then represents the ice evasion record for the last 8 profiles with the latest profile in the least significant bit. |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_InvalidSequencePoint_LOGICAL |  Invalid sequence point detected (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_NegativeSbeNumber_LOGICAL |  Negative SBE number (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_NextPressureTimeout_LOGICAL | different from ascent timeout since it refers to a single pressure point timeout. |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_OptodeFailed_LOGICAL | Optode : Failed (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_OptodeNoResponse_LOGICAL | Optode : No response (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_OptodeNullArgumentDetectedDuringMeasurement_LOGICAL | Optode : Null argument detected during measurement (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_OptodeStatus_NUMBER | Flag indicating the status of the Optode (see manual) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_OxygenSensorState_LOGICAL | "Oxygen Sensor State - 1=on, 0=off" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_PistonFullyExtendedBeforeSurfaceDetectionAlgorithmTerminated_LOGICAL | Piston fully extended before surface detection algorithm terminated (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_PistonMotorRunning_LOGICAL |  Piston motor running (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_PressureActivationTestMessage_LOGICAL | Current argos message is a pressure-activation test message (Yes or No) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_InitialCheckError_LOGICAL | "Auto-test is performed at the beginning of the mission: Flag 0 = Problem, 1 = OK)" | or detailed auto-test for float hardware resulting in a detailed code for each tested sub-part (see manual) |  |  |  | 4/30/2015 | 4/30/2015 | 
+FLAG_PressureReachedZero_LOGICAL |  Pressure reached zero (Yes or No) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ProfileInProgress_LOGICAL |  Profile in progress (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ProfileTermination_hex | Flag indicating the status of the profile termination (see manual) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ProfileTerminationFlag#1_byte | see description in manufacturer's manual |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ProfileTerminationFlag#2_byte | see description in manufacturer's manual |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_RemoteControlMessageKO_COUNT | number of received messages which have been rejected by the float |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_RemoteControlMessageOK_COUNT | number of messages sent by the remote control and received by the iridium float |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_RTCStatus_LOGICAL | "real time clock status - 1= OK, 0=not OK" |  | T |  |  | 1/5/2012 | 9/29/2013 | 
+FLAG_TelonicsPTTStatus_byte | Implemented a status byte for the Telonics ST21 PTT to facilitate diagnostics. This byte records the state of 8 status bits for the Telonics PTT |  | T |  | APEX- NAVO | 4/17/2014 | 4/17/2014 | 
+FLAG_SatlanticStatus_NUMBER | Flag indicating the status of the Satlantic optical sensor |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ExceptionDetectedWhileParsingPPedanticRegex_LOGICAL | Sbe41 : Exception detected while parsing the P pedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ExceptionDetectedWhileParsingThePNonpedanticRegex_LOGICAL | Sbe41 : Exception detected while parsing the P nonpedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ExceptionDetectedWhileParsingThePTSNonPedanticRegex_LOGICAL | Sbe41 : Exception detected while parsing the PTS nonpedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ExceptionDetectedWhileParsingThePTSPedanticRegex_LOGICAL | Sbe41 : Exception detected while parsing the PTS pedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41NullArgumentDetectedDuringPMeasurement_LOGICAL | Sbe41 : Null argument detected during P measurement (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41PExeption_LOGICAL | Sbe41 : P exception (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41PNoResponse_LOGICAL | Sbe41 : P No response (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41PTException_LOGICAL | Sbe41 : PT exception (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41PTSException_LOGICAL | Sbe41 : PTS exception (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41PTSNoResponse_LOGICAL | Sbe41 : PTS No response (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41PUnreliable_LOGICAL | Sbe41 : P unreliable (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ResponseToPMeasurementFailedTheNonpedanticRegex_LOGICAL | Sbe41 : Response to P measurement failed the nonpedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ResponseToPMeasurementFailedThePedanticRegex_LOGICAL | Sbe41 : Response to P measurement failed the pedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ResponseToPTSMeasurementFailedTheNonpedanticRegex_LOGICAL | Sbe41 : Response to PTS measurement failed the nonpedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_Sbe41ResponseToPTSMmeasurementFailedThePedanticRegex_LOGICAL | Sbe41 : Response to PTS measurement failed the pedantic regex (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_SBE43NullArgumentDetectedDuringPTSMeasurement_LOGICAL | SBE43 : Null argument detected during PTS measurement (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_SeabirdStringLengthError_LOGICAL |  Seabird string length error (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ShallowWaterTrapDetected_LOGICAL | Shallow water trap detected (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusBladderStateAtLaunch_NUMBER | "External bladder state at deployment (0: float stay at surface, 1: heavy float at deployment)" |  |  |  |  | 4/30/2015 | 4/30/2015 | 
+FLAG_StartDescentToProfile_NUMBER | "Status of the start date-time of the descending profile (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusEndAscentToSurface_NUMBER | "Status of the end date-time of the ascending profile (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusEndDescentToProfile_NUMBER | "Status of the end date-time of the descending profile (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusHistoryQCFailed_hex | Flag History Failed (from profile file) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusHistoryQCPerformed_hex | Flag History performed (from profile file) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusStartAscentToSurface_NUMBER | "Status of the start date-time of the ascending profile (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_StatusStartTransmission_NUMBER | "Status of the start date-time of transmission (0:Nominal, 1:Estimated, 2:Transmitted)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_System_NUMBER |  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_SystemAtDepth_hex | System flags at depth  - SEE MANUAL   |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_SystemAtSurface_hex | System flags at surface - SEE MANUAL |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_TimerDone_LOGICAL |  Timer done (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_UpDown_LOGICAL | Flag indicating whether the float is in 'Up time' (0) or 'Down time' (1) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_WakeUpByWatchDogAlarm_LOGICAL | Wake-up by watchdog alarm (Yes or No) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+FLAG_ArgosTransmitterExceptionStatus_bit | has an Argos transmitter exception been detected |  |  |  |  |  |  | 
+REFERENCE_BlueFlntuParkEnd_COUNT | "Flntu BlueReference at end of park, before descent to profile depth" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+REFERENCE_BlueFlntuSurface_COUNT | Flntu BlueReference at surface |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+REFERENCE_NTUParkEnd_COUNT | "Flntu NTU Reference at end of park, before descent to profile depth" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+REFERENCE_NTUSurface_COUNT | Flntu NTU Reference at surface |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+
+POSITION_PistonNow_COUNT |  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonPark_COUNT | piston position at park pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonParkEnd_COUNT | piston position at end of park period before descent to profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonParkStart_COUNT | plunger position at parking start |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonProfile_COUNT | piston position at maximum profile pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonStorage_COUNT |  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonSurface_COUNT | "Piston position, recorded as the instrument reaches the surface" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonSurfaceAddedBuoyancy_COUNT | "Piston position, recorded AFTER the instrument reaches the surface and the bladder has been fully pumped to increase buoyancy" |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+POSITION_PistonTarget_NUMBER | is this the same as one of the CONFIG_PISTON variables?  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonPosition1_COUNT | Apex ascent profile piston position 1 |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+POSITION_PistonMax_COUNT | reported maximum piston position |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+
+PRES_TimeOutGPS_dbar | Pressure when GPS acquisition times out |  |  |  | NINJA_D |  |  | 
+PRES_TimeOutIridium_dbar | Pressure when iridium communications time out  |  |  |  | NINJA_D |  |  | 
+PRES_1HourIntoDescentToProfile_dbar | pressure taken 1 hour after the beginning of descent  | "NOTE - If Descent Start Time (DST) is known from the decoding process in real time, this pressure should be stored in the TRAJ file as a PRES variable with the corresponding code of MC - 10 (often MC = 190).  If Descent Start Time is not known in real time, store the pressure measurement in the TECH file.  " | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_2HoursIntoDescentToProfile_dbar | pressure taken 2 hours after the beginning of descent  | "NOTE - If Descent Start Time (DST) is known from the decoding process in real time, this pressure should be stored in the TRAJ file as a PRES variable with the corresponding code of MC - 10 (often MC = 190).  If Descent Start Time is not known in real time, store the pressure measurement in the TECH file.  " | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_<int>HoursIntoDesentToProfile_dbar   | (add more of these as required to complete the sequence as reported by the float) | "NOTE - If Descent Start Time (DST) is known from the decoding process in real time, this pressure should be stored in the TRAJ file as a PRES variable with the corresponding code of MC - 10 (often MC = 190).  If Descent Start Time is not known in real time, store the pressure measurement in the TECH file.  " |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_MaxDifferencePvsPTorPTSSamples_dbar | "The maximum (in absolute value) divergence between pressures from closely-spaced (ie., a few seconds apart in time) P-only sample requests and PT or PTS sample requests. The divergence is measured as the P-only sample minus the pressure from the PTS (or PT) sample." |  |  |  |  | 10/20/2015 | 10/20/2015 | 
+PRES_AscendingProfileReductionBottomSlicesThickness_dbar | Ascending profile reduction Deep zone slices thickness - ETF | PRES_AscendingProfileReductionBottomSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_AscendingProfileReductionETF_dbar | Ascending profile reduction - ETF | PRES_AscendingProfileReductionETF_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_AscendingProfileReductionETS_dbar | Ascending profile reduction - ETS | PRES_AscendingProfileReductionETS_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_AscendingProfileReductionSeparation_dbar | Ascending profile reduction Surface / bottom pressure threshold - PRSEP | PRES_AscendingProfileReductionSeparation_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_AscendingProfileReductionSurfaceSlicesThickness_dbar | Ascending profile reduction surface slices thickness - ETS | PRES_AscendingProfileReductionSurfaceSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_CTDProfileReductionBottomSlicesThickness_dbar | CTD profile reduction Deep zone slices thickness - ETF | PRES_CTDProfileReductionBottomSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_CTDProfileReductionSeparation_dbar | CTD profile reduction Shallow / deep pressure threshold - PRSEP | PRES_CTDProfileReductionSeparation_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_CTDProfileReductionSurfaceSlicesThickness_dbar | CTD profile reduction Shallow zone slices thickness - ETS | PRES_CTDProfileReductionSurfaceSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescendingProfileReductionBottomSlicesThickness_dbar | Descending profile reduction Deep zone slices thickness - ETF | PRES_DescendingProfileReductionBottomSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescendingProfileReductionSeparation_dbar | Descending profile reduction Shallow / deep pressure threshold - PRSEP | PRES_DescendingProfileReductionSeparation_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescendingProfileReductionSurfaceSlicesThickness_dbar | Descending profile reduction surface slices thickness - ETS | PRES_DescendingProfileReductionSurfaceSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DescentStartAfterReset_dbar | Pressure after pressure reset just prior to descent (IDG VAR=PFS) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+
+PRES_DOXYProfileReductionBottomSlicesThickness_dbar | DOXY profile reduction Deep zone slices thickness - ETF | PRES_DOXYProfileReductionBottomSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DOXYProfileReductionSeparation_dbar | DOXY profile reduction Shallow / deep pressure threshold - Surface / bottom pressure thresholdPRSEP | PRES_DOXYProfileReductionSeparation_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DOXYProfileReductionSurfaceSlicesThickness_dbar | DOXY profile reduction Number of slices in shallow zone - ETS | PRES_DOXYProfileReductionSurfaceSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ForFLNTUSurface_dbar | pressure used for Flntu at surface |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ForOptodeSurface_dbar | pressure used for Optode at surface |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+PRES_MaximumDepthBinWithValidData_dbar | Maximum depth bin with valid data according to the float |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ExceededMaximumProfileDepth_dbar | The pressure where the float exceeds its maximum profile depth. |  |  |  |  |  |  | 
+
+PRES_MiddleDeepBoundaryAscent_dbar | boundary pressure between middle/deep areas at ascent - IS THIS A CONFIGURATION VARIABLE?? |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_MinimumDepthBinWithValidData_dbar | Minimum depth bin with valid data according to the float |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+PRES_MinimumDuringMaximumBuoyancy_dbar | the shallowest presssure reached by a float when buoyancy is at maximum but it cannot reach the surface. |  |  |  | NINJA_D | 2/10/2014 | 2/10/2014 | 
+PRES_Now_dbar | test message data reporting pressure at the surface during drift - cycle 0 |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_PlusFourseconds_dbar | PRES measured 4 seconds after PRES_AscentStart_dbar | "NOTE - this can also be placed into the traj files with MC-10 depending on the timing event (Often this would be MC = 590) and a JULD calculated from AscentStart times.  If the AscentStart time is not known, then they can remain in the tech file. " |  |  |  | 40913 | 40913 | 
+PRES_PlusTwoseconds_dbar | PRES measured 2 seconds after PRES_AscentStart_dbar | "NOTE - this can also be placed into the traj files with MC -10 depending on the timing event (often this would be MC = 590) and a JULD calculated from AscentStart times.  If the AscentStart time is not known, then they can remain in the tech file. " |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_Settling0_dbar | needs valid definitions… |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_Settling1_dbar | needs valid definitions… |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ShallowDeepBoundaryAscent_dbar | boundary pressure between shallow/deep areas at ascent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ShallowDeepBoundaryDescent_dbar | boundary pressure between shallow/deep areas at descent |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ShallowestInProfile_dbar | shallowest profile point |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ShallowMiddleBoundaryAscent_dbar | boundary pressure between shallow/middle areas at ascent - IS THIS A CONFIGURATION VARIABLE?? |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_AscentTimeOutExpired_dbar | Pressure when ascending time out |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+PRES_DescentTimeOutExpired_dbar | Pressure when descending time out |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+PRES_DescentTimeOutExpiredAfterFailedAscent_dbar | Maximum pressure when descent times out after a previous failed ascent (from ice avoidancy or buoyancy issues). |  |  |  | NINJA_D | 2/10/2014 | 2/10/2014 | 
+PRES_IceAvoidance_dbar | Pressure when float avoids ice |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+PRES_SurfaceComplement_dbar |  Surface pressure complement |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_TUR3ProfileReductionBottomSlicesThickness_dbar | TUR3 profile reduction Deep zone slices thickness - ETF | PRES_TUR3ProfileReductionBottomSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_TUR3ProfileReductionSeparation_dbar | TUR3 profile reduction Surface / bottom pressure threshold - PRSEP | PRES_TUR3ProfileReductionSeparation_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_TUR3ProfileReductionSurfaceSlicesThickness_dbar | TUR3 profile reduction Number of slices in shallow zone - ETS | PRES_TUR3ProfileReductionSurfaceSlicesThickness_dbar |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_ChangeInFirstSeek_COUNT | Pressure Change during first seek at the park depth (IDG Var=PSK) |  | T |  |  | 1/5/2012 | 9/26/2012 | 
+PRES_WhenInWaterSensed_dbar | "From p,t,s when in water sensed " |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TEMP_WhenInWaterSensed_degC | "From p,t,s when in water sensed " |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PSAL_WhenInWaterSensed_psu | "From p,t,s when in water sensed " |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+PRESSURE_AirBladder_COUNT | measured in COUNT - approx 148 COUNT |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_BladderNow_dbar | current pressure of the air bladder 'now' (when is 'now'?). |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRES_DuringMaxBuoyancyAndGPSAcquisition_dbar | Pressure when buoyancy is max during getting GPS |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+PRES_During MaximumBuoyancyAndIridiumTransmission_dbar | Pressure when buoyancy is max during sending messages |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+
+PRESSURE_InternalVacuum_mbar |  units might be (mbar) or (COUNT) or (inHg) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumAirBladderEmpty_inHg | Internal Vacuum when air (sleeve) bladder is empty (IDG Var=VACb) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumAirBladderFull_inHg | Internal Vacuum when air (sleeve) bladder is full (IDG Var=VACa) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumDuringDescent50dbar_inHg | Internal Vacuum at 50dbar as float is sinking towards drift depth. |  | T |  |  | 9/25/2012 | 9/25/2012 | 
+PRESSURE_InternalVacuumOilBladderEmpty_inHg | Internal vacuum when all oil is inside pressure case |  | T |  |  | 9/25/2012 | 9/25/2012 | 
+PRESSURE_InternalVacuumOilBladderFull_inHg | Internal vacuum when all oil isinside the oil bladder |  | T |  |  | 9/25/2012 | 9/25/2012 | 
+PRESSURE_InternalVacuumAtEndSurface_inHg | Air pressure inside of SOLO at end of surface time (IDG Var=ATE) ! |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumAtLaunch_inHg | Internal vacuum when float launched |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumAtStartSurface_inHg | Air pressure inside of SOLO at start of surface time (IDG Var=ATS) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumAtSurface_mbar | Surface internal pressure |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumBeforeFill_inHg | SAME AS SOMETHING ELSE? |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumDuringPark_inHg | Park vacuum |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumEndXmit_inHg | internal pressure at the end of the transmission period |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumParkEnd_inHg | Internal Vacuum at end of park. before descent to profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumProfileStart_mbar | Internal tube pressure [mbar] in profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+PRESSURE_InternalVacuumRange_mbar | "the range of internal vacuum reported by the float - e.g., ""<=725""  or ""726-750""" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TEMPERATURE_InternalVacuumAtSurface_degC | internal tube temperature at the surface |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TEMPERATURE_InternalVacuumAirBladderFull_degC | internal tube temperature at surface after airbladder fill |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TEMPERATURE_InternalVacuumProfileStart_degC | internal tube temperature at the profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+
+STATUS_LimitSwitch_hex |  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+STATUS_MiscellaneousOperations_hex |  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+STATUS_LimitSwitchINAtSurfaceStartXmit_NUMBER | "Binary reporting of piston position (1=IN, 0=OUT) IDG VAR=LIMsw....not same LIMsw as in Cy0" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+STATUS_LimitSwitchOUTAtStartAscent_NUMBER | "Binary reporting of piston position (0=IN, 1=OUT) (IDG VAR=LIMsw)...not same LIMsw as in Cy0" |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_AirPumpOn_seconds | Air pump on time |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_AirPumpOnIntegrated_seconds | Air pumped integrated |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_Ascent1900DB_seconds |  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_Ascent2000DB_seconds |  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_BuoyancyPumpOn_seconds | are the units right? |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_BuoyancyReductionActionAtSurface_seconds | the time the pump or valve ran at the surface to initiate descent |  |  |  |  |  |  | 
+TIME_ClockDrift_dsec/day | MOVED from CONFIG to TIME |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+
+TIME_DescentTo50Decibars_seconds | IDG Var=FallT |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_DescentToPark_hours | metadata?  Measured and reported? OR CONFIGURATION INFORMATION? |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_DOXYSampleFrequencyDuringAscent_seconds | DOXY ascent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_DOXYSampleFrequencyDuringDescent_seconds | DOXY descent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_DOXYSampleFrequencyDuringPark_hours | DOXY drift acquisition frequency (hour) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_FromBladdersEmptyToStartOfMission_seconds | TIME FROM START TO END FIRST PROFILE |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_FromStartOfMissionToEndFirstProfile_seconds | TIME FROM BLADDERS EMPTY TO START  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_GroundingRelativeToCycleBeginning_hours | Gounding day relative to cycle beginning |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_SinceLastIridiumGPSFix_DD | Days since the last GPS fix/Hours since the Last GPS Fix (HH) |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+TIME_IridiumGPSFix_seconds | the number of seconds required to obtain a GPS fix for a profile |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_PreviousIridiumSession_seconds | duration of the previous iridium session |  |  |  |  |  |  | 
+TIME_TransmissionLastHousekeepingMessage_seconds | time required to transmit the last housekeeping message |  |  |  |  | 5/25/2012 | 5/25/2012 | 
+
+TIME_MotorDriveDuringDescent_minutes |  |  | T |  |  | 5/29/2012 | 5/29/2012 | 
+TIME_MotorDriveDuringAscent_minutes |  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_OptiqueSampleFrequencyDuringDescent_seconds | Optique descent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_OptiqueSampleFrequencyDuringPark_hours | Optique drift acquisition frequency (hour) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_PistonRanDuringDescentFrom100db_seconds | seconds that piston ran to descend from approximately 100db (IDG Var= TIP) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_PistonRanDuringFirstSeek_seconds | seconds that piston ran during first seek (park depth) IDG Var=TSK |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_PumpActionsAtSurface_seconds | duration of pump actions at the surface |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_PumpActionsAdditionalAtSurfaceForGPSAcquisition_seconds  | duration of additional pump actions at the surface performed during GPS acquisition in case of insufficient buoyancy |  | T |  |  | 7/14/2016 | 7/14/2016 | 
+TIME_PumpActionsAtDepth_seconds | total duration of pump actions at depth |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+TIME_PumpActionsInOutAtDepth_COUNT | total duration of pump actions (in and out both reported) at depth |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+TIME_PumpActionsInOutAtSurface_COUNT | total duration of pump actions (in and out both reported) at the surface |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+TIME_PumpMotor_seconds | units could be COUNT or seconds - Pump motor time=COUNT multiplied by 2 for seconds |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_SampleFrequencyDuringAscent_seconds | CTD ascent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_SampleFrequencyDuringDescent_seconds | CTD descent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_SampleFrequencyDuringPark_seconds | "sampling period during park was: TIME_SamplePeriodPark_hours" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_Settling0_seconds |  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_Settling1_seconds |  |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_SinceAscentEnd_HHMMSS | (units variable) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_SinceStartUp_seconds | time since startup before deployment |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_TelemetryPhaseInitiationTimeRelativeEPOCH_minutes | time of telemetry phase initiation in mintes relative to EPOCH - this includes the ascent from profiling depth. |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_ToAscend_seconds | time taken to reach the surface  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_Transmission_minutes | Transmission time in minutes |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_TUR3SampleFrequencyDuringAscent_seconds | TUR3 ascent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_TUR3SampleFrequencyDuringDescent_seconds | TUR3 descent acquisition frequency (sec) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+TIME_TUR3SampleFrequencyDuringPark_hours | TUR3 drift acquisition frequency (hour) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+VOLUME_OilVolumeTransferredAtSurfaceDuringDescent_cm^3 | Oil volume transferred from the external bladder during the descent to park (between the surface and the second threshold of the buoyancy reduction phase). This is the oil volume tranferred  during the NUMBER_ValveActionsAtSurfaceDuringDescent_COUNT valve actions (Id 126). | reported pump/valve actions were expressed as durations in the previous floats version. For the CTS5 they are reported as transferred oil volume. | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+VOLUME_OilVolumeTransferredDuringDescentToPark_cm^3 | Oil volume transferred from the external bladder during the descent to park (between the second threshold of the buoyancy reduction phase and the end of the descent to park). This is the oil volume tranferred  during the NUMBER_ValveActionsDuringDescentToPark_COUNT valve actions (Id 124). | reported pump/valve actions were expressed as durations in the previous floats version. For the CTS5 they are reported as transferred oil volume. | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+VOLUME_OilVolumeTransferredToAscentWhenGrounded_cm^3 | "Oil volume, transferred to the external bladder, needed to leave the sea bottom when grounded. " | reported pump/valve actions were expressed as durations in the previous floats version. For the CTS5 they are reported as transferred oil volume. | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+VOLUME_OilVolumeTransferredDuringDescentToProfile_cm^3 | Oil volume transferred from the external bladder during the descent to start profile pressure. This is the oil volume tranferred  during the NUMBER_ValveActionsDuringDescentToProfile_COUNT valve actions (Id 125). | reported pump/valve actions were expressed as durations in the previous floats version. For the CTS5 they are reported as transferred oil volume. | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+VOLUME_OilVolumeTransferredDuringAscentToSurface_cm^3 | Oil volume transferred to the external bladder during the ascent to surface This is the oil volume tranferred  during the NUMBER_PumpActionsDuringAscentToSurface_COUNT pump actions (Id 116). | reported pump/valve actions were expressed as durations in the previous floats version. For the CTS5 they are reported as transferred oil volume. | T |  | PROVOR CTS5 | 2/1/2017 | 2/1/2017 | 
+
+CURRENT_BatteryAirPumpOn_mA  | Battery Current during inflation of sleeve bladder |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryAvgPumpOnStartAscent_mA | Average pump motor current taken at start of ascent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryFlntu_mA | battery current measured when Flntu sampled at unspecified time in profile |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryFlntuParkEnd_mA | battery current measured when Flntu sampled at end of park |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryFlbbParkEnd_mA | battery current measured when Flbb sampled at end of park |  | T |  |  | 22/08/2016 | 22/08/2016 | 
+CURRENT_BatteryOptics_COUNTS | battery current while the optial sensor is on |  | T |  |  | 5/29/2012 | 5/29/2012 | 
+CURRENT_Battery<short_sensor_name>_mA | battery current measured by the sensors themselves. |  |  |  |  | 3/28/2014 | 3/28/2014 | 
+CURRENT_BatteryInitialAtProfileDepth_mA  | Battery Current measured at bottom (park or pressure) at initial pump extension completion |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryMaxPumpOnStartAscent_mA | Maximum pump motor current taken at start of ascent |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryNoLoad_mA | same as: CURRENT_BATTERY_PARK_NOLOAD_mA? |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryPark_mA | measured during park-park phase and is averaged |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryParkEnd_mA | "battery current measured at end of park, before descent to profile depth" |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryParkNoLoad_mA | "Battery Current measured at park pressure with no load, Same as BOTTOM battery current (older floats)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryParkNoLoad_volts | same as: CURRENT_BATTERY_PARK_NOLOAD_mA? |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryPistonPumpOn_mA  | Battery Current during pumping to ascend |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryPumpOn_mA | Battery Current buoyancy pump on  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatterySampledbyFlntu_mA |  Flntu sampled battery current |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatterySampledbySBE_mA |  Sbe sampled battery current - same as CURRENT_BatterySBEPump_mA???? |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatterySBEParkEnd_mA | battery current measured when the SBE41 sampled at the end of park |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatterySBEPump_mA | battery current when CTD active  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatterySurfaceAirPumpOn_mA  | Battery Current measured at the surface with the air pump running (6 seconds) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_BatteryPumpLastValueAsAscends_mA | Current measured in the last portion of pumping as the float ascends |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+CURRENT_MotorAtEndOfAscent_mA  | Motor current measured at the end of the ascent phase (pump motor?) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_MotorOutToAscent_mA  | Motor current measured during the ?  ascent phase (pump motor?) |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+CURRENT_MotorStartProfile_amps | Motor current in profile depth |  |  |  |  | 1/5/2012 | 1/5/2012 | 
+
+VOLTAGE_Aux_volts | auxiliary voltage (formerly VOLTAGE_OF_AUX(volts)) |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_Battery_volts | battery voltage when battery capacity is unknown |  |  |  |  |  |  | 
+VOLTAGE_Battery6V_volts | battery voltage of 6v system |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_Battery7V_volts | battery voltage of 7v system |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_Battery12V_volts | battery voltage of 12V system |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_Battery14V_volts | battery voltage of 14v system |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_Battery18V_volts | battery voltage of 18v system |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+VOLTAGE_BatteryCPU_volts | "CPU Voltage LSB=0.1 Volts, requires a full description " |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_Battery14VStartDescentToPark_volts | battery voltage of 14V system when float starts descending to park |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+VOLTAGE_Battery14VStartAscentToSurface_volts | battery voltage of 14V system when float starts ascending to surface |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+VOLTAGE_Battery7VStartDescentToPark_volts | battery voltage of 7V system when float starts descending to park |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+VOLTAGE_Battery7VStartAscentToSurface_volts | battery voltage of 7V system when float starts ascending to surface |  |  |  | NINJA_D | 5/19/2014 | 5/19/2014 | 
+VOLTAGE_BatteryCPUStartProfile_volts | CPU battery voltage at profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryCPUStartXmit_volts | "CPU Battery @ start oftransmission after data has been processed LSB=0.1 volts,  IDG Var= Vcpu" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryCPUSurface_volts | Surface CPU battery voltage |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryCPUDepth_volts | CPU battery voltage at (unspecified) depth |  | T |  |  | 5/25/2012 | 5/25/2012 | 
+VOLTAGE_BatteryDescentToProfile_volts |  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryExternalStartProfile_volts | voltage of the external battery at the profile depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryFlntuParkEnd_volts | battery voltage measured by Flntu at end of park |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryFlbbParkEnd_volts | battery voltage measured by Flbb at end of park |  | T |  |  | 22/08/2016 | 22/08/2016 | 
+VOLTAGE_BatteryFltnu_volts | Flntu sampled battery voltage |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryOptics_volts | battery voltage of the optical sensor. |  |  |  |  |  |  | 
+VOLTAGE_Battery<short_sensor_name>_volts | battery voltage measured by the individual sensors |  |  |  |  | 3/28/2014 | 3/28/2014 | 
+VOLTAGE_BatteryInitialAtProfileDepth_volts  | measured at initial pump extension completion |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryNoLoad_volts | battery voltage measured with no load |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryParkEnd_volts | battery voltage measured at end of park with no load |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryParkNoLoad_volts | battery voltage during inactive park phase - SAME AS BOTTOM BATTERY VOLTAGE FOR OLDER FLOATS |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryPistonPumpOn_volts | buoyancy pump voltage |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryProfileNoLoad_volts | battery voltage jus before profile begins - no load on the batteries |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryPumpAscentEnd_volts | "Pump Battery at end of ascent Voltage LSB=0.1 Volts, - also a diagnostic message " |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryPumpLastValueAsAscends_volts | "pump battery voltage, on last reading as ascending (IDG Var=Vpmp)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryPumpOn_volts | Pump Battery Voltage LSB=0.1 Volts |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatteryPumpStartProfile_volts | Pump battery voltage (volts) at depth |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatterySBEAscent_volts | Voltage measured when ctd switched on sampling during profile ascend phase |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatterySBEParkEnd_volts | battery voltage measured when the SBE41 sampled after the end of park phase |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatterySBEPump_volts | battery voltage when CTD active  |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatterySurfaceAirPumpOn_volts | Voltage measured when AIR PUMP is switched on at the surface for extra buoyancy |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGE_BatterySurfaceNoLoad_volts | battery voltage during inactive surface phase |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGEDROP_BatteryStartProfile_volts | "battery voltage drop, pump on at max pressure, starting profile(tenths of volts)" |  | T |  |  | 1/5/2012 | 1/5/2012 | 
+VOLTAGETIME_IntegratedAirPumpVolume_voltseconds | integrated measure (volts * seconds) of the pumped air volume (VSAP of Apex floats) | Changed units from volt+B640seconds to voltseconds | T |  |  | 1/5/2012 | 2/18/2015 | 
+VOLTAGE_AcrossInsulation_mV | Insulation voltage measured between 2 sub-parts of the float. |  |  |  |  | 2/16/2016 | 2/16/2016 | 
+SPEED_FirstGrounding_mm/s | Vertical speed during the first grounding |  |  |  |  | 10/9/2014 | 10/9/2014 | 
+
+//BIO-Argo names: |  | "<short_sensor_name> can be: CTD, OPTODE, OCR, ECO3, FLNTU, CROVER, SUNA or any other BIO-Argo sensor defined." |  |  |  |  |  | 
+
+CURRENT_SUNAAPFSupply_mA | SUNA APF Frame Supply Current  |  | T |  |  | 9/26/2013 | 9/26/2013 | 
+FLAG_<short_sensor_name>Status_LOGICAL | "Sensor status - 1= OK, 0=not OK" |  | T |  |  | 9/26/2013 | 9/29/2013 | 
+
+FLAG_SensorBoardStatus_NUMBER | Flag reporting the status of the sensor board. |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+
+NUMBER_<short_sensor_name>AscentIridiumMessages_COUNT | Number of Iridium messages used to transmit <short_sensor_name> data collected during the ascent from the profile depth to the surface. |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>AscentIridiumPackets_COUNT | Number of Iridium packets used to transmit <short_sensor_name> data collected during the ascent from the profile depth to the surface. |  |  |  |  | 10/14/2014 | 10/14/2014 | 
+NUMBER_<short_sensor_name>AscentSamplesDepthZone<Z>_COUNT | Number of samples acquired by <short_sensor_name> in the depth zone #<Z> during the ascent from the profile depth to the surface. Depth zone number: <Z> = 1..5 |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>DescentIridiumMessages_COUNT | Number of Iridium messages used to transmit <short_sensor_name> data collected during the descent phases (from surface to the parking depth and from the parking depth to the profile depth). |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>DescentIridiumPackets_COUNT | Number of Iridium packets used to transmit <short_sensor_name> data collected during the descent phases (from surface to the parking depth and from the parking depth to the profile depth). |  |  |  |  | 10/14/2014 | 10/14/2014 | 
+NUMBER_<short_sensor_name>DescentSamplesDepthZone<Z>_COUNT | Number of samples acquired by <short_sensor_name> in the depth zone #<Z> during the descent phases (from surface to the parking depth and from the parking depth to the profile depth). Depth zone number: <Z> = 1..5 |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>AscentSamples_COUNT | "Number of samples acquired by <short_sensor_name> during the ""ascent to surface"" phase." |  |  |  | CTS5 | 10/12/2020 | 10/12/2020 | 
+NUMBER_<short_sensor_name>InAirSamples_COUNT | "Number of samples acquired by <short_sensor_name> during the ""surface"" phase." |  |  |  | CTS5 | 10/12/2020 | 10/12/2020 | 
+NUMBER_<short_sensor_name>DescentToParkSamples_COUNT | "Number of samples acquired by <short_sensor_name> during the ""surface to parking depth"" phase." |  |  |  | CTS5 | 10/12/2020 | 10/12/2020 | 
+NUMBER_<short_sensor_name>DescentToProfileSamples_COUNT | "Number of samples acquired by <short_sensor_name> during the ""parking depth to profile depth"" phase." |  |  |  | CTS5 | 12.10.202 | 10/12/2020 | 
+NUMBER_<short_sensor_name>ParkIridiumMessages_COUNT | Number of Iridium messages used to transmit <short_sensor_name> data collected during the drift at park depth. |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>ParkIridiumPackets_COUNT | Number of Iridium packets used to transmit <short_sensor_name> data collected during the drift at park depth. |  |  |  |  | 10/14/2014 | 10/14/2014 | 
+NUMBER_<short_sensor_name>ProfileDriftIridiumMessages_COUNT | Number of Iridium messages used to transmit <short_sensor_name> data collected during the drift at profile depth. (Drift is added to the name because otehrwise it appears to be ascent data) |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>ParkSamples_COUNT | Number of samples acquired by <short_sensor_name> during the drift at parking depth. |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_<short_sensor_name>ProfileDriftSamples_COUNT | Number of samples acquired by <short_sensor_name> during the drift at profile depth. |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_AscendingCTDSamplesInternalCounter_COUNT | total number of slices of the ascending profile after reduction |  | NUMBER_AscendingCTDSamplesDepthInternalCounter_COUNT | Ascending profile ctd measurements - Depth internal counter  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_DescendingCTDSamplesInternalCounter_COUNT | total number of slices of the descending profile after reduction |  | NUMBER_DescendingCTDSamplesDepthInternalCounter_COUNT | Descending profile cdt measurements - Depth internal counter  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_PumpActionsDuringProfileDrift_COUNT | Number of pump actions during drift at profile depth. |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_PumpActionsToLeaveReleasingSystem_COUNT | Number of pump actions needed to leave the releasing system (float deployed in ASFAR (Autonomous System for Argo float Release) mode) |  |  |  |  | 10/18/2015 | 10/18/2015 | 
+NUMBER_SBEFPCommandTimeouts_COUNT | "Number of timeouts while measuring pressure with the SBE sensor using a ""Fast Pressure"" command." |  |  |  |  | 9/26/2013 | 9/29/2013 | 
+NUMBER_VectorToSensorBoardsDialogErrors_COUNT | Number of dialog errors between vector and sensor boards. |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+NUMBER_SUNAAPFErrorCounter_COUNT | "Incremented each time an error is encountered.The APF interface provides a mechanism to access error messages.If the error counter increases between frames, the operator or control system can retrieve the accumulated error message(s)." |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+NUMBER_SUNAAPFPowerCycleCounter_COUNT | Incremented each time power is applied to SUNA (it can be used to notice if the SUNA was powered unintentionally between data collection events). |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+NUMBER_SUNAAPFSampleCounter_COUNT | "Incremented for each sample the SUNA measures (it can be used to track frames, and recognize if frames were missed)." |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+VOLTAGE_SUNAAPFSupplyVoltage_volts | "Voltage [V] measured inside SUNA via ADC.The voltage available to the SUNA just outside its power regulators.SUNA can operate on 6 to 18 VDC. This voltage allows the operator to monitor supply voltage, and in the case of a drop to makedecisions on the continued operation of the SUNA." |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+CURRENT_SUNAAPFSupplyCurrent_mA | "Current [mA] measured inside SUNA via ADC.The current can be monitored to ascertain that all components are operating. A sudden drop or increase would indicate the failure of a system component." |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+NUMBER_OptodeSensorReset_COUNT | Number of power resets of the DO sensor |  |  |  |  | 5/10/2016 | 5/10/2016 | 
+NUMBER_OptodeAcquisitionsFailed_COUNT | Number of failed  acquisitions of the DO sensor |  |  |  |  | 5/10/2016 | 5/10/2016 | 
+NUMBER_SubCycle_NUMBER |  |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+NUMBER_InternalCycle_NUMBER |  |  |  |  |  | 12/17/2013 | 12/17/2013 | 
+NUMBER_SubCyclesDoneSinceDeployment_COUNT |  |  |  |  |  | 1/1/2014 | 1/1/2014 | 
+/////added so we don't have to allow missing <short_sensor_name>/////
+NUMBER_AscentIridiumPackets_COUNT | Number of Iridium packets used to transmit <short_sensor_name> data collected during the ascent from the profile depth to the surface. |  |  |  |  | 10/14/2014 | 10/14/2014 | 
+NUMBER_DescentIridiumPackets_COUNT | Number of Iridium packets used to transmit <short_sensor_name> data collected during the descent phases (from surface to the parking depth and from the parking depth to the profile depth). |  |  |  |  | 10/14/2014 | 10/14/2014 | 
+NUMBER_ParkIridiumPackets_COUNT | Number of Iridium packets used to transmit <short_sensor_name> data collected during the drift at park depth. |  |  |  |  | 10/14/2014 | 10/14/2014 | 

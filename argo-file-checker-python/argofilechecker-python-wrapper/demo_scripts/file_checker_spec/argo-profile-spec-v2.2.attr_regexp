@@ -1,0 +1,24 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+// Changes in BPHASE_DOXY between v2.2 and v2.31 that have not been dealt with
+
+BPHASE_DOXY:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY_ADJUSTED:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY_ADJUSTED:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY_ADJUSTED_ERROR:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+
+BPHASE_DOXY2:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY2:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY2_ADJUSTED:long_name = (BPHASE_DOXY)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY2_ADJUSTED:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+MOLAR_DOXY_ADJUSTED:comment = (Technical value reported by sensors such as Aandera Optode)|(Adjusted technical value reported by sensors such as Aandera Optode);
+MOLAR_DOXY_ADJUSTED:long_name = (MOLAR_DOXY)|(DISSOLVED OXYGEN);
+MOLAR_DOXY_ADJUSTED_ERROR:long_name =  (MOLAR_DOXY)|(DISSOLVED OXYGEN);
+
+

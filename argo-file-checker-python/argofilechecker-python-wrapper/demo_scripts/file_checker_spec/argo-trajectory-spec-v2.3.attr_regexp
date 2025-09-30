@@ -1,0 +1,29 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+// coriolis is missing this
+JULD:standard_name = <*>;
+
+// csio is missing these
+GROUNDED:conventions = Y,P,N,U|Y,N,U;
+DATA_TYPE:long_name = <*>;
+FORMAT_VERSION:long_name = <*>;
+HANDBOOK_VERSION:long_name = <*>;
+REFERENCE_DATE_TIME:long_name = <*>;
+DATE_CREATION:long_name = <*>;
+PROJECT_NAME:long_name = <*>;
+PI_NAME:long_name = <*>;
+
+//  Changes in BPHASE_DOXY between v2.2 and v2.31 that have not been dealt with
+
+BPHASE_DOXY:long_name = BPHASE_DOXY|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+BPHASE_DOXY_ADJUSTED:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+BPHASE_DOXY2:long_name = (BPHASE_DOXY2)|(OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR);
+BPHASE_DOXY2:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+BPHASE_DOXY2_ADJUSTED:comment = (Uncalibrated phase shift reported by sensors such as Aandera Optode)|(In situ measurement);
+
+MOLAR_DOXY:units = micromole/litre|millimole/m3;
+MOLAR_DOXY_ADJUSTED:units = micromole/litre|millimole/m3;
+MOLAR_DOXY_ADJUSTED_ERROR:units = micromole/litre|millimole/m3;

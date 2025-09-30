@@ -1,0 +1,10 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+//
+// Reference Table 22: Platform Family
+
+FLOAT | Profiling float
+FLOAT_DEEP |  Profiling float that is capable of profiling deeper than 2000dbar 
+FLOAT_COASTAL | "Coastal float, i.e. ARVOR_C"
+POLAR_OCEAN_PROFILING_SYSTEM | "Ice platform that provides meteorological data is paired with a subsurface platform, either a PROVOR or NEMO float tethered along a cable that uses buoyancy to go up and down."
+ICE_TETHERED_PROFILER | Surface ice-mounted platform that provides meteorological data and subsurface profiler tethered to a cable that uses a motor to go up and down.

@@ -1,0 +1,287 @@
+netcdf argo-metadata-v3.0-spec {
+
+//@ DATA_TYPE = "Argo meta-data"
+//@ FORMAT_VERSION   = "3.1"
+//@ HANDBOOK_VERSION = "1.2"
+//@ REFERENCE_DATE_TIME = "19500101000000"
+//@ $Revision: 1228 $
+//@ $Date: 2021-03-03 16:22:15 +0000 (Wed, 03 Mar 2021) $
+
+// global attributes:
+	:title = "Argo float metadata file" ;
+	:institution = "<+>US GDAC" ;
+	:source = "Argo float" ;
+	:history = "<+>";
+	:references = "http://www.argodatamgt.org/Documentation" ;
+	:user_manual_version = "3.1" ;        /*REGEX = "3\..*" */
+	:Conventions = "Argo-3.1 CF-1.6" ;    /*REGEX = "Argo-3\..* +CF-.*" */
+
+dimensions:
+	DATE_TIME = 14; 
+	STRING4096 = 4096;
+	STRING1024 = 1024;
+	STRING256 = 256; 
+	STRING128 = 128;  
+	STRING64 = 64; 
+	STRING32 = 32; 
+	STRING17 = 17; 
+	STRING16 = 16; 
+	STRING8 = 8; 
+	STRING4 = 4; 
+	STRING2 = 2;
+	N_PARAM = _unspecified_;
+	N_SENSOR = _unspecified_;
+	N_CONFIG_PARAM = _unspecified_;
+	N_LAUNCH_CONFIG_PARAM = _unspecified_;
+	N_MISSIONS = _unspecified_;
+	N_POSITIONING_SYSTEM = _unspecified_;
+	N_TRANS_SYSTEM = _unspecified_;
+
+variables:
+// General information on the meta-data file
+	char DATA_TYPE(STRING16);
+		DATA_TYPE:long_name = "Data type";
+		DATA_TYPE:conventions = "Argo reference table 1";
+		DATA_TYPE:_FillValue = " "; 
+	char FORMAT_VERSION(STRING4); 
+		FORMAT_VERSION:long_name =  "File format version";
+		FORMAT_VERSION:_FillValue = " "; 
+	char HANDBOOK_VERSION(STRING4);
+		HANDBOOK_VERSION:long_name = "Data handbook version";
+		HANDBOOK_VERSION:_FillValue = " "; 
+	char DATE_CREATION(DATE_TIME);
+		DATE_CREATION:long_name = "Date of file creation";
+		DATE_CREATION:conventions = "YYYYMMDDHHMISS";
+		DATE_CREATION:_FillValue = " "; 
+	char DATE_UPDATE(DATE_TIME);
+		DATE_UPDATE:long_name = "Date of update of this file";
+		DATE_UPDATE:conventions = "YYYYMMDDHHMISS";
+		DATE_UPDATE:_FillValue = " "; 
+	char PLATFORM_NUMBER(STRING8);
+		PLATFORM_NUMBER:long_name = "Float unique identifier";
+		PLATFORM_NUMBER:conventions = "WMO float identifier : A9IIIII";
+ 		PLATFORM_NUMBER:_FillValue = " "; 
+	char PLATFORM_WIGOS_ID(STRING17);
+		PLATFORM_WIGOS_ID:long_name = "Float unique identifier";
+		PLATFORM_WIGOS_ID:conventions = "WMO WIGOS float identifier: 0-22000-0-A9IIIII";
+		PLATFORM_WIGOS_ID:_FillValue = " ";
+	char PTT(STRING256);
+		PTT:long_name = "Transmission identifier (ARGOS, ORBCOMM, etc.)";
+		PTT:_FillValue = " "; 
+	char TRANS_SYSTEM(N_TRANS_SYSTEM, STRING16);
+		TRANS_SYSTEM:long_name = "Telecommunications system used"; 
+		TRANS_SYSTEM:_FillValue = " "; 
+	char TRANS_SYSTEM_ID(N_TRANS_SYSTEM, STRING32);
+		TRANS_SYSTEM_ID:long_name = "Program identifier used by the transmission system";
+		TRANS_SYSTEM_ID:_FillValue = " "; 
+	char TRANS_FREQUENCY(N_TRANS_SYSTEM, STRING16);
+		TRANS_FREQUENCY:long_name = "Frequency of transmission from the float";
+		TRANS_FREQUENCY:units = "hertz";
+		TRANS_FREQUENCY:_FillValue = " ";
+	char POSITIONING_SYSTEM(N_POSITIONING_SYSTEM, STRING8);
+		POSITIONING_SYSTEM:long_name = "Positioning system";
+		POSITIONING_SYSTEM:_FillValue = " "; 
+	char PLATFORM_FAMILY(STRING256);
+		PLATFORM_FAMILY:long_name = "Category of instrument";
+		PLATFORM_FAMILY:conventions = "Argo reference table 22";
+		PLATFORM_FAMILY:_FillValue = " ";
+	char PLATFORM_TYPE(STRING32);
+		PLATFORM_TYPE:long_name = "Type of float";
+		PLATFORM_TYPE:conventions = "Argo reference table 23";
+		PLATFORM_TYPE:_FillValue = " "; 
+	char PLATFORM_MAKER(STRING256);
+		PLATFORM_MAKER:long_name = "Name of the manufacturer";
+		PLATFORM_MAKER:conventions = "Argo reference table 24";
+		PLATFORM_MAKER:_FillValue = " "; 
+	char FIRMWARE_VERSION(STRING64|STRING32);
+		FIRMWARE_VERSION:long_name = "Firmware version for the float";
+		FIRMWARE_VERSION:_FillValue = " ";
+	char MANUAL_VERSION(STRING16);
+		MANUAL_VERSION:long_name = "Manual version for the float";
+		MANUAL_VERSION:_FillValue = " ";
+	char FLOAT_SERIAL_NO(STRING32);
+		FLOAT_SERIAL_NO:long_name = "Serial number of the float";
+		FLOAT_SERIAL_NO:_FillValue = " ";
+	char STANDARD_FORMAT_ID(STRING16);
+		STANDARD_FORMAT_ID:long_name = "Standard format number to describe the data format type for each float";
+		STANDARD_FORMAT_ID:_FillValue = " ";
+	char DAC_FORMAT_ID(STRING16);
+		DAC_FORMAT_ID:long_name = "Format number used by the DAC to describe the data format type for each float";
+		DAC_FORMAT_ID:_FillValue = " ";
+	char WMO_INST_TYPE(STRING4);
+		WMO_INST_TYPE:long_name = "Coded instrument type";
+		WMO_INST_TYPE:conventions = "Argo reference table 8";
+		WMO_INST_TYPE:_FillValue = " ";
+	char PROJECT_NAME(STRING64);
+		PROJECT_NAME:long_name = "Name of the project"; 
+		PROJECT_NAME:_FillValue = " ";
+	char PROGRAM_NAME(STRING64);
+		PROGRAM_NAME:long_name = "Name of the program";
+		PROGRAM_NAME:_FillValue = " ";  
+	char DATA_CENTRE(STRING2);
+		DATA_CENTRE:long_name = "Data centre in charge of float real-time processing";
+		DATA_CENTRE:conventions = "Argo reference table 4";
+		DATA_CENTRE:_FillValue = " ";
+	char PI_NAME (STRING64);
+		PI_NAME:long_name = "Name of the principal investigator";
+		PI_NAME:_FillValue = " ";
+	char ANOMALY(STRING256);
+		ANOMALY:long_name = "Describe any anomalies or problems the float may have had";
+		ANOMALY:_FillValue = " ";
+	char BATTERY_TYPE(STRING64);
+		BATTERY_TYPE:long_name = "Type of battery packs in the float";
+		BATTERY_TYPE:_FillValue = " ";
+	char BATTERY_PACKS(STRING64);
+		BATTERY_PACKS:long_name = "Configuration of battery packs in the float";
+		BATTERY_PACKS:_FillValue = " ";
+	char CONTROLLER_BOARD_TYPE_PRIMARY(STRING32);
+		CONTROLLER_BOARD_TYPE_PRIMARY:long_name = "Type of primary controller board";
+		CONTROLLER_BOARD_TYPE_PRIMARY:_FillValue = " ";
+	char CONTROLLER_BOARD_TYPE_SECONDARY(STRING32);
+		CONTROLLER_BOARD_TYPE_SECONDARY:long_name = "Type of secondary controller board";
+		CONTROLLER_BOARD_TYPE_SECONDARY:_FillValue = " ";
+	char CONTROLLER_BOARD_SERIAL_NO_PRIMARY(STRING32);
+		CONTROLLER_BOARD_SERIAL_NO_PRIMARY:long_name = "Serial number of the primary controller board";
+		CONTROLLER_BOARD_SERIAL_NO_PRIMARY:_FillValue = " ";
+	char CONTROLLER_BOARD_SERIAL_NO_SECONDARY(STRING32);
+		CONTROLLER_BOARD_SERIAL_NO_SECONDARY:long_name = "Serial number of the secondary controller board";
+		CONTROLLER_BOARD_SERIAL_NO_SECONDARY:_FillValue = " ";
+	char SPECIAL_FEATURES(STRING1024);
+		SPECIAL_FEATURES:long_name = "Extra features of the float (algorithms, compressee etc.)";
+		SPECIAL_FEATURES:_FillValue = " ";
+	char FLOAT_OWNER (STRING64);
+		FLOAT_OWNER:long_name = "Float owner";
+		FLOAT_OWNER:_FillValue = " ";
+	char OPERATING_INSTITUTION(STRING64);
+		OPERATING_INSTITUTION:long_name = "Operating institution of the float";
+		OPERATING_INSTITUTION:_FillValue = " ";
+	char CUSTOMISATION(STRING1024);
+		CUSTOMISATION:long_name = "Float customisation, i.e. (institution and modifications)";
+		CUSTOMISATION:_FillValue = " ";
+
+
+// Float deployment and mission information
+	char LAUNCH_DATE(DATE_TIME);
+		LAUNCH_DATE:long_name = "Date (UTC) of the deployment"; 
+		LAUNCH_DATE:conventions = "YYYYMMDDHHMISS";
+		LAUNCH_DATE:_FillValue = " "; 
+	double LAUNCH_LATITUDE;
+		LAUNCH_LATITUDE:long_name = "Latitude of the float when deployed";
+		LAUNCH_LATITUDE:units = "degree_north";
+		LAUNCH_LATITUDE:_FillValue = 99999.; 
+		LAUNCH_LATITUDE:valid_min = -90.;
+		LAUNCH_LATITUDE:valid_max = 90.;
+	double LAUNCH_LONGITUDE;
+		LAUNCH_LONGITUDE:long_name = "Longitude of the float when deployed";
+		LAUNCH_LONGITUDE:units = "degree_east"; 
+		LAUNCH_LONGITUDE:_FillValue = 99999.; 
+		LAUNCH_LONGITUDE:valid_min = -180.; 
+		LAUNCH_LONGITUDE:valid_max = 180.;
+	char LAUNCH_QC;
+		LAUNCH_QC:long_name = "Quality on launch date, time and location";
+		LAUNCH_QC:conventions = "Argo reference table 2"; 
+		LAUNCH_QC:_FillValue = " ";
+	char START_DATE(DATE_TIME);
+		START_DATE:long_name = "Date (UTC) of the first descent of the float"; 
+		START_DATE:conventions = "YYYYMMDDHHMISS"; 
+		START_DATE:_FillValue = " ";
+	char START_DATE_QC;
+		START_DATE_QC:long_name = "Quality on start date"; 
+		START_DATE_QC:conventions = "Argo reference table 2"; 
+		START_DATE_QC:_FillValue = " ";
+	char STARTUP_DATE(DATE_TIME);
+		STARTUP_DATE:long_name = "Date (UTC) of the activation of the float"; 
+		STARTUP_DATE:conventions = "YYYYMMDDHHMISS"; 
+		STARTUP_DATE:_FillValue = " ";
+	char STARTUP_DATE_QC;
+		STARTUP_DATE_QC:long_name = "Quality on startup date"; 
+		STARTUP_DATE_QC:conventions = "Argo reference table 2"; 
+		STARTUP_DATE_QC:_FillValue = " ";
+	char DEPLOYMENT_PLATFORM(STRING32|STRING128);
+		DEPLOYMENT_PLATFORM:long_name = "Identifier of the deployment platform"; 
+		DEPLOYMENT_PLATFORM:_FillValue = " ";
+	char DEPLOYMENT_CRUISE_ID(STRING32);
+		DEPLOYMENT_CRUISE_ID:long_name = "Identification number or reference number of the cruise used to deploy the float";
+		DEPLOYMENT_CRUISE_ID:_FillValue = " ";
+	char DEPLOYMENT_REFERENCE_STATION_ID(STRING256);
+		DEPLOYMENT_REFERENCE_STATION_ID:long_name = "Identifier or reference number of co-located stations used to verify the first profile";
+		DEPLOYMENT_REFERENCE_STATION_ID:_FillValue = " ";
+	char END_MISSION_DATE(DATE_TIME);
+		END_MISSION_DATE:long_name = "Date (UTC) of the end of mission of the float"; 
+		END_MISSION_DATE:conventions = "YYYYMMDDHHMISS"; 
+		END_MISSION_DATE:_FillValue = " ";
+	char END_MISSION_STATUS;
+		END_MISSION_STATUS:long_name = "Status of the end of mission of the float"; 
+		END_MISSION_STATUS:conventions = "T:No more transmission received, R:Retrieved"; 
+		END_MISSION_STATUS:_FillValue = " ";
+
+// Configuration parameters
+	char LAUNCH_CONFIG_PARAMETER_NAME(N_LAUNCH_CONFIG_PARAM, STRING128);
+		LAUNCH_CONFIG_PARAMETER_NAME:long_name = "Name of configuration parameter at launch";
+		LAUNCH_CONFIG_PARAMETER_NAME:_FillValue = " "; 
+float_or_double LAUNCH_CONFIG_PARAMETER_VALUE(N_LAUNCH_CONFIG_PARAM);
+		LAUNCH_CONFIG_PARAMETER_VALUE:long_name = "Value of configuration parameter at launch";
+		LAUNCH_CONFIG_PARAMETER_VALUE:_FillValue = 99999.; 
+	char CONFIG_PARAMETER_NAME(N_CONFIG_PARAM, STRING128);
+		CONFIG_PARAMETER_NAME:long_name = "Name of configuration parameter";
+		CONFIG_PARAMETER_NAME:_FillValue = " "; 
+float_or_double CONFIG_PARAMETER_VALUE(N_MISSIONS, N_CONFIG_PARAM);
+		CONFIG_PARAMETER_VALUE:long_name = "Value of configuration parameter";
+		CONFIG_PARAMETER_VALUE:_FillValue = 99999.; 
+	int CONFIG_MISSION_NUMBER(N_MISSIONS);
+		CONFIG_MISSION_NUMBER:long_name = "Unique number denoting the missions performed by the float";
+		CONFIG_MISSION_NUMBER:conventions = "1...N, 1 : first complete mission";
+		CONFIG_MISSION_NUMBER:_FillValue = 99999; 
+	char CONFIG_MISSION_COMMENT(N_MISSIONS, STRING256);
+		CONFIG_MISSION_COMMENT:long_name = "Comment on configuration";
+		CONFIG_MISSION_COMMENT:_FillValue = " ";
+
+// Float sensor information
+	char SENSOR(N_SENSOR, STRING32);
+		SENSOR:long_name = "Name of the sensor mounted on the float";
+		SENSOR:conventions = "Argo reference table 25";
+		SENSOR:_FillValue = " "; 
+	char SENSOR_MAKER(N_SENSOR, STRING256);
+		SENSOR_MAKER:long_name = "Name of the sensor manufacturer";
+		SENSOR_MAKER:conventions = "Argo reference table 26";
+		SENSOR_MAKER:_FillValue = " ";
+	char SENSOR_MODEL(N_SENSOR, STRING256);
+		SENSOR_MODEL:long_name = "Type of sensor";
+		SENSOR_MODEL:conventions = "Argo reference table 27";
+		SENSOR_MODEL:_FillValue = " "; 
+	char SENSOR_SERIAL_NO(N_SENSOR, STRING16);
+		SENSOR_SERIAL_NO:long_name = "Serial number of the sensor";
+		SENSOR_SERIAL_NO:_FillValue = " ";
+	char SENSOR_FIRMWARE_VERSION(N_SENSOR, STRING32);
+		SENSOR_FIRMWARE_VERSION:long_name = "Firmware version of the sensor"; 
+		SENSOR_FIRMWARE_VERSION:_FillValue = " ";		
+
+// Float parameter information
+	char PARAMETER(N_PARAM, STRING64);
+		PARAMETER:long_name = "Name of parameter computed from float measurements";
+		PARAMETER:conventions = "Argo reference table 3";
+		PARAMETER:_FillValue = " ";
+	char PARAMETER_SENSOR(N_PARAM, STRING128);
+		PARAMETER_SENSOR:long_name = "Name of the sensor that measures this parameter";
+		PARAMETER_SENSOR:conventions = "Argo reference table 25";
+		PARAMETER_SENSOR:_FillValue = " ";
+	char PARAMETER_UNITS(N_PARAM, STRING32);
+		PARAMETER_UNITS:long_name = "Units of accuracy and resolution of the parameter";
+		PARAMETER_UNITS:_FillValue = " ";
+	char PARAMETER_ACCURACY(N_PARAM, STRING32);
+		PARAMETER_ACCURACY:long_name = "Accuracy of the parameter";
+		PARAMETER_ACCURACY:_FillValue = " ";
+	char PARAMETER_RESOLUTION(N_PARAM, STRING32);
+		PARAMETER_RESOLUTION:long_name = "Resolution of the parameter";
+		PARAMETER_RESOLUTION:_FillValue =" ";
+
+// Float calibration information
+	char PREDEPLOYMENT_CALIB_EQUATION(N_PARAM, STRING1024|STRING4096);
+		PREDEPLOYMENT_CALIB_EQUATION:long_name = "Calibration equation for this parameter";
+		PREDEPLOYMENT_CALIB_EQUATION:_FillValue = " ";
+	char PREDEPLOYMENT_CALIB_COEFFICIENT(N_PARAM, STRING1024|STRING4096); 
+		PREDEPLOYMENT_CALIB_COEFFICIENT:long_name = "Calibration coefficients for this equation";
+		PREDEPLOYMENT_CALIB_COEFFICIENT:_FillValue = " ";
+	char PREDEPLOYMENT_CALIB_COMMENT(N_PARAM, STRING1024|STRING4096);
+		PREDEPLOYMENT_CALIB_COMMENT:long_name = "Comment applying to this parameter calibration"; 
+		PREDEPLOYMENT_CALIB_COMMENT:_FillValue = " ";

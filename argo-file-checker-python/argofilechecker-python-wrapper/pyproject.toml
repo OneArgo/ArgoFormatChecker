@@ -1,0 +1,189 @@
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[project]
+name = "argofilechecker-python-wrapper"
+version = "0.0.0"
+description = "Python wrapper for Argo file checker"
+authors = [
+    {name = "Yvan Lubac",email = "yvan.lubac@euro-argo.eu"}
+]
+readme = "README.md"
+
+[tool.poetry]
+packages = [{include = "argofilechecker_python_wrapper", from = "src"}]
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+style = "semver"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+pydantic = "^2.11.9"
+defusedxml = "^0.7.1"
+# Specify the optional dependencies that will be used below as "extras"
+pytest = { version = ">=8.4.2,<9.0.0", optional = true }
+pytest-cov = { version = ">=7.0.0,<8.0.0", optional = true }
+pytest-mock = { version = ">=3.15.1,<4.0.0", optional = true }
+coverage = { version = ">=7.10.6,<8.0.0", extras = ["xml"], optional = true }
+tox = { version = ">=4.30.2,<5.0.0", optional = true }
+ruff = { version = ">=0.13.0,<0.14.0", optional = true }
+mypy = { version = ">=1.18.1,<2.0.0", optional = true }
+bandit = { version = ">=1.8.6,<2.0.0", extras = ["toml"], optional = true }
+poetry = { version = ">=2.0.0", optional = true }
+twine = { version = ">=6.2.0,<7.0.0", optional = true }
+pytest-env = "^1.1.5"
+
+
+[tool.poetry.extras]
+test = ["pytest", "pytest-cov", "pytest-mock", "pytest-env", "coverage", "tox"]
+lint = ["ruff"]
+type = ["mypy"]
+bandit = ["bandit"]
+build = ["poetry", "twine"]
+
+
+[dependency-groups]
+lint = [
+    "ruff (>=0.13.0,<0.14.0)"
+]
+build = [
+    "twine (>=6.2.0,<7.0.0)"
+]
+type = [
+    "mypy (>=1.18.1,<2.0.0)"
+]
+test = [
+    "pytest (>=8.4.2,<9.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)",
+    "tox (>=4.30.2,<5.0.0)",
+    "coverage[xml] (>=7.10.6,<8.0.0)"
+]
+bandit = [
+    "bandit[toml] (>=1.8.6,<2.0.0)"
+]
+
+[tool.coverage.paths]
+source = [
+    "src/argofilechecker_python_wrapper",
+    "**/argofilechecker_python_wrapper"
+]
+
+[tool.setuptools.packages.find]
+namespaces = false
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+indent-width = 4
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "C90",
+    "I",
+    "N",
+    "D",
+    "ERA",
+    "PD",
+    "PGH",
+    "PL",
+    "TRY",
+    "FLY",
+    "NPY",
+    "PERF",
+    "FURB",
+    "RUF"
+]
+ignore = [
+    "D203",  # Conflict with D211 - prefer no-blank-line-before-class.
+    "D213",  # Conflict with D213 - prefer multi-line-summary-first-line.
+]
+fixable = ["ALL"]
+unfixable = []
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+isort.split-on-trailing-comma = false
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = true
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+disallow_any_unimported = true
+disallow_any_expr = true
+disallow_any_decorated = true
+disallow_any_generics = true
+disallow_any_explicit = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_redundant_casts = true
+strict_equality = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "e2e: end-to-end tests which have to download data from GDAC."]
+
+[tool.pytest_env]
+GDAC_FTP_HOST="ftp://ftp.ifremer.fr/ifremer/argo/dac"
+SPECS_REPO_URL="https://github.com/OneArgo/ArgoFormatChecker.git"
+SPECS_REPO_REF="main"
+TEST_REPO_SUBDIR="file_checker_spec/"
+JAR_URL="https://github.com/OneArgo/ArgoFormatChecker/releases/download/v2.9.3/file_checker_exec-2.9.3.jar"
