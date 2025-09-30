@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+build/
+dist/
+public/
+*.egg-info/
+.eggs/
+docs/source/generated
+
+# Test artifacts=
+
+.coverage
+coverage.xml
+coverage_reports
+junit.xml
+
+# Developer Environments
+venv/
+.tox/
+./ruff_cache
+./mypy_cache
+.env
+secrets.env
