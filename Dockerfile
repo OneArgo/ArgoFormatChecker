@@ -43,6 +43,7 @@ RUN echo "=== Listing build context ===" && ls -la / || true
 RUN echo "=== Current directory ===" && pwd && ls -la . || true
 RUN echo "=== Looking for file_checker_spec ===" && find / -name "file_checker_spec" -type d 2>/dev/null || true
 COPY file_checker_spec /app/file_checker_spec
+RUN echo "=== Content of file_checker_spec ===" && ls -la /app/file_checker_spec/
 # Specify the default command for running the app
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
