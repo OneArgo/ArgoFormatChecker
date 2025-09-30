@@ -38,6 +38,10 @@ RUN set -e \
 # Copy the built jar file to the runtime stage
 COPY --from=builder --chown=root:gcontainer --chmod=750 /build/target/file_checker*.jar app.jar
 # Copy the specs :
+# Debug: afficher le contenu du contexte de build
+RUN echo "=== Listing build context ===" && ls -la / || true
+RUN echo "=== Current directory ===" && pwd && ls -la . || true
+RUN echo "=== Looking for file_checker_spec ===" && find / -name "file_checker_spec" -type d 2>/dev/null || true
 COPY file_checker_spec /app/file_checker_spec
 # Specify the default command for running the app
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
