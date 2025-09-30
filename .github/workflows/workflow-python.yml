@@ -1,0 +1,33 @@
+name: Image build
+
+on:
+  push:
+    branches:
+      # Run on our main branch
+      - main
+      - develop
+    paths:
+      - file_checker_python/**
+  pull_request:
+    # Run for any pull requests
+    paths:
+      - file_checker_python/**
+  release:
+    types: [created]
+    
+
+jobs:
+  container-image-build-wrapper:
+    uses: ./.github/workflows/component-container-image.yml
+    with:
+      context: .
+      file: "python.Dockerfile"
+      target: file-checker-python
+      image-path: ghcr.io/OneArgo/ArgoFormatChecker/python-wrapper
+  container-image-build-api:
+    uses: ./.github/workflows/component-container-image.yml
+    with:
+      context: .
+      file: "python.Dockerfile"
+      target: file-checker-api
+      image-path: ghcr.io/OneArgo/ArgoFormatChecker/python-api
