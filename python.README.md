@@ -8,7 +8,7 @@ It runs the File Checker JAR as a **subprocess**, parses the generated XML outpu
 ### With Poetry
 
 ```bash
-cd ./file_checker_python/argofilechecker-python-wrapper
+cd ./file_checker_python/file_checker_python_wrapper
 poetry install
 ```
 
