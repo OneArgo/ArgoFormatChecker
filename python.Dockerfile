@@ -50,7 +50,7 @@ COPY ./file_checker_spec /app/specs
 
 #env variables for file checker
 ENV FILE_CHECKER_JAR="/app/app.jar"
-ENV FILE_CHECKER_SPECS="/app/specs"
+ENV FILE_CHECKER_SPECS="/app/file_checker_spec"
 
 RUN --mount=type=bind,from=build-package,source=/opt/build,target=/opt/build \
     python -m venv /opt/venv && \
@@ -73,11 +73,9 @@ LABEL org.opencontainers.image.description="Docker image for Argo File Checker P
 LABEL org.opencontainers.image.url="https://github.com/British-Oceanographic-Data-Centre/amrit-repos"
 LABEL org.opencontainers.image.source="https://github.com/British-Oceanographic-Data-Centre/amrit-repos"
 
-COPY ./file_checker_spec /app/specs
-
 #env variables for file checker
 ENV FILE_CHECKER_JAR="/app/app.jar"
-ENV FILE_CHECKER_SPECS="/app/specs"
+ENV FILE_CHECKER_SPECS="/app/file_checker_spec"
 ENV UPLOAD_FILES_DIR="/home/app/input"
 
 WORKDIR /home/app

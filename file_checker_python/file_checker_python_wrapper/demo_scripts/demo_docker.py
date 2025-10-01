@@ -9,7 +9,7 @@ from argofilechecker_python_wrapper.models import ResultType
 
 # 1) Instantiate the wrapper (explicit paths).
 # file checker jar is already contained in the docker image
-file_checker = FileChecker(specs_path=specs_path)
+file_checker = FileChecker()
 
 
 # 2) Validate a list of files from the same DAC
