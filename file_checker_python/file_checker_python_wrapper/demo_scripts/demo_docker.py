@@ -6,8 +6,6 @@ from typing import List
 from argofilechecker_python_wrapper import FileChecker, ValidationResult
 from argofilechecker_python_wrapper.models import ResultType
 
-specs_path = "/app/specs"
-
 
 # 1) Instantiate the wrapper (explicit paths).
 # file checker jar is already contained in the docker image
