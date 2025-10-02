@@ -35,7 +35,7 @@ poetry run python demo_test.py
 docker build --target file-checker-python -f python.Dockerfile -t argofilechecker-python:latest .
 ```
 
-Argo File checker .jar file will be included in the docker image but you still need to mount your data your script file (if not used in interactive mode) :
+Argo File checker .jar file will be included in the Docker image but you still need to mount your data and provide a script file (if not used in interactive mode):
 
 ```bash
 docker run --rm -v ${pwd}/file_checker_python/file_checker_python_wrapper/demo_scripts/demo_docker.py:/scripts/demo_docker.py -v ${pwd}/demo/inputs/2903996:/data argofilechecker-python:latest /scripts/demo_docker.py
