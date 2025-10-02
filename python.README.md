@@ -8,7 +8,8 @@ It runs the File Checker JAR as a **subprocess**, parses the generated XML outpu
 ### With Poetry
 
 ```bash
-poetry add argofilechecker-python-wrapper
+cd ./file_checker_python/file_checker_python_wrapper
+poetry install
 ```
 
 ## Run ArgoFileChecker Python Wrapper (after installing the package and any additional dependencies)
@@ -34,7 +35,7 @@ poetry run python demo_test.py
 docker build --target file-checker-python -f python.Dockerfile -t argofilechecker-python:latest .
 ```
 
-Argo File checker .jar file will be included in the docker image but you still need to mount your data and specs volumes and also your script file (if not used in interactive mode) :
+Argo File checker .jar file will be included in the Docker image but you still need to mount your data and provide a script file (if not used in interactive mode):
 
 ```bash
 docker run --rm -v ${pwd}/file_checker_python/file_checker_python_wrapper/demo_scripts/demo_docker.py:/scripts/demo_docker.py -v ${pwd}/demo/inputs/2903996:/data argofilechecker-python:latest /scripts/demo_docker.py
@@ -46,7 +47,7 @@ You can use interactive mode to execute python code inside the container :
 ```bash
 docker run --rm -it -v ${pwd}/demo/inputs/2903996:/data argofilechecker-python:latest
 >>> from argofilechecker_python_wrapper import FileChecker
->>> filechecker = FileChecker(specs_path='/app/specs')
+>>> filechecker = FileChecker()
 >>> results = filechecker.check_files(['/data/2903996_meta.nc'],"coriolis")
 >>> results[0].to_string()
 '/data/2903996_meta.nc : FILE ACCEPTED with 0 error(s) and 0 warning(s)'
