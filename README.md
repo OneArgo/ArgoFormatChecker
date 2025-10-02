@@ -112,6 +112,10 @@ or for Windows :
 
 output files will be generated in `./demo/outputs`.
 
+### Run File checker using Python and an API
+
+In folder /file-checker-python you will find a python wrapper and an API to facilitate the use of Argo FileChecker. See python.README for more informations.
+
 ### Test data
 
 To further test the Argo File Checker, you will find argo data here : https://www.argodatamgt.org/DataAccess.html
