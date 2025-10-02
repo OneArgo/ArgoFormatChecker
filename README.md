@@ -1,8 +1,10 @@
 # Argo NetCDF file format checker
+
 The Argo NetCDF file format checker performs format and content checks on Argo NetCDF files.  
-The Argo NetCDF format is described in "Argo user's manual" http://dx.doi.org/10.13155/29825  
-More information on https://www.argodatamgt.org/Documentation  
+The Argo NetCDF format is described in "Argo user's manual" <http://dx.doi.org/10.13155/29825>  
+More information on <https://www.argodatamgt.org/Documentation>  
 The format checker has two directories:
+
 - file_checker_exec : the java code
 - file_checker_spec : the rules applied on the NetCDF file by the java code
 
@@ -10,16 +12,119 @@ The rules files implement the Argo vocabularies managed on [NVS vocabulary serve
 Vocabularies and format changes are managed on [Argo Vocabs Task Team - AVTT GitHub](https://github.com/orgs/OneArgo/projects/4/views/1).
 
 **With each release (from 2.9.2) you will find :**
+
 - **file_checker_exec-[version].jar** which consolidates both application's compiled code and all its dependencies into a single executable file.
-- source code 
+- source code
 
 ## Run Argo NetCDF file format checker
-- Using file_checker_exec-[version].jar :
+
+### Using file_checker_exec-{version}.jar :
+
 ```bash
-java -jar file_checker_exec-[version].jar $OPTION $DAC_NAME $SPEC $OUTPUT_DIR $INPUT_DIR $FILE_NAME
+java -jar file_checker_exec-{version}.jar $OPTION $DAC_NAME $SPEC $OUTPUT_DIR $INPUT_DIR [$FILES_NAMES]
 ```
 
-Only this JAR file is needed. You can delete legacy log4j2 & netcdf libraries jar files.
+$FILES_NAMES is a list of file's name from the INPUT_DIR. It is optional : without it, all files from INPUT_DIR will be checked.
+
+### Run the application using Docker
+
+```bash
+docker run --rm -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results ghcr.io/oneargo/argoformatchecker/app:{TAG} [$OPTIONS] $DAC_NAME ./file_checker_spec ./results ./data [$FILES_NAMES]
+```
+
+Or if you want to use your own specification files :
+
+```bash
+docker run --rm -v [ABSOLUTE_PATH_TO_SPEC]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results ghcr.io/oneargo/argoformatchecker/app:{TAG} [$OPTIONS] $DAC_NAME ./file_checker_spec ./results ./data [$FILES_NAMES]
+```
+
+You need to mount external directories to the container :
+
+[ABSOLUTE_PATH_TO_SPEC] : OPTIONAL - The file_checker_spec directory path (if you don't want to use the specs included in the docker container).
+
+[ABSOLUTE_PATH_TO_DATA_FOLDER] : Path to directory containing the argo necdf files to be checked. The fileChecker will not seek files in subfolders
+
+[ABSOLUTE_PATH_TO_OUTPUT_DIR] : the directory where xml results files \*.filecheck will be created
+
+Example :
+
+```bash
+docker run --rm -v D:\test_file_checker\datatest:/app/data -v D:\test_file_checker\results:/app/results ghcr.io/oneargo/argoformatchecker/app:develop  -no-name-check coriolis ./file_checker_spec ./results ./data
+```
+
+### Run the application using Docker Compose
+
+To facilitate the use of Argo file checker a compose.yaml and .env files are provided :
+
+- Prepare your data.
+- Copy `.env.docs` as `.env` file, and customize variables to configure the file checker for your environment.
+- Download compose.yaml
+- Run the service using Docker Compose:
+
+```bash
+docker compose -f compose.yaml up
+```
+
+or in background :
+
+```bash
+docker compose -f compose.yaml up -d
+```
+
+Example of an .env file :
+
+```text
+# file checker image
+FILECHECKER_IMAGE=ghcr.io/oneargo/argoformatchecker/app
+FILECHECKER_IMAGE_TAG=develop
+
+# External directories to mount to the container
+FILECHECKER_INPUT_VOLUME='D:\test_compose\data'
+FILECHECKER_OUTPUT_VOLUME='D:\test_compose\results'
+
+# Variable specific to floats to check
+DAC_NAME=bodc
+FILECHECKER_OPTIONS=
+FILES_NAMES=
+```
+
+### Run the application on demonstration files
+
+Demonstration data are availables to run the application locally easily.
+
+- Clone the repository :
+
+```bash
+git clone https://github.com/OneArgo/ArgoFormatChecker.git
+```
+
+- Run the script dedicated
+
+```bash
+./run-file-checker-linux.sh
+```
+
+or for Windows :
+
+```bash
+./run-file-checker-windows.bat
+```
+
+output files will be generated in `./demo/outputs`.
+
+### Run File checker using Python and an API
+
+In folder /file-checker-python you will find a python wrapper and an API to facilitate the use of Argo FileChecker. See python.README for more informations.
+
+### Test data
+
+To further test the Argo File Checker, you will find argo data here : https://www.argodatamgt.org/DataAccess.html
+
+The Argo File Checker is not yet designed to checking *prof.nc and *Sprof.nc. It checks only TRAJ, META, TECH and PROFILES files.
+
+## Run File checker using Python and an API
+
+In folder /argo-file-checker-python you will find a python wrapper and an API to facilitate the use of Argo FileChecker.
 
 ## TOOLS
 
@@ -39,7 +144,6 @@ git clone https://github.com/OneArgo/ArgoFormatChecker.git
 
 - Build the application with maven (will requiert Java jdk installed), in file_checker_exec folder :
 
-
 ```bash
 cd file_checker_exec
 ./mvnw clean install
@@ -47,23 +151,16 @@ cd file_checker_exec
 
 In target folder you will find both original-file_checker_exec and file_checker_exec-[version]. It is this last one to use.
 
-
-### Using docker
-
+### build docker image
 
 - Build the application with Docker :
 
-```
+```bash
 docker build -t filechecker_2.8.14 .
 ```
 
-- Run the application using Docker
-
-```
-docker run --rm -v [ABSOLUTE_PATH_TO_file_checker_spec]:/app/file_checker_spec -v [ABSOLUTE_PATH_TO_DATA_FOLDER]:/app/data -v [ABSOLUTE_PATH_TO_OUTPUT_DIR]:/app/results filechecker_2.8.14:latest $DAC_NAME ./file_checker_spec ./results ./data $FILE_NAME
-```
-
 ### Run integration tests
+
 The source code comes with some netcdf test files. You can run the integration tests with this following command :
 
 ```bash

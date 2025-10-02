@@ -1,0 +1,11 @@
+services:
+  argo-netcdf-checker:
+    container_name: ArgoFormatChecker
+    image: ${FILECHECKER_IMAGE}:${FILECHECKER_IMAGE_TAG}
+    user: "${DOCKER_UID:-0}:${DOCKER_GID:-0}"
+    group_add:
+      - 1001
+    volumes:      
+      - ${FILECHECKER_INPUT_VOLUME}:/app/data:ro
+      - ${FILECHECKER_OUTPUT_VOLUME}:/app/results:rw
+    command: ${FILECHECKER_OPTIONS} ${DAC_NAME} ./file_checker_spec ./results ./data ${FILES_NAMES}

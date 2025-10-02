@@ -77,10 +77,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		super(arFile);
 	}
 
-//	public ArgoMetadataValidator(String specDir, String version) {
-//		// super(specDir, FileType.METADATA, version);
-//	}
-
 	// ..........................................
 	// METHODS
 	// ..........................................
@@ -140,10 +136,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			return false;
 		}
 		// .......do meta-data file specific validations..........
-
-//		if (ckNulls) {
-//			validateStringNulls();
-//		}
 
 		validateDates();
 
