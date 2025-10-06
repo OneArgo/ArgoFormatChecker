@@ -808,8 +808,11 @@ public class ArgoConfigTechParam {
 			String parameterCode) throws IllegalArgumentException {
 		// TO DO : UPDATE THIS FONCTION TO BE ABLE TO RETRIEVE LONG_NAME FROM NVS
 
-		String parameterCode = column[0];
-		String parameterLongName = column[1];
+//		String parameterCode = column[0];
+//		String parameterLongName = column[1];
+
+		// String parameterCode = "PLCAHOLDER";
+		String parameterLongName = "PLCAHOLDER";
 
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit

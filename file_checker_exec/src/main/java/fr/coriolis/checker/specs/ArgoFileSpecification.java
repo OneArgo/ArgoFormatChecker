@@ -7,10 +7,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +22,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.core.ArgoDataFile;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosConcept;
+import fr.coriolis.checker.utils.NvsDefinitionParser;
 import ucar.ma2.DataType;
 
 /**
@@ -512,6 +517,8 @@ public class ArgoFileSpecification {
 	 * this is a method to force an attribute to be excluded.
 	 */
 	public static final String ATTR_NOT_ALLOWED = "<->"; // ..not allowed (can't be present)
+
+	public static final int NUMBER_ALLOWED_DUPLICATE_SENSOR = 5;
 
 	private static final String axis = new String("axis");
 	private static final String c_format = new String("C_format");
@@ -1195,11 +1202,13 @@ public class ArgoFileSpecification {
 //					DataType.STRING);
 //		}
 //		
-		//2025-09 : as it may have multiple units (in fact all units from reference units table) and multiple long_name (defined in R14), we will have a special check for this. 
+		// 2025-09 : as it may have multiple units (in fact all units from reference
+		// units table) and multiple long_name (defined in R14), we will have a special
+		// check for this.
 		// For the generic test, we ignore these attributes.
 		addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
 		addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
-		
+
 		varHash.put(techParamName, techParamVar);
 		// 2 - add it to the optionnal variables :
 		optVar.add(techParamName);
@@ -2020,791 +2029,1046 @@ public class ArgoFileSpecification {
 			isPost3_0 = true;
 		}
 
-		// ..open the file
+		// Open NVS table R03 :
+		for (SkosConcept physParamEntry : ArgoNVSReferenceTable.PARAMETER_TABLE.getConceptMembersByAltLabelMap()
+				.values()) {
+			// parse attributes from definition field :
+			Map<String, String> physParamAttributes = NvsDefinitionParser.parseAttributes("Local_Attributes",
+					physParamEntry.getDefinition());
 
-		try (InputStream in = SpecIO.getInstance().open(prmFileName);
-				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+			String prm = physParamEntry.getAltLabel().trim(); // ..parameter name - NVS altLabel
+			boolean isDeprecated = physParamEntry.isDeprecated();
+			// physical parameter's attributes from definition field :
+			String prmLName = physParamAttributes.get("long_name").trim();
+			String prmSName = physParamAttributes.get("standard_name").trim();
+			String prmUnits = physParamAttributes.get("units").trim();
+			String prmVmin = physParamAttributes.get("valid_min").trim();
+			String prmVmax = physParamAttributes.get("valid_max").trim();
+			String prmCategory = physParamAttributes.get("category").trim();
+			String prmFill = physParamAttributes.get("fill_value").trim();
+			String prmType = physParamAttributes.get("data_type").trim();
+			String[] extraDims = getExtraDimensionsFromParametersAttributes(
+					physParamAttributes.get("extra_dim").trim());
 
-			// ..parse the file
-			log.info("parsing \"parameter\" file '{}'", prmFileName);
+			// deal with empty or "-" attributes (only for >3.0 version)
+			if (isPost3_0) {
+				prmSName = replaceAttributeIfNotAllowed(prmSName);
+				prmVmin = replaceAttributeIfNotAllowed(prmVmin);
+				prmVmax = replaceAttributeIfNotAllowed(prmVmax);
+				prmLName = replaceAttributeIfToBeIgnored(prmLName);
+			}
 
-			// ..read through the file
-			// String line;
-			int nLine = 0;
-			String line;
-			while ((line = fileReader.readLine()) != null) {
-				nLine++;
-				log.debug("line({}): '{}'", line);
+			log.debug("parsed: {}|{}|{}|{}|{}|deprecated : {}|{}|", prm, prmType, prmLName, prmSName, prmUnits, prmVmin,
+					prmVmax, isDeprecated, prmFill);
 
-				if (pBlankOrComment.matcher(line).matches()) {
-					continue;
-				}
+			// For a given physParam, we build a virutal list of allowed physParam's names
+			// to take into account duplicate sensor.
+			// ex : TEMP, TEMP_1, TEMP_2, TEMP_3,...
+			String[] prmList = buildParamListForDuplicatePhysicalParameters(prm, NUMBER_ALLOWED_DUPLICATE_SENSOR);
 
-				// .....parse the line into individual entries.....
-				String st[] = line.split("\\|");
-
-				if (st.length < nParamFields) {
-					fileReader.close();
-					log.error("too few columns on line {} in '{}'", nLine, prmFileName);
-					throw new IOException(
-							"Too few columns on line " + nLine + " in '" + prmFileName + "': '" + line + "'");
-				}
-
-				String prm = st[1].trim(); // ..parameter name // NVS altLabel
-				String prmLName = st[3].trim(); // ..long_name // NVS prefLabel
-				String prmSName = st[4].trim(); // ..(cf_)standard_name // needed in NVS
-				String prmUnits = st[6].trim(); // ..units // needed in NVS
-				String prmVmin = st[7].trim(); // ..value min // needed in NVS
-				String prmVmax = st[8].trim(); // ..value max // needed in NVS
-				String prmCategory = st[9].trim(); // .."c", "b", "ic", "ib" // needed in NVS
-				String prmComment = st[14].trim(); // ..to be searched for extra dimension
-				String prmStatus = st[16].trim(); // .."active", "deprecated", etc // NVS deprecated
-				String prmFill = st[17].trim(); // ..fillValue // needed in NVS
-				String prmType = st[18].trim(); // ..data type // needed in NVS
-
-				// ..status codes of " " (blank), "active", "deprecated" are allowed
-
-				boolean isDeprecated = false;
-				if (prmStatus.length() > 0) {
-					if (!pActive.matcher(prmStatus).matches()) {
-						if (!pDeprecated.matcher(prmStatus).matches()) {
-							// ..not allowed
-							log.debug("prm is not valid: '{}'", prm);
-							continue;
-						} else {// ..it is deprecated
-							log.debug("deprecated prm: '{}'", prm);
-							isDeprecated = true;
-						}
-					}
-				}
-
-				// ..set any special handling instructions for v3.1 and later files
-
-				if (isPost3_0) {
-					if (prmSName.length() == 0 || prmSName.equals("-")) {
-						prmSName = ATTR_NOT_ALLOWED;
-					}
-					if (prmVmin.length() == 0 || prmVmin.equals("-")) {
-						prmVmin = ATTR_NOT_ALLOWED;
-					}
-					if (prmVmax.length() == 0 || prmVmax.equals("-")) {
-						prmVmax = ATTR_NOT_ALLOWED;
-					}
-					if (prmLName.length() == 0 || prmLName.equals("-")) {
-						prmLName = ATTR_IGNORE;
-					}
-				}
-
-				log.debug("parsed: {}|{}|{}|{}|{}|{}|{}|", prm, prmType, prmLName, prmSName, prmUnits, prmVmin, prmVmax,
-						prmStatus, prmFill);
-
-				// ..array of automatic "number" variables
-
-				String prmList[] = new String[4];
-				prmList[0] = prm;
-				// ADMT-25 : Always add an underscore to numbering duplicate sensor/parameters
-				// variable
-				prmList[1] = prm + "_2";
-				prmList[2] = prm + "_3";
-				prmList[3] = prm + "_4";
-
-				// ...LIST-ONLY MODE: grab the param name and continue with the next line
-				if (listOnly) {
-					for (String prmName : prmList) {
-						if (!physParamNameList.contains(prmName)) {// ..new param name
-							physParamNameList.add(prmName);
-							if (isDeprecated) {
-								depParamNameList.add(prmName);
-							}
-
-							physParamNameList.add(prmName + "_STD");
-							physParamNameList.add(prmName + "_MED");
-
-						} else { // ..duplicate name is a no, no
-							log.error("Duplicate param name '" + prmFileName + "': '" + line + "'");
-							fileReader.close();
-							throw new IOException("Duplicate param name in '" + prmFileName + "': '" + line + "'");
-						}
-					}
-					continue;
-				}
-
-				// ..check if there is an "extra dimension"
-				// ..at least for now, this is encoded in the data type
-				boolean prmExtra = false;
-				if (pN_VALUES.matcher(prmComment).matches()) {
-					prmExtra = true;
-					log.debug("variable with extra dimension: type = '{}'", prmType);
-				}
-
-				// ..check the data type
-				String tmp = prmType;
-				switch (prmType) {
-				case "NC_DOUBLE":
-					prmType = "double";
-					break;
-				case "NC_FLOAT":
-					prmType = "float";
-					break;
-				case "NC_SHORT":
-					prmType = "short";
-					break;
-				}
-				if (log.isDebugEnabled() && !prmType.equals(tmp)) {
-					log.debug("reset prmType from {} to {}", tmp, prmType);
-				}
-
-				if (!(prmType.equals("float") || prmType.equals("double") || prmType.equals("short"))) {
-					log.error("Invalid data type = '" + line + "'");
-					throw new IOException("Invalid data type '" + prmType + "' (" + prmFileName + "; " + nLine + ")");
-				}
-
-				DataType ncDataType = DataType.getType(prmType);
-
-				// ..check for symbolic NETCDF fill values
-
-				if (prmFill.startsWith("NC_FILL_")) {
-					tmp = prmFill;
-					prmFill = NC_FILL_TYPES.get(tmp);
-
-					if (prmFill == null) {
-						log.debug("Invalid NC_FILL_: '" + tmp + "' in line '" + line + "'");
-						throw new IOException("Invalid NC_FILL_: '" + tmp + "' (" + prmFileName + "; " + nLine + ")");
-					}
-
-					log.debug("Changed fill-value from {} to {}", tmp, prmFill);
-				}
-
-				// ..check the PrmCat -- "c" = core, "b" = bio, "ic/ib" = intermediate -> core,
-				// bio
-				if (!(prmCategory.equals("c") || prmCategory.equals("b") || prmCategory.equals("ic")
-						|| prmCategory.equals("ib"))) {
-					log.debug("Invalid category '" + prmCategory + "' in line '" + line + "'");
-					throw new IOException(
-							"Invalid category '" + prmCategory + "' (" + prmFileName + "; " + nLine + ")");
-				}
-
-				// ..decide if this parameter is in this type of file
-
-				boolean keep = false;
-				boolean opt = true;
-				boolean CORE = false;
-				boolean BIO = false;
-
-				// ..check for a valid file type and decide if it's a keeper
-				if (prmCategory.equals("c")) {
-					CORE = true;
-					BIO = false;
-
-					if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()) {
-						// ..keep PRES / PRESn in all cases
-						opt = false;
-						keep = true;
-
-						// ..treat PRES/PRESn like any other bio-parameter in Bio- files
-						if (isBioProf || isOldBioTraj) {
-							CORE = false;
-						}
-
-					} else if (isCoreProf || isTraj || isOldCoreTraj) {
-						// ..keep "c" parameters for core and traj (> v3.1) files
-						keep = true;
-						if (prm.equals("TEMP") && fileType == ArgoDataFile.FileType.PROFILE) {
-							opt = false;
-						}
-					}
-
-				} else if (prmCategory.equals("ic")) {
-					CORE = false;
-					BIO = false;
-
-					if (isCoreProf || isTraj || isOldCoreTraj) {
-						// ..keep "c" and "ic" parameters for core and traj (> v3.1) files
-						keep = true;
-					}
-
-				} else if (prmCategory.equals("b")) {
-					CORE = false;
-					BIO = true;
-
-					if (isBioProf || isTraj || isOldBioTraj) {
-						// ..keep "b" parameters for Bio-Argo and traj (> v3.1) files
-						keep = true;
-					}
-
-				} else if (prmCategory.equals("ib")) {
-					CORE = false;
-					BIO = false;
-
-					if (isBioProf || isTraj || isOldBioTraj) {
-						// ..keep "ib" parameters for Bio-Argo and traj (> v3.1) files
-						keep = true;
-					}
-
-				} else {
-					log.debug("Invalid param category (c,b,ic,ib) '" + prmCategory + "' in line '" + line + "'");
-					throw new IOException("Invalid parameter category (c,b,i) '" + prmCategory + "' (" + prmFileName
-							+ "; " + nLine + ")");
-				}
-
-				// ..for each <param> entry, automatically make <param>* variables too
+			// ...LIST-ONLY MODE: grab the param name and continue with the next
+			// physParamEntry
+			if (listOnly) {
 				for (String prmName : prmList) {
-
-					if (keep) {
-						// ..build the relevant variable entries
-						log.debug("keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
-
-						// ..add to list of valid parameter names
-						if (!physParamNameList.contains(prmName)) {// ..new param name
-							physParamNameList.add(prmName);
-							if (isDeprecated) {
-								depParamNameList.add(prmName);
-							}
-
-						} else { // ..duplicate name is a no, no
-							log.error("Duplicate param name (line {}) '{}'", nLine, prmName);
-							throw new IOException("Duplicate param name in '" + prmFileName + "' (line " + nLine
-									+ "): '" + line + "'");
+					if (!physParamNameList.contains(prmName)) {// ..new param name
+						physParamNameList.add(prmName);
+						if (isDeprecated) {
+							depParamNameList.add(prmName);
 						}
 
-						// ..create the variable group(s)
-						// -- see VARIABLE GROUPS documentation at the top
+						physParamNameList.add(prmName + "_STD");
+						physParamNameList.add(prmName + "_MED");
+
+					} else { // ..duplicate name is a no, no
+						log.error("Duplicate param name R03 table :" + "'" + prm + "'");
+						throw new IOException("Duplicate param name in R03 table :" + "'" + prm + "'");
+					}
+				}
+				continue;
+			}
+
+			// ..check if there is an "extra dimension"
+			// ..at least for now, this is encoded in the data type
+			boolean prmExtra = extraDims != null && extraDims.length > 0;
+
+			// ..check the data type
+			if (!prmType.equals("double") && !prmType.equals("float") && !prmType.equals("short")) {
+				log.error("Invalid data type = '" + prmType + "'");
+				throw new IOException("Invalid data type '" + prmType + "' (NVS R03, parameter : " + prm + ")");
+			}
+			DataType ncDataType = DataType.getType(prmType);
+
+			// symbolic NETCDF fill values replacement
+			prmFill = checkAndRepacleWithNcFillTypes(prm, prmFill);
+
+			// check the PrmCat -- "c" = core, "b" = bio, "ic/ib" = intermediate -> core,
+			// bio
+			ParameterCategoryResult categoryAnalysisResults = analyzeParameterCategory(prmCategory, prm, fileType,
+					isCoreProf, isBioProf, isTraj, isOldCoreTraj, isOldBioTraj);
+			boolean keep = categoryAnalysisResults.keep;
+			boolean opt = categoryAnalysisResults.opt;
+			boolean CORE = categoryAnalysisResults.CORE;
+			boolean BIO = categoryAnalysisResults.BIO;
+
+			// BUILD <PARAM> variables. For each <param> entry, automatically make <param>*
+			// variables too
+			for (String prmName : prmList) {
+
+				buildParamVariables(fileType, version, prmName, dimPQc, dimParam, errComment, errLongName, presAxis,
+						pres_adjAxis, prm, isDeprecated, prmLName, prmSName, prmUnits, prmVmin, prmVmax, prmFill,
+						prmList, prmExtra, ncDataType, keep, opt, CORE, BIO);
+				opt = true; // After the first iteration in prmList, opt is put to true as all virtual _<N>
+							// variables for duplicate sensor are optionnals.
+
+			} // end for (prmList)
 
-						String group_qc = prmName + "_QC";
-						String group_adj = prmName + "_ADJUSTED";
-
-						if (CORE || BIO) { // ..a "full parameter"
-							if (!groupMembers.containsKey(prmName)) { // ..new group - init
-								groupMembers.put(prmName, new HashSet<String>());
-								log.debug("create group: '{}'", prmName);
-							}
-
-						} else { // ..implies an i-parameter
-							interPhysParam.add(prmName);
-							log.debug("add intermediate variable '{}'", prmName);
-
-							// ..make the _qc group
-							if (!groupMembers.containsKey(group_qc)) { // ..new group - init
-								groupMembers.put(group_qc, new HashSet<String>());
-								log.debug("create group: '{}'", group_qc);
-							}
-
-							// ..make the _adj group
-							if (!groupMembers.containsKey(group_adj)) { // ..new group - init
-								groupMembers.put(group_adj, new HashSet<String>());
-								log.debug("create group: '{}'", group_adj);
-							}
-						}
-
-						// ..PRES and Bio-argo files: In bio-argo files,
-						// .. - only PRES appears
-						// .. - there is no PROFILE_PRES_QC, PRES_QC, PRES_ADJ_QC, *_ADJ_ERR
-
-						boolean bio_pres = false;
-						if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()
-								&& (fileType == ArgoDataFile.FileType.BIO_PROFILE
-										|| fileType == ArgoDataFile.FileType.BIO_TRAJECTORY)) {
-							bio_pres = true;
-						}
-
-						String varNm;
-						ArgoVariable aVar;
-
-						if (fileType == ArgoDataFile.FileType.PROFILE
-								|| fileType == ArgoDataFile.FileType.BIO_PROFILE) {
-
-							/*
-							 * Build the parameter structure char PROFILE_<PARAM>_QC(N_PROF);
-							 * PROFILE_<PARAM>_QC:long_name = "Global quality flag of PRES profile";
-							 * PROFILE_<PARAM>_QC:conventions = "Argo reference table 2a";
-							 * PROFILE_<PARAM>_QC:_FillValue = " ";
-							 *
-							 * NOTE: PRES does not have this variable in BIO_PROFILE files
-							 */
-							if (!bio_pres) {
-								varNm = new String("PROFILE_" + prmName + "_QC");
-								aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, prmName);
-								addAttr(aVar, long_name, prfQcLName + prmName + " profile", DataType.STRING);
-								addAttr(aVar, conventions, prfQcConventions, DataType.STRING);
-								addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
-
-								varHash.put(varNm, aVar);
-								physParamVarList.add(varNm);
-
-								// ..add to groups ... see VARIABLE GROUPS above
-
-								String group;
-								if (CORE || BIO) {
-									group = prmName;
-
-								} else { // ..this is an intermediate parameter
-									group = group_qc;
-								}
-
-								varGroup.put(varNm, group);
-								groupMembers.get(group).add(varNm);
-
-								if (opt) {
-									// ..add to optional variables
-									optVar.add(varNm);
-								}
-
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, group, group);
-
-							} else {
-								log.debug("skip: 'PROFILE_{}_QC' (bio_pres = true)", prmName);
-							}
-						} // ..end if (PROFILE)
-
-						// ...build the <PARAM> structures....
-						// .. the profile structures are for both <PARAM> and <PARAM>_ADJUSTED
-
-						String P[] = { prmName, prmName + "_ADJUSTED" };
-
-						for (String v : P) {
-							/*
-							 * Build the parameter structure Profile: <ncDataType> <P>(N_PROF, N_LEVELS)
-							 * -or- <ncDataType> <P>(N_PROF, N_LEVELS,_extra_)
-							 *
-							 * Trajectory: <ncDataType> <P>(N_MEASUREMENT); -or- <ncDataType>
-							 * <P>(N_MEASUREMENT, _extra_)
-							 *
-							 * Attributes: <P>:long_name = "<param-specific>"; <P>:standard_name =
-							 * "<param-specific>"; <P>:_FillValue = <param-specific>; <P>:units =
-							 * "<param-specific>"; <P>:valid_min = <param-specific>; <P>:valid_max =
-							 * <param-specific>; <P>:comment = "<param-specific>"; (version-specific)
-							 * <P>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <P>:FORTRAN_format
-							 * = ATTR_IGNORE_VALUE; //..means ignore setting <P>:resolution =
-							 * ATTR_IGNORE_VALUE; <P>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
-							 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
-							 * versions if it showed up
-							 *
-							 * where <P> = <PARAM>, <PARAM>_ADJUSTED
-							 *
-							 * if <P> = PRES or PRES_ADJUSTED, add <P>:axis = "Z"
-							 *
-							 */
-							log.debug("...working on: {}", v);
-
-							aVar = new ArgoVariable(v, ncDataType, dimParam, prmName);
-
-							if (prmExtra) {
-								aVar.setHaveExtraDimension();
-							}
-
-							addAttr(aVar, long_name, prmLName, DataType.STRING);
-
-							if (version.compareTo("2.3") < 0) {
-								addAttr(aVar, comment, prmSName, DataType.STRING);
-							} else {
-								addAttr(aVar, standard_name, prmSName, DataType.STRING);
-							}
-
-							// aVar.addAttribute(fillValue, fillValueNum);
-							addAttr(aVar, fillValue, prmFill, ncDataType);
-							addAttr(aVar, units, prmUnits, DataType.STRING);
-							addAttr(aVar, valid_min, prmVmin, ncDataType);
-							addAttr(aVar, valid_max, prmVmax, ncDataType);
-							if (v.startsWith("PRES")) {
-								addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
-								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.1", DataType.STRING);
-							} else {
-								addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.3f", DataType.STRING);
-								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.3", DataType.STRING);
-							}
-							addAttr(aVar, resolution, ATTR_IGNORE + "99999.", ncDataType);
-							addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown",
-									DataType.STRING);
-
-							if (v.equals("PRES")) {
-								addAttr(aVar, axis, presAxis, DataType.STRING);
-							} else if (v.equals("PRES_ADJUSTED")) {
-								addAttr(aVar, axis, pres_adjAxis, DataType.STRING);
-							}
-
-							varHash.put(v, aVar);
-							physParamVarList.add(v);
-
-							// ..add to group(s) -- see VARIABLE GROUPS above
-							if (CORE || BIO) {
-								varGroup.put(v, prmName);
-								groupMembers.get(prmName).add(v);
-								log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, prmName, prmName);
-
-							} else { // ..an i-parameter
-								// ..<PARAM> has no primary group and belongs to _qc and _adj groups
-								// ..<PARAM>_ADJ has primary and belongs to only _adj group
-								// ..(ADMT-16: <PARAM> can no longer exist by itself)
-
-								if (v.endsWith("_ADJUSTED")) {
-									varGroup.put(v, group_adj);
-									groupMembers.get(group_adj).add(v);
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, group_adj,
-											group_adj);
-
-								} else {
-									varGroup.put(v, group_qc);
-									groupMembers.get(group_adj).add(v);
-									groupMembers.get(group_qc).add(v);
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'/'{}'", v, opt, "",
-											group_qc, group_adj);
-								}
-							}
-
-							if (opt) {
-								// ..add to optional variables
-								optVar.add(v);
-							}
-
-							/*
-							 * Build the parameter structure Profile char <P>_QC(N_PROF, N_LEVELS);
-							 * Trajectory char <P>_QC(N_MEASUREMENT);
-							 *
-							 * <P>_QC:long_name = "quality flag"; <P>_QC:conventions =
-							 * "Argo reference table 2"; <P>_QC:_FillValue = " ";
-							 *
-							 * where <P> = <PARAM>, <PARAM>_ADJUSTED
-							 *
-							 * Don't put PRES_QC in bio-Argo file. (==> bio_pres = true)
-							 */
-
-							if (!bio_pres) {
-								varNm = new String(v + "_QC");
-								aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, prmName);
-								addAttr(aVar, long_name, prmQcLName, DataType.STRING);
-								addAttr(aVar, conventions, prmQcConventions, DataType.STRING);
-								addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
-
-								varHash.put(varNm, aVar);
-								physParamVarList.add(varNm);
-
-								// ..add to group -- see VARIABLE GROUPS above
-
-								if (CORE || BIO) {
-									varGroup.put(varNm, prmName);
-									groupMembers.get(prmName).add(varNm);
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, prmName,
-											prmName);
-
-								} else {
-									String group;
-									if (v.endsWith("_ADJUSTED")) {
-										group = group_adj;
-									} else {
-										group = group_qc;
-									}
-
-									varGroup.put(varNm, group);
-									groupMembers.get(group).add(varNm);
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}')", varNm, opt, group,
-											group);
-								}
-
-								if (opt) {
-									// ..add to optional variables
-									optVar.add(varNm);
-								}
-
-							} else {
-								log.debug("skip: '{}_QC'  (bio_pres == true)", v);
-							}
-
-							/*
-							 * Do not put PRES_ADJUSTED in bio-argo file -- bio_pres = true ==> <PARAM> =
-							 * PRES && this is a bio-profile file
-							 */
-							if (bio_pres) {
-								log.debug("skip PRES_ADJUSTED: (bio_pres == true)");
-								break;
-							}
-						}
-
-						/*
-						 * Build the parameter structure Profile <ncDataType>
-						 * <PARAM>_ADJUSTED_ERROR(N_PROF, N_LEVELS); Trajectory <ncDataType>
-						 * <PARAM>_ADJUSTED_ERROR(N_MEASUREMENT);
-						 *
-						 * <PARAM>_ADJUSTED_ERROR:long_name = "<param-specific>";
-						 * <PARAM>_ADJUSTED_ERROR:_FillValue = <param-specific;
-						 * <PARAM>_ADJUSTED_ERROR:units = "<param-specific";
-						 * <PARAM>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
-						 * as determined by the delayed mode QC process.";
-						 * <PARAM>_ADJUSTED_ERROR:C_format = "%7.1f";
-						 * <PARAM>_ADJUSTED_ERROR:FORTRAN_format = "F7.1";
-						 * <PARAM>_ADJUSTED_ERROR:resolution = 0.1f;
-						 */
-
-						if (!bio_pres) {
-							varNm = new String(prmName + "_ADJUSTED_ERROR");
-							aVar = new ArgoVariable(varNm, ncDataType, dimParam, prmName);
-
-							addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName), DataType.STRING);
-
-							addAttr(aVar, fillValue, prmFill, ncDataType);
-							addAttr(aVar, units, prmUnits, DataType.STRING);
-							addAttr(aVar, comment, errComment, DataType.STRING);
-							addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.4f", DataType.STRING);
-							addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.4", DataType.STRING);
-							addAttr(aVar, resolution, ATTR_IGNORE + prmFill, ncDataType);
-
-							varHash.put(varNm, aVar);
-							physParamVarList.add(varNm);
-
-							// ..add to group -- see VARIABLE GROUPS above
-
-							String group;
-							if (CORE || BIO) {
-								group = prmName;
-
-							} else { // ..an i-parameter
-								group = group_adj;
-							}
-
-							varGroup.put(varNm, group);
-							groupMembers.get(group).add(varNm);
-							log.debug("added: '{}'; opt '{}'; primary group'{}'; member '{}'", varNm, opt, group,
-									group);
-
-							if (opt) {
-								// ..add to optional variables
-								optVar.add(varNm);
-							}
-						}
-
-						/*
-						 * **************************************************************** STAT
-						 * variables: Every parameter can have a <PARAM>_STD and/or <PARAM>_MED group
-						 * including the *_ADJUSTED variables --- all optional
-						 *
-						 * The STAT variables are only allowed in the file of the primary parameter core
-						 * param STAT only in core files bio param STAT only in bio files
-						 *
-						 */
-
-						if (!bio_pres) {
-							String STAT[] = { prmName + "_STD", prmName + "_MED" };
-							for (String statNm : STAT) {
-								// ..add to list of valid parameter names
-								physParamNameList.add(statNm);
-								interPhysParam.add(statNm); // they are "intermediate parameters"
-
-								// ..create the variable group
-								// ..each of these are there own group
-
-								String stat_qc = statNm + "_QC";
-								String stat_adj = statNm + "_ADJUSTED";
-
-								if (!groupMembers.containsKey(statNm)) { // ..new group - init
-									groupMembers.put(stat_qc, new HashSet<String>());
-									log.debug("create group: '{}'", statNm);
-									groupMembers.put(stat_adj, new HashSet<String>());
-									log.debug("create group: '{}_ADJUSTED'", statNm);
-								}
-
-								/*
-								 * ***** Apr 2015 Users of the STAT variables are not including PROFILE_*_QC So
-								 * don't allow them at all until there is some outcry
-								 *
-								 * ***** Update: Apr 2022 Handle these as "intermediate parameters"
-								 */
-
-								if (fileType == ArgoDataFile.FileType.PROFILE
-										|| fileType == ArgoDataFile.FileType.BIO_PROFILE) {
-
-									/*
-									 * Build the parameter structure char PROFILE_<STAT>_QC(N_PROF);
-									 * PROFILE_<STAT>_QC:long_name = "Global quality flag of <STAT> profile";
-									 * PROFILE_<STAT>_QC:conventions = "Argo reference table 2a";
-									 * PROFILE_<STAT>_QC:_FillValue = " ";
-									 *
-									 * where <STAT> = <PARAM>_STD, <PARAM>_MED
-									 */
-
-									varNm = new String("PROFILE_" + statNm + "_QC");
-									aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, statNm);
-									aVar.addAttribute(long_name, prfQcLName + statNm + " profile");
-									aVar.addAttribute(conventions, prfQcConventions);
-									aVar.addAttribute(fillValue, fillValueBLANK);
-
-									varHash.put(varNm, aVar);
-									physParamVarList.add(varNm);
-
-									// ..add to options
-									varGroup.put(varNm, stat_qc);
-									groupMembers.get(stat_qc).add(varNm);
-									optVar.add(varNm);
-									log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, true, stat_qc,
-											stat_qc);
-								} // ..end if (PROFILE)
-
-								// ...build the <STAT> structures....
-								// .. the profile structures are for both <STAT> and <STAT>_ADJUSTED
-
-								String S[] = new String[] { statNm, statNm + "_ADJUSTED" };
-								String group = null;
-
-								for (String v : S) {
-
-									/*
-									 * Build the parameter STAT structure Profile: <ncDataType> <S>(N_PROF,
-									 * N_LEVELS); -or- <ncDataType> <S>(N_PROF, N_LEVELS,_extra_) Trajectory:
-									 * <ncDataType> <S>(N_MEASUREMENT); -or- <ncDataType> <S>(N_MEASUREMENT,
-									 * _extra_) <S>:long_name = "<param-specific>"; //<S>:standard_name =
-									 * "<param-specific>"; <S>:_FillValue = <param-specific>; <S>:units =
-									 * "<param-specific>"; <S>:valid_min = <param-specific>; <S>:valid_max =
-									 * <param-specific>; <S>:comment = "<param-specific>"; (version-specific)
-									 * <S>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <S>:FORTRAN_format
-									 * = ATTR_IGNORE_VALUE; //..means ignore setting <S>:resolution =
-									 * ATTR_IGNORE_VALUE; <S>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
-									 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
-									 * versions if it showed up
-									 *
-									 * 
-									 * where <S> = <STAT>, <STAT>_ADJUSTED
-									 */
-
-									aVar = new ArgoVariable(v, ncDataType, dimParam, statNm);
-
-									if (prmExtra) {
-										aVar.setHaveExtraDimension();
-									}
-
-									StringBuilder tmpLName;
-									if (statNm.endsWith("_STD")) {
-										tmpLName = new StringBuilder("Standard deviation of ");
-									} else {
-										tmpLName = new StringBuilder("Median value of ");
-									}
-									tmpLName.append(prmLName.substring(0, 1).toLowerCase())
-											.append(prmLName.substring(1));
-
-									addAttr(aVar, long_name, tmpLName.toString(), DataType.STRING);
-
-									// aVar.addAttribute(fillValue, fillValueNum);
-									addAttr(aVar, fillValue, prmFill, ncDataType);
-									addAttr(aVar, units, prmUnits, DataType.STRING);
-									if (statNm.endsWith("_MED")) {
-										addAttr(aVar, valid_min, prmVmin, ncDataType);
-										addAttr(aVar, valid_max, prmVmax, ncDataType);
-									}
-									addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
-									addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
-									addAttr(aVar, resolution, ATTR_IGNORE, ncDataType);
-									addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown",
-											DataType.STRING);
-
-									varHash.put(v, aVar);
-									physParamVarList.add(v);
-
-									// ..add to the appropriate groups
-
-									if (v.endsWith("_ADJUSTED")) {
-										group = stat_adj;
-										varGroup.put(v, stat_adj);
-										groupMembers.get(stat_adj).add(v); // ..add to the appropriate group
-										log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, stat_adj,
-												stat_adj);
-
-									} else {
-										group = stat_qc;
-										varGroup.put(v, stat_qc);
-										groupMembers.get(stat_adj).add(v);
-										groupMembers.get(stat_qc).add(v);
-										log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, "",
-												stat_adj);
-									}
-
-									optVar.add(v);
-
-									/*
-									 * Build the parameter structure char <S>_QC(N_PROF, N_LEVELS); <S>_QC:long_name
-									 * = "quality flag"; <S>_QC:conventions = "Argo reference table 2";
-									 * <S>_QC:_FillValue = " ";
-									 *
-									 * where <S> = <STAT>, <STAT>_ADJUSTED
-									 */
-
-									varNm = new String(v + "_QC");
-									aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, statNm);
-									aVar.addAttribute(long_name, prmQcLName);
-									aVar.addAttribute(conventions, prmQcConventions);
-									aVar.addAttribute(fillValue, fillValueBLANK);
-
-									// group = v+"_QC";
-									varHash.put(varNm, aVar);
-									groupMembers.get(group).add(varNm); // ..add to the prmName group of variables
-									physParamVarList.add(varNm);
-
-									log.debug("variable added: '{}'  (group '{}')", varNm, group);
-
-									// ..add to options
-									varGroup.put(varNm, group);
-									optVar.add(varNm);
-									log.debug("option added: '{}' (group '{})", varNm, group);
-								} // ..end for v : <STAT>, <STAT>_ADJUSTED
-
-								/*
-								 * Build the parameter structure <ncDataType> <STAT>_ADJUSTED_ERROR(N_PROF,
-								 * N_LEVELS); <STAT>_ADJUSTED_ERROR:long_name = "<param-specific>";
-								 * <STAT>_ADJUSTED_ERROR:_FillValue = <param-specific>;
-								 * <STAT>_ADJUSTED_ERROR:units = "<param-specific>";
-								 * <STAT>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
-								 * as determined by the delayed mode QC process.";
-								 * <STAT>_ADJUSTED_ERROR:C_format = ATTR_IGNORE_VALUE;
-								 * <STAT>_ADJUSTED_ERROR:FORTRAN_format = ATTR_IGNORE_VALUE;
-								 * <STAT>_ADJUSTED_ERROR:resolution = ATTR_IGNORE_VALUE;
-								 */
-
-								varNm = new String(statNm + "_ADJUSTED_ERROR");
-								aVar = new ArgoVariable(varNm, ncDataType, dimParam, statNm);
-
-								addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName),
-										DataType.STRING);
-
-								addAttr(aVar, fillValue, prmFill, ncDataType);
-								addAttr(aVar, units, prmUnits, DataType.STRING);
-								addAttr(aVar, comment, errComment, DataType.STRING);
-								addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
-								addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
-								addAttr(aVar, resolution, ATTR_IGNORE_VALUE, DataType.STRING);
-
-								varHash.put(varNm, aVar);
-								optVar.add(varNm);
-								physParamVarList.add(varNm);
-
-								varGroup.put(varNm, stat_adj);
-								groupMembers.get(stat_adj).add(varNm); // ..add to the ADJUSTED group
-
-								log.debug("added: '{}': opt '{}' ; primary '{}'; 'member '{}'", varNm, true, stat_adj,
-										stat_adj);
-							} // ..end for <PARAM>_STD, <PARAM>_MED
-
-						}
-
-					} else {
-						log.debug("not keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
-					} // ..end if (keep)
-
-					// ..make adjustments for numbered variables
-					opt = true; // ..every #d variable is optional
-
-				} // ..end for (prmList)
-			} // ..end while (readLine)
-
-			fileReader.close();
-
-			log.debug(".....parseParamFile: end.....");
-			return true;
-
-		} catch (FileNotFoundException e) {
-			log.error("prmFileName '" + prmFileName + "' does not exist");
-			throw e;
-		} catch (IOException e) {
-			log.error("prmFileName '" + prmFileName + "' cannot be read");
-			throw e;
 		}
 
+		// ..open the file - to be deleted
+
 	} // ..end parseParamFile
+
+	/**
+	 * For each parameter in R03 table and the related <PARAM>_<N> (for duplicate
+	 * sensor), build the netcdf variable <PARAM> specification : attributes,
+	 * dimension and variable name. Also build the related <PARAM>_QC,
+	 * <PARAM>_ADJUSTED, <PARAM>_ADJUSTED_QC, <PARAM>_ADJUSTED_ERROR variable.
+	 * 
+	 * @param fileType
+	 * @param version
+	 * @param prmName      : variable name -> parameter name or duplicate sensor
+	 *                     name : TEMP, TEMP_2, PSAL, PSAL_2, etc.
+	 * @param dimPQc
+	 * @param dimParam
+	 * @param errComment
+	 * @param errLongName
+	 * @param presAxis
+	 * @param pres_adjAxis
+	 * @param prm          : parameter base name. eg. TEMP, PRES, PSAL
+	 * @param isDeprecated
+	 * @param prmLName
+	 * @param prmSName
+	 * @param prmUnits
+	 * @param prmVmin
+	 * @param prmVmax
+	 * @param prmFill
+	 * @param prmList
+	 * @param prmExtra
+	 * @param ncDataType
+	 * @param keep
+	 * @param opt
+	 * @param CORE
+	 * @param BIO
+	 * @throws IOException
+	 */
+	private void buildParamVariables(ArgoDataFile.FileType fileType, String version, String prmName,
+			ArgoDimension[] dimPQc, ArgoDimension[] dimParam, String errComment, String errLongName, String presAxis,
+			String pres_adjAxis, String prm, boolean isDeprecated, String prmLName, String prmSName, String prmUnits,
+			String prmVmin, String prmVmax, String prmFill, String[] prmList, boolean prmExtra, DataType ncDataType,
+			boolean keep, boolean opt, boolean CORE, boolean BIO) throws IOException {
+
+		if (keep) {
+			// ..build the relevant variable entries
+			log.debug("keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
+
+			// ..add to list of valid parameter names
+			addToPhysParamNameLists(prmName, isDeprecated);
+
+			// create the variable group(s)
+			// see VARIABLE GROUPS documentation at the top
+			String group_qc = prmName + "_QC";
+			String group_adj = prmName + "_ADJUSTED";
+			createVariableGroups(prmName, CORE, BIO, group_qc, group_adj);
+
+			// ..PRES and Bio-argo files: In bio-argo files,
+			// .. - only PRES appears
+			// .. - there is no PROFILE_PRES_QC, PRES_QC, PRES_ADJ_QC, *_ADJ_ERR
+
+			boolean bio_pres = false;
+			if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()
+					&& (fileType == ArgoDataFile.FileType.BIO_PROFILE
+							|| fileType == ArgoDataFile.FileType.BIO_TRAJECTORY)) {
+				bio_pres = true;
+			}
+
+			String varNm;
+			ArgoVariable aVar;
+
+			if (fileType == ArgoDataFile.FileType.PROFILE || fileType == ArgoDataFile.FileType.BIO_PROFILE) {
+
+				/*
+				 * Build the parameter structure char PROFILE_<PARAM>_QC(N_PROF);
+				 * PROFILE_<PARAM>_QC:long_name = "Global quality flag of PRES profile";
+				 * PROFILE_<PARAM>_QC:conventions = "Argo reference table 2a";
+				 * PROFILE_<PARAM>_QC:_FillValue = " ";
+				 *
+				 * NOTE: PRES does not have this variable in BIO_PROFILE files
+				 */
+				buildProfileParamVariables(prmName, dimPQc, opt, CORE, BIO, group_qc, bio_pres);
+			} // ..end if (PROFILE)
+
+			// ...build the <PARAM> structures....
+			// .. the profile structures are for both <PARAM> and <PARAM>_ADJUSTED
+			buildParamAndParamAdjustedVariables(version, prmName, dimParam, presAxis, pres_adjAxis, prmLName, prmSName,
+					prmUnits, prmVmin, prmVmax, prmFill, prmExtra, ncDataType, opt, CORE, BIO, group_qc, group_adj,
+					bio_pres);
+
+			/*
+			 * Build the parameter structure Profile <ncDataType>
+			 * <PARAM>_ADJUSTED_ERROR(N_PROF, N_LEVELS); Trajectory <ncDataType>
+			 * <PARAM>_ADJUSTED_ERROR(N_MEASUREMENT);
+			 *
+			 * <PARAM>_ADJUSTED_ERROR:long_name = "<param-specific>";
+			 * <PARAM>_ADJUSTED_ERROR:_FillValue = <param-specific;
+			 * <PARAM>_ADJUSTED_ERROR:units = "<param-specific";
+			 * <PARAM>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
+			 * as determined by the delayed mode QC process.";
+			 * <PARAM>_ADJUSTED_ERROR:C_format = "%7.1f";
+			 * <PARAM>_ADJUSTED_ERROR:FORTRAN_format = "F7.1";
+			 * <PARAM>_ADJUSTED_ERROR:resolution = 0.1f;
+			 */
+
+			if (!bio_pres) {
+				buildParamAdjustedErrorVariable(prmName, dimParam, errComment, errLongName, prmLName, prmUnits, prmFill,
+						ncDataType, opt, CORE, BIO, group_adj);
+			}
+
+			/*
+			 * **************************************************************** STAT
+			 * variables: Every parameter can have a <PARAM>_STD and/or <PARAM>_MED group
+			 * including the *_ADJUSTED variables --- all optional
+			 *
+			 * The STAT variables are only allowed in the file of the primary parameter core
+			 * param STAT only in core files bio param STAT only in bio files
+			 *
+			 */
+
+			if (!bio_pres) {
+				String STAT[] = { prmName + "_STD", prmName + "_MED" };
+				for (String statNm : STAT) {
+					// ..add to list of valid parameter names
+					physParamNameList.add(statNm);
+					interPhysParam.add(statNm); // they are "intermediate parameters"
+
+					// ..create the variable group
+					// ..each of these are there own group
+
+					String stat_qc = statNm + "_QC";
+					String stat_adj = statNm + "_ADJUSTED";
+
+					if (!groupMembers.containsKey(statNm)) { // ..new group - init
+						groupMembers.put(stat_qc, new HashSet<String>());
+						log.debug("create group: '{}'", statNm);
+						groupMembers.put(stat_adj, new HashSet<String>());
+						log.debug("create group: '{}_ADJUSTED'", statNm);
+					}
+
+					/*
+					 * ***** Apr 2015 Users of the STAT variables are not including PROFILE_*_QC So
+					 * don't allow them at all until there is some outcry
+					 *
+					 * ***** Update: Apr 2022 Handle these as "intermediate parameters"
+					 */
+
+					if (fileType == ArgoDataFile.FileType.PROFILE || fileType == ArgoDataFile.FileType.BIO_PROFILE) {
+
+						/*
+						 * Build the parameter structure char PROFILE_<STAT>_QC(N_PROF);
+						 * PROFILE_<STAT>_QC:long_name = "Global quality flag of <STAT> profile";
+						 * PROFILE_<STAT>_QC:conventions = "Argo reference table 2a";
+						 * PROFILE_<STAT>_QC:_FillValue = " ";
+						 *
+						 * where <STAT> = <PARAM>_STD, <PARAM>_MED
+						 */
+
+						varNm = new String("PROFILE_" + statNm + "_QC");
+						aVar = new ArgoVariable(varNm, DataType.CHAR, dimPQc, statNm);
+						aVar.addAttribute(long_name, prfQcLName + statNm + " profile");
+						aVar.addAttribute(conventions, prfQcConventions);
+						aVar.addAttribute(fillValue, fillValueBLANK);
+
+						varHash.put(varNm, aVar);
+						physParamVarList.add(varNm);
+
+						// ..add to options
+						varGroup.put(varNm, stat_qc);
+						groupMembers.get(stat_qc).add(varNm);
+						optVar.add(varNm);
+						log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, true, stat_qc, stat_qc);
+					} // ..end if (PROFILE)
+
+					// ...build the <STAT> structures....
+					// .. the profile structures are for both <STAT> and <STAT>_ADJUSTED
+
+					String S[] = new String[] { statNm, statNm + "_ADJUSTED" };
+					String group = null;
+
+					for (String v : S) {
+
+						/*
+						 * Build the parameter STAT structure Profile: <ncDataType> <S>(N_PROF,
+						 * N_LEVELS); -or- <ncDataType> <S>(N_PROF, N_LEVELS,_extra_) Trajectory:
+						 * <ncDataType> <S>(N_MEASUREMENT); -or- <ncDataType> <S>(N_MEASUREMENT,
+						 * _extra_) <S>:long_name = "<param-specific>"; //<S>:standard_name =
+						 * "<param-specific>"; <S>:_FillValue = <param-specific>; <S>:units =
+						 * "<param-specific>"; <S>:valid_min = <param-specific>; <S>:valid_max =
+						 * <param-specific>; <S>:comment = "<param-specific>"; (version-specific)
+						 * <S>:C_format = ATTR_IGNORE_VALUE; //..means ignore setting <S>:FORTRAN_format
+						 * = ATTR_IGNORE_VALUE; //..means ignore setting <S>:resolution =
+						 * ATTR_IGNORE_VALUE; <S>:comment_on_resolution = ATTR_IGNORE; ///..means ignore
+						 * entirely only in v3.1 and beyond (but technically would be allowed in earlier
+						 * versions if it showed up
+						 *
+						 * 
+						 * where <S> = <STAT>, <STAT>_ADJUSTED
+						 */
+
+						aVar = new ArgoVariable(v, ncDataType, dimParam, statNm);
+
+						if (prmExtra) {
+							aVar.setHaveExtraDimension();
+						}
+
+						StringBuilder tmpLName;
+						if (statNm.endsWith("_STD")) {
+							tmpLName = new StringBuilder("Standard deviation of ");
+						} else {
+							tmpLName = new StringBuilder("Median value of ");
+						}
+						tmpLName.append(prmLName.substring(0, 1).toLowerCase()).append(prmLName.substring(1));
+
+						addAttr(aVar, long_name, tmpLName.toString(), DataType.STRING);
+
+						// aVar.addAttribute(fillValue, fillValueNum);
+						addAttr(aVar, fillValue, prmFill, ncDataType);
+						addAttr(aVar, units, prmUnits, DataType.STRING);
+						if (statNm.endsWith("_MED")) {
+							addAttr(aVar, valid_min, prmVmin, ncDataType);
+							addAttr(aVar, valid_max, prmVmax, ncDataType);
+						}
+						addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
+						addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
+						addAttr(aVar, resolution, ATTR_IGNORE, ncDataType);
+						addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown", DataType.STRING);
+
+						varHash.put(v, aVar);
+						physParamVarList.add(v);
+
+						// ..add to the appropriate groups
+
+						if (v.endsWith("_ADJUSTED")) {
+							group = stat_adj;
+							varGroup.put(v, stat_adj);
+							groupMembers.get(stat_adj).add(v); // ..add to the appropriate group
+							log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, stat_adj, stat_adj);
+
+						} else {
+							group = stat_qc;
+							varGroup.put(v, stat_qc);
+							groupMembers.get(stat_adj).add(v);
+							groupMembers.get(stat_qc).add(v);
+							log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, true, "", stat_adj);
+						}
+
+						optVar.add(v);
+
+						/*
+						 * Build the parameter structure char <S>_QC(N_PROF, N_LEVELS); <S>_QC:long_name
+						 * = "quality flag"; <S>_QC:conventions = "Argo reference table 2";
+						 * <S>_QC:_FillValue = " ";
+						 *
+						 * where <S> = <STAT>, <STAT>_ADJUSTED
+						 */
+
+						varNm = new String(v + "_QC");
+						aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, statNm);
+						aVar.addAttribute(long_name, prmQcLName);
+						aVar.addAttribute(conventions, prmQcConventions);
+						aVar.addAttribute(fillValue, fillValueBLANK);
+
+						// group = v+"_QC";
+						varHash.put(varNm, aVar);
+						groupMembers.get(group).add(varNm); // ..add to the prmName group of variables
+						physParamVarList.add(varNm);
+
+						log.debug("variable added: '{}'  (group '{}')", varNm, group);
+
+						// ..add to options
+						varGroup.put(varNm, group);
+						optVar.add(varNm);
+						log.debug("option added: '{}' (group '{})", varNm, group);
+					} // ..end for v : <STAT>, <STAT>_ADJUSTED
+
+					/*
+					 * Build the parameter structure <ncDataType> <STAT>_ADJUSTED_ERROR(N_PROF,
+					 * N_LEVELS); <STAT>_ADJUSTED_ERROR:long_name = "<param-specific>";
+					 * <STAT>_ADJUSTED_ERROR:_FillValue = <param-specific>;
+					 * <STAT>_ADJUSTED_ERROR:units = "<param-specific>";
+					 * <STAT>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
+					 * as determined by the delayed mode QC process.";
+					 * <STAT>_ADJUSTED_ERROR:C_format = ATTR_IGNORE_VALUE;
+					 * <STAT>_ADJUSTED_ERROR:FORTRAN_format = ATTR_IGNORE_VALUE;
+					 * <STAT>_ADJUSTED_ERROR:resolution = ATTR_IGNORE_VALUE;
+					 */
+
+					varNm = new String(statNm + "_ADJUSTED_ERROR");
+					aVar = new ArgoVariable(varNm, ncDataType, dimParam, statNm);
+
+					addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName), DataType.STRING);
+
+					addAttr(aVar, fillValue, prmFill, ncDataType);
+					addAttr(aVar, units, prmUnits, DataType.STRING);
+					addAttr(aVar, comment, errComment, DataType.STRING);
+					addAttr(aVar, c_format, ATTR_IGNORE_VALUE, DataType.STRING);
+					addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE, DataType.STRING);
+					addAttr(aVar, resolution, ATTR_IGNORE_VALUE, DataType.STRING);
+
+					varHash.put(varNm, aVar);
+					optVar.add(varNm);
+					physParamVarList.add(varNm);
+
+					varGroup.put(varNm, stat_adj);
+					groupMembers.get(stat_adj).add(varNm); // ..add to the ADJUSTED group
+
+					log.debug("added: '{}': opt '{}' ; primary '{}'; 'member '{}'", varNm, true, stat_adj, stat_adj);
+				} // ..end for <PARAM>_STD, <PARAM>_MED
+
+			}
+
+		} else {
+			log.debug("not keeping param: '{}'  CORE/BIO {}/{}", prmName, CORE, BIO);
+		} // end if (keep)
+
+	}
+
+	/**
+	 * Build the parameter structure Profile <ncDataType>
+	 * <PARAM>_ADJUSTED_ERROR(N_PROF, N_LEVELS); Trajectory <ncDataType>
+	 * <PARAM>_ADJUSTED_ERROR(N_MEASUREMENT);
+	 *
+	 * <PARAM>_ADJUSTED_ERROR:long_name = "<param-specific>";
+	 * <PARAM>_ADJUSTED_ERROR:_FillValue = <param-specific;
+	 * <PARAM>_ADJUSTED_ERROR:units = "<param-specific";
+	 * <PARAM>_ADJUSTED_ERROR:comment = "Contains the error on the \ adjusted values
+	 * as determined by the delayed mode QC process.";
+	 * <PARAM>_ADJUSTED_ERROR:C_format = "%7.1f";
+	 * <PARAM>_ADJUSTED_ERROR:FORTRAN_format = "F7.1";
+	 * <PARAM>_ADJUSTED_ERROR:resolution = 0.1f;
+	 * 
+	 * @param prmName
+	 * @param dimParam
+	 * @param errComment
+	 * @param errLongName
+	 * @param prmLName
+	 * @param prmUnits
+	 * @param prmFill
+	 * @param ncDataType
+	 * @param opt
+	 * @param CORE
+	 * @param BIO
+	 * @param group_adj
+	 */
+	private void buildParamAdjustedErrorVariable(String prmName, ArgoDimension[] dimParam, String errComment,
+			String errLongName, String prmLName, String prmUnits, String prmFill, DataType ncDataType, boolean opt,
+			boolean CORE, boolean BIO, String group_adj) {
+		String varNm;
+		ArgoVariable aVar;
+		varNm = new String(prmName + "_ADJUSTED_ERROR");
+		// aVar = new ArgoVariable(varNm, ncDataType, dimParam, prmName);
+		aVar = createPhysParamArgoVariable(prmName, dimParam, varNm, ncDataType,
+				(errLongName == null ? prmLName : errLongName), prmFill, "", prmUnits, "", "", ATTR_IGNORE + prmFill,
+				"", errComment, ATTR_IGNORE_VALUE + "%15.4f", ATTR_IGNORE_VALUE + "F15.4");
+
+//		createPhysParamArgoVariable(String prmName, ArgoDimension[] dimPQc, String varNm,
+//				DataType dataType, String prmLongName, String prmFillValue, String prmConventions, String prmUnits,
+//				String prmVmin, String prmVmax, String prmResolution, String resolutionComment, String errComment)
+
+		// addAttr(aVar, long_name, (errLongName == null ? prmLName : errLongName),
+		// DataType.STRING);
+
+		// addAttr(aVar, fillValue, prmFill, ncDataType);
+		// addAttr(aVar, units, prmUnits, DataType.STRING);
+		// addAttr(aVar, comment, errComment, DataType.STRING);
+//		addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.4f", DataType.STRING);
+//		addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.4", DataType.STRING);
+		// addAttr(aVar, resolution, ATTR_IGNORE + prmFill, ncDataType);
+
+		varHash.put(varNm, aVar);
+		physParamVarList.add(varNm);
+
+		// ..add to group -- see VARIABLE GROUPS above
+
+		String group;
+		if (CORE || BIO) {
+			group = prmName;
+
+		} else { // ..an i-parameter
+			group = group_adj;
+		}
+
+		varGroup.put(varNm, group);
+		groupMembers.get(group).add(varNm);
+		log.debug("added: '{}'; opt '{}'; primary group'{}'; member '{}'", varNm, opt, group, group);
+
+		if (opt) {
+			// ..add to optional variables
+			optVar.add(varNm);
+		}
+	}
+
+	/**
+	 * Build the parameter structure Profile: <ncDataType>
+	 * <P>
+	 * (N_PROF, N_LEVELS) -or- <ncDataType>
+	 * <P>
+	 * (N_PROF, N_LEVELS,_extra_)
+	 *
+	 * Trajectory: <ncDataType>
+	 * <P>
+	 * (N_MEASUREMENT); -or- <ncDataType>
+	 * <P>
+	 * (N_MEASUREMENT, _extra_)
+	 *
+	 * Attributes:
+	 * <P>
+	 * :long_name = "<param-specific>";
+	 * <P>
+	 * :standard_name = "<param-specific>";
+	 * <P>
+	 * :_FillValue = <param-specific>;
+	 * <P>
+	 * :units = "<param-specific>";
+	 * <P>
+	 * :valid_min = <param-specific>;
+	 * <P>
+	 * :valid_max = <param-specific>;
+	 * <P>
+	 * :comment = "<param-specific>"; (version-specific)
+	 * <P>
+	 * :C_format = ATTR_IGNORE_VALUE; //..means ignore setting
+	 * <P>
+	 * :FORTRAN_format = ATTR_IGNORE_VALUE; //..means ignore setting
+	 * <P>
+	 * :resolution = ATTR_IGNORE_VALUE;
+	 * <P>
+	 * :comment_on_resolution = ATTR_IGNORE; ///..means ignore entirely only in v3.1
+	 * and beyond (but technically would be allowed in earlier versions if it showed
+	 * up
+	 *
+	 * where
+	 * <P>
+	 * = <PARAM>, <PARAM>_ADJUSTED
+	 *
+	 * if
+	 * <P>
+	 * = PRES or PRES_ADJUSTED, add
+	 * <P>
+	 * :axis = "Z"
+	 * 
+	 * @param version
+	 * @param prmName
+	 * @param dimParam
+	 * @param presAxis
+	 * @param pres_adjAxis
+	 * @param prmLName
+	 * @param prmSName
+	 * @param prmUnits
+	 * @param prmVmin
+	 * @param prmVmax
+	 * @param prmFill
+	 * @param prmExtra
+	 * @param ncDataType
+	 * @param opt
+	 * @param CORE
+	 * @param BIO
+	 * @param group_qc
+	 * @param group_adj
+	 * @param bio_pres
+	 */
+	private void buildParamAndParamAdjustedVariables(String version, String prmName, ArgoDimension[] dimParam,
+			String presAxis, String pres_adjAxis, String prmLName, String prmSName, String prmUnits, String prmVmin,
+			String prmVmax, String prmFill, boolean prmExtra, DataType ncDataType, boolean opt, boolean CORE,
+			boolean BIO, String group_qc, String group_adj, boolean bio_pres) {
+		String varNm;
+		ArgoVariable aVar;
+		String P[] = { prmName, prmName + "_ADJUSTED" };
+
+		for (String v : P) {
+
+			log.debug("...working on: {}", v);
+
+			// aVar = new ArgoVariable(v, ncDataType, dimParam, prmName);
+			aVar = createPhysParamArgoVariable(prmName, dimParam, v, ncDataType, prmLName, prmFill, "", prmUnits,
+					prmVmin, prmVmax, ATTR_IGNORE + "99999.", ATTR_IGNORE + "resolution is unknown", "", "", "");
+//			addAttr(aVar, long_name, prmLName, DataType.STRING);
+//			addAttr(aVar, fillValue, prmFill, ncDataType);
+//			addAttr(aVar, units, prmUnits, DataType.STRING);
+//			addAttr(aVar, valid_min, prmVmin, ncDataType);
+//			addAttr(aVar, valid_max, prmVmax, ncDataType);
+//			addAttr(aVar, resolution, ATTR_IGNORE + "99999.", ncDataType);
+//			addAttr(aVar, comment_on_resolution, ATTR_IGNORE + "resolution is unknown", DataType.STRING);
+
+			// add conditionals attributes :
+			if (version.compareTo("2.3") < 0) {
+				addAttr(aVar, comment, prmSName, DataType.STRING);
+			} else {
+				addAttr(aVar, standard_name, prmSName, DataType.STRING);
+			}
+			if (v.startsWith("PRES")) {
+				addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+				addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.1", DataType.STRING);
+			} else {
+				addAttr(aVar, c_format, ATTR_IGNORE_VALUE + "%15.3f", DataType.STRING);
+				addAttr(aVar, fortran_format, ATTR_IGNORE_VALUE + "F15.3", DataType.STRING);
+			}
+
+			if (v.equals("PRES")) {
+				addAttr(aVar, axis, presAxis, DataType.STRING);
+			} else if (v.equals("PRES_ADJUSTED")) {
+				addAttr(aVar, axis, pres_adjAxis, DataType.STRING);
+			}
+
+			// if an extra dimension is described in param attributes:
+			if (prmExtra) {
+				aVar.setHaveExtraDimension();
+			}
+
+			varHash.put(v, aVar);
+			physParamVarList.add(v);
+
+			// ..add to group(s) -- see VARIABLE GROUPS above
+			if (CORE || BIO) {
+				varGroup.put(v, prmName);
+				groupMembers.get(prmName).add(v);
+				log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, prmName, prmName);
+
+			} else { // ..an i-parameter
+				// ..<PARAM> has no primary group and belongs to _qc and _adj groups
+				// ..<PARAM>_ADJ has primary and belongs to only _adj group
+				// ..(ADMT-16: <PARAM> can no longer exist by itself)
+
+				if (v.endsWith("_ADJUSTED")) {
+					varGroup.put(v, group_adj);
+					groupMembers.get(group_adj).add(v);
+					log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, group_adj, group_adj);
+
+				} else {
+					varGroup.put(v, group_qc);
+					groupMembers.get(group_adj).add(v);
+					groupMembers.get(group_qc).add(v);
+					log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'/'{}'", v, opt, "", group_qc, group_adj);
+				}
+			}
+
+			if (opt) {
+				// ..add to optional variables
+				optVar.add(v);
+			}
+
+			/*
+			 * Build the parameter structure Profile char <P>_QC(N_PROF, N_LEVELS);
+			 * Trajectory char <P>_QC(N_MEASUREMENT);
+			 *
+			 * <P>_QC:long_name = "quality flag"; <P>_QC:conventions =
+			 * "Argo reference table 2"; <P>_QC:_FillValue = " ";
+			 *
+			 * where <P> = <PARAM>, <PARAM>_ADJUSTED
+			 *
+			 * Don't put PRES_QC in bio-Argo file. (==> bio_pres = true)
+			 */
+
+			if (!bio_pres) {
+				// build the *<PARAM>_QC and <PARAM>_ADJUSTED_QC variables
+				varNm = new String(v + "_QC");
+				aVar = createPhysParamArgoVariable(prmName, dimParam, varNm, DataType.CHAR, prmQcLName, fillValueBLANK,
+						prmQcConventions, "", "", "", "", "", "", "", "");
+//				aVar = new ArgoVariable(varNm, DataType.CHAR, dimParam, prmName);
+//				addAttr(aVar, long_name, prmQcLName, DataType.STRING);
+//				addAttr(aVar, conventions, prmQcConventions, DataType.STRING);
+//				addAttr(aVar, fillValue, fillValueBLANK, DataType.STRING);
+
+				varHash.put(varNm, aVar);
+				physParamVarList.add(varNm);
+
+				// ..add to group -- see VARIABLE GROUPS above
+				if (CORE || BIO) {
+					varGroup.put(varNm, prmName);
+					groupMembers.get(prmName).add(varNm);
+					log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, prmName, prmName);
+
+				} else {
+					String group;
+					if (v.endsWith("_ADJUSTED")) {
+						group = group_adj;
+					} else {
+						group = group_qc;
+					}
+
+					varGroup.put(varNm, group);
+					groupMembers.get(group).add(varNm);
+					log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}')", varNm, opt, group, group);
+				}
+
+				if (opt) {
+					// ..add to optional variables
+					optVar.add(varNm);
+				}
+
+			} else {
+				log.debug("skip: '{}_QC'  (bio_pres == true)", v);
+			}
+
+			/*
+			 * Do not put PRES_ADJUSTED in bio-argo file -- bio_pres = true ==> <PARAM> =
+			 * PRES && this is a bio-profile file
+			 */
+			if (bio_pres) {
+				log.debug("skip PRES_ADJUSTED: (bio_pres == true)");
+				break;
+			}
+		}
+	}
+
+	/**
+	 *
+	 * Build the parameter structure char PROFILE_<PARAM>_QC(N_PROF);
+	 * PROFILE_<PARAM>_QC:long_name = "Global quality flag of PRES profile";
+	 * PROFILE_<PARAM>_QC:conventions = "Argo reference table 2a";
+	 * PROFILE_<PARAM>_QC:_FillValue = " ";
+	 *
+	 * NOTE: PRES does not have this variable in BIO_PROFILE files
+	 *
+	 * @param prmName
+	 * @param dimPQc
+	 * @param opt
+	 * @param CORE
+	 * @param BIO
+	 * @param group_qc
+	 * @param bio_pres
+	 */
+	private void buildProfileParamVariables(String prmName, ArgoDimension[] dimPQc, boolean opt, boolean CORE,
+			boolean BIO, String group_qc, boolean bio_pres) {
+		String varNm;
+		ArgoVariable aVar;
+		if (!bio_pres) {
+			varNm = new String("PROFILE_" + prmName + "_QC");
+			aVar = createPhysParamArgoVariable(prmName, dimPQc, varNm, DataType.CHAR, prfQcLName + prmName + " profile",
+					fillValueBLANK, prfQcConventions, "", "", "", "", "", "", "", "");
+
+			varHash.put(varNm, aVar);
+			physParamVarList.add(varNm);
+
+			// ..add to groups ... see VARIABLE GROUPS above
+
+			String group;
+			if (CORE || BIO) {
+				group = prmName;
+
+			} else { // ..this is an intermediate parameter
+				group = group_qc;
+			}
+
+			varGroup.put(varNm, group);
+			groupMembers.get(group).add(varNm);
+
+			if (opt) {
+				// ..add to optional variables
+				optVar.add(varNm);
+			}
+
+			log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", varNm, opt, group, group);
+
+		} else {
+			log.debug("skip: 'PROFILE_{}_QC' (bio_pres = true)", prmName);
+		}
+	}
+
+	private ArgoVariable createPhysParamArgoVariable(String prmName, ArgoDimension[] dimPQc, String varNm,
+			DataType dataType, String prmLongName, String prmFillValue, String prmConventions, String prmUnits,
+			String prmVmin, String prmVmax, String prmResolution, String resolutionComment, String errComment,
+			String paramCformat, String paramFortranFormat) {
+		ArgoVariable aVar;
+		aVar = new ArgoVariable(varNm, dataType, dimPQc, prmName);
+		// Mandatory attributes
+		addAttr(aVar, long_name, prmLongName, DataType.STRING);
+		DataType fillValueType = dataType.equals(DataType.CHAR) ? DataType.STRING : dataType;
+		addAttr(aVar, fillValue, prmFillValue, fillValueType);
+
+		// optionnals attributes
+		addAttrIfNotEmpty(aVar, conventions, prmConventions, DataType.STRING);
+		addAttrIfNotEmpty(aVar, units, prmUnits, DataType.STRING);
+		addAttrIfNotEmpty(aVar, valid_min, prmVmin, dataType);
+		addAttrIfNotEmpty(aVar, valid_max, prmVmax, dataType);
+		addAttrIfNotEmpty(aVar, resolution, prmResolution, dataType);
+		addAttrIfNotEmpty(aVar, comment_on_resolution, resolutionComment, DataType.STRING);
+		addAttrIfNotEmpty(aVar, comment, errComment, DataType.STRING);
+		addAttrIfNotEmpty(aVar, c_format, paramCformat, DataType.STRING);
+		addAttrIfNotEmpty(aVar, fortran_format, paramFortranFormat, DataType.STRING);
+
+		return aVar;
+	}
+
+	/**
+	 * Adds an attribute to the variable only if the value is not null or empty.
+	 * 
+	 * @param var      The ArgoVariable to add the attribute to
+	 * @param attrName Attribute name
+	 * @param value    Attribute value
+	 * @param dataType Data type of the attribute
+	 */
+	private void addAttrIfNotEmpty(ArgoVariable var, String attrName, String value, DataType dataType) {
+		if (value != null && !value.isEmpty()) {
+			addAttr(var, attrName, value, dataType);
+		}
+	}
+
+	private void addToPhysParamNameLists(String prmName, boolean isDeprecated) throws IOException {
+		if (!physParamNameList.contains(prmName)) {// ..new param name
+			physParamNameList.add(prmName);
+			if (isDeprecated) {
+				depParamNameList.add(prmName);
+			}
+
+		} else { // ..duplicate name is a no, no
+			log.error("Duplicate param name (line {}) '{}'", "NVS R03", prmName);
+			throw new IOException("Duplicate param name in NVS R03 table (parameter " + prmName + ")");
+		}
+	}
+
+	private void createVariableGroups(String prmName, boolean CORE, boolean BIO, String group_qc, String group_adj) {
+		if (CORE || BIO) { // ..a "full parameter"
+			if (!groupMembers.containsKey(prmName)) { // ..new group - init
+				groupMembers.put(prmName, new HashSet<String>());
+				log.debug("create group: '{}'", prmName);
+			}
+
+		} else { // ..implies an i-parameter
+			interPhysParam.add(prmName);
+			log.debug("add intermediate variable '{}'", prmName);
+
+			// ..make the _qc group
+			if (!groupMembers.containsKey(group_qc)) { // ..new group - init
+				groupMembers.put(group_qc, new HashSet<String>());
+				log.debug("create group: '{}'", group_qc);
+			}
+
+			// ..make the _adj group
+			if (!groupMembers.containsKey(group_adj)) { // ..new group - init
+				groupMembers.put(group_adj, new HashSet<String>());
+				log.debug("create group: '{}'", group_adj);
+			}
+		}
+	}
+
+	/**
+	 * check for symbolic NETCDF fill values. If prmFill start with NC_FILL, replace
+	 * it with the right NC_FILL_TYPE value if key prmFill exists in the map.
+	 * 
+	 * @param prm     (String) parameter name needed for error message.
+	 * @param prmFill (String) extracted (with NvsDefintionParser) Fill_Value from
+	 *                NVS table definition's field.
+	 * @return
+	 * @throws IOException
+	 */
+	private String checkAndRepacleWithNcFillTypes(String prm, String prmFill) throws IOException {
+		if (prmFill.startsWith("NC_FILL_")) {
+			String tmp = prmFill;
+			prmFill = NC_FILL_TYPES.get(tmp);
+
+			if (prmFill == null) {
+				log.debug("Invalid NC_FILL_: '" + tmp + "' (NVS R03, parameter : " + prm + ")");
+				throw new IOException("Invalid NC_FILL_: '" + tmp + "' (NVS R03, parameter : " + prm + ")");
+			}
+
+			log.debug("Changed fill-value from {} to {}", tmp, prmFill);
+		}
+		return prmFill;
+	}
+
+	/**
+	 * Validates and analyzes parameter category to determine if it should be kept
+	 * in the file.
+	 * 
+	 * @param prmCategory   Category code: "c" (core), "b" (bio), "ic" (intermediate
+	 *                      core), "ib" (intermediate bio) extracted from NVS R03
+	 *                      table's definition field.
+	 * @param prm           Parameter name
+	 * @param fileType      Type of Argo data file
+	 * @param isCoreProf    True if core profile file
+	 * @param isBioProf     True if bio profile file
+	 * @param isTraj        True if trajectory file
+	 * @param isOldCoreTraj True if old core trajectory file
+	 * @param isOldBioTraj  True if old bio trajectory file
+	 * @return ParameterCategoryResult containing keep, opt, CORE, BIO flags
+	 * @throws IOException if category code is invalid
+	 */
+	private ParameterCategoryResult analyzeParameterCategory(String prmCategory, String prm,
+			ArgoDataFile.FileType fileType, boolean isCoreProf, boolean isBioProf, boolean isTraj,
+			boolean isOldCoreTraj, boolean isOldBioTraj) throws IOException {
+
+		// Validate category
+		if (!(prmCategory.equals("c") || prmCategory.equals("b") || prmCategory.equals("ic")
+				|| prmCategory.equals("ib"))) {
+			log.debug("Invalid category '" + prmCategory + "' (NVS R03, parameter : " + prm + ")");
+			throw new IOException("Invalid category '" + prmCategory + "' (NVS R03, parameter : " + prm + ")");
+		}
+
+		boolean keep = false;
+		boolean opt = true;
+		boolean CORE = false;
+		boolean BIO = false;
+
+		// Analyze based on category
+		if (prmCategory.equals("c")) {
+			CORE = true;
+			BIO = false;
+
+			if (prm.startsWith("PRES") && pPRESn.matcher(prm).matches()) {
+				// Keep PRES/PRESn in all cases
+				opt = false;
+				keep = true;
+
+				// Treat PRES/PRESn like any other bio-parameter in Bio-files
+				if (isBioProf || isOldBioTraj) {
+					CORE = false;
+				}
+
+			} else if (isCoreProf || isTraj || isOldCoreTraj) {
+				// Keep "c" parameters for core and traj (> v3.1) files
+				keep = true;
+				if (prm.equals("TEMP") && fileType == ArgoDataFile.FileType.PROFILE) {
+					opt = false;
+				}
+			}
+
+		} else if (prmCategory.equals("ic")) {
+			CORE = false;
+			BIO = false;
+
+			if (isCoreProf || isTraj || isOldCoreTraj) {
+				// Keep "c" and "ic" parameters for core and traj (> v3.1) files
+				keep = true;
+			}
+
+		} else if (prmCategory.equals("b")) {
+			CORE = false;
+			BIO = true;
+
+			if (isBioProf || isTraj || isOldBioTraj) {
+				// Keep "b" parameters for Bio-Argo and traj (> v3.1) files
+				keep = true;
+			}
+
+		} else if (prmCategory.equals("ib")) {
+			CORE = false;
+			BIO = false;
+
+			if (isBioProf || isTraj || isOldBioTraj) {
+				// Keep "ib" parameters for Bio-Argo and traj (> v3.1) files
+				keep = true;
+			}
+		}
+
+		return new ParameterCategoryResult(keep, opt, CORE, BIO);
+	}
+
+	/**
+	 * Result object for parameter category analysis.
+	 */
+	private static class ParameterCategoryResult {
+		public final boolean keep;
+		public final boolean opt;
+		public final boolean CORE;
+		public final boolean BIO;
+
+		public ParameterCategoryResult(boolean keep, boolean opt, boolean CORE, boolean BIO) {
+			this.keep = keep;
+			this.opt = opt;
+			this.CORE = CORE;
+			this.BIO = BIO;
+		}
+	}
+
+	/**
+	 * extra_dim attribute in the defintion field of R03 physical parameters table
+	 * is in form of "extra_dim:[name1, name2,...]". For this attribute, the
+	 * NvsDefinitionParser provide a map with key="extra_dim" and value="[name1,
+	 * name2]". This function is needed to extract name1, name2, etc. and provide a
+	 * list of string
+	 * 
+	 * @param extraDimString (String). ex : "[name1, name2]"
+	 * @return list of extra dimensions. ex : {"name1","name2"}
+	 */
+	private String[] getExtraDimensionsFromParametersAttributes(String extraDimString) {
+
+		if (extraDimString == null || extraDimString.isEmpty()) {
+			return new String[0];
+		}
+
+		// Remove brackets and split by comma
+		String content = extraDimString.replaceAll("[\\[\\]]", "").trim();
+
+		if (content.isEmpty()) {
+			return new String[0];
+		}
+
+		// Split and trim each element
+		return Arrays.stream(content.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toArray(String[]::new);
+
+	}
+
+	/**
+	 * It may be possible to have duplicate sensor on a float so multiple time the
+	 * same physical parameters need to be wrote in the netCDF file. To distinguish
+	 * variable, we put an _N at the end of the parameter name. N is the a count.
+	 * For each physical parameter from the reference table, we build a virtual list
+	 * of parameter names by adding _N. ADMT-25 : Always add an underscore to
+	 * numbering duplicate sensor/parameters
+	 * 
+	 * ex : TEMP, TEMP_1, TEMP_2, TEMP_3,...
+	 * 
+	 * @param prm
+	 * @param numberOfAllowedDuplicate
+	 * @return
+	 */
+	private String[] buildParamListForDuplicatePhysicalParameters(String prm, int numberOfAllowedDuplicate) {
+		// ..array of automatic "number" variables
+		String prmList[] = new String[numberOfAllowedDuplicate];
+		prmList[0] = prm;
+		// variable
+		for (int n = 1; n < numberOfAllowedDuplicate; n++) {
+			prmList[n] = prm + "_" + String.valueOf(n);
+		}
+		return prmList;
+	}
+
+	/**
+	 * If extracted attribute value from reference table is null or "-", replace by
+	 * the ATTR_IGNORE value.
+	 * 
+	 * @param attrValue
+	 * @return attrValue or ATTR_IGNORE
+	 */
+	private String replaceAttributeIfToBeIgnored(String attrValue) {
+		if (attrValue.length() == 0 || attrValue.equals("-")) {
+			attrValue = ATTR_IGNORE;
+		}
+		return attrValue;
+	}
+
+	/**
+	 * If extracted attribute value from reference table is null or "-", replace by
+	 * the ATTR_NOT_ALLOWED value.
+	 * 
+	 * @param attrValue
+	 * @return attrValue or ATTR_NOT_ALLOWED
+	 */
+	private String replaceAttributeIfNotAllowed(String attrValue) {
+		if (attrValue.length() == 0 || attrValue.equals("-")) {
+			attrValue = ATTR_NOT_ALLOWED;
+		}
+		return attrValue;
+	}
 
 	/**
 	 * Convenience function to add an attribute to a variable
