@@ -65,13 +65,13 @@ SBE61_V5.0.9 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2021-12-10 | added 
 SBE61_V5.0.10 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-07-21 | https://github.com/nvs-vocabs/ArgoVocabs/issues/65
 SBE61_V5.0.12 | SBE |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2023-07-21 | https://github.com/nvs-vocabs/ArgoVocabs/issues/65
 CTD_F01 | TSK | TSK model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
-RBR | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  |  
+RBR | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC, CTD_TEMP_CNDC | CTD |  |  
 RBRoem_V1.16 | RBR | RBR model | CTD_PRES, CTD_TEMP, CTD_CNDC |  |  | deprecated  
-RBR_ARGO | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
-RBR_ARGO3 | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
-RBR_ARGO3_DEEP4K | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
-RBR_ARGO3_DEEP6K | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020
-RBR_CTD | RBR | | CTD_PRES, CTD_TEMP, CTD_CNDC | CTD | 2025-09-23 | added by ylubac 23/09/2025  https://github.com/OneArgo/ArgoVocabs/issues/157
+RBR_ARGO | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC, CTD_TEMP_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+RBR_ARGO3 | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC, CTD_TEMP_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+RBR_ARGO3_DEEP4K | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC, CTD_TEMP_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020 
+RBR_ARGO3_DEEP6K | RBR |  | CTD_PRES, CTD_TEMP, CTD_CNDC, CTD_TEMP_CNDC | CTD |  | added by MB 15/07/2020 completed by VT 28/07/2020
+RBR_CTD | RBR | | CTD_PRES, CTD_TEMP, CTD_CNDC, CTD_TEMP_CNDC | CTD | 2025-09-23 | added by ylubac 23/09/2025  https://github.com/OneArgo/ArgoVocabs/issues/157
 
 //Oxygen sensors |  |  |  |  |  |  
 RBR_CODA_T_ODO | RBR |  | OPTODE_DOXY | OPTODE |  | added by VT 28/07/2020 
