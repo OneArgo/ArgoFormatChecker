@@ -17,7 +17,7 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import fr.coriolis.checker.filetypes.ArgoDataFile;
+import fr.coriolis.checker.core.ArgoDataFile;
 import ucar.ma2.DataType;
 
 /**
@@ -25,7 +25,7 @@ import ucar.ma2.DataType;
  * 
  * <p>
  * This class does NOT implement the "format verification" process. See
- * {@link fr.coriolis.checker.filetypes.ArgoDataFile#verifyFormat()
+ * {@link fr.coriolis.checker.core.ArgoDataFile#verifyFormat()
  * ArgoDataFile.verifyFormat} for more information.
  * <p>
  * <b>
@@ -1111,6 +1111,10 @@ public class ArgoFileSpecification {
 			// ..technical parameter file
 			if (fType == ArgoDataFile.FileType.TECHNICAL) {
 				ConfigTech = new ArgoConfigTechParam(specDir, version, false, true);
+
+				// ..for each <tech_param> entry, automatically make <tech_param>* variables too
+				addOptionnalTechParamVariables();
+
 			}
 		}
 	} // ..end openFullSpecification
@@ -1137,6 +1141,96 @@ public class ArgoFileSpecification {
 					mem.add(v);
 					log.debug("group '{}': add member '{}'", key, v);
 				}
+			}
+		}
+	}
+
+	// ..................................................
+	// ........TECH TIME SERIES SPECIAL HANDLING.........
+	// ..................................................
+	/**
+	 * Argo Technical file can have times series of TECH_PARAM. For each
+	 * <tech_param> entry, automatically make <tech_param>* variables too. These
+	 * variables are members of group : JULD, CYCLE_NUMBER_MEAS, MEASUREMENT_CODE,
+	 * <TECH_PARAM>. SO for each <tech_param>, create a group named <tech_param> and
+	 * containing variable <tech_param> and JULD, CYCLE_NUMBER_MEAS,
+	 * MEASUREMENT_CODE and all potential variables defined under the
+	 * "TECH_TIMESERIES" group name defined in the opt file. Summary : for each
+	 * <Tech_param> create a group named <tech_param> and add into this group all
+	 * variables contained in the groupe(if exists) "TECH_TIMESERIES".
+	 */
+	private void addOptionnalTechParamVariables() {
+		// get tech param names (without unit)
+		for (String techParamName : ConfigTech.getTechParamList()) {
+			createAndAddToGroupOptionnalTechParamVariable(techParamName);
+		}
+
+	}
+
+	/**
+	 * Build the <TECH_PARAM> variable. The long_name and unit are retrieved from
+	 * 
+	 * @param techParamName : variable name (without the unit).
+	 */
+	private void createAndAddToGroupOptionnalTechParamVariable(String techParamName) {
+		// 1 - create the <tech_param> variable :
+		ArgoDimension dimTechParam[] = new ArgoDimension[1];
+		dimTechParam[0] = dimHash.get("N_TECH_MEASUREMENT");
+		ArgoVariable techParamVar = new ArgoVariable(techParamName, DataType.FLOAT, dimTechParam, techParamName);
+
+		// may have multiple units or longç_name for a same parameter name. In those
+		// cases, we ignore units and/or long_name: IGNORE THIS
+//		if (ConfigTech.getParamAuthorizedLongName().get(techParamName) == null
+//				|| ConfigTech.getParamAuthorizedLongName().get(techParamName).size() != 1) {
+//			addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+//		} else {
+//			addAttr(techParamVar, long_name, ConfigTech.getParamAuthorizedLongName().get(techParamName).get(0),
+//					DataType.STRING);
+//		}
+//		if (ConfigTech.getParamAuthorizedUnits().get(techParamName) == null
+//				|| ConfigTech.getParamAuthorizedUnits().get(techParamName).size() != 1) {
+//			addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+//		} else {
+//			addAttr(techParamVar, units, ConfigTech.getParamAuthorizedUnits().get(techParamName).get(0),
+//					DataType.STRING);
+//		}
+//		
+		//2025-09 : as it may have multiple units (in fact all units from reference units table) and multiple long_name (defined in R14), we will have a special check for this. 
+		// For the generic test, we ignore these attributes.
+		addAttr(techParamVar, long_name, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+		addAttr(techParamVar, units, ATTR_IGNORE_VALUE + "%15.1f", DataType.STRING);
+		
+		varHash.put(techParamName, techParamVar);
+		// 2 - add it to the optionnal variables :
+		optVar.add(techParamName);
+		// 3 - create the group for the <tech_param> variable
+		createGroup(groupMembers, techParamName);
+		// 4 - add into this group the variable member of group "TECH_TIMESERIES" (JULD
+		HashSet<String> techTimeSeriesGroupMembers = groupMembers.get("TECH_TIMESERIES");
+		addMembersToGroup(groupMembers, techParamName, techTimeSeriesGroupMembers);
+		// 5 - link varName to group name :
+		varGroup.put(techParamName, techParamName);
+	}
+
+	/**
+	 * add a new group to groupMembers instance variable.
+	 * 
+	 * @param groupMembers
+	 * @param groupName
+	 */
+	private void createGroup(HashMap<String, HashSet<String>> groupMembers, String groupName) {
+		if (!groupMembers.containsKey(groupName)) { // ..new group - init
+			groupMembers.put(groupName, new HashSet<String>());
+			log.debug("create group: '{}'", groupName);
+		}
+
+	}
+
+	private void addMembersToGroup(HashMap<String, HashSet<String>> groups, String groupName,
+			HashSet<String> newMembers) {
+		if (groups.containsKey(groupName)) {
+			for (String member : newMembers) {
+				groups.get(groupName).add(member);
 			}
 		}
 	}
@@ -1556,7 +1650,8 @@ public class ArgoFileSpecification {
 	// ......................................................
 	/**
 	 * Parses the "optional element" file of a specification. This file defines
-	 * which elements in the CDL specification are optional.
+	 * which elements in the CDL specification are optional. Element can me
+	 * variables or dimensions.
 	 *
 	 * @return True - file parsed; False - failed to parse file
 	 * @throws IOException indicates file read or permission error
@@ -1800,6 +1895,8 @@ public class ArgoFileSpecification {
 	 */
 
 	public boolean parseParamFile(ArgoDataFile.FileType fileType, String version, boolean listOnly) throws IOException {
+		// TO DO : HANDLE REGEX in PARAM NAME and ATTRIBUTE : see ArgoConfigTechParam
+		// Create a generic class ?
 		log.debug(".....parseParamFile: start.....");
 		log.debug("fileType, version: '{}' '{}' --- listOnly {}", fileType, version, listOnly);
 

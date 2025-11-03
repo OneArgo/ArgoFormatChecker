@@ -26,6 +26,7 @@ dimensions:
 	STRING4 = 4;
 	STRING2 = 2;
 	N_TECH_PARAM = UNLIMITED;
+	N_TECH_MEASUREMENT = UNLIMITED;
 
 variables:
 
@@ -68,5 +69,18 @@ variables:
 		CYCLE_NUMBER:long_name = "Float cycle number";
 		CYCLE_NUMBER:conventions = "0...N, 0 : launch cycle (if exists), 1 : first complete cycle";
 		CYCLE_NUMBER:_FillValue = 99999;
-
-}
+		
+// Timeseries of technical data (optional)
+	double JULD(N_TECH_MEASUREMENT);
+		JULD:long_name = "Julian day (UTC) of each measurement";
+		JULD:standard_name = "time";
+		JULD:units = "days since 1950-01-01 00:00:00 UTC";
+		JULD:conventions = "Relative julian days with decimal part (as parts of day)";
+		JULD:_FillValue = 999999;
+		JULD:axis = "T";
+	int CYCLE_NUMBER_MEAS (N_TECH_MEASUREMENT);
+	int MEASUREMENT_CODE(N_TECH_MEASUREMENT);
+		MEASUREMENT_CODE:long_name = "Flag referring to a measurement event in the cycle";
+		MEASUREMENT_CODE:conventions = "Argo reference table 15";
+		MEASUREMENT_CODE:_FillValue = 99999;
+		
