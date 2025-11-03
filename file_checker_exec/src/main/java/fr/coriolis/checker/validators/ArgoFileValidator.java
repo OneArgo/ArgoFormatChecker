@@ -514,10 +514,12 @@ public class ArgoFileValidator {
 			if (attrName.equals("long_name") && authorizedLongName != null
 					&& !authorizedLongName.contains(dataAttrValue)) {
 
-				validationResult.addError("attribute: " + varName + ":" + attrName + ": Definitions differ "
-						+ "\n\tSpecification = See argo-tech_names-spec list, definition column"
-						+ "\n\tData File     = '" + dataAttrValue + "'");
+				String specValueInErrorReport = authorizedLongName.size() == 1 ? "'" + authorizedLongName.get(0) + "'"
+						: "Multiple possibilities; see argo-tech_names-spec list, definition column";
 
+				validationResult.addError(
+						String.format("attribute: %s:%s: Definitions differ\n\tSpecification = %s\n\tData File = '%s'",
+								varName, attrName, specValueInErrorReport, dataAttrValue));
 			}
 
 		}

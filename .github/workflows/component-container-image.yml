@@ -11,6 +11,14 @@ on:
         description: "Path of the docker image Tag"
         default: "ghcr.io/${{ github.repository }}/app"
         type: string
+      target:
+        description: "Target build stage for Docker multistage build"
+        required: false
+        type: string
+      file:
+        description: "Path to the Dockerfile."
+        required: false
+        type: string
 
 jobs:
   container-image-build:
@@ -35,9 +43,18 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build  (pull request)
         uses: docker/build-push-action@v6
-        if: ${{ github.event_name == 'pull_request'}}
+        if: ${{ github.event_name == 'pull_request' && (inputs.target == '' || inputs.target == null) }}
         with:
           context: "{{defaultContext}}:${{ inputs.context }}"
+          tags: "${{ steps.format.outputs.lowercase }}:develop"
+          push: false
+      - name: Build with target (pull request)
+        uses: docker/build-push-action@v6
+        if: ${{ github.event_name == 'pull_request' && inputs.target != '' && inputs.target != null }}
+        with:
+          context: "{{defaultContext}}:${{ inputs.context }}"
+          target: ${{ inputs.target }}
+          file: ${{ inputs.file }}
           tags: "${{ steps.format.outputs.lowercase }}:develop"
           push: false
       - name: Build and push (develop)
@@ -49,15 +66,33 @@ jobs:
           push: true
       - name: Build and push (main)
         uses: docker/build-push-action@v6
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && (inputs.target == '' || inputs.target == null) }}
         with:
           context: "{{defaultContext}}:${{ inputs.context }}"
           tags: "${{ steps.format.outputs.lowercase }}:latest"
           push: true
-      - name: Build and push (release)
+      - name: Build and push with target (main)
         uses: docker/build-push-action@v6
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && inputs.target != '' && inputs.target != null }}
         with:
           context: "{{defaultContext}}:${{ inputs.context }}"
+          target: ${{ inputs.target }}
+          file: ${{ inputs.file }}
+          tags: "${{ steps.format.outputs.lowercase }}:latest"
+          push: true
+      - name: Build and push (release)
+        uses: docker/build-push-action@v6
+        if: ${{ github.event_name == 'release' && (inputs.target == '' || inputs.target == null) }}
+        with:
+          context: "{{defaultContext}}:${{ inputs.context }}"
+          tags: "${{ steps.format.outputs.lowercase }}:${{ github.ref_name }}"
+          push: true
+      - name: Build and push with target (release)
+        uses: docker/build-push-action@v6
+        if: ${{ github.event_name == 'release' && inputs.target != '' && inputs.target != null }}
+        with:
+          context: "{{defaultContext}}:${{ inputs.context }}"
+          target: ${{ inputs.target }}
+          file: ${{ inputs.file }}
           tags: "${{ steps.format.outputs.lowercase }}:${{ github.ref_name }}"
           push: true

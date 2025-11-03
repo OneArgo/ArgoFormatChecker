@@ -11,10 +11,11 @@ LABEL org.opencontainers.image.vendor="OneArgo"
 
 WORKDIR /build
 
-COPY ./.mvn ./.mvn
-COPY ./mvnw ./mvnw
-COPY ./pom.xml ./pom.xml
-COPY ./src ./src
+COPY ./file_checker_exec/.mvn ./.mvn
+COPY ./file_checker_exec/mvnw ./mvnw
+COPY ./file_checker_exec/pom.xml ./pom.xml
+COPY ./file_checker_exec/src ./src
+
 
 # Ensure mvnw has execution permissions
 RUN chmod +x ./mvnw \
@@ -36,6 +37,9 @@ RUN set -e \
 
 # Copy the built jar file to the runtime stage
 COPY --from=builder --chown=root:gcontainer --chmod=750 /build/target/file_checker*.jar app.jar
+# Copy the specs :
+COPY file_checker_spec /app/file_checker_spec
+
 # Specify the default command for running the app
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
