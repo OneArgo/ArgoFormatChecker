@@ -159,7 +159,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 	private void validateOptionalParams() {
 		// PROGRAM_NAME - ref table 41
-		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME);
+		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME, true);
 	}
 
 	/**
@@ -899,20 +899,20 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			String snsr = sensor[n].trim();
 			snsrInfo = ArgoReferenceTable.SENSOR.contains(snsr);
 			boolean snsrValid = checkParameterValueAgainstRefTable(sensorName + "[" + (n + 1) + "]", snsr,
-					ArgoReferenceTable.SENSOR);
+					ArgoReferenceTable.SENSOR, false);
 
 			// ..check SENSOR_MAKER
 			String snsrMaker = sensorMaker[n].trim();
 			mkrInfo = ArgoReferenceTable.SENSOR_MAKER.contains(snsrMaker);
 			boolean smkrValid = checkParameterValueAgainstRefTable(sensorMakerName + "[" + (n + 1) + "]", snsrMaker,
-					ArgoReferenceTable.SENSOR_MAKER);
+					ArgoReferenceTable.SENSOR_MAKER, false);
 			log.debug(sensorMakerName + "[{}]: '{}'", n, snsrMaker);
 
 			// ..check SENSOR_MODEL
 			String snsrModel = sensorModel[n].trim();
 			mdlInfo = ArgoReferenceTable.SENSOR_MODEL.contains(snsrModel);
 			boolean mdlValid = checkParameterValueAgainstRefTable(sensorModelName + "[" + (n + 1) + "]", snsrModel,
-					ArgoReferenceTable.SENSOR_MODEL);
+					ArgoReferenceTable.SENSOR_MODEL, false);
 
 			// ..cross-reference SENSOR_MODEL / SENSOR_MAKER
 			if (smkrValid && mdlValid) {
@@ -1010,7 +1010,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	} // ..end validateMandatory_v3
 
 	private boolean checkParameterValueAgainstRefTable(String parameterName, String parameterValue,
-			StringTable refTable) {
+			StringTable refTable, boolean warningOnly) {
 		ArgoReferenceTable.ArgoReferenceEntry info;
 
 		log.debug("{}: '{}'", parameterName, parameterValue);
@@ -1021,17 +1021,25 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			return true;
 
 		} else {
-			validationResult.addError(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+			String resultMessage = parameterName + ": '" + parameterValue + "' Status: " + info.message
+					+ " (not in reference table)";
+			if (warningOnly) {
+				validationResult.addWarning(resultMessage);
+			} else {
+				validationResult.addError(resultMessage);
+			}
+
 			return false;
 		}
 	}
 
-	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
+	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable,
+			boolean warningOnly) {
 
 		Variable dataVar = arFile.getNcReader().findVariable(parameterName);
 		if (dataVar != null) {
 			String parameterValue = arFile.readString(parameterName).trim();
-			return checkParameterValueAgainstRefTable(parameterName, parameterValue, refTable);
+			return checkParameterValueAgainstRefTable(parameterName, parameterValue, refTable, warningOnly);
 		}
 		return true;
 	}

@@ -22,7 +22,7 @@ public class ValidateOptionalParametersValueCheckIT {
 	@Tag(TEST_DIR_NAME)
 	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
 	@CsvSource({ "6903281_meta_PROGRAM_NAME_in_ref-table-41.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
-			"6903281_meta_PROGRAM_NAME_Not-in_ref-table-41.nc,coriolis,FILE-REJECTED,DATA-VALIDATION" })
+			"6903281_meta_PROGRAM_NAME_Not-in_ref-table-41.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION" })
 	void fileChecker_shouldAcceptPROGRAMNAME_WhenConformToRefTable41(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 

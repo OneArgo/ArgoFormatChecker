@@ -65,20 +65,13 @@ public final class TestsUtils {
 		return String.join("\n", Files.readAllLines(xmlResultFile.toPath()));
 	}
 
+	// ============== CHECK RESULT =================
 	public static void genericFileCheckerE2ETest(String fileName, String dac, String result, String phase,
 			String testDirName, String options) throws IOException, InterruptedException {
 
 		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
 
 		assertThat(content).isNotEmpty().contains("<status>" + result).contains("<phase>" + phase);
-	}
-
-	public static void e2eTestWarningPresence(String fileName, String dac, String warningMessage, String testDirName,
-			String options) throws IOException, InterruptedException {
-
-		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
-
-		assertThat(content).isNotEmpty().contains("<warning>" + warningMessage);
 	}
 
 	// We use an overloaded method to provide a default value for the last argument
@@ -90,10 +83,34 @@ public final class TestsUtils {
 
 	}
 
+	// ============== CHECK WARNINGS =================
+
+	public static void e2eTestWarningPresence(String fileName, String dac, String warningMessage, String testDirName,
+			String options) throws IOException, InterruptedException {
+
+		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
+
+		assertThat(content).isNotEmpty().contains("<warning>" + warningMessage);
+	}
+
+	public static void e2eTestWarningAbsence(String fileName, String dac, String testDirName, String options)
+			throws IOException, InterruptedException {
+
+		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
+
+		assertThat(content).isNotEmpty().contains("<warnings number=\"0\"/>");
+	}
+
 	public static void e2eTestWarningPresence(String fileName, String dac, String warningMessage, String testDirName)
 			throws IOException, InterruptedException {
 
 		e2eTestWarningPresence(fileName, dac, warningMessage, testDirName, "-no-name-check");
+	}
+
+	public static void e2eTestWarningAbsence(String fileName, String dac, String testDirName)
+			throws IOException, InterruptedException {
+
+		e2eTestWarningAbsence(fileName, dac, testDirName, "-no-name-check");
 	}
 
 }
