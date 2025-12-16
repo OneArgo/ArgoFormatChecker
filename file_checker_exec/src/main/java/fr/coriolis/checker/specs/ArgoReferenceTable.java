@@ -151,7 +151,7 @@ public final class ArgoReferenceTable {
 	static {
 		DacCenterCodes.put(DACS.AOML, "AO MB NA PM SI UW WH");
 		DacCenterCodes.put(DACS.BODC, "BO");
-		DacCenterCodes.put(DACS.CORIOLIS, "AW GE IO IF LV RU SP VL DK");
+		DacCenterCodes.put(DACS.CORIOLIS, "AW GE IO IF LV RU SP VL DK EA");
 		DacCenterCodes.put(DACS.CSIO, "HZ");
 		DacCenterCodes.put(DACS.CSIRO, "CS");
 		DacCenterCodes.put(DACS.INCOIS, "IN");
