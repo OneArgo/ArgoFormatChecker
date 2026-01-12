@@ -1,12 +1,16 @@
 package fr.coriolis.checker.validators;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,7 +161,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 	private void validateOptionalParams() {
 		// PROGRAM_NAME - ref table 41
-		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME);
+		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME, true);
 	}
 
 	/**
@@ -849,6 +853,12 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				validationResult.addError(name + "[" + (n + 1) + "]: '" + str + "': Invalid");
 			}
 		}
+		// check unicity in PARAMETER entries :
+		Set<String> duplicateParameters = checkForDuplicate(paramVar);
+		if (duplicateParameters.size() > 0) {
+			validationResult.addWarning(
+					"PARAMETER variable contains duplicate values: [" + String.join(", ", duplicateParameters) + "]");
+		}
 
 		name = "PARAMETER_UNITS"; // ..not empty
 		paramVar = arFile.readStringArr(name);
@@ -915,62 +925,46 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			SkosConcept sensorMakerTableEntry;
 
 			// ..check SENSOR
-			boolean snsrValid = false;
 			String snsr = sensor[n].trim();
-			log.debug(sensorName + "[{}]: '{}'", n, snsr);
-
 			String normalizedSensorName = normalizeSensorName(snsr);
-			sensorTableEntry = ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap()
-					.get(normalizedSensorName);
-			if (sensorTableEntry != null) {
-				snsrValid = true;
-				if (sensorTableEntry.isDeprecated()) {
-					validationResult.addWarning(
-							sensorName + "[" + (n + 1) + "]: '" + snsr + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
-				}
-
-			} else {
-				validationResult.addError(sensorName + "[" + (n + 1) + "]: '" + snsr + "' Status: "
-						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
-			}
+			boolean snsrValid = checkParameterValueAgainstRefTable(sensorName + "[" + (n + 1) + "]",
+					normalizedSensorName, ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap(), false);
 
 			// ..check SENSOR_MAKER
 			String snsrMaker = sensorMaker[n].trim();
-			boolean smkrValid = false;
+			boolean smkrValid = checkParameterValueAgainstRefTable(sensorMakerName + "[" + (n + 1) + "]", snsrMaker,
+					ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap(), false);
 			log.debug(sensorMakerName + "[{}]: '{}'", n, snsrMaker);
-			sensorMakerTableEntry = ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap()
-					.get(snsrMaker);
-			if (sensorMakerTableEntry != null) {
-				smkrValid = true;
-				if (sensorMakerTableEntry.isDeprecated()) {
-					validationResult.addWarning(sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: "
-							+ SkosConcept.DEPRECATED_CONCEPT);
-				}
 
-			} else {
-				validationResult.addError(sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: "
-						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
-			}
+//			// ..check SENSOR_MODEL
+//			String snsrModel = sensorModel[n].trim();
+//			boolean mdlValid = false;
+//			log.debug(sensorModelName + "[{}]: '{}'", n, snsrModel);
+//			sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
+//					.get(snsrModel);
+//			if (sensorModelTableEntry != null) {
+//				mdlValid = true;
+//				if (sensorModelTableEntry.isDeprecated()) {
+//					validationResult.addWarning(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
+//							+ SkosConcept.DEPRECATED_CONCEPT);
+//				}
+//			} else {
+//				validationResult.addError(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
+//						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
+//			}
+//=======
 
 			// ..check SENSOR_MODEL
 			String snsrModel = sensorModel[n].trim();
-			boolean mdlValid = false;
-			log.debug(sensorModelName + "[{}]: '{}'", n, snsrModel);
-			sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
-					.get(snsrModel);
-			if (sensorModelTableEntry != null) {
-				mdlValid = true;
-				if (sensorModelTableEntry.isDeprecated()) {
-					validationResult.addWarning(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
-							+ SkosConcept.DEPRECATED_CONCEPT);
-				}
-			} else {
-				validationResult.addError(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
-						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
-			}
+			boolean mdlValid = checkParameterValueAgainstRefTable(sensorModelName + "[" + (n + 1) + "]", snsrModel,
+					ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap(), false);
 
 			// ..cross-reference SENSOR_MODEL R27 / SENSOR_MAKER R26
 			if (smkrValid && mdlValid) {
+				sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
+						.get(snsrModel);
+				sensorMakerTableEntry = ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap()
+						.get(snsrMaker);
 				if (!snsrModel.equals("UNKNOWN")) {
 
 					if (!sensorModelTableEntry.checkBroaderReference(sensorMakerTableEntry.getId())) {
@@ -987,6 +981,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 			// ..cross-reference SENSOR_MODEL R27 / SENSOR R25
 			if (snsrValid && mdlValid) {
+				sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
+						.get(snsrModel);
+				sensorTableEntry = ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap()
+						.get(normalizedSensorName);
 				if (!snsrModel.equals("UNKNOWN")) {
 					if (!sensorModelTableEntry.checkRelatedReference(sensorTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorName + "[" + (n + 1) + "]: "
@@ -999,6 +997,12 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 					}
 				}
 			}
+		}
+		// check unicity in SENSOR entries :
+		Set<String> duplicateSensors = checkForDuplicate(sensor);
+		if (duplicateSensors.size() > 0) {
+			validationResult.addWarning(
+					"SENSOR variable contains duplicate values: [" + String.join(", ", duplicateSensors) + "]");
 		}
 
 		// ..........per-positioning_system checks
@@ -1061,27 +1065,87 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		log.debug("....validateMandatory_v3: end.....");
 	} // ..end validateMandatory_v3
 
-	private void checkParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
+	private boolean checkParameterValueAgainstRefTable(String parameterName, String parameterValue,
+			Map<String, SkosConcept> refTable, boolean warningOnly) {
 		ArgoReferenceTable.ArgoReferenceEntry info;
-		String parameterValue = arFile.readString(parameterName).trim();
 
 		log.debug("{}: '{}'", parameterName, parameterValue);
-		if ((info = refTable.contains(parameterValue)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+
+		SkosConcept tableEntry = refTable.get(parameterValue);
+
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(
+						parameterName + ": '" + parameterValue + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
+			return true;
 
 		} else {
-			validationResult.addError(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+			String resultMessage = parameterName + ": '" + parameterValue + "' Status: "
+					+ SkosConcept.INVALID_ALTLABEL_MESSAGE + " (not in reference table)";
+//			validationResult.addError(sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: "
+//					+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
+			if (warningOnly) {
+				validationResult.addWarning(resultMessage);
+			} else {
+				validationResult.addError(resultMessage);
+			}
+
+			return false;
 		}
 	}
 
-	private void checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable) {
+	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable,
+			boolean warningOnly) {
 
 		Variable dataVar = arFile.getNcReader().findVariable(parameterName);
 		if (dataVar != null) {
-			checkParameterValueAgainstRefTable(parameterName, refTable);
+			String parameterValue = arFile.readString(parameterName).trim();
+			// =======TO DO : replace with NVS table 41 when it exists. ======
+			ArgoReferenceTable.ArgoReferenceEntry info;
+
+			log.debug("{}: '{}'", parameterName, parameterValue);
+			if ((info = refTable.contains(parameterValue)).isValid()) {
+				if (info.isDeprecated) {
+					validationResult.addWarning(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+				}
+				return true;
+
+			} else {
+				validationResult.addError(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+				String resultMessage = parameterName + ": '" + parameterValue + "' Status: " + info.message
+						+ " (not in reference table)";
+				if (warningOnly) {
+					validationResult.addWarning(resultMessage);
+				} else {
+					validationResult.addError(resultMessage);
+				}
+
+				return false;
+			}
+			// =====================================================================
+
+			// return checkParameterValueAgainstRefTable(parameterName, parameterValue,
+			// refTable, warningOnly);
 		}
+		return true;
+	}
+
+	/**
+	 * Check if a list of values contains duplicates
+	 * 
+	 * @param paramValuesList (String[]) list of values to check
+	 * @return Set of values which are found multiple time in the list
+	 */
+	private Set<String> checkForDuplicate(String[] paramValuesList) {
+		// for each value of the list, count the number of times it appears
+		Map<String, Long> count = Arrays.stream(paramValuesList).map(String::trim)
+				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+		// build the list of value which appears more than one time
+		Set<String> doublons = count.entrySet().stream().filter(e -> e.getValue() > 1).map(Map.Entry::getKey)
+				.collect(Collectors.toSet());
+
+		return doublons;
 	}
 
 	/**

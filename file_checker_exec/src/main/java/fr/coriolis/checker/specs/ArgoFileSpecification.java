@@ -2678,10 +2678,14 @@ public class ArgoFileSpecification {
 				groupMembers.get(prmName).add(v);
 				log.debug("added: '{}'; opt '{}'; primary '{}'; member '{}'", v, opt, prmName, prmName);
 
-			} else { // ..an i-parameter
+			} else {
+				// ..an i-parameter
 				// ..<PARAM> has no primary group and belongs to _qc and _adj groups
 				// ..<PARAM>_ADJ has primary and belongs to only _adj group
 				// ..(ADMT-16: <PARAM> can no longer exist by itself)
+				// ==========
+				// CHECK_0076
+				// ==========
 
 				if (v.endsWith("_ADJUSTED")) {
 					varGroup.put(v, group_adj);

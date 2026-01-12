@@ -33,42 +33,45 @@ public final class TestsUtils {
 		}
 	}
 
-	public static void genericFileCheckerE2ETest(String fileName, String dac, String result, String phase,
-			String testDirName, String options) throws IOException, InterruptedException {
+	private static String executeJarAndGetResult(String fileName, String dac, String testDirName, String options)
+			throws IOException, InterruptedException {
 
-		// ARANGE
-		String inPutDirPath = TestsUtils.TEST_FILES_DIR + "/" + testDirName;
-		File intputDir = new File(inPutDirPath);
-		File testFile = new File(inPutDirPath + "/" + fileName);
-		// before executing jar, verify file and dir exists :
+		// ARRANGE
+		String inputDirPath = TestsUtils.TEST_FILES_DIR + "/" + testDirName;
+		File inputDir = new File(inputDirPath);
+		File testFile = new File(inputDirPath + "/" + fileName);
+
+		// pre-checks
 		assertThat(TestsUtils.jarFile).exists().isFile().as("jar should be created in target folder");
-		;
 		assertThat(testFile).exists().isFile().as("netcdf test file should be in test/netcdf/TEST* resources folder");
 		assertThat(TestsUtils.specDirDir).exists().isDirectory().as("specifications directory should exist");
-		assertThat(intputDir).exists().isDirectory().as("input directory should exist");
+		assertThat(inputDir).exists().isDirectory().as("input directory should exist");
 		assertThat(TestsUtils.outputDir).exists().isDirectory().as("output directory should exist");
 
 		// ACT
 		ProcessBuilder builder = new ProcessBuilder("java", "-jar", TestsUtils.jarPath, options, dac,
-				TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inPutDirPath, fileName);
+				TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inputDirPath, fileName);
 		builder.redirectErrorStream(true);
 		Process process = builder.start();
-		process.waitFor();
 
-		// ASSESS
-		// No error
+		// ASSERT - common checks
 		int exitCode = process.waitFor();
 		assertThat(exitCode).isZero().as("execution should complete without errors");
-		// result file created
-		File xmlResultFile = new File(TestsUtils.OUTPUT_DIR_PATH + "\\" + fileName + ".filecheck");
+
+		File xmlResultFile = new File(TestsUtils.OUTPUT_DIR_PATH + "/" + fileName + ".filecheck");
 		assertThat(xmlResultFile).exists().isFile().as("Result file should be created in %s",
 				TestsUtils.OUTPUT_DIR_PATH);
-		// expected status
-		String content = String.join("\n", Files.readAllLines(xmlResultFile.toPath()));
-		assertThat(content).isNotEmpty().contains("<status>" + result);
-		// in the expected
-		assertThat(content).isNotEmpty().contains("<phase>" + phase);
 
+		return String.join("\n", Files.readAllLines(xmlResultFile.toPath()));
+	}
+
+	// ============== CHECK RESULT =================
+	public static void genericFileCheckerE2ETest(String fileName, String dac, String result, String phase,
+			String testDirName, String options) throws IOException, InterruptedException {
+
+		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
+
+		assertThat(content).isNotEmpty().contains("<status>" + result).contains("<phase>" + phase);
 	}
 
 	// We use an overloaded method to provide a default value for the last argument
@@ -78,6 +81,36 @@ public final class TestsUtils {
 
 		genericFileCheckerE2ETest(fileName, dac, result, phase, testDirName, "-no-name-check");
 
+	}
+
+	// ============== CHECK WARNINGS =================
+
+	public static void e2eTestWarningPresence(String fileName, String dac, String warningMessage, String testDirName,
+			String options) throws IOException, InterruptedException {
+
+		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
+
+		assertThat(content).isNotEmpty().contains("<warning>" + warningMessage);
+	}
+
+	public static void e2eTestWarningAbsence(String fileName, String dac, String testDirName, String options)
+			throws IOException, InterruptedException {
+
+		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
+
+		assertThat(content).isNotEmpty().contains("<warnings number=\"0\"/>");
+	}
+
+	public static void e2eTestWarningPresence(String fileName, String dac, String warningMessage, String testDirName)
+			throws IOException, InterruptedException {
+
+		e2eTestWarningPresence(fileName, dac, warningMessage, testDirName, "-no-name-check");
+	}
+
+	public static void e2eTestWarningAbsence(String fileName, String dac, String testDirName)
+			throws IOException, InterruptedException {
+
+		e2eTestWarningAbsence(fileName, dac, testDirName, "-no-name-check");
 	}
 
 }

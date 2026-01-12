@@ -1508,7 +1508,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					if (qcFlagsTableEntry.isDeprecated()) {
 						depQC++;
 					}
-
+					// ==========
+					// CHECK_0074
+					// ==========
 					if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 						// ..data is missing - QC better be too
 						if (prm_qc[k] != '9' && prm_qc[k] != '0') {
@@ -1517,6 +1519,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 					} else {
 						// ..data not missing - check QC value
+						// ==========
+						// CHECK_0075
+						// ==========
 
 						if (prm_qc[k] == '0') {
 							if (!arFile.getFileSpec().isOptional(varName)) {
@@ -1536,7 +1541,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					} else if (prm_qc[k] == '0') {
 						n_noqc++;
 					}
-
+					// ==========
+					// CHECK_0074
+					// ==========
 				} else { // ..QC not is ref table 2, handle " " special case
 					if (prm_qc[k] == ' ') {
 						// ..qc set to NOT MEASURED, data better be missing
@@ -1629,7 +1636,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				// .. If _ADJUSTED exists the other must too, and so can be tested.
 				// .. IF _QC doesn't exist, NONE of the "ADJ variables" do
 				// .. Skip all of these tests if _QC doesn't exist
-
+				// ==========
+				// CHECK_0076
+				// ==========
 				if (varQC == null) {
 					log.debug(varName + "_QC not in file: skip remaining tests");
 					continue PARAM_LOOP;

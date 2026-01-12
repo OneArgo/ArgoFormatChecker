@@ -2013,7 +2013,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						if (tableEntry != null && tableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
-
+						// CHECK_PROFILE_0074
 						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// ..data is missing - QC better be too
 							if (prm_qc[n] != '9' && prm_qc[n] != ' ') {
@@ -2081,6 +2081,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			// .. and go with the flow here
 			// ..-- ie, if *_ADJUSTED not present, skip these checks entirely
 
+			// ==========
+			// CHECK_0076
+			// ==========
 			if (var == null) {
 				log.debug("{} not in file: skip *_ADJUSTED checks", varName);
 				continue PARAM_LOOP;
