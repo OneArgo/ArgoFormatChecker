@@ -936,24 +936,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 					ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap(), false);
 			log.debug(sensorMakerName + "[{}]: '{}'", n, snsrMaker);
 
-//			// ..check SENSOR_MODEL
-//			String snsrModel = sensorModel[n].trim();
-//			boolean mdlValid = false;
-//			log.debug(sensorModelName + "[{}]: '{}'", n, snsrModel);
-//			sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
-//					.get(snsrModel);
-//			if (sensorModelTableEntry != null) {
-//				mdlValid = true;
-//				if (sensorModelTableEntry.isDeprecated()) {
-//					validationResult.addWarning(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
-//							+ SkosConcept.DEPRECATED_CONCEPT);
-//				}
-//			} else {
-//				validationResult.addError(sensorModelName + "[" + (n + 1) + "]: '" + snsrModel + "' Status: "
-//						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
-//			}
-//=======
-
 			// ..check SENSOR_MODEL
 			String snsrModel = sensorModel[n].trim();
 			boolean mdlValid = checkParameterValueAgainstRefTable(sensorModelName + "[" + (n + 1) + "]", snsrModel,
