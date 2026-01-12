@@ -1877,7 +1877,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 						// ..check the per level QC flag
 						SkosConcept qcFlagsTableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE
-								.getConceptMembersByAltLabelMap().get(String.valueOf(prm_qc[k]));
+								.getConceptMembersByAltLabelMap().get(String.valueOf(prm_adj_qc[k]));
 
 						if (qcFlagsTableEntry != null) {
 							if (qcFlagsTableEntry.isDeprecated()) {
