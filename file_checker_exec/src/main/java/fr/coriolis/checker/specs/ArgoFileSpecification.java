@@ -2035,6 +2035,8 @@ public class ArgoFileSpecification {
 			// parse attributes from definition field :
 			Map<String, String> physParamAttributes = NvsDefinitionParser.parseAttributes("Local_Attributes",
 					physParamEntry.getDefinition());
+			Map<String, String> physParamProperties = NvsDefinitionParser.parseAttributes("Properties",
+					physParamEntry.getDefinition());
 
 			String prm = physParamEntry.getAltLabel().trim(); // ..parameter name - NVS altLabel
 			boolean isDeprecated = physParamEntry.isDeprecated();
@@ -2044,11 +2046,12 @@ public class ArgoFileSpecification {
 			String prmUnits = getOrEmptyStringFromMap(physParamAttributes, "units");
 			String prmVmin = getOrEmptyStringFromMap(physParamAttributes, "valid_min");
 			String prmVmax = getOrEmptyStringFromMap(physParamAttributes, "valid_max");
-			String prmCategory = getOrEmptyStringFromMap(physParamAttributes, "category");
 			String prmFill = getOrEmptyStringFromMap(physParamAttributes, "fill_value");
-			String prmType = getOrEmptyStringFromMap(physParamAttributes, "data_type");
+			// physical parameter's properties from definition field :
+			String prmType = getOrEmptyStringFromMap(physParamProperties, "data_type");
 			String[] extraDims = getExtraDimensionsFromParametersAttributes(
 					getOrEmptyStringFromMap(physParamAttributes, "extra_dim"));
+			String prmCategory = getOrEmptyStringFromMap(physParamProperties, "category");
 
 			// deal with empty or "-" attributes (only for >3.0 version)
 			if (isPost3_0) {

@@ -1094,7 +1094,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				return true;
 
 			} else {
-				validationResult.addError(parameterName + ": '" + parameterValue + "' Status: " + info.message);
 				String resultMessage = parameterName + ": '" + parameterValue + "' Status: " + info.message
 						+ " (not in reference table)";
 				if (warningOnly) {

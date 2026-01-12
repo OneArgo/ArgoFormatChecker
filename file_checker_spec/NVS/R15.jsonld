@@ -4714,16 +4714,19 @@
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R15/current/1100/",
-            "pav:authoredOn": "2025-09-02 12:51:44.0",
-            "pav:hasCurrentVersion": {
+            "pav:hasVersion": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R15/current/1100/1/"
             },
+            "pav:authoredOn": "2025-09-29 14:51:43.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R15/current/1100/2/"
+            },
             "dce:identifier": "SDN:R15::1100",
-            "pav:version": "1",
+            "pav:version": "2",
             "skos:notation": "SDN:R15::1100",
             "skos:altLabel": "1100",
-            "dc:date": "2025-09-02 12:51:44.0",
-            "owl:versionInfo": "1",
+            "dc:date": "2025-09-29 14:51:43.0",
+            "owl:versionInfo": "2",
             "skos:prefLabel": {
                 "@language": "en",
                 "@value": "1100"
@@ -4731,9 +4734,9 @@
             "dc:identifier": "SDN:R15::1100",
             "skos:note": {
                 "@language": "en",
-                "@value": "accepted"
+                "@value": "deprecated"
             },
-            "owl:deprecated": "false",
+            "owl:deprecated": "true",
             "void:inDataset": {
                 "@id": "http://vocab.nerc.ac.uk/.well-known/void"
             },
@@ -6217,13 +6220,13 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R15/current/585/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R15/current/498/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R15/current/145/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R15/current/301/"
-                },
-                {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R15/current/498/"
                 }
             ],
             "@type": "skos:Collection",
@@ -6231,14 +6234,17 @@
             "dc:description": "Measurement code IDs used in Argo Trajectory netCDF files. Argo netCDF variable MEASUREMENT_CODE is populated by R15 altLabel.",
             "dc:title": "Argo trajectory measurement code identifiers",
             "skos:prefLabel": "Argo trajectory measurement code identifiers",
-            "owl:versionInfo": "2",
-            "dc:date": "2025-09-03 03:00:00.0",
+            "owl:versionInfo": "3",
+            "dc:date": "2025-09-30 03:00:01.0",
             "skos:altLabel": "MEASUREMENT_CODE_ID",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "MEASUREMENT_CODE_ID",
             "rdfs:comment": "Governance for vocabularies used in the Argo data system, published and maintained by the Argo Data Management Team (ADMT) and hosted on the NERC Vocabulary Server.",
             "grg:RE_RegisterOwner": "Argo Data Management Team",
-            "grg:RE_RegisterManager": "British Oceanographic Data Centre"
+            "grg:RE_RegisterManager": "British Oceanographic Data Centre",
+            "rdfs:seeAlso": {
+                "@id": "https://github.com/OneArgo/ArgoVocabs"
+            }
         }
     ],
     "@context": {

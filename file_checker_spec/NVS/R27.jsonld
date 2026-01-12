@@ -32,40 +32,6 @@
             "@type": "skos:Concept"
         },
         {
-            "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/",
-            "pav:authoredOn": "2021-08-18 14:32:12.0",
-            "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/1/"
-            },
-            "dce:identifier": "SDN:R27::FLOATCLOCK",
-            "pav:version": "1",
-            "skos:notation": "SDN:R27::FLOATCLOCK",
-            "skos:altLabel": "FLOATCLOCK",
-            "dc:date": "2021-08-18 14:32:12.0",
-            "owl:versionInfo": "1",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "Float clock"
-            },
-            "dc:identifier": "SDN:R27::FLOATCLOCK",
-            "skos:note": {
-                "@language": "en",
-                "@value": "accepted"
-            },
-            "owl:deprecated": "false",
-            "void:inDataset": {
-                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
-            },
-            "skos:definition": {
-                "@language": "en",
-                "@value": "Inboard Real Time Clock (RTC) of a float."
-            },
-            "skos:related": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/FLOATCLOCK_MTIME/"
-            },
-            "@type": "skos:Concept"
-        },
-        {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RAFOS/",
             "pav:authoredOn": "2021-08-18 14:32:12.0",
             "pav:hasCurrentVersion": {
@@ -101,71 +67,85 @@
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE83_OPTODE/",
-            "pav:authoredOn": "2023-11-24 09:35:13.0",
-            "pav:hasCurrentVersion": {
+            "pav:hasVersion": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE83_OPTODE/1/"
             },
-            "dce:identifier": "SDN:R27::SBE83_OPTODE",
-            "pav:version": "1",
-            "skos:notation": "SDN:R27::SBE83_OPTODE",
-            "skos:altLabel": "",
-            "dc:date": "2023-11-24 09:35:13.0",
-            "owl:versionInfo": "1",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "Sea-Bird Scientific SBE83 oxygen optode"
-            },
-            "dc:identifier": "SDN:R27::SBE83_OPTODE",
-            "skos:note": {
-                "@language": "en",
-                "@value": "accepted"
-            },
-            "owl:deprecated": "false",
-            "void:inDataset": {
-                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            "@type": "skos:Concept",
+            "skos:related": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/OPTODE_DOXY/"
             },
             "skos:definition": {
                 "@language": "en",
                 "@value": "An optical dissolved oxygen sensor, manufactured by Sea-Bird Scientific and designed to be integrated into a pumped CTD system."
             },
-            "skos:related": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/OPTODE_DOXY/"
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
             },
-            "@type": "skos:Concept"
-        },
-        {
-            "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/",
-            "pav:authoredOn": "2025-08-20 09:29:53.0",
-            "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/1/"
-            },
-            "dce:identifier": "SDN:R27::DSB301-10-C85",
-            "pav:version": "1",
-            "skos:notation": "SDN:R27::DSB301-10-C85",
-            "skos:altLabel": "DSB301-10-C85",
-            "dc:date": "2025-08-20 09:29:53.0",
-            "owl:versionInfo": "1",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "Quartzdyne DSB301-10-C85 pressure sensor"
-            },
-            "dc:identifier": "SDN:R27::DSB301-10-C85",
+            "owl:deprecated": "false",
             "skos:note": {
                 "@language": "en",
                 "@value": "accepted"
             },
-            "owl:deprecated": "false",
+            "dc:identifier": "SDN:R27::SBE83_OPTODE",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Sea-Bird Scientific SBE83 oxygen optode"
+            },
+            "owl:versionInfo": "2",
+            "dc:date": "2025-11-18 12:09:41.0",
+            "skos:altLabel": "SBE83_OPTODE",
+            "skos:notation": "SDN:R27::SBE83_OPTODE",
+            "pav:version": "2",
+            "dce:identifier": "SDN:R27::SBE83_OPTODE",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE83_OPTODE/2/"
+            },
+            "pav:authoredOn": "2025-11-18 12:09:41.0"
+        },
+        {
+            "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_CTD/",
+            "pav:authoredOn": "2025-10-08 10:58:28.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_CTD/1/"
+            },
+            "dce:identifier": "SDN:R27::RBR_CTD",
+            "@type": "skos:Concept",
+            "skos:related": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_PRES/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
+                }
+            ],
+            "skos:definition": {
+                "@language": "en",
+                "@value": "A system comprising temperature, conductivity and pressure sensors, manufactured by RBR for moored applications. This cell was not optimized for use on profiling floats, and this was used in only one test deployment. The system supports both spot and continuous sampling modes, with sampling speeds configurable to up to 12 Hz. The depth rating for a standard profile is 2000 dbar, with energy consumption of approximately 700 J."
+            },
             "void:inDataset": {
                 "@id": "http://vocab.nerc.ac.uk/.well-known/void"
             },
-            "skos:definition": {
+            "owl:deprecated": "false",
+            "skos:note": {
                 "@language": "en",
-                "@value": "A thickness shear mode quartz resonator pressure sensor manufactured by Quartzdyne. Pressure range: 0 dbar - 6900 dbar; field accuracy: 0.02 % Full Scale (FS) between -40 degC and 85 degC."
+                "@value": "accepted"
             },
-            "skos:related": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_PRES/"
+            "dc:identifier": "SDN:R27::RBR_CTD",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "RBR CTD"
             },
-            "@type": "skos:Concept"
+            "owl:versionInfo": "1",
+            "dc:date": "2025-10-08 10:58:28.0",
+            "skos:altLabel": "RBR_CTD",
+            "skos:notation": "SDN:R27::RBR_CTD",
+            "pav:version": "1"
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_R10W/",
@@ -259,6 +239,43 @@
             "dc:date": "2025-08-28 11:45:52.0",
             "skos:altLabel": "OCR504_ICSW",
             "skos:notation": "SDN:R27::OCR504_ICSW"
+        },
+        {
+            "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/",
+            "pav:authoredOn": "2025-08-20 09:29:53.0",
+            "@type": "skos:Concept",
+            "skos:related": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_PRES/"
+            },
+            "skos:definition": {
+                "@language": "en",
+                "@value": "A thickness shear mode quartz resonator pressure sensor manufactured by Quartzdyne. Pressure range: 0 dbar - 6900 dbar; field accuracy: 0.02 % Full Scale (FS) between -40 degC and 85 degC."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "false",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "dc:identifier": "SDN:R27::DSB301-10-C85",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Quartzdyne DSB301-10-C85 pressure sensor"
+            },
+            "owl:versionInfo": "1",
+            "dc:date": "2025-08-20 09:29:53.0",
+            "skos:altLabel": "DSB301-10-C85",
+            "skos:notation": "SDN:R27::DSB301-10-C85",
+            "skos:broader": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/QUARTZDYNE/"
+            },
+            "pav:version": "1",
+            "dce:identifier": "SDN:R27::DSB301-10-C85",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/1/"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/QUARTZDYNE_DSB301-10-C85/",
@@ -1509,6 +1526,7 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR/1/"
             },
             "dce:identifier": "SDN:R27::RBR",
+            "pav:version": "1",
             "@type": "skos:Concept",
             "skos:related": [
                 {
@@ -1519,6 +1537,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
                 }
             ],
             "skos:definition": {
@@ -1544,8 +1565,7 @@
             "skos:notation": "SDN:R27::RBR",
             "skos:broader": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/RBR/"
-            },
-            "pav:version": "1"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO3_DEEP6K/",
@@ -1554,6 +1574,7 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO3_DEEP6K/1/"
             },
             "dce:identifier": "SDN:R27::RBR_ARGO3_DEEP6K",
+            "pav:version": "1",
             "@type": "skos:Concept",
             "skos:related": [
                 {
@@ -1564,6 +1585,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
                 }
             ],
             "skos:definition": {
@@ -1589,8 +1613,7 @@
             "skos:notation": "SDN:R27::RBR_ARGO3_DEEP6K",
             "skos:broader": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/RBR/"
-            },
-            "pav:version": "1"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_CODA_T_ODO/",
@@ -1636,6 +1659,7 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO/1/"
             },
             "dce:identifier": "SDN:R27::RBR_ARGO",
+            "pav:version": "1",
             "@type": "skos:Concept",
             "skos:related": [
                 {
@@ -1646,6 +1670,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
                 }
             ],
             "skos:definition": {
@@ -1671,8 +1698,7 @@
             "skos:notation": "SDN:R27::RBR_ARGO",
             "skos:broader": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/RBR/"
-            },
-            "pav:version": "1"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_PRES/",
@@ -1755,6 +1781,7 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO3_DEEP4K/1/"
             },
             "dce:identifier": "SDN:R27::RBR_ARGO3_DEEP4K",
+            "pav:version": "1",
             "@type": "skos:Concept",
             "skos:related": [
                 {
@@ -1765,6 +1792,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
                 }
             ],
             "skos:definition": {
@@ -1790,8 +1820,7 @@
             "skos:notation": "SDN:R27::RBR_ARGO3_DEEP4K",
             "skos:broader": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/RBR/"
-            },
-            "pav:version": "1"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO3/",
@@ -1800,6 +1829,7 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO3/1/"
             },
             "dce:identifier": "SDN:R27::RBR_ARGO3",
+            "pav:version": "1",
             "@type": "skos:Concept",
             "skos:related": [
                 {
@@ -1810,6 +1840,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
                 }
             ],
             "skos:definition": {
@@ -1835,8 +1868,7 @@
             "skos:notation": "SDN:R27::RBR_ARGO3",
             "skos:broader": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/RBR/"
-            },
-            "pav:version": "1"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/EM/",
@@ -4698,6 +4730,60 @@
             "dce:identifier": "SDN:R27::SATLANTIC_OCR507_ICSWR10W"
         },
         {
+            "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/",
+            "pav:authoredOn": "2021-08-18 14:32:12.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/1/"
+            },
+            "dce:identifier": "SDN:R27::FLOATCLOCK",
+            "pav:version": "1",
+            "skos:broader": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/NKE/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/MARTEC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/OPTIMARE/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TWR/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/WRC/"
+                }
+            ],
+            "@type": "skos:Concept",
+            "skos:related": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/FLOATCLOCK_MTIME/"
+            },
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Inboard Real Time Clock (RTC) of a float."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "false",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "dc:identifier": "SDN:R27::FLOATCLOCK",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Float clock"
+            },
+            "owl:versionInfo": "1",
+            "dc:date": "2021-08-18 14:32:12.0",
+            "skos:altLabel": "FLOATCLOCK",
+            "skos:notation": "SDN:R27::FLOATCLOCK"
+        },
+        {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE37/",
             "pav:authoredOn": "2019-10-11 14:49:00.0",
             "pav:hasCurrentVersion": {
@@ -6412,22 +6498,22 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/UNKNOWN/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
-                },
-                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RAFOS/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE83_OPTODE/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/"
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_CTD/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_R10W/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_ICSW/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/QUARTZDYNE_DSB301-10-C85/"
@@ -6679,6 +6765,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR507_ICSWR10W/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE61_V5.0.3/"
                 },
                 {
@@ -6822,8 +6911,8 @@
             "dc:description": "Terms listing models of sensors mounted on Argo floats. Note: avoid using the manufacturer name and sensor firmware version in new entries when possible. Argo netCDF variable SENSOR_MODEL is populated by R27 altLabel.",
             "dc:title": "Argo sensor models",
             "skos:prefLabel": "Argo sensor models",
-            "owl:versionInfo": "21",
-            "dc:date": "2025-09-03 03:00:00.0",
+            "owl:versionInfo": "23",
+            "dc:date": "2025-11-19 02:00:00.0",
             "skos:altLabel": "SENSOR_MODEL",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "SENSOR_MODEL",
@@ -6831,7 +6920,7 @@
             "grg:RE_RegisterOwner": "Argo Data Management Team",
             "grg:RE_RegisterManager": "British Oceanographic Data Centre",
             "rdfs:seeAlso": {
-                "@id": "https://github.com/nvs-vocabs/R27"
+                "@id": "https://github.com/OneArgo/ArgoVocabs"
             }
         }
     ],
