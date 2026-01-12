@@ -684,8 +684,8 @@ public class ArgoConfigTechParam {
 
 		if (!matcher.find()) {
 			// ..no <*> structures -- just a straight fixed name
-
 			paramList.add(param);
+
 			log.debug("add param: '{}'", param);
 
 		} else {
@@ -768,6 +768,10 @@ public class ArgoConfigTechParam {
 		techParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
 		techParamCodeList = new LinkedHashSet<String>(250);
 
+		techParamList_DEP = new LinkedHashSet<String>(250);
+		techParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
+		techParamCodeList_DEP = new LinkedHashSet<String>(250);
+
 		// ..pattern to recognize/replace templates
 		Pattern pTemplate = Pattern.compile("<([^>]+?)>");
 
@@ -779,6 +783,8 @@ public class ArgoConfigTechParam {
 						techParamEntry.getPrefLabel());
 			} else {
 				// it is a deprecated tech param
+				System.out.println("deprecated");
+
 				parseTechParamName(techParamList_DEP, techParamCodeList_DEP, techParamRegex_DEP, "NVS R14 table",
 						pTemplate, techParamEntry.getPrefLabel());
 			}
@@ -812,7 +818,7 @@ public class ArgoConfigTechParam {
 //		String parameterLongName = column[1];
 
 		// String parameterCode = "PLCAHOLDER";
-		String parameterLongName = "PLCAHOLDER";
+		String parameterLongName = "PLACEHOLDER";
 
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
@@ -992,7 +998,6 @@ public class ArgoConfigTechParam {
 			// Build additional paramList using regex and referenceTable and add it to the
 			// paramList
 			List<String> paramListFromRegex = generateParamListFromPattern(pRegex.pattern());
-
 			paramList.addAll(paramListFromRegex);
 
 		}
