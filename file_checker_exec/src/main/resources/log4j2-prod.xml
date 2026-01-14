@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="off">
+<Configuration status="warn">
 
   <Properties>
-    <Property name="logfile">${sys:logfile.name:-all_LOG}</Property>
-    <Property name="suffix">${sys:log_suffix:-}</Property>
+    <Property name="logfile">${__sys__:logfile.name:-FileChecker_all_LOG}</Property>
+    <Property name="suffix">${__sys__:log_suffix:-}</Property>
   </Properties>
 
   <Appenders>
@@ -12,19 +12,22 @@
     </Console>
 
     <RollingFile name="File" 
-                 fileName="${logfile}${suffix}" 
-                 filePattern="${logfile}${suffix}-%i"
+                 fileName="${logfile}${suffix}.log" 
+                 filePattern="${logfile}${suffix}-%i.log"
                  createOnDemand="true"
-                 immediateFlush="false" append="false">
+                 immediateFlush="true" 
+                 append="true">
       <PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
       <Policies>
-        <SizeBasedTriggeringPolicy size="250 MB"/>
+        <SizeBasedTriggeringPolicy size="1 MB"/>
       </Policies>
+      <DefaultRolloverStrategy max="1"/>
     </RollingFile>
   </Appenders>
 
   <Loggers>
-    <Root level="off">
+    <Root level="warn">
+      <AppenderRef ref="Console"/>
       <AppenderRef ref="File"/>
     </Root>
   </Loggers>

@@ -1491,6 +1491,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			for (int k = 0; k < prm.length; k++) {
 				// if (! ArgoDataFile.is_99_999_FillValue(prm[k]) && k > maxLevelUsed)
 				// maxLevelUsed = k;
+				// =================================
+				// CHECK_0064_PROF & CHECK_0065_PROF
+				// =================================
 				if (Float.isNaN(prm[k])) {
 					nan++;
 				}
@@ -1827,8 +1830,8 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				log.debug("mode = '{}'", mode);
 
 				if (mode == 'R') {
-					paramErr = checkParamAdjusted_When_DataModeIsR_CHECK_PROFILE_0021(prm_adj, prm_adj_err, prm_adj_qc,
-							fValue, mode, varName, profNum, prm);
+					paramErr = checkParamAdjusted_When_DataModeIsR(prm_adj, prm_adj_err, prm_adj_qc, fValue, mode,
+							varName, profNum, prm);
 
 					// ..... do checks for A and D files ........
 				} else {
@@ -1861,6 +1864,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					 */
 
 					for (int k = 0; k < prm_adj.length; k++) {
+						// =================================
+						// CHECK_0064_PROF & CHECK_0065_PROF
+						// =================================
 						if (Float.isNaN(prm_adj[k])) {
 							nan++;
 						}
@@ -1875,6 +1881,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							infErr++;
 						}
 
+						// ===============
+						// CHECK_0077_PROF
+						// ===============
 						// ..check the per level QC flag
 						SkosConcept qcFlagsTableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE
 								.getConceptMembersByAltLabelMap().get(String.valueOf(prm_adj_qc[k]));
@@ -1891,6 +1900,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							}
 						}
 
+						// =================================
+						// CHECK_0078_PROF & CHECK_0079_PROF
+						// =================================
 						// ..check special case of adj_qc = ' '
 						if (prm_qc[k] == ' ' || prm_adj_qc[k] == ' ') {
 							// ..one is missing, both must be
@@ -2155,7 +2167,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	}
 
 	/**
-	 * CHECK_PROFILE_0011 : Check when DATA_MODE = ‘R’ then <PARAM>_ADJUSTED and
+	 * CHECK_0062_PROF : Check when DATA_MODE = ‘R’ then <PARAM>_ADJUSTED and
 	 * <PARAM>_ADJUSTED_QC are All FillValue (including *_QC and *_ERROR). ERROR if
 	 * not tge
 	 * 
@@ -2171,8 +2183,8 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	 * 
 	 * @return : True if an error has been encountered
 	 */
-	private boolean checkParamAdjusted_When_DataModeIsR_CHECK_PROFILE_0021(float[] prm_adj, float[] prm_adj_err,
-			char[] prm_adj_qc, float fValue, char mode, String varName, int profNum, float[] prm) {
+	private boolean checkParamAdjusted_When_DataModeIsR(float[] prm_adj, float[] prm_adj_err, char[] prm_adj_qc,
+			float fValue, char mode, String varName, int profNum, float[] prm) {
 		int errNotMiss = 0; // ..count of ERROR not missing
 		int missNot = 0; // ..count of param_adj not missing
 		int qcNotMiss = 0; // ..count of ADJ_QC not missing

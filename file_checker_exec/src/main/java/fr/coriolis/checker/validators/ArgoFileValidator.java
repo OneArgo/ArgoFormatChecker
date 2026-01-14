@@ -342,7 +342,7 @@ public class ArgoFileValidator {
 							log.warn("regex match (WARN): attribute '{}:{} = '{}' matches '{}'", varName, attrName,
 									dataAttrValue, regex.pattern);
 						} else {
-							log.warn("regex match (NO WARN): attribute '{}:{} = '{}' matches '{}'", varName, attrName,
+							log.info("regex match (NO WARN): attribute '{}:{} = '{}' matches '{}'", varName, attrName,
 									dataAttrValue, regex.pattern);
 						}
 					}

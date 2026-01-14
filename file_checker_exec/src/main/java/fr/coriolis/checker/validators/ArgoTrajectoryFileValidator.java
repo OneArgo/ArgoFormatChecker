@@ -1996,11 +1996,18 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker invQC = new ErrorTracker();
 			ErrorTracker missQC = new ErrorTracker();
 			ErrorTracker nan = new ErrorTracker();
+			ErrorTracker inf = new ErrorTracker();
 			ErrorTracker notMiss = new ErrorTracker();
 
 			for (int n = 0; n < nMeasure; n++) {
-				if (prm[n] == Float.NaN) {
+				// =================================
+				// CHECK_0064_PROF & CHECK_0065_PROF
+				// =================================
+				if (Float.isNaN(prm[n])) {
 					nan.increment(n);
+				}
+				if (Float.isInfinite(prm[n])) {
+					inf.increment(n);
 				}
 
 				if (prm_qc != null) {
@@ -2205,6 +2212,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker missAdj = new ErrorTracker();
 			nan.reset();
 			ErrorTracker nanErr = new ErrorTracker();
+			ErrorTracker infErr = new ErrorTracker();
 			ErrorTracker notMissAdj = new ErrorTracker();
 			ErrorTracker notMissAdjQc = new ErrorTracker();
 			ErrorTracker notMissErr = new ErrorTracker();
@@ -2214,18 +2222,28 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker rQcNotMiss = new ErrorTracker();
 
 			for (int n = 0; n < nMeasure; n++) {
-				if (prm_adj[n] == Float.NaN) {
+				// =================================
+				// CHECK_0064_PROF & CHECK_0065_PROF
+				// =================================
+				if (Float.isNaN(prm_adj[n])) {
 					nan.increment(n);
 				}
-
-				if (prm_adj_err[n] == Float.NaN) {
+				if (Float.isNaN(prm_adj_err[n])) {
 					nanErr.increment(n);
+				}
+				if (Float.isInfinite(prm_adj[n])) {
+					inf.increment(n);
+				}
+				if (Float.isInfinite(prm_adj_err[n])) {
+					infErr.increment(n);
 				}
 
 				if (mode[n] == 'R') {
 
 					// ........... r-mode ............
-
+					// ===============
+					// CHECK_0062_TRAJ
+					// ===============
 					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 						rNotMiss.increment(n);
 					}
@@ -2242,6 +2260,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 					// ............ a-mode or d-mode ...........
 
+					// ===============
+					// CHECK_0077_TRAJ
+					// ===============
 					// ..check the QC flag
 
 					if (prm_adj_qc[n] != ' ') {
@@ -2259,6 +2280,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						}
 					}
 
+					// =================================
+					// CHECK_0078_TRAJ & CHECK_0079_TRAJ
+					// =================================
 					// ..check special case of adj_qc = ' '
 					if (prm_qc[n] == ' ' || prm_adj_qc[n] == ' ') {
 						// ..one is "not measured", both must be
@@ -2382,6 +2406,12 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			nanErr.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_ERROR: NaN at ", "measurements");
+
+			inf.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
+					varName + ": Inf at ", "measurements");
+
+			infErr.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
+					varName + "_ERROR: Inf at ", "measurements");
 
 			notMissAdj.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + ": Not FillValue where PARAM is FillValue at", "measurements");

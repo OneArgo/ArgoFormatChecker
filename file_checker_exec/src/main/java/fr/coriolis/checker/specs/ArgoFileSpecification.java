@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.core.ArgoDataFile;
+import fr.coriolis.checker.exceptions.R03ParameterException;
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.tables.SkosConcept;
 import fr.coriolis.checker.utils.NvsDefinitionParser;
@@ -2032,99 +2033,113 @@ public class ArgoFileSpecification {
 		// Open NVS table R03 :
 		for (SkosConcept physParamEntry : ArgoNVSReferenceTable.PARAMETER_TABLE.getConceptMembersByAltLabelMap()
 				.values()) {
-			// parse attributes from definition field :
-			Map<String, String> physParamAttributes = NvsDefinitionParser.parseAttributes("Local_Attributes",
-					physParamEntry.getDefinition());
-			Map<String, String> physParamProperties = NvsDefinitionParser.parseAttributes("Properties",
-					physParamEntry.getDefinition());
 
-			String prm = physParamEntry.getAltLabel().trim(); // ..parameter name - NVS altLabel
-			boolean isDeprecated = physParamEntry.isDeprecated();
-			// physical parameter's attributes from definition field :
-			String prmLName = getOrEmptyStringFromMap(physParamAttributes, "long_name");
-			String prmSName = getOrEmptyStringFromMap(physParamAttributes, "standard_name");
-			String prmUnits = getOrEmptyStringFromMap(physParamAttributes, "units");
-			String prmVmin = getOrEmptyStringFromMap(physParamAttributes, "valid_min");
-			String prmVmax = getOrEmptyStringFromMap(physParamAttributes, "valid_max");
-			String prmFill = getOrEmptyStringFromMap(physParamAttributes, "fill_value");
-			// physical parameter's properties from definition field :
-			String prmType = getOrEmptyStringFromMap(physParamProperties, "data_type");
-			String[] extraDims = getExtraDimensionsFromParametersAttributes(
-					getOrEmptyStringFromMap(physParamAttributes, "extra_dim"));
-			String prmCategory = getOrEmptyStringFromMap(physParamProperties, "category");
+			try {
+				// parse attributes from definition field :
+				Map<String, String> physParamAttributes = NvsDefinitionParser.parseAttributes("Local_Attributes",
+						physParamEntry.getDefinition());
+				Map<String, String> physParamProperties = NvsDefinitionParser.parseAttributes("Properties",
+						physParamEntry.getDefinition());
 
-			// deal with empty or "-" attributes (only for >3.0 version)
-			if (isPost3_0) {
-				prmSName = replaceAttributeIfNotAllowed(prmSName);
-				prmVmin = replaceAttributeIfNotAllowed(prmVmin);
-				prmVmax = replaceAttributeIfNotAllowed(prmVmax);
-				prmLName = replaceAttributeIfToBeIgnored(prmLName);
-			}
+				String prm = physParamEntry.getAltLabel().trim(); // ..parameter name - NVS altLabel
+				boolean isDeprecated = physParamEntry.isDeprecated();
+				// physical parameter's attributes from definition field :
+				String prmLName = getOrEmptyStringFromMap(physParamAttributes, "long_name");
+				String prmSName = getOrEmptyStringFromMap(physParamAttributes, "standard_name");
+				String prmUnits = getOrEmptyStringFromMap(physParamAttributes, "units");
+				String prmVmin = getOrEmptyStringFromMap(physParamAttributes, "valid_min");
+				String prmVmax = getOrEmptyStringFromMap(physParamAttributes, "valid_max");
+				String prmFill = getOrEmptyStringFromMap(physParamAttributes, "fill_value");
+				// physical parameter's properties from definition field :
+				String prmType = getOrEmptyStringFromMap(physParamProperties, "data_type");
+				String[] extraDims = getExtraDimensionsFromParametersAttributes(
+						getOrEmptyStringFromMap(physParamAttributes, "extra_dim"));
+				String prmCategory = getOrEmptyStringFromMap(physParamProperties, "category");
 
-			log.debug("parsed: {}|{}|{}|{}|{}|deprecated : {}|{}|", prm, prmType, prmLName, prmSName, prmUnits, prmVmin,
-					prmVmax, isDeprecated, prmFill);
-
-			// For a given physParam, we build a virutal list of allowed physParam's names
-			// to take into account duplicate sensor.
-			// ex : TEMP, TEMP_1, TEMP_2, TEMP_3,...
-			String[] prmList = buildParamListForDuplicatePhysicalParameters(prm, NUMBER_ALLOWED_DUPLICATE_SENSOR);
-
-			// ...LIST-ONLY MODE: grab the param name and continue with the next
-			// physParamEntry
-			if (listOnly) {
-				for (String prmName : prmList) {
-					if (!physParamNameList.contains(prmName)) {// ..new param name
-						physParamNameList.add(prmName);
-						if (isDeprecated) {
-							depParamNameList.add(prmName);
-						}
-
-						physParamNameList.add(prmName + "_STD");
-						physParamNameList.add(prmName + "_MED");
-
-					} else { // ..duplicate name is a no, no
-						log.error("Duplicate param name R03 table :" + "'" + prm + "'");
-						throw new IOException("Duplicate param name in R03 table :" + "'" + prm + "'");
-					}
+				// deal with empty or "-" attributes (only for >3.0 version)
+				if (isPost3_0) {
+					prmSName = replaceAttributeIfNotAllowed(prmSName);
+					prmVmin = replaceAttributeIfNotAllowed(prmVmin);
+					prmVmax = replaceAttributeIfNotAllowed(prmVmax);
+					prmLName = replaceAttributeIfToBeIgnored(prmLName);
 				}
-				continue;
+
+				log.debug("parsed: {}|{}|{}|{}|{}|deprecated : {}|{}|", prm, prmType, prmLName, prmSName, prmUnits,
+						prmVmin, prmVmax, isDeprecated, prmFill);
+
+				// For a given physParam, we build a virutal list of allowed physParam's names
+				// to take into account duplicate sensor.
+				// ex : TEMP, TEMP_1, TEMP_2, TEMP_3,...
+				String[] prmList = buildParamListForDuplicatePhysicalParameters(prm, NUMBER_ALLOWED_DUPLICATE_SENSOR);
+
+				// ...LIST-ONLY MODE: grab the param name and continue with the next
+				// physParamEntry
+				if (listOnly) {
+					for (String prmName : prmList) {
+						if (!physParamNameList.contains(prmName)) {// ..new param name
+							physParamNameList.add(prmName);
+							if (isDeprecated) {
+								depParamNameList.add(prmName);
+							}
+
+							physParamNameList.add(prmName + "_STD");
+							physParamNameList.add(prmName + "_MED");
+
+						} else { // ..duplicate name is a no, no
+							throw new R03ParameterException("Duplicate param name (R03 table) :" + "'" + prm
+									+ "'. This parameter will be ignored");
+							// v3.0.0 : not a fail checker failure, just ignore the parameter with a warn
+							// log
+							// throw new IOException("Duplicate param name in R03 table :" + "'" + prm +
+							// "'");
+						}
+					}
+					continue;
+				}
+
+				// check if there is an "extra dimension"
+				// at least for now, this is encoded in the data type
+				boolean prmExtra = extraDims != null && extraDims.length > 0;
+
+				// ..check the data type
+				if (!prmType.equals("double") && !prmType.equals("float") && !prmType.equals("short")) {
+					throw new R03ParameterException("Invalid data type = '" + prmType + "' for parameter " + prm
+							+ " in R03 table. This parameter will be ignored in specifications definition.");
+
+					// v3.0.0 : not a file checker failure, just ignore the parameter with a warn
+					// log
+//				throw new IOException("Invalid data type '" + prmType + "' (NVS R03, parameter : " + prm
+//						+ "). Parameter will be ignored.");
+				}
+				DataType ncDataType = DataType.getType(prmType);
+
+				// symbolic NETCDF fill values replacement
+				prmFill = checkAndRepacleWithNcFillTypes(prm, prmFill);
+
+				// check the PrmCat -- "c" = core, "b" = bio, "ic/ib" = intermediate -> core,
+				// bio
+				ParameterCategoryResult categoryAnalysisResults = analyzeParameterCategory(prmCategory, prm, fileType,
+						isCoreProf, isBioProf, isTraj, isOldCoreTraj, isOldBioTraj);
+				boolean keep = categoryAnalysisResults.keep;
+				boolean opt = categoryAnalysisResults.opt;
+				boolean CORE = categoryAnalysisResults.CORE;
+				boolean BIO = categoryAnalysisResults.BIO;
+
+				// BUILD <PARAM> variables. For each <param> entry, automatically make <param>*
+				// variables too
+
+				for (String prmName : prmList) {
+
+					buildParamVariables(fileType, version, prmName, dimPQc, dimParam, errComment, errLongName, presAxis,
+							pres_adjAxis, prm, isDeprecated, prmLName, prmSName, prmUnits, prmVmin, prmVmax, prmFill,
+							prmList, prmExtra, ncDataType, keep, opt, CORE, BIO);
+					opt = true; // After the first iteration in prmList, opt is put to true as all virtuals _<N>
+								// variables for duplicate sensor are optionnals.
+
+				} // end for (prmList)
+			} catch (R03ParameterException e) {
+				log.warn(e.getMessage());
 			}
-
-			// check if there is an "extra dimension"
-			// at least for now, this is encoded in the data type
-			boolean prmExtra = extraDims != null && extraDims.length > 0;
-
-			// ..check the data type
-			if (!prmType.equals("double") && !prmType.equals("float") && !prmType.equals("short")) {
-				log.error("Invalid data type = '" + prmType + "'");
-				throw new IOException("Invalid data type '" + prmType + "' (NVS R03, parameter : " + prm + ")");
-			}
-			DataType ncDataType = DataType.getType(prmType);
-
-			// symbolic NETCDF fill values replacement
-			prmFill = checkAndRepacleWithNcFillTypes(prm, prmFill);
-
-			// check the PrmCat -- "c" = core, "b" = bio, "ic/ib" = intermediate -> core,
-			// bio
-			ParameterCategoryResult categoryAnalysisResults = analyzeParameterCategory(prmCategory, prm, fileType,
-					isCoreProf, isBioProf, isTraj, isOldCoreTraj, isOldBioTraj);
-			boolean keep = categoryAnalysisResults.keep;
-			boolean opt = categoryAnalysisResults.opt;
-			boolean CORE = categoryAnalysisResults.CORE;
-			boolean BIO = categoryAnalysisResults.BIO;
-
-			// BUILD <PARAM> variables. For each <param> entry, automatically make <param>*
-			// variables too
-			for (String prmName : prmList) {
-
-				buildParamVariables(fileType, version, prmName, dimPQc, dimParam, errComment, errLongName, presAxis,
-						pres_adjAxis, prm, isDeprecated, prmLName, prmSName, prmUnits, prmVmin, prmVmax, prmFill,
-						prmList, prmExtra, ncDataType, keep, opt, CORE, BIO);
-				opt = true; // After the first iteration in prmList, opt is put to true as all virtuals _<N>
-							// variables for duplicate sensor are optionnals.
-
-			} // end for (prmList)
-
 		}
 		log.debug(".....parseParamFile: end.....");
 		return true;
@@ -2163,12 +2178,13 @@ public class ArgoFileSpecification {
 	 * @param CORE
 	 * @param BIO
 	 * @throws IOException
+	 * @throws R03ParameterException
 	 */
 	private void buildParamVariables(ArgoDataFile.FileType fileType, String version, String prmName,
 			ArgoDimension[] dimPQc, ArgoDimension[] dimParam, String errComment, String errLongName, String presAxis,
 			String pres_adjAxis, String prm, boolean isDeprecated, String prmLName, String prmSName, String prmUnits,
 			String prmVmin, String prmVmax, String prmFill, String[] prmList, boolean prmExtra, DataType ncDataType,
-			boolean keep, boolean opt, boolean CORE, boolean BIO) throws IOException {
+			boolean keep, boolean opt, boolean CORE, boolean BIO) throws IOException, R03ParameterException {
 
 		if (keep) {
 			// build the relevant variable entries
@@ -2865,7 +2881,7 @@ public class ArgoFileSpecification {
 		}
 	}
 
-	private void addToPhysParamNameLists(String prmName, boolean isDeprecated) throws IOException {
+	private void addToPhysParamNameLists(String prmName, boolean isDeprecated) throws R03ParameterException {
 		if (!physParamNameList.contains(prmName)) {// ..new param name
 			physParamNameList.add(prmName);
 			if (isDeprecated) {
@@ -2873,8 +2889,7 @@ public class ArgoFileSpecification {
 			}
 
 		} else { // ..duplicate name is a no, no
-			log.error("Duplicate param name (line {}) '{}'", "NVS R03", prmName);
-			throw new IOException("Duplicate param name in NVS R03 table (parameter " + prmName + ")");
+			throw new R03ParameterException("Duplicate param name (NVS R03) 'prmName'");
 		}
 	}
 
@@ -2912,15 +2927,16 @@ public class ArgoFileSpecification {
 	 *                NVS table definition's field.
 	 * @return
 	 * @throws IOException
+	 * @throws R03ParameterException
 	 */
-	private String checkAndRepacleWithNcFillTypes(String prm, String prmFill) throws IOException {
+	private String checkAndRepacleWithNcFillTypes(String prm, String prmFill) throws R03ParameterException {
 		if (prmFill.startsWith("NC_FILL_")) {
 			String tmp = prmFill;
 			prmFill = NC_FILL_TYPES.get(tmp);
 
 			if (prmFill == null) {
-				log.debug("Invalid NC_FILL_: '" + tmp + "' (NVS R03, parameter : " + prm + ")");
-				throw new IOException("Invalid NC_FILL_: '" + tmp + "' (NVS R03, parameter : " + prm + ")");
+				throw new R03ParameterException("Invalid NC_FILL_: '" + prmFill + "' (NVS R03, parameter : " + prm
+						+ "). This parameter will be ignored in specification definition.");
 			}
 
 			log.debug("Changed fill-value from {} to {}", tmp, prmFill);
@@ -2943,17 +2959,18 @@ public class ArgoFileSpecification {
 	 * @param isOldCoreTraj True if old core trajectory file
 	 * @param isOldBioTraj  True if old bio trajectory file
 	 * @return ParameterCategoryResult containing keep, opt, CORE, BIO flags
-	 * @throws IOException if category code is invalid
+	 * @throws IOException           if category code is invalid
+	 * @throws R03ParameterException
 	 */
 	private ParameterCategoryResult analyzeParameterCategory(String prmCategory, String prm,
 			ArgoDataFile.FileType fileType, boolean isCoreProf, boolean isBioProf, boolean isTraj,
-			boolean isOldCoreTraj, boolean isOldBioTraj) throws IOException {
+			boolean isOldCoreTraj, boolean isOldBioTraj) throws R03ParameterException {
 
 		// Validate category
 		if (!(prmCategory.equals("c") || prmCategory.equals("b") || prmCategory.equals("ic")
 				|| prmCategory.equals("ib"))) {
-			log.debug("Invalid category '" + prmCategory + "' (NVS R03, parameter : " + prm + ")");
-			throw new IOException("Invalid category '" + prmCategory + "' (NVS R03, parameter : " + prm + ")");
+			throw new R03ParameterException("Invalid category '" + prmCategory + "' (NVS R03, parameter : " + prm
+					+ "). This parameter will be ignored in specification definition.");
 		}
 
 		boolean keep = false;
@@ -3029,6 +3046,7 @@ public class ArgoFileSpecification {
 			this.opt = opt;
 			this.CORE = CORE;
 			this.BIO = BIO;
+
 		}
 	}
 
