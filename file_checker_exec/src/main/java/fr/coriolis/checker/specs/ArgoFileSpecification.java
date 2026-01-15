@@ -1884,8 +1884,8 @@ public class ArgoFileSpecification {
 	/**
 	 * Parses the list of physical parameters of the specification
 	 *
-	 * Reads two files: prmFileName - the primary list of physcial parameter names
-	 * prmFileNameAux - contains "auxilliary" setting for certain parameters
+	 * Reads two files: R03.jsonld - the primary list of physcial parameter names
+	 * and prmFileNameAux - contains "auxilliary" setting for certain parameters
 	 *
 	 * @param fileType The allowed physical parameters are dependent on the file
 	 *                 type.
@@ -1930,70 +1930,7 @@ public class ArgoFileSpecification {
 		}
 
 		// ..................get the Auxilliary (special) settings....................
-		// ..initialize special settings
-
-		String errComment = null;
-		String errLongName = null;
-		String presAxis = new String("Z");
-		String pres_adjAxis = new String("Z");
-
-		// ..open the file
-		try (InputStream in = SpecIO.getInstance().open(prmFileNameAux);
-				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
-
-			// ..parse the file
-			log.info("parsing \"auxilliary parameter\" file '" + prmFileNameAux + "'");
-
-			// ..read through the file
-			String line;
-			while ((line = fileReader.readLine()) != null) {
-				log.debug("line: '" + line + "'");
-
-				if (pBlankOrComment.matcher(line).matches()) {
-					continue;
-				}
-
-				// .....parse the line into individual entries.....
-				String st[] = line.split("\\|");
-
-				// ..it's not a valid parameter definition line
-				// ..check for special settings
-
-				if (st[0].trim().equals("PRES:axis")) {
-					presAxis = st[1].trim();
-					log.debug("pres:axis line : '" + presAxis + "'");
-					continue;
-
-				} else if (st[0].trim().equals("PRES_ADJUSTED:axis")) {
-					pres_adjAxis = st[1].trim();
-					log.debug("pres_adjusted:axis line : '" + pres_adjAxis + "'");
-					continue;
-
-				} else if (st[0].trim().equals("ADJUSTED_ERROR:comment")) {
-					errComment = st[1].trim();
-					log.debug("adjusted_error:comment line : '" + errComment + "'");
-					continue;
-
-				} else if (st[0].trim().equals("ADJUSTED_ERROR:long_name")) {
-					errLongName = st[1].trim();
-					log.debug("adjusted_error:long_name line : '" + errLongName + "'");
-					continue;
-
-				} else {
-					fileReader.close();
-					log.error("Invalid line in '" + prmFileName + "': '" + line + "'");
-					throw new IOException("Invalid line in '" + prmFileName + "': '" + line + "'");
-				}
-			} // ..end while read(auxilliary param file)
-
-			fileReader.close();
-		} catch (FileNotFoundException e) {
-			log.error("prmFileName '" + prmFileNameAux + "' does not exist");
-			throw e;
-		} catch (IOException e) {
-			log.error("prmFileName '" + prmFileNameAux + "' cannot be read");
-			throw e;
-		}
+		AuxilliarySettings auxilliarySettings = parseAuxilliarySettings();
 
 		// ........................read the MAIN parameter file.......................
 
@@ -2130,9 +2067,11 @@ public class ArgoFileSpecification {
 
 				for (String prmName : prmList) {
 
-					buildParamVariables(fileType, version, prmName, dimPQc, dimParam, errComment, errLongName, presAxis,
-							pres_adjAxis, prm, isDeprecated, prmLName, prmSName, prmUnits, prmVmin, prmVmax, prmFill,
-							prmList, prmExtra, ncDataType, keep, opt, CORE, BIO);
+					buildParamVariables(fileType, version, prmName, dimPQc, dimParam,
+							auxilliarySettings.getErrComment(), auxilliarySettings.getErrLongName(),
+							auxilliarySettings.getPresAxis(), auxilliarySettings.getPresAdjAxis(), prm, isDeprecated,
+							prmLName, prmSName, prmUnits, prmVmin, prmVmax, prmFill, prmList, prmExtra, ncDataType,
+							keep, opt, CORE, BIO);
 					opt = true; // After the first iteration in prmList, opt is put to true as all virtuals _<N>
 								// variables for duplicate sensor are optionnals.
 
@@ -2145,6 +2084,113 @@ public class ArgoFileSpecification {
 		return true;
 
 	} // end parseParamFile
+
+	/**
+	 * Parses the auxiliary settings file and extracts specification attributes. For
+	 * ADJUSED_ERROR, there is special attributes (comment or long_bname) that are
+	 * not defined in physical parameters table (R03). THis file also specify a
+	 * special value for attribute axis for PRES parameter. This file is versioned
+	 * and must but updated with each new version of specification.
+	 * 
+	 * 
+	 * <p>
+	 * This method reads a pipe-delimited configuration file containing auxiliary
+	 * settings for pressure axis and adjusted error parameters. Blank lines and
+	 * comments are ignored during parsing.
+	 * </p>
+	 * 
+	 * <p>
+	 * The file format expects lines in the following format: {@code KEY|VALUE}
+	 * </p>
+	 * 
+	 * <p>
+	 * Supported keys are:
+	 * </p>
+	 * <ul>
+	 * <li>{@code PRES:axis} - Pressure axis identifier</li>
+	 * <li>{@code PRES_ADJUSTED:axis} - Adjusted pressure axis identifier</li>
+	 * <li>{@code ADJUSTED_ERROR:comment} - Comment for adjusted error</li>
+	 * <li>{@code ADJUSTED_ERROR:long_name} - Long name for adjusted error</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Default values for {@code presAxis} and {@code presAdjAxis} are set to "Z" if
+	 * not specified in the file.
+	 * </p>
+	 * 
+	 * @return an {@link AuxilliarySettings} object populated with the parsed values
+	 * 
+	 * @throws FileNotFoundException if the auxiliary settings file does not exist
+	 * @throws IOException           if the file cannot be read, contains malformed
+	 *                               lines, or contains unrecognized keys
+	 * 
+	 * @see AuxilliarySettings
+	 */
+	private AuxilliarySettings parseAuxilliarySettings() throws IOException {
+		// ..initialize special settings
+		AuxilliarySettings auxilliarySettings = new AuxilliarySettings();
+
+		// ..open the file
+		try (InputStream in = SpecIO.getInstance().open(prmFileNameAux);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+			// ..parse the file
+			log.info("parsing \"auxilliary parameter\" file '" + prmFileNameAux + "'");
+
+			// ..read through the file
+			String line;
+			while ((line = fileReader.readLine()) != null) {
+				log.debug("line: '" + line + "'");
+
+				if (pBlankOrComment.matcher(line).matches()) {
+					continue;
+				}
+
+				// .....parse the line into individual entries.....
+				String parts[] = line.split("\\|");
+				if (parts.length < 2) {
+					// ..it's not a valid parameter definition line
+					throw new IOException("Malformed line in '" + prmFileNameAux + "': '" + line + "'");
+				}
+
+				String key = parts[0].trim();
+				String value = parts[1].trim();
+
+				// ..check for special settings
+				switch (key) {
+				case "PRES:axis":
+					auxilliarySettings.setPresAxis(value);
+					log.debug("pres:axis line : '" + value + "'");
+					break;
+				case "PRES_ADJUSTED:axis":
+					auxilliarySettings.setPresAdjAxis(value);
+					log.debug("pres_adjusted:axis line : '" + value + "'");
+					break;
+				case "ADJUSTED_ERROR:comment":
+					auxilliarySettings.setErrComment(value);
+					log.debug("adjusted_error:comment line : '" + value + "'");
+					break;
+				case "ADJUSTED_ERROR:long_name":
+					auxilliarySettings.setErrLongName(value);
+					log.debug("adjusted_error:long_name line : '" + value + "'");
+					break;
+				default:
+					log.error("Invalid line in '" + prmFileNameAux + "': '" + line + "'");
+					throw new IOException("Invalid line in '" + prmFileNameAux + "': '" + line + "'");
+				}
+
+			} // ..end while read(auxilliary param file)
+
+		} catch (FileNotFoundException e) {
+			log.error("prmFileName '" + prmFileNameAux + "' does not exist");
+			throw e;
+		} catch (IOException e) {
+			log.error("prmFileName '" + prmFileNameAux + "' cannot be read");
+			throw e;
+		}
+
+		return auxilliarySettings;
+	}
 
 	/**
 	 * For each parameter in R03 table and the related <PARAM>_<N> (for duplicate
