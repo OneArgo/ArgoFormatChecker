@@ -363,32 +363,65 @@ public class ArgoFileValidator {
 	 */
 	private boolean checkSpecialTechParamVarAttributeValue(Variable dataVar, String varName, Attribute dataAttr,
 			String attrName, ArgoAttribute specAttr, ArgoAttribute.AttrHandling specialHandling) {
+		boolean result = true;
 		if (arFile.getFileSpec().ConfigTech != null && arFile.getFileSpec().ConfigTech.findTechParam(varName) != null) {
 			// this variable is TECH_PARAM variable, check its attribut with list of units
 			// and long_name.
 			// dataAtt type already check in checkVarAttributeValue
 			String dataAttrValue = dataAttr.getStringValue();
-			if (attrName.equals("units") && !arFile.getFileSpec().ConfigTech.isConfigTechUnit(dataAttrValue)
-					&& !arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(dataAttrValue)) {
-				// dataAtt type already check in checkVarAttributeValue
-				// units not found in reference table !
-				validationResult.addError("attribute: " + varName + ":" + attrName + ": Definitions differ "
-						+ "\n\tSpecification = See argo-tech_units-spec units list" + "\n\tData File     = '"
-						+ dataAttrValue + "'");
-
+			// check units
+			if (attrName.equals("units")) {
+				result = checkTechParamUnitsAttribute(varName, attrName, dataAttrValue);
 			}
-			List<String> authorizedLongName = arFile.getFileSpec().ConfigTech.getParamAuthorizedLongName().get(varName);
-			if (attrName.equals("long_name") && authorizedLongName != null
-					&& !authorizedLongName.contains(dataAttrValue)) {
-
-				String specValueInErrorReport = authorizedLongName.size() == 1 ? "'" + authorizedLongName.get(0) + "'"
-						: "Multiple possibilities; see argo-tech_names-spec list, definition column";
-
-				validationResult.addError(
-						String.format("attribute: %s:%s: Definitions differ\n\tSpecification = %s\n\tData File = '%s'",
-								varName, attrName, specValueInErrorReport, dataAttrValue));
+			// special case for long_name : should be varName_units
+			if (attrName.equals("long_name")) {
+				result = checkTechParamLongNameAttribute(dataVar, varName, attrName, dataAttrValue);
 			}
+			// List<String> authorizedLongName =
+			// arFile.getFileSpec().ConfigTech.getParamAuthorizedLongName().get(varName);
+//			if (attrName.equals("long_name") && authorizedLongName != null
+//					&& !authorizedLongName.contains(dataAttrValue)) {
+//
+//				String specValueInErrorReport = authorizedLongName.size() == 1 ? "'" + authorizedLongName.get(0) + "'"
+//						: "Multiple possibilities; see argo-tech_names-spec list, definition column";
+//
+//				validationResult.addError(
+//						String.format("attribute: %s:%s: Definitions differ\n\tSpecification = %s\n\tData File = '%s'",
+//								varName, attrName, specValueInErrorReport, dataAttrValue));
+//			}
 
+		}
+
+		return result;
+	}
+
+	private boolean checkTechParamUnitsAttribute(String varName, String attrName, String dataAttrValue) {
+		if (!arFile.getFileSpec().ConfigTech.isConfigTechUnit(dataAttrValue)
+				&& !arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(dataAttrValue)) {
+			// units not found in reference table !
+			validationResult.addError("attribute: " + varName + ":" + attrName + ": Definitions differ "
+					+ "\n\tSpecification = See argo-tech_units-spec units list" + "\n\tData File     = '"
+					+ dataAttrValue + "'");
+			return false;
+
+		}
+		return true;
+	}
+
+	private boolean checkTechParamLongNameAttribute(Variable dataVar, String varName, String attrName,
+			String dataAttrValue) {
+
+		// get unit value
+		Attribute unitAttribute = dataVar.findAttribute("units");
+		String unitsValue = unitAttribute.getStringValue();
+		// Build expected long_name
+		String expectedLonName = varName + "_" + unitsValue;
+		if (!dataAttrValue.equals(expectedLonName)) {
+			// long_name wrong !
+			validationResult.addError("attribute: " + varName + ":" + attrName + ": Definitions differ "
+					+ "\n\tSpecification = long_name = TECH_PARAM_units : " + expectedLonName + "\n\tData File     = '"
+					+ dataAttrValue + "'");
+			return false;
 		}
 
 		return true;

@@ -40,24 +40,20 @@ public final class TestsUtils {
 		String inputDirPath = TestsUtils.TEST_FILES_DIR + "/" + testDirName;
 		File inputDir = new File(inputDirPath);
 		File testFile = new File(inputDirPath + "/" + fileName);
-
 		// pre-checks
 		assertThat(TestsUtils.jarFile).exists().isFile().as("jar should be created in target folder");
 		assertThat(testFile).exists().isFile().as("netcdf test file should be in test/netcdf/TEST* resources folder");
 		assertThat(TestsUtils.specDirDir).exists().isDirectory().as("specifications directory should exist");
 		assertThat(inputDir).exists().isDirectory().as("input directory should exist");
 		assertThat(TestsUtils.outputDir).exists().isDirectory().as("output directory should exist");
-
 		// ACT
 		ProcessBuilder builder = new ProcessBuilder("java", "-jar", TestsUtils.jarPath, options, dac,
 				TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inputDirPath, fileName);
 		builder.redirectErrorStream(true);
 		Process process = builder.start();
-
 		// ASSERT - common checks
 		int exitCode = process.waitFor();
 		assertThat(exitCode).isZero().as("execution should complete without errors");
-
 		File xmlResultFile = new File(TestsUtils.OUTPUT_DIR_PATH + "/" + fileName + ".filecheck");
 		assertThat(xmlResultFile).exists().isFile().as("Result file should be created in %s",
 				TestsUtils.OUTPUT_DIR_PATH);
@@ -68,9 +64,7 @@ public final class TestsUtils {
 	// ============== CHECK RESULT =================
 	public static void genericFileCheckerE2ETest(String fileName, String dac, String result, String phase,
 			String testDirName, String options) throws IOException, InterruptedException {
-
 		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
-
 		assertThat(content).isNotEmpty().contains("<status>" + result).contains("<phase>" + phase);
 	}
 

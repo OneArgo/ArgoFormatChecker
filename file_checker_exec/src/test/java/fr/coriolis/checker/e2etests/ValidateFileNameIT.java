@@ -16,6 +16,7 @@ public class ValidateFileNameIT {
 	@BeforeAll
 	public static void init() {
 		TestsUtils.init(ValidateFileNameIT.class);
+
 	}
 
 	@Tag(TEST_DIR_NAME)
@@ -24,7 +25,6 @@ public class ValidateFileNameIT {
 			"6903283_badName.nc,coriolis,FILE-REJECTED,FILE-NAME-CHECK" })
 	public void fileChecker_shouldAcceptFile_whenValidFileName(String fileName, String dac, String result, String phase)
 			throws IOException, InterruptedException {
-
 		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME, "-format-only");
 	}
 

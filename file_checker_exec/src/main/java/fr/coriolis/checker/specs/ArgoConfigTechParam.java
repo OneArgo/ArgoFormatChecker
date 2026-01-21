@@ -786,7 +786,6 @@ public class ArgoConfigTechParam {
 						techParamEntry);
 			} else {
 				// it is a deprecated tech param
-				System.out.println("deprecated");
 
 				parseTechParamName(techParamList_DEP, techParamCodeList_DEP, techParamRegex_DEP, "NVS R14 table",
 						pTemplate, techParamEntry);
@@ -826,30 +825,40 @@ public class ArgoConfigTechParam {
 		String paramName = paramNameAndUnit[0];
 		String unit = paramNameAndUnit[1];
 
-		// add list to authorized unit list for this parameter. TO USE LATER. FOR NOW
-		// USE AUTHORIZE ALL UNITS FROM UNITS TABLE
-//		if (paramAuthorizedUnits.containsKey(paramName)) {
-//			paramAuthorizedUnits.get(paramName).add(unit);
-//		} else {
-//			paramAuthorizedUnits.put(paramName, new ArrayList<>(Arrays.asList(unit)));
-//		}
-
-		// check if this table Entry contains possible values for short_sensor_name :
+		// retrieve from Entry possible values for short_sensor_name and units :
 		Map<String, String> techParamAttributes = NvsDefinitionParser.parseAttributes("Template_Values",
 				techParamEntry.getDefinition());
-		System.out.println(techParamAttributes);
+
+		// add list to authorized unit list for this parameter. TO USE LATER. FOR NOW
+		// USE AUTHORIZE ALL UNITS FROM UNITS TABLE
+		// buildListOfAuthorizedUnitsFromNVSParamTemplateValues(paramName,
+		// techParamAttributes);
 
 		// get the list of short_sensor_name :
 		buildListOfShortSensorNameFromNVSParamTemplateValues(techParamAttributes);
 		// add list to authorized long_name list for this parameter
 
-		processParamAndLongNameFields(paramName, parameterLongName, pTemplate);
+		// the following become useless as the long_name check should be
+		// <param>_<unit>
+		// processParamAndLongNameFields(paramName, parameterLongName, pTemplate);
 
 		// ..process the parameter name (can contain regex) and add to right list
 		// (paramList or paramRegex)
 		processParameterField(paramList, paramRegex, pTemplate, paramName);
 
 	}
+
+//	private void buildListOfAuthorizedUnitsFromNVSParamTemplateValues(String paramName,
+//			Map<String, String> techParamAttributes) {
+//		List<String> UnitValuesforGivenParameter = new ArrayList<>(
+//				Arrays.asList(ArgoFileSpecification.getValuesListFromParametersAttributes(
+//						ArgoFileSpecification.getOrEmptyStringFromMap(techParamAttributes, "unit"))));
+//		if (paramAuthorizedUnits.containsKey(paramName)) {
+//			paramAuthorizedUnits.get(paramName).addAll(UnitValuesforGivenParameter);
+//		} else {
+//			paramAuthorizedUnits.put(paramName, UnitValuesforGivenParameter);
+//		}
+//	}
 
 	private void buildListOfShortSensorNameFromNVSParamTemplateValues(Map<String, String> paramAttributes) {
 		String[] shortSensorNameValuesforGivenParameter = ArgoFileSpecification.getValuesListFromParametersAttributes(
@@ -867,66 +876,66 @@ public class ArgoConfigTechParam {
 	 * 
 	 * @param field
 	 */
-	private void processParamAndLongNameFields(String paramName, String longName, Pattern pTemplate) {
-		Matcher matcherParamName = pTemplate.matcher(paramName);
-		Matcher matcherLongName = pTemplate.matcher(longName);
-
-		if (!matcherParamName.find()) {
-
-			List<String> longNameListFromRegex;
-			// no <short_sensor_name> in tech param's name. Check if there is one in
-			// long_name. In this case all possibilities are authorized :
-			if (matcherLongName.find()) {
-				// ..contains <*> structures in long_name, build list of possibilities
-				String regexString = convertParamStringToRegex(longName, matcherLongName);
-
-				Pattern pRegex = Pattern.compile(regexString.toString());
-
-				longNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
-
-			} else {
-				// no <sensor_short_name> in paramName nor in longName.
-				longNameListFromRegex = new ArrayList<>(Arrays.asList(longName));
-			}
-
-			// add list to authorized long_name list for this parameter
-			if (paramAuthorizedLongName.containsKey(paramName)) {
-				paramAuthorizedLongName.get(paramName).addAll(longNameListFromRegex);
-			} else {
-				paramAuthorizedLongName.put(paramName, longNameListFromRegex);
-			}
-
-		} else {
-			// ..contains <*> structures -- convert to a regex and build list of param name
-			String regexString = convertParamStringToRegex(paramName, matcherParamName);
-
-			Pattern pRegex = Pattern.compile(regexString.toString());
-			List<String> paramNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
-			// for each paramName, apply this function (recursivity) :
-			for (String paramNameWithNoRegex : paramNameListFromRegex) {
-				// need to repace the short_sensor_name and Z in longName by the same found in
-				// paramName :
-				String shortSensorNamefound = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex,
-						"short_sensor_name");
-				String zValue = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex, "Z");
-
-				// onlys sort_sensor_name and Z are found in paramName. Replace value if found
-				// in corresponding longName
-				String completedLongName = longName;
-				if (shortSensorNamefound != null) {
-					completedLongName = completedLongName.replace("<short_sensor_name>", shortSensorNamefound);
-				}
-
-				if (zValue != null) {
-					completedLongName = completedLongName.replace("<Z>", zValue);
-				}
-
-				processParamAndLongNameFields(paramNameWithNoRegex, completedLongName, pTemplate);
-
-			}
-		}
-
-	}
+//	private void processParamAndLongNameFields(String paramName, String longName, Pattern pTemplate) {
+//		Matcher matcherParamName = pTemplate.matcher(paramName);
+//		Matcher matcherLongName = pTemplate.matcher(longName);
+//
+//		if (!matcherParamName.find()) {
+//
+//			List<String> longNameListFromRegex;
+//			// no <short_sensor_name> in tech param's name. Check if there is one in
+//			// long_name. In this case all possibilities are authorized :
+//			if (matcherLongName.find()) {
+//				// ..contains <*> structures in long_name, build list of possibilities
+//				String regexString = convertParamStringToRegex(longName, matcherLongName);
+//
+//				Pattern pRegex = Pattern.compile(regexString.toString());
+//
+//				longNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
+//
+//			} else {
+//				// no <sensor_short_name> in paramName nor in longName.
+//				longNameListFromRegex = new ArrayList<>(Arrays.asList(longName));
+//			}
+//
+//			// add list to authorized long_name list for this parameter
+//			if (paramAuthorizedLongName.containsKey(paramName)) {
+//				paramAuthorizedLongName.get(paramName).addAll(longNameListFromRegex);
+//			} else {
+//				paramAuthorizedLongName.put(paramName, longNameListFromRegex);
+//			}
+//
+//		} else {
+//			// ..contains <*> structures -- convert to a regex and build list of param name
+//			String regexString = convertParamStringToRegex(paramName, matcherParamName);
+//
+//			Pattern pRegex = Pattern.compile(regexString.toString());
+//			List<String> paramNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
+//			// for each paramName, apply this function (recursivity) :
+//			for (String paramNameWithNoRegex : paramNameListFromRegex) {
+//				// need to repace the short_sensor_name and Z in longName by the same found in
+//				// paramName :
+//				String shortSensorNamefound = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex,
+//						"short_sensor_name");
+//				String zValue = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex, "Z");
+//
+//				// onlys sort_sensor_name and Z are found in paramName. Replace value if found
+//				// in corresponding longName
+//				String completedLongName = longName;
+//				if (shortSensorNamefound != null) {
+//					completedLongName = completedLongName.replace("<short_sensor_name>", shortSensorNamefound);
+//				}
+//
+//				if (zValue != null) {
+//					completedLongName = completedLongName.replace("<Z>", zValue);
+//				}
+//
+//				processParamAndLongNameFields(paramNameWithNoRegex, completedLongName, pTemplate);
+//
+//			}
+//		}
+//
+//	}
 
 	public String extractSpecificValueFromPattern(String originalPattern, String actualString, Pattern pRegex,
 			String placeholderName) {
