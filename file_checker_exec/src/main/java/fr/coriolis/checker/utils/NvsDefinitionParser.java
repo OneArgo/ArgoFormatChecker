@@ -42,7 +42,8 @@ public final class NvsDefinitionParser {
 		if (matcher.find()) {
 			attributesMap = buildAttributesMap(matcher.group(1));
 		}
-
+		System.out.println("build map");
+		System.out.println(attributesMap);
 		return attributesMap;
 
 	}

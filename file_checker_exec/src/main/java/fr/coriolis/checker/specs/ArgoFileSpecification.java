@@ -1967,7 +1967,44 @@ public class ArgoFileSpecification {
 			isPost3_0 = true;
 		}
 
-		// Open NVS table R03 :
+		// Open and parse NVS table R03 to build PARAM specifiations :
+		parseR03parameterTable(fileType, version, listOnly, dimPQc, dimParam, auxilliarySettings, isCoreProf, isBioProf,
+				isOldCoreTraj, isOldBioTraj, isTraj, isPost3_0);
+
+		log.debug(".....parseParamFile: end.....");
+
+		return true;
+
+	} // end parseParamFile
+
+	/**
+	 * Parse the R03 table to extract PARAM specifications (param name, attributes,
+	 * category, etc.) and build the <PARAM>* variable specifications and add it to
+	 * the list of physical parameter.
+	 * 
+	 * If an error is detected inside the table (ex: missing attribute for a
+	 * parameter, forbidden value for an attribute, duplicate name, etc.), a warning
+	 * will be edited in logs and the parameter will not be taken into account but
+	 * the File Checker will continue to run.
+	 * 
+	 * @param fileType
+	 * @param version
+	 * @param listOnly
+	 * @param dimPQc
+	 * @param dimParam
+	 * @param auxilliarySettings
+	 * @param isCoreProf
+	 * @param isBioProf
+	 * @param isOldCoreTraj
+	 * @param isOldBioTraj
+	 * @param isTraj
+	 * @param isPost3_0
+	 * @throws IOException
+	 */
+	private void parseR03parameterTable(ArgoDataFile.FileType fileType, String version, boolean listOnly,
+			ArgoDimension[] dimPQc, ArgoDimension[] dimParam, AuxilliarySettings auxilliarySettings, boolean isCoreProf,
+			boolean isBioProf, boolean isOldCoreTraj, boolean isOldBioTraj, boolean isTraj, boolean isPost3_0)
+			throws IOException {
 		for (SkosConcept physParamEntry : ArgoNVSReferenceTable.PARAMETER_TABLE.getConceptMembersByAltLabelMap()
 				.values()) {
 
@@ -1989,7 +2026,7 @@ public class ArgoFileSpecification {
 				String prmFill = getOrEmptyStringFromMap(physParamAttributes, "fill_value");
 				// physical parameter's properties from definition field :
 				String prmType = getOrEmptyStringFromMap(physParamProperties, "data_type");
-				String[] extraDims = getExtraDimensionsFromParametersAttributes(
+				String[] extraDims = getValuesListFromParametersAttributes(
 						getOrEmptyStringFromMap(physParamAttributes, "extra_dim"));
 				String prmCategory = getOrEmptyStringFromMap(physParamProperties, "category");
 
@@ -2022,13 +2059,10 @@ public class ArgoFileSpecification {
 							physParamNameList.add(prmName + "_STD");
 							physParamNameList.add(prmName + "_MED");
 
-						} else { // ..duplicate name is a no, no
+						} else {
+							// ..duplicate name is a no, no
 							throw new R03ParameterException("Duplicate param name (R03 table) :" + "'" + prm
 									+ "'. This parameter will be ignored");
-							// v3.0.0 : not a fail checker failure, just ignore the parameter with a warn
-							// log
-							// throw new IOException("Duplicate param name in R03 table :" + "'" + prm +
-							// "'");
 						}
 					}
 					continue;
@@ -2040,13 +2074,10 @@ public class ArgoFileSpecification {
 
 				// ..check the data type
 				if (!prmType.equals("double") && !prmType.equals("float") && !prmType.equals("short")) {
+
 					throw new R03ParameterException("Invalid data type = '" + prmType + "' for parameter " + prm
 							+ " in R03 table. This parameter will be ignored in specifications definition.");
 
-					// v3.0.0 : not a file checker failure, just ignore the parameter with a warn
-					// log
-//				throw new IOException("Invalid data type '" + prmType + "' (NVS R03, parameter : " + prm
-//						+ "). Parameter will be ignored.");
 				}
 				DataType ncDataType = DataType.getType(prmType);
 
@@ -2062,9 +2093,8 @@ public class ArgoFileSpecification {
 				boolean CORE = categoryAnalysisResults.CORE;
 				boolean BIO = categoryAnalysisResults.BIO;
 
-				// BUILD <PARAM> variables. For each <param> entry, automatically make <param>*
-				// variables too
-
+				// Build <PARAM> variables. For each <param> entry, automatically make <param>*
+				// variables too :
 				for (String prmName : prmList) {
 
 					buildParamVariables(fileType, version, prmName, dimPQc, dimParam,
@@ -2077,13 +2107,11 @@ public class ArgoFileSpecification {
 
 				} // end for (prmList)
 			} catch (R03ParameterException e) {
+				// v3.0.0 : not a file checker failure, just ignore the parameter with a warn
 				log.warn(e.getMessage());
 			}
 		}
-		log.debug(".....parseParamFile: end.....");
-		return true;
-
-	} // end parseParamFile
+	}
 
 	/**
 	 * Parses the auxiliary settings file and extracts specification attributes. For
@@ -3103,17 +3131,17 @@ public class ArgoFileSpecification {
 	 * name2]". This function is needed to extract name1, name2, etc. and provide a
 	 * list of string
 	 * 
-	 * @param extraDimString (String). ex : "[name1, name2]"
+	 * @param stringList (String). ex : "[name1, name2]"
 	 * @return list of extra dimensions. ex : {"name1","name2"}
 	 */
-	private String[] getExtraDimensionsFromParametersAttributes(String extraDimString) {
+	public static String[] getValuesListFromParametersAttributes(String stringList) {
 
-		if (extraDimString == null || extraDimString.isEmpty()) {
+		if (stringList == null || stringList.isEmpty()) {
 			return new String[0];
 		}
 
 		// Remove brackets and split by comma
-		String content = extraDimString.replaceAll("[\\[\\]]", "").trim();
+		String content = stringList.replaceAll("[\\[\\]]", "").trim();
 
 		if (content.isEmpty()) {
 			return new String[0];
@@ -3180,7 +3208,7 @@ public class ArgoFileSpecification {
 	/**
 	 * Safely gets a trimmed value from a map, returning empty string if null.
 	 */
-	private String getOrEmptyStringFromMap(Map<String, String> map, String key) {
+	public static String getOrEmptyStringFromMap(Map<String, String> map, String key) {
 		String value = map.get(key);
 		return value != null ? value.trim() : "";
 	}

@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.tables.SkosConcept;
+import fr.coriolis.checker.utils.NvsDefinitionParser;
 
 /**
  * Implements features to check the Meta-data CONFIG_PARAMETER_NAME (including
@@ -102,13 +103,15 @@ public class ArgoConfigTechParam {
 		knownTemplates = new String[] { "D", "horizontalphasename", "I", "N", "N1", "param", "PARAM", "S", "SubS",
 				"shortsensorname", "verticalphasename", "digit", "int", "Z" };
 
-		Map<String, Set<String>> temp2 = new HashMap<>();
-		temp2.put("short_sensor_name", ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name);
-		temp2.put("Z", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
-		temp2.put("I", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
-		temp2.put("cycle_phase_name", ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name);
-		temp2.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
-		possibleValuesByKey = Collections.unmodifiableMap(temp2);
+		// Map<String, Set<String>> temp2 = new HashMap<>();
+		possibleValuesByKey = new HashMap<>();
+		// temp2.put("short_sensor_name",
+		// ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name);
+		possibleValuesByKey.put("Z", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
+		possibleValuesByKey.put("I", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
+		possibleValuesByKey.put("cycle_phase_name", ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name);
+		possibleValuesByKey.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
+		// possibleValuesByKey = Collections.unmodifiableMap(temp2);
 	}
 
 	// ......define and initialize the pattern matcher objects......
@@ -780,13 +783,13 @@ public class ArgoConfigTechParam {
 				.getConceptMembersByAltLabelMap().values()) {
 			if (!techParamEntry.isDeprecated()) {
 				parseTechParamName(techParamList, techParamCodeList, techParamRegex, "NVS R14 table", pTemplate,
-						techParamEntry.getPrefLabel());
+						techParamEntry);
 			} else {
 				// it is a deprecated tech param
 				System.out.println("deprecated");
 
 				parseTechParamName(techParamList_DEP, techParamCodeList_DEP, techParamRegex_DEP, "NVS R14 table",
-						pTemplate, techParamEntry.getPrefLabel());
+						pTemplate, techParamEntry);
 			}
 		}
 		log.debug(".....parseTechParamFile: end.....");
@@ -811,14 +814,11 @@ public class ArgoConfigTechParam {
 	 */
 	private void parseTechParamName(LinkedHashSet<String> paramList, LinkedHashSet<String> paramCodeList,
 			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String fileName, Pattern pTemplate,
-			String parameterCode) throws IllegalArgumentException {
-		// TO DO : UPDATE THIS FONCTION TO BE ABLE TO RETRIEVE LONG_NAME FROM NVS
+			SkosConcept techParamEntry) throws IllegalArgumentException {
 
-//		String parameterCode = column[0];
-//		String parameterLongName = column[1];
-
-		// String parameterCode = "PLCAHOLDER";
-		String parameterLongName = "PLACEHOLDER";
+		// get parameterCode & longName (prefLabel)
+		String parameterCode = techParamEntry.getPrefLabel();
+		String parameterLongName = parameterCode;
 
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
@@ -834,13 +834,30 @@ public class ArgoConfigTechParam {
 //			paramAuthorizedUnits.put(paramName, new ArrayList<>(Arrays.asList(unit)));
 //		}
 
+		// check if this table Entry contains possible values for short_sensor_name :
+		Map<String, String> techParamAttributes = NvsDefinitionParser.parseAttributes("Template_Values",
+				techParamEntry.getDefinition());
+		System.out.println(techParamAttributes);
+
+		// get the list of short_sensor_name :
+		buildListOfShortSensorNameFromNVSParamTemplateValues(techParamAttributes);
 		// add list to authorized long_name list for this parameter
+
 		processParamAndLongNameFields(paramName, parameterLongName, pTemplate);
 
 		// ..process the parameter name (can contain regex) and add to right list
 		// (paramList or paramRegex)
 		processParameterField(paramList, paramRegex, pTemplate, paramName);
 
+	}
+
+	private void buildListOfShortSensorNameFromNVSParamTemplateValues(Map<String, String> paramAttributes) {
+		String[] shortSensorNameValuesforGivenParameter = ArgoFileSpecification.getValuesListFromParametersAttributes(
+				ArgoFileSpecification.getOrEmptyStringFromMap(paramAttributes, "short_sensor_name"));
+		// first clean the map for this key (from previous tech param parsing):
+		possibleValuesByKey.remove("short_sensor_name");
+		// add the new list of short_sensor_name :
+		possibleValuesByKey.put("short_sensor_name", Set.of(shortSensorNameValuesforGivenParameter));
 	}
 
 	/**
@@ -885,7 +902,6 @@ public class ArgoConfigTechParam {
 
 			Pattern pRegex = Pattern.compile(regexString.toString());
 			List<String> paramNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
-
 			// for each paramName, apply this function (recursivity) :
 			for (String paramNameWithNoRegex : paramNameListFromRegex) {
 				// need to repace the short_sensor_name and Z in longName by the same found in
@@ -1014,7 +1030,6 @@ public class ArgoConfigTechParam {
 			if (!possibleValuesByKey.containsKey(key)) {
 				continue;
 			} // no values to inject for this regex pattern
-
 			boolean containRegex = regexList.stream().anyMatch(regex -> regex.contains(groupPattern));
 
 			if (!containRegex) {
