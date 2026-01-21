@@ -230,40 +230,6 @@
             "@type": "skos:Concept"
         },
         {
-            "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/",
-            "pav:hasVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/1/"
-            },
-            "pav:authoredOn": "2025-09-29 14:51:41.0",
-            "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/2/"
-            },
-            "dce:identifier": "SDN:R03::NB_SAMPLE_SUNA",
-            "pav:version": "2",
-            "skos:notation": "SDN:R03::NB_SAMPLE_SUNA",
-            "skos:altLabel": "NB_SAMPLE_SUNA",
-            "dc:date": "2025-09-29 14:51:41.0",
-            "owl:versionInfo": "2",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "Number of SUNA samples in each pressure bin"
-            },
-            "dc:identifier": "SDN:R03::NB_SAMPLE_SUNA",
-            "skos:note": {
-                "@language": "en",
-                "@value": "deprecated"
-            },
-            "owl:deprecated": "true",
-            "void:inDataset": {
-                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
-            },
-            "skos:definition": {
-                "@language": "en",
-                "@value": "Number of SUNA sensor samples in each pressure bin (dimensionless)."
-            },
-            "@type": "skos:Concept"
-        },
-        {
             "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_OPTODE/",
             "pav:hasVersion": [
                 {
@@ -340,6 +306,45 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_CTD/3/"
             },
             "pav:authoredOn": "2025-11-25 10:14:03.0"
+        },
+        {
+            "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/",
+            "pav:hasVersion": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/1/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/2/"
+                }
+            ],
+            "@type": "skos:Concept",
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Not Used. Number of samples in each pressure bin. Local_Attributes:{long_name:Number of samples in each pressure bin; standard_name:-; units:count; valid_min:-; valid_max:-; fill_value:NC_FILL_SHORT}. Properties:{category:ic; data_type:short}."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "true",
+            "skos:note": {
+                "@language": "en",
+                "@value": "deprecated"
+            },
+            "dc:identifier": "SDN:R03::NB_SAMPLE_SUNA",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Number of SUNA samples in each pressure bin"
+            },
+            "owl:versionInfo": "3",
+            "dc:date": "2026-01-15 16:32:25.0",
+            "skos:altLabel": "NB_SAMPLE_SUNA",
+            "skos:notation": "SDN:R03::NB_SAMPLE_SUNA",
+            "pav:version": "3",
+            "dce:identifier": "SDN:R03::NB_SAMPLE_SUNA",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/3/"
+            },
+            "pav:authoredOn": "2026-01-15 16:32:25.0"
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_ECO/",
@@ -4401,13 +4406,13 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SFET/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/"
-                },
-                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_OPTODE/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_CTD/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_SUNA/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_ECO/"
@@ -4688,8 +4693,8 @@
             "dc:description": "Terms describing individual measured parameters or phenomena, used to mark up sets of data in Argo netCDF arrays. Argo netCDF variables PARAMETER, STATION_PARAMETERS, HISTORY_PARAMETER and TRAJECTORY_PARAMETERS are populated by R03 altLabel. R03 altLabel is also used to name netCDF variables. Detailed information (incl. about Local_Attributes and Properties) is in the user manual (https://dx.doi.org/10.13155/29825), in the Reference Table 3 section.",
             "dc:title": "Argo parameter codes",
             "skos:prefLabel": "Argo parameter codes",
-            "owl:versionInfo": "12",
-            "dc:date": "2025-11-27 02:00:01.0",
+            "owl:versionInfo": "13",
+            "dc:date": "2026-01-16 02:00:00.0",
             "skos:altLabel": "PARAMETER",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "PARAMETER",
