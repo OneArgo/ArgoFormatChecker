@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -2026,7 +2027,7 @@ public class ArgoFileSpecification {
 				String prmFill = getOrEmptyStringFromMap(physParamAttributes, "fill_value");
 				// physical parameter's properties from definition field :
 				String prmType = getOrEmptyStringFromMap(physParamProperties, "data_type");
-				String[] extraDims = getValuesListFromParametersAttributes(
+				String[] extraDims = getValuesListFromParameterListAttribute(
 						getOrEmptyStringFromMap(physParamAttributes, "extra_dim"));
 				String prmCategory = getOrEmptyStringFromMap(physParamProperties, "category");
 
@@ -3124,31 +3125,65 @@ public class ArgoFileSpecification {
 		}
 	}
 
-	/**
-	 * extra_dim attribute in the defintion field of R03 physical parameters table
-	 * is in form of "extra_dim:[name1, name2,...]". For this attribute, the
-	 * NvsDefinitionParser provide a map with key="extra_dim" and value="[name1,
-	 * name2]". This function is needed to extract name1, name2, etc. and provide a
-	 * list of string
-	 * 
-	 * @param stringList (String). ex : "[name1, name2]"
-	 * @return list of extra dimensions. ex : {"name1","name2"}
-	 */
-	public static String[] getValuesListFromParametersAttributes(String stringList) {
-
-		if (stringList == null || stringList.isEmpty()) {
+	public static String[] getValuesListFromParameterAttribute(String attributeValueStr) {
+		if (attributeValueStr == null || attributeValueStr.isEmpty()) {
 			return new String[0];
 		}
 
 		// Remove brackets and split by comma
-		String content = stringList.replaceAll("[\\[\\]]", "").trim();
-
+		String content = attributeValueStr.replaceAll("[\\[\\]]", "").trim();
 		if (content.isEmpty()) {
 			return new String[0];
 		}
+		// parse conent (list or range)
+		if (content.contains("..")) {
+			// it is a range (ex: '1..5')
+			return getRangeValuesFromParametersRangeAttribute(content);
+		} else {
+			// in other case, treat it as a list 'valu1,value2,...
+			return getValuesListFromParameterListAttribute(content);
+		}
+
+	}
+
+	/**
+	 * attribute in the defintion field of NVS parameters table is in form of
+	 * "extra_dim:[name1, name2,...]". For this attribute, the NvsDefinitionParser
+	 * provide a map with key="extra_dim" and value="[name1, name2]". This function
+	 * is needed to extract name1, name2, etc. and provide a list of string
+	 * 
+	 * @param stringList (String). ex : "[name1, name2]"
+	 * @return list of extra dimensions. ex : {"name1","name2"}
+	 */
+	private static String[] getValuesListFromParameterListAttribute(String content) {
 
 		// Split and trim each element
 		return Arrays.stream(content.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toArray(String[]::new);
+
+	}
+
+	/**
+	 * /** attribute in the defintion field of NVS parameters table may be in form
+	 * of "N:[1..5]". This define a range of values. This function extract this
+	 * range and provide a list of string for each value (ex :
+	 * {"1","2","3","4","5"})
+	 * 
+	 * @param content : the attribute string content (without the bracket '[' and
+	 *                ']' )
+	 * @return
+	 */
+	private static String[] getRangeValuesFromParametersRangeAttribute(String content) {
+		// it is a range number '1..5'
+		// separate start and end number
+		String[] bounds = content.split("\\.\\.");
+		int start = Integer.parseInt(bounds[0]);
+		int end = Integer.parseInt(bounds[1]);
+		// generate list :
+		List<String> result = new ArrayList<>();
+		for (int i = start; i <= end; i++) {
+			result.add(String.valueOf(i));
+		}
+		return result.toArray(new String[0]);
 
 	}
 
@@ -3210,6 +3245,10 @@ public class ArgoFileSpecification {
 	 */
 	public static String getOrEmptyStringFromMap(Map<String, String> map, String key) {
 		String value = map.get(key);
+		return getOrEmptyStringFromValue(value);
+	}
+
+	public static String getOrEmptyStringFromValue(String value) {
 		return value != null ? value.trim() : "";
 	}
 

@@ -1,0 +1,14 @@
+2026-02-24 11:56:00.158 ERROR ValidateSubmit - Error processing file: 3901639_meta_bad-short-sensor-name.nc
+java.lang.NullPointerException: Cannot read field "failedMatchedTemplates" because "match" is null
+	at fr.coriolis.checker.validators.ArgoMetadataFileValidator.validateConfigParams(ArgoMetadataFileValidator.java:1425) ~[file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.validators.ArgoMetadataFileValidator.validateData(ArgoMetadataFileValidator.java:152) ~[file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.core.ValidateSubmit.checkArgoFileData(ValidateSubmit.java:404) [file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.core.ValidateSubmit.validateFiles(ValidateSubmit.java:247) [file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.core.ValidateSubmit.main(ValidateSubmit.java:124) [file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+2026-02-24 11:56:00.268 ERROR ValidateSubmit - Error processing file: 3901639_meta_N-Not-integer.nc
+java.lang.NullPointerException: Cannot read field "failedMatchedTemplates" because "match" is null
+	at fr.coriolis.checker.validators.ArgoMetadataFileValidator.validateConfigParams(ArgoMetadataFileValidator.java:1425) ~[file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.validators.ArgoMetadataFileValidator.validateData(ArgoMetadataFileValidator.java:152) ~[file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.core.ValidateSubmit.checkArgoFileData(ValidateSubmit.java:404) [file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.core.ValidateSubmit.validateFiles(ValidateSubmit.java:247) [file_checker_exec-3.0.0-SNAPSHOT.jar:?]
+	at fr.coriolis.checker.core.ValidateSubmit.main(ValidateSubmit.java:124) [file_checker_exec-3.0.0-SNAPSHOT.jar:?]

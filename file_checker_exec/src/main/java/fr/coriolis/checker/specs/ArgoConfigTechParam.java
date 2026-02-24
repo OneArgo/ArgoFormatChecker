@@ -101,7 +101,7 @@ public class ArgoConfigTechParam {
 		templateReplacement = Collections.unmodifiableMap(temp);
 
 		knownTemplates = new String[] { "D", "horizontalphasename", "I", "N", "N1", "param", "PARAM", "S", "SubS",
-				"shortsensorname", "verticalphasename", "digit", "int", "Z" };
+				"shortsensorname", "verticalphasename", "cyclephasename", "digit", "int", "Z" };
 
 		// Map<String, Set<String>> temp2 = new HashMap<>();
 		possibleValuesByKey = new HashMap<>();
@@ -113,6 +113,10 @@ public class ArgoConfigTechParam {
 		possibleValuesByKey.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
 		// possibleValuesByKey = Collections.unmodifiableMap(temp2);
 	}
+	// List of template that may have a list of authorized values from the reference
+	// table
+	static Set<String> CONFIG_TEMPLATE_TO_CHECK = Set.of("short_sensor_name", "param", "cycle_phase_name", "PARAM", "N",
+			"I", "D");
 
 	// ......define and initialize the pattern matcher objects......
 	static Pattern pBlankOrComment; // ..match a blank line or a comment line
@@ -570,81 +574,34 @@ public class ArgoConfigTechParam {
 		LinkedHashSet<String> paramList = null;
 		LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex = null;
 
-		// ....loop over the active and deprecated files.....
+		// ..pattern to recognize/replace templates
+		Pattern pTemplate = Pattern.compile("<([^>]+?)>");
+		log.debug("template regex: '{}'", pTemplate);
 
-		for (int nFile = 0; nFile < fileNames.length; nFile++) {
-			String fileName = fileNames[nFile];
+		configParamList = new LinkedHashSet<String>(250);
+		configParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
 
-			log.debug("parsing '{}'", fileName);
-			// .......parse the config param name file.......
-			// ..open the file
-			try (InputStream in = SpecIO.getInstance().open(fileName);
-					BufferedReader fileReader = new BufferedReader(
-							new InputStreamReader(in, StandardCharsets.UTF_8));) {
-				// ..create list variables
-				// ..open file
-				if (nFile == 0) { // argo-core_config_param
-					configParamList = new LinkedHashSet<String>(250);
-					configParamRegex = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
+		configParamList_DEP = new LinkedHashSet<String>(250);
+		configParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(250);
 
-					paramList = configParamList;
-					paramRegex = configParamRegex;
+		// ....loop over the active and deprecated entries.....
+		for (SkosConcept configParamEntry : ArgoNVSReferenceTable.CONFIG_PARAMETER_NAME_TABLE
+				.getConceptMembersByAltLabelMap().values()) {
+			if (!configParamEntry.isDeprecated()) {
+				parseConfigParamName(configParamList, configParamRegex, "NVS R18 table", pTemplate, configParamEntry);
 
-				} else if (nFile == 2) { // argo-core_config_param.deprecetaed
-					// ..do this only for the first deprecated file
-					configParamList_DEP = new LinkedHashSet<String>(25);
-					configParamRegex_DEP = new LinkedHashMap<Pattern, HashMap<String, HashSet<String>>>(25);
+			} else {
+				// it is a deprecated config param
+				parseConfigParamName(configParamList_DEP, configParamRegex_DEP, "NVS R18 table", pTemplate,
+						configParamEntry);
 
-					paramList = configParamList_DEP;
-					paramRegex = configParamRegex_DEP;
-				}
-
-				// .....read through the files....
-
-				// ..pattern to recognize/replace templates
-				Pattern pTemplate = Pattern.compile("<([^>]+?)>");
-				log.debug("template regex: '{}'", pTemplate);
-
-				String line;
-				while ((line = fileReader.readLine()) != null) {
-					if (pBlankOrComment.matcher(line).matches()) {
-						log.debug("blank/comment: '{}'", line);
-						continue;
-					}
-
-					// ..break the line into individual entries and trim the content
-					String column[] = line.split("\\|");
-					for (int n = 0; n < column.length; n++) {
-						String s = column[n].trim();
-						column[n] = s;
-					}
-
-					parseConfigParamName(paramList, paramRegex, nFile, fileName, pTemplate, column);
-				} // ..end while (line)
-
-				fileReader.close();
-
-			} catch (FileNotFoundException e) {
-				if (nFile <= 1) {
-					// ..both primary files MUST exist
-					log.error("Config-Param-file '{}' does not exist", fileName);
-					throw e;
-				} else {
-					// ..deprecated file MAY NOT exist
-					log.debug("Deprecated-Config-Param-file '{}' does not exist (optional)", fileName);
-					continue;
-				}
-
-			} catch (IOException e) {
-				log.error("File '" + fileName + "' cannot be read");
-				throw e;
 			}
-
-		} // ..end for (fileNames)
+		}
 
 		log.debug("configParamList: {}", configParamList);
 
 		log.debug(".....parseConfigParamFiles: end.....");
+
 	} // ..end parseConfigParamFiles
 
 	/**
@@ -659,29 +616,15 @@ public class ArgoConfigTechParam {
 	 * @param column
 	 */
 	private void parseConfigParamName(LinkedHashSet<String> paramList,
-			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, int nFile, String fileName,
-			Pattern pTemplate, String[] column) {
-		// for CORE config name (nfile = 0):
-		// column[0] : Parameter label
-		// column[1] : Explanation (with values for <PARAM>
-		// column[2] : MANDATORY (M) / OPTIONAL (O)
-		// column[3] : Comment/Action
+			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String tableName, Pattern pTemplate,
+			SkosConcept configParamEntry) {
 
-		// column[4] : Float Type
-		// for BIO config name (nfile = 1)
-		// column[0] : Parameter label
-		// column[1] : Parameter definition
-		// column[2] : values for <short sensor name>
-		// column[3] : values for <param>
-		// column[4] : values for <cycle_phase_name>
-		// column[5] : values for numbers (<I>, <N>, <S>, <Subs>)
-		// column[6] : FLOAT TYPE (PLATFORM_TYPE ?)
-		// column[7] : MANDATORY (M) / OPTIONAL (O)
-		// column[8] : CHANGEABLE (C) /SET (S)
-		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
-		String param = extractParamNameAndUnitFromParamCode(fileName, column[0])[0];
-
+		String paramCode = configParamEntry.getPrefLabel();
+		String param = extractParamNameAndUnitFromParamCode(tableName, paramCode)[0];
+		String unit = extractParamNameAndUnitFromParamCode(tableName, paramCode)[1]; // not useful of the moment as we
+																						// authorize all units from the
+																						// ref list
 		// ..process parameter
 		Matcher matcher = pTemplate.matcher(param);
 
@@ -709,41 +652,23 @@ public class ArgoConfigTechParam {
 			// ..decide if there are "match lists" to compare to
 			// ..- core_config_name spec does NOT have any match lines
 			// ..- bio_config_name spec can have "match lists"
+			// 02/2026 : no distinction between bio and core when using NVS table
 
 			HashMap<String, HashSet<String>> matchList = null;
 
-			if (nFile == 1 || nFile == 3) { // BIO config name files
-				// ..bio-config file has matching list in these columns
-				String[] templates = { "shortsensorname", "param", "cyclephasename" };
-				int[] nColumn = { 2, 3, 4, 5 }; // .."0-based"
+			// if (nFile == 1 || nFile == 3) { // BIO config name files
+			// ..bio-config file has matching list in these columns
+			// String[] templates = { "shortsensorname", "param", "cyclephasename" };
 
-				matchList = new HashMap<String, HashSet<String>>(templates.length);
+			// int[] nColumn = { 2, 3, 4, 5 }; // .."0-based"
 
-				for (int n = 0; n < templates.length; n++) {
-					if (column.length > nColumn[n]) {
-						String[] list = column[nColumn[n]].split("[, /]");
+			matchList = new HashMap<String, HashSet<String>>();
 
-						HashSet<String> set = new HashSet<String>(list.length);
+			// get template_values defined in Definition field :
+			Map<String, String> configParamTemplateValues = NvsDefinitionParser.parseAttributes("Template_Values",
+					configParamEntry.getDefinition());
 
-						for (int m = 0; m < list.length; m++) {
-							String s = list[m].trim();
-							if (s.length() > 0) {
-								set.add(list[m].trim());
-							}
-						}
-
-						if (set.size() > 0) {
-							// ..have to handle the "CTD" exception .. I hate exceptions
-							if (templates[n].equals("shortsensorname")) {
-								set.add("CTD");
-							}
-
-							matchList.put(templates[n], set);
-							log.debug("matchList: add '{}' = '{}'", templates[n], set);
-						}
-					}
-				}
-			}
+			buildTemplatesMatchingListFromNVSParamTemplateValues(matchList, configParamTemplateValues);
 
 			if (matchList != null && matchList.size() > 0) {
 				paramRegex.put(pRegex, matchList);
@@ -861,12 +786,37 @@ public class ArgoConfigTechParam {
 //	}
 
 	private void buildListOfShortSensorNameFromNVSParamTemplateValues(Map<String, String> paramAttributes) {
-		String[] shortSensorNameValuesforGivenParameter = ArgoFileSpecification.getValuesListFromParametersAttributes(
+		String[] shortSensorNameValuesforGivenParameter = ArgoFileSpecification.getValuesListFromParameterAttribute(
 				ArgoFileSpecification.getOrEmptyStringFromMap(paramAttributes, "short_sensor_name"));
 		// first clean the map for this key (from previous tech param parsing):
 		possibleValuesByKey.remove("short_sensor_name");
 		// add the new list of short_sensor_name :
 		possibleValuesByKey.put("short_sensor_name", Set.of(shortSensorNameValuesforGivenParameter));
+	}
+
+	private void buildTemplatesMatchingListFromNVSParamTemplateValues(HashMap<String, HashSet<String>> matchList,
+			Map<String, String> configParamTemplateValues) {
+
+		for (Map.Entry<String, String> entry : configParamTemplateValues.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+
+			String[] templateValues = ArgoFileSpecification
+					.getValuesListFromParameterAttribute(ArgoFileSpecification.getOrEmptyStringFromValue(value));
+
+			HashSet<String> set = new HashSet<>(Arrays.asList(templateValues));
+
+			// "CTD" exception (always authorized for short_sensor_name ???) :
+			if (key.equals("short_sensor_name")) {
+				set.add("CTD");
+			}
+			if (!set.isEmpty() && CONFIG_TEMPLATE_TO_CHECK.contains(key)) {
+				// need to replace short_sensor_name, cycle_phase_name by shortsensorname and
+				// cyclephasename
+				matchList.put(entry.getKey().replace("_", ""), set);
+			}
+
+		}
 	}
 
 	/**
