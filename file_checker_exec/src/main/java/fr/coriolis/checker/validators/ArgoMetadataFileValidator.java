@@ -1461,7 +1461,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 						if (match.nUnMatchedTemplates > 0) {
 							// ..these Templates did not have values specified in the table
-
 							// ..check the generic template values:
 							// .. shortsensorname, cyclephasename, param
 							// ..all others are accepted as is - they matched their basic regex
@@ -1471,7 +1470,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 							if (str != null) {
 								if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
 									String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'",
-											varName, (n + 1), str);
+											varName, (n + 1), str, param);
 									// validationResult.addError(err);
 
 									// ################# TEMPORARY WARNING ################

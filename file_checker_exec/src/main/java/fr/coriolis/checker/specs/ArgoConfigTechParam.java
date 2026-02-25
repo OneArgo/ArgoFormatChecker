@@ -75,7 +75,8 @@ public class ArgoConfigTechParam {
 
 	static final String defaultTemplateReplacement;
 	static final Map<String, String> templateReplacement;
-	static final String[] knownTemplates;
+	static final Set<String> knownTemplates;
+	static final Set<String> knownTemplatesWithMatchListToCheck;
 	static final Map<String, Set<String>> possibleValuesByKey;
 
 	static {
@@ -91,7 +92,7 @@ public class ArgoConfigTechParam {
 		temp.put("param", "(?<param>[A-Z][a-z]+(?:[A-Z][a-z]+)??)");
 		temp.put("PARAM", "(?<PARAM>[A-Z]+?)");
 		temp.put("S", "(?<S>\\d+?)");
-		temp.put("SubS", "(?<Subs>\\d+?)");
+		temp.put("SubS", "(?<SubS>\\d+?)");
 		temp.put("short_sensor_name", "(?<shortsensorname>[A-Z][a-z]+?|CTD)");
 		// ..tech templates (alphabetical order)
 		temp.put("digit", "(?<digit>\\d)");
@@ -100,8 +101,10 @@ public class ArgoConfigTechParam {
 		temp.put("Z", "(?<Z>\\d+?)");
 		templateReplacement = Collections.unmodifiableMap(temp);
 
-		knownTemplates = new String[] { "D", "horizontalphasename", "I", "N", "N1", "param", "PARAM", "S", "SubS",
-				"shortsensorname", "verticalphasename", "cyclephasename", "digit", "int", "Z" };
+		knownTemplates = new HashSet<>(Arrays.asList("D", "horizontalphasename", "I", "N", "N1", "param", "PARAM", "S",
+				"SubS", "shortsensorname", "verticalphasename", "cyclephasename", "digit", "int", "Z"));
+		knownTemplatesWithMatchListToCheck = new HashSet<>(Arrays.asList("horizontalphasename", "N", "N1", "param",
+				"PARAM", "shortsensorname", "verticalphasename", "cyclephasename"));
 
 		// Map<String, Set<String>> temp2 = new HashMap<>();
 		possibleValuesByKey = new HashMap<>();
@@ -113,11 +116,6 @@ public class ArgoConfigTechParam {
 		possibleValuesByKey.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
 		// possibleValuesByKey = Collections.unmodifiableMap(temp2);
 	}
-	// List of template that may have a list of authorized values from the reference
-	// table
-	static Set<String> CONFIG_TEMPLATE_TO_CHECK = Set.of("short_sensor_name", "param", "cycle_phase_name", "PARAM", "N",
-			"I", "D");
-
 	// ......define and initialize the pattern matcher objects......
 	static Pattern pBlankOrComment; // ..match a blank line or a comment line
 	static Pattern pComment; // ..comment
@@ -798,7 +796,9 @@ public class ArgoConfigTechParam {
 			Map<String, String> configParamTemplateValues) {
 
 		for (Map.Entry<String, String> entry : configParamTemplateValues.entrySet()) {
-			String key = entry.getKey();
+			String normalizedKey = entry.getKey().replace("_", "");// need to replace short_sensor_name,
+																	// cycle_phase_name by shortsensorname and
+			// cyclephasename
 			String value = entry.getValue();
 
 			String[] templateValues = ArgoFileSpecification
@@ -807,13 +807,16 @@ public class ArgoConfigTechParam {
 			HashSet<String> set = new HashSet<>(Arrays.asList(templateValues));
 
 			// "CTD" exception (always authorized for short_sensor_name ???) :
-			if (key.equals("short_sensor_name")) {
+			if (normalizedKey.equals("shortsensorname")) {
 				set.add("CTD");
 			}
-			if (!set.isEmpty() && CONFIG_TEMPLATE_TO_CHECK.contains(key)) {
-				// need to replace short_sensor_name, cycle_phase_name by shortsensorname and
-				// cyclephasename
-				matchList.put(entry.getKey().replace("_", ""), set);
+			if (!set.isEmpty() && knownTemplatesWithMatchListToCheck.contains(normalizedKey)) {
+				matchList.put(normalizedKey, set);
+				// special case for N and N+1 : N+1 has the "N" key in template values so need
+				// to replicate the set
+				if (normalizedKey.equals("N")) {
+					matchList.put("N1", set);
+				}
 			}
 
 		}
