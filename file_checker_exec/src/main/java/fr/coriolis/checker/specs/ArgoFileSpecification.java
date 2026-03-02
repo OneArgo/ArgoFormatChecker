@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.exceptions.R03ParameterException;
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.R03DeprecatedEntry;
 import fr.coriolis.checker.tables.SkosConcept;
 import fr.coriolis.checker.utils.NvsDefinitionParser;
 import ucar.ma2.DataType;
@@ -483,9 +484,9 @@ public class ArgoFileSpecification {
 
 	// .......physical parameter variables...........
 
-	private static final int nParamFields = 19; // ..number of significant fields (min number)
 	private static final HashMap<String, ArgoDataFile.FileType> paramFileTypes = new HashMap<String, ArgoDataFile.FileType>();
-
+	private static final Set<String> NUMERIC_ATTRS = new HashSet<>(
+			Arrays.asList("valid_min", "valid_max", "fillValue", "resolution"));
 	// ..attribute constants
 
 	/**
@@ -529,8 +530,6 @@ public class ArgoFileSpecification {
 	private static final String conventions = new String("conventions");
 	private static final String fillValue = new String("_FillValue");
 	private static final String fillValueBLANK = new String(" ");
-	private static final Number fillValueFloatPARAM = new Float(99999.f);
-	private static final Number fillValueDoublePARAM = new Double(99999.f);
 	private static final String fortran_format = new String("FORTRAN_format");
 	private static final String long_name = new String("long_name");
 	private static final String standard_name = new String("standard_name");
@@ -691,8 +690,8 @@ public class ArgoFileSpecification {
 
 	private String cdlFileName;
 	private String optFileName;
-	private String prmFileName;
 	private String prmFileNameAux;
+	private String r03DepPhysicalParamsTableName;
 	private String regFileName;
 
 	private boolean attrRegex;
@@ -713,6 +712,8 @@ public class ArgoFileSpecification {
 	private HashSet<String> depParamNameList; // ..list of deprecated physical param names
 	private HashSet<String> physParamNameList;// ..list of physical param names
 	private HashSet<String> physParamVarList; // ..list of phys-prm-related variables
+	private List<R03DeprecatedEntry> R03DeprecatedEntries; // list of deprecated R03 entries,
+															// by version
 
 //............................................
 //              CONSTRUCTORS
@@ -843,6 +844,16 @@ public class ArgoFileSpecification {
 	 */
 	public ArrayList<String> getPhysicalParamNames() {
 		return new ArrayList<String>(physParamNameList);
+	}
+
+	/**
+	 * Return list of deprecated physical parameters attributes key and values for
+	 * the current version.
+	 * 
+	 * @return
+	 */
+	public List<R03DeprecatedEntry> getDeprecatedPhysicalParamsEntries() {
+		return new ArrayList<R03DeprecatedEntry>(R03DeprecatedEntries);
 	}
 
 	/**
@@ -1030,7 +1041,7 @@ public class ArgoFileSpecification {
 		String prefix = "argo-";
 		cdlFileName = prefix + fType.specType + "-spec-v" + version.trim() + ".cdl";
 		optFileName = prefix + fType.specType + "-spec-v" + version.trim() + ".opt";
-		prmFileName = prefix + "physical_params-spec-v" + version.trim();
+		r03DepPhysicalParamsTableName = prefix + "R03-deprecated-physical_params-spec";
 		prmFileNameAux = prefix + "physical_params-spec-v" + version.trim() + ".aux";
 		regFileName = prefix + fType.specType + "-spec-v" + version.trim() + ".attr_regexp";
 
@@ -1039,7 +1050,6 @@ public class ArgoFileSpecification {
 			log.debug("specName = {}", specName);
 			log.debug("cdlFileName = '{}'", cdlFileName);
 			log.debug("optFileName = '{}'", optFileName);
-			log.debug("prmFileName = '{}'", prmFileName);
 			log.debug("prmFileNameAux = '{}'", prmFileNameAux);
 			log.debug("regFileName = '{}'", regFileName);
 		}
@@ -1069,7 +1079,7 @@ public class ArgoFileSpecification {
 		// ..physical parameter file
 		if (paramFileTypes.containsValue(fType)) {
 			// ..this file-type contains physical parameter structures
-			log.info("parsing '" + prmFileName + "' for type '" + fType + "' (data-structures)");
+			log.info("parsing R03 table for type '" + fType + "' (data-structures)");
 			try {
 				status = parseParamFile(fType, version, false);
 			} catch (IOException e) {
@@ -1078,7 +1088,7 @@ public class ArgoFileSpecification {
 
 		} else {
 			// ..this file-type only needs to know physical parameter names
-			log.info("parsing '" + prmFileName + "' for type '" + fType + "' (list-only)");
+			log.info("parsing R03 table for type '" + fType + "' (list-only)");
 			try {
 				status = parseParamFile(fType, version, true);
 			} catch (IOException e) {
@@ -1972,6 +1982,9 @@ public class ArgoFileSpecification {
 		parseR03parameterTable(fileType, version, listOnly, dimPQc, dimParam, auxilliarySettings, isCoreProf, isBioProf,
 				isOldCoreTraj, isOldBioTraj, isTraj, isPost3_0);
 
+		// get the deprecated R03 entries
+		parseR03DeprecatedTable(version);
+
 		log.debug(".....parseParamFile: end.....");
 
 		return true;
@@ -2219,6 +2232,106 @@ public class ArgoFileSpecification {
 		}
 
 		return auxilliarySettings;
+	}
+
+	/**
+	 * Parses the deprecated parameter table and returns only the entries matching
+	 * the given version.
+	 *
+	 * <p>
+	 * Lines starting with {@code //} and empty lines are ignored. Each returned
+	 * entry represents a (parameter, attribute, deprecated value) triplet that was
+	 * valid in a previous version but is no longer accepted in the current
+	 * reference version but should only raise a warning and not an error.
+	 *
+	 * @param path    path to the deprecated table file
+	 * @param version version filter, e.g. {@code "[3.0]"}
+	 * @return list of deprecated entries for the given version, empty if none match
+	 * @throws IOException if the file cannot be read
+	 */
+	private void parseR03DeprecatedTable(String version) throws IOException {
+		List<R03DeprecatedEntry> entries = new ArrayList<>();
+
+		try (InputStream in = SpecIO.getInstance().open(r03DepPhysicalParamsTableName);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+			String line;
+			while ((line = br.readLine()) != null) {
+				line = line.strip();
+				if (line.isEmpty() || line.startsWith("//")) {
+					continue;
+				}
+
+				// .....parse the line into individual entries.....
+				String[] c = line.split("\\|");
+				if (c.length < 6) {
+					continue; // not a valid entries as we expect at least 6 columns (deprecation date not
+								// used here)
+				}
+				if (!containsVersion(c[5].strip(), version)) {
+					continue; // we extract only for the current version
+				}
+
+				String attributeKey = c[1].strip();
+				String oldValue = normalizeValue(attributeKey, c[2].strip());
+
+				entries.add(new R03DeprecatedEntry(c[0].strip(), // paramName
+						attributeKey, // attributeKey
+						oldValue, // oldValue
+						c[3].strip(), // status
+						c[4].strip() // message
+				));
+			}
+		}
+		R03DeprecatedEntries = entries;
+	}
+
+	/**
+	 * Normalizes an attribute value for consistent comparison.
+	 *
+	 * <p>
+	 * For numeric attributes ({@code value_min}, {@code value_max},
+	 * {@code fillValue}, {@code resolution}), strips any trailing
+	 * {@code f}/{@code F} float suffix and parses the result as a double, so that
+	 * {@code "-2.f"} and {@code "-2.0"} are considered equal. Non-numeric strings
+	 * such as {@code "NC_FILL_SHORT"} or {@code "-"} are returned as-is.
+	 *
+	 * <p>
+	 * For all other attributes, the value is returned trimmed without any
+	 * transformation.
+	 *
+	 * @param attributeKey the attribute name, e.g. {@code "value_min"},
+	 *                     {@code "long_name"}
+	 * @param value        the raw value to normalize
+	 * @return the normalized value, or {@code null} if {@code value} is
+	 *         {@code null}
+	 */
+	private static String normalizeValue(String attributeKey, String value) {
+		if (value == null) {
+			return null;
+		}
+		String v = value.trim();
+
+		if (!NUMERIC_ATTRS.contains(attributeKey)) {
+			return v;
+		}
+
+		if (v.endsWith("f") || v.endsWith("F")) {
+			v = v.substring(0, v.length() - 1);
+		}
+
+		try {
+			return String.valueOf(Double.parseDouble(v));
+		} catch (NumberFormatException e) {
+			return v; // NC_FILL_SHORT, NC_FILL_DOUBLE, "-", etc.
+		}
+	}
+
+	private static boolean containsVersion(String versionField, String version) {
+		// versionField ex: "[2.2,2.3]" or "[3.0]"
+		// Strip brackets then split on comma
+		String stripped = versionField.replaceAll("[\\[\\]\\s]", "");
+		return Arrays.asList(stripped.split(",")).contains(version.replaceAll("[\\[\\]\\s]", ""));
 	}
 
 	/**

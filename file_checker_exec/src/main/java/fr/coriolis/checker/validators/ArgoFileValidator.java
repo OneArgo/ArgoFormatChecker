@@ -21,6 +21,7 @@ import fr.coriolis.checker.specs.ArgoDimension;
 import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import fr.coriolis.checker.specs.ArgoVariable;
+import fr.coriolis.checker.tables.R03DeprecatedEntry;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -314,15 +315,11 @@ public class ArgoFileValidator {
 			if (!dataAttrValue.equals(specAttrValue)) {
 				// ..data file attribute is not the same as the spec file attribute
 				ArgoFileSpecification.AttrRegex regex = arFile.getFileSpec().getAttrRegex(varName, attrName);
-				if (regex == null) {
-					// ..no regex .. this is a format error
-					validationResult.addError(
-							"attribute: " + varName + ":" + attrName + ": Definitions differ " + "\n\tSpecification = '"
-									+ specAttrValue + "'" + "\n\tData File     = '" + dataAttrValue + "'");
-					log.info("format error: {}:{} " + "attribute mismatch (no regex): spec, data = {}, {}", varName,
-							attrName, specAttrValue, dataAttrValue);
 
-					return false;
+				if (regex == null) {
+					// ..no regex .. this is a format error unless it is listed as a deprecated
+					// values
+					return checkDeprecatedAttrOrPropValue(varName, attrName, dataAttrValue, specAttrValue);
 
 				} else {
 					// ..regex defined ... does it match?
@@ -335,7 +332,8 @@ public class ArgoFileValidator {
 
 					} else {
 						if (regex.warn) {
-							validationResult.addError("attribute: " + dataVar.getShortName() + ":"
+
+							validationResult.addWarning("attribute: " + dataVar.getShortName() + ":"
 									+ dataAttr.getShortName() + ": Accepted; not standard value"
 									+ "\n\tSpecification     = '" + specAttrValue + "'" + "\n\tException allowed = '"
 									+ regex.pattern + "' (regex)" + "\n\tData File         = '" + dataAttrValue + "'");
@@ -351,6 +349,48 @@ public class ArgoFileValidator {
 		} else {
 			log.debug("ckVarAttr: '{}': marked as IGNORE", attrName);
 		} // ..end if (marked IGNORE)
+		return true;
+	}
+
+	/**
+	 * check if an attribute or properties (data_type, category, extra_dim) value is
+	 * listed in the deprecation versioned table. If so, add a warning or error
+	 * message or pass depending on the status. return false if not found
+	 * 
+	 * @param varName
+	 * @param specAttrValue
+	 * @return
+	 */
+	private boolean checkDeprecatedAttrOrPropValue(String varName, String attrName, String dataAttrValue,
+			String specAttrValue) {
+		List<R03DeprecatedEntry> entries = arFile.getFileSpec().getDeprecatedPhysicalParamsEntries();
+
+		R03DeprecatedEntry entryFound = entries.stream().filter(e -> e.getParamName().equals(varName)
+				&& e.getAttributeKey().equals(attrName) && e.getOldValue().equals(dataAttrValue)).findFirst()
+				.orElse(null);
+
+		if (entryFound == null) {
+			// not found so not listed in deprecated table. add error and return false
+			validationResult.addError("attribute/property: " + varName + ":" + attrName + ": Definitions differ "
+					+ "\n\tSpecification = '" + specAttrValue + "'" + "\n\tData File     = '" + dataAttrValue + "'");
+			log.info("format error: {}:{} " + "attribute mismatch (no regex): spec, data = {}, {}", varName, attrName,
+					specAttrValue, dataAttrValue);
+
+			return false;
+		} else if (entryFound.getStatus().equals("warning")) {
+			validationResult.addWarning(entryFound.getMessage());
+			return true;
+		} else if (entryFound.getStatus().equals("reject")) {
+			// found in the deprecatd table but listed with a status = "reject"
+			validationResult.addError(entryFound.getMessage());
+			return false;
+		} else if (entryFound.getStatus().equals("pass")) {
+			// attribute found in deprecated table with "pass" status so no error nor
+			// warning.
+			return true;
+		}
+
+		// if found but with unknown status, consider that as a "pass"
 		return true;
 	}
 
@@ -869,6 +909,7 @@ public class ArgoFileValidator {
 			// .....Step 2a: Compare the attributes for this variable......
 		} else if (!ckVarAttr(dataVar, specVar)) {
 			// ..variable attributes don't match
+			// check in the deprecated entries table
 			return;
 		}
 

@@ -71,8 +71,10 @@ public class Options {
 	private final String outDirName;
 	private final String inDirName;
 
-	private final boolean useOnlineNVS;
-	private final boolean useInternalSpecs;
+	private final boolean useOnlineNVS; // to read NVS tables from internet instead of the ones providing in the spec
+										// dir (internal or external)
+	private final boolean useInternalSpecs; // to use specs file now included in the .jar file instead of specifying an
+											// external file_chec_spec dir
 
 	// ..standard i/o shortcuts
 	static PrintStream stdout = new PrintStream(System.out);
