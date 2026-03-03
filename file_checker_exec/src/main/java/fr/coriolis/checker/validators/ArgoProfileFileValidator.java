@@ -1511,9 +1511,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					if (qcFlagsTableEntry.isDeprecated()) {
 						depQC++;
 					}
-					// ==========
-					// CHECK_0074
-					// ==========
+					// ===============
+					// CHECK_0074_PROF
+					// ===============
 					if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 						// ..data is missing - QC better be too
 						if (prm_qc[k] != '9' && prm_qc[k] != '0') {
@@ -1639,9 +1639,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				// .. If _ADJUSTED exists the other must too, and so can be tested.
 				// .. IF _QC doesn't exist, NONE of the "ADJ variables" do
 				// .. Skip all of these tests if _QC doesn't exist
-				// ==========
-				// CHECK_0076
-				// ==========
+
 				if (varQC == null) {
 					log.debug(varName + "_QC not in file: skip remaining tests");
 					continue PARAM_LOOP;
@@ -1916,6 +1914,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							}
 
 						} else {
+							// ===============
+							// CHECK_0081_PROF
+							// ===============
 							// ..check if param (not param_adj!) is missing
 							if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 								// .....param is missing.....
@@ -1937,13 +1938,20 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								// .....param is NOT missing......
 
 								if (ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
+									// ===============
+									// CHECK_0082_PROF
+									// ===============
 									// ..param_adj is missing - QC must be 4 or 9
 									if (prm_adj_qc[k] != '4') {
 										if (prm_adj_qc[k] != '9') {
 											// ..adj_qc is NOT 4 or 9
 											missAdj++;
 
-										} else { // ..adj_qc is 9, qc better be too
+										} else {
+											// ===============
+											// CHECK_0083_PROF
+											// ===============
+											// ..adj_qc is 9, qc better be too
 											if (prm_qc[k] != '9') {
 												missMiss++;
 											}

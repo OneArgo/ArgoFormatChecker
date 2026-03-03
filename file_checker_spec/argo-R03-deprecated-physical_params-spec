@@ -1,6 +1,7 @@
 // This table lists deprecated values, 
 //i.e. it lists which param/local_attribute.key/local_attribute.value or param/property.key/property.value pairs 
 //trigger a warning or are accepted (and no longer cause an error).
+// For properties (category, data_type, extra_dims), status and message columns are not needed and will be ignored.
 
 // columns
 // PARAM_NAME | local_attribute.key or property.key | local_attribute.value or property.value | status (reject/warning/pass) | message | versions | deprecation_date
@@ -68,4 +69,3 @@ TPHASE_DOXY | category | c | warning | This category for TPHASE_DOXY is now depr
 VOLTAGE_DOXY | long_name | Voltage reported by sensors such as SBE43 | warning | This long_name for VOLTAGE_DOXY is now deprecated in format version [2.2] | [2.2] | 04/04/2018
 VOLTAGE_DOXY | long_name | VOLTAGE_DOXY | warning | This long_name for VOLTAGE_DOXY is now deprecated in format version [2.3] | [2.3] | 04/04/2018
 VOLTAGE_DOXY | category | c | warning | This category for VOLTAGE_DOXY is now deprecated in format version [3.0] | [3.0] | 04/04/2018
-VOLTAGE_DOXY_TEST | category | c | warning | This category for VOLTAGE_DOXY is now deprecated in format version [3.1] | [3.1] | 04/04/2018

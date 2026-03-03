@@ -2088,9 +2088,6 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			// .. and go with the flow here
 			// ..-- ie, if *_ADJUSTED not present, skip these checks entirely
 
-			// ==========
-			// CHECK_0076
-			// ==========
 			if (var == null) {
 				log.debug("{} not in file: skip *_ADJUSTED checks", varName);
 				continue PARAM_LOOP;
@@ -2296,7 +2293,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						}
 
 					} else {
-
+						// ==============
+						// CHECK_0081_TRAJ
+						// ===============
 						// ..check if param (not param_adj!) is missing
 
 						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
@@ -2320,6 +2319,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							// .....param is NOT missing......
 
 							if (ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
+								// ===============
+								// CHECK_0082_TRAJ
+								// ===============
 								// ..param_adj is missing - QC must be 4 or 9
 								if (prm_adj_qc[n] != '4' && prm_adj_qc[n] != '9') {
 									missAdj.increment(n);
@@ -2347,6 +2349,11 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 										if (is_FillValue(fValue, prm_adj_err[n])) {
 											errNotSetDmode.increment(n);
 										}
+
+										// =================================
+										// CHECK_0076_TRAJ & CHECK_0080_TRAJ
+										// =================================
+
 										// } else {
 										// //.. mode == 'A'
 

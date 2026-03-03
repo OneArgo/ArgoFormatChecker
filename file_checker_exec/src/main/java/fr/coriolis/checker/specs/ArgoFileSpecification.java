@@ -1978,12 +1978,12 @@ public class ArgoFileSpecification {
 			isPost3_0 = true;
 		}
 
+		// get the deprecated R03 entries
+		parseR03DeprecatedTable(version);
+
 		// Open and parse NVS table R03 to build PARAM specifiations :
 		parseR03parameterTable(fileType, version, listOnly, dimPQc, dimParam, auxilliarySettings, isCoreProf, isBioProf,
 				isOldCoreTraj, isOldBioTraj, isTraj, isPost3_0);
-
-		// get the deprecated R03 entries
-		parseR03DeprecatedTable(version);
 
 		log.debug(".....parseParamFile: end.....");
 
@@ -2039,10 +2039,9 @@ public class ArgoFileSpecification {
 				String prmVmax = getOrEmptyStringFromMap(physParamAttributes, "valid_max");
 				String prmFill = getOrEmptyStringFromMap(physParamAttributes, "fill_value");
 				// physical parameter's properties from definition field :
-				String prmType = getOrEmptyStringFromMap(physParamProperties, "data_type");
-				String[] extraDims = getValuesListFromParameterListAttribute(
-						getOrEmptyStringFromMap(physParamAttributes, "extra_dim"));
-				String prmCategory = getOrEmptyStringFromMap(physParamProperties, "category");
+				String prmType = getPropertyValueFromSpec(prm, physParamProperties, "data_type");
+				String[] extraDims = getPropertyListValuesFromSpec(prm, physParamProperties, "extra_dim");
+				String prmCategory = getPropertyValueFromSpec(prm, physParamProperties, "category");
 
 				// deal with empty or "-" attributes (only for >3.0 version)
 				if (isPost3_0) {
@@ -2125,6 +2124,46 @@ public class ArgoFileSpecification {
 				log.warn(e.getMessage());
 			}
 		}
+	}
+
+	/**
+	 * for properties values, need to check frist the deprecated physical params
+	 * table and if no entries detected for the considered parameter and format
+	 * version, check the reference R03 NVS table.
+	 * 
+	 * @param string a properties name (data_type, category, extra_dim=
+	 * @return
+	 */
+	private String getPropertyValueFromSpec(String paramName, Map<String, String> physParamProperties,
+			String propertyName) {
+		List<R03DeprecatedEntry> entries = getDeprecatedPhysicalParamsEntries();
+
+		R03DeprecatedEntry entryFound = entries.stream()
+				.filter(e -> e.getParamName().equals(paramName) && e.getAttributeKey().equals(propertyName)).findFirst()
+				.orElse(null);
+
+		if (entryFound == null) {
+			// nothing in deprecated table, switch to the reference NVS table :
+			return getOrEmptyStringFromMap(physParamProperties, propertyName);
+		}
+
+		return entryFound.getOldValue();
+	}
+
+	private String[] getPropertyListValuesFromSpec(String paramName, Map<String, String> physParamProperties,
+			String propertyName) {
+		List<R03DeprecatedEntry> entries = getDeprecatedPhysicalParamsEntries();
+
+		R03DeprecatedEntry entryFound = entries.stream()
+				.filter(e -> e.getParamName().equals(paramName) && e.getAttributeKey().equals(propertyName)).findFirst()
+				.orElse(null);
+
+		if (entryFound == null) {
+			return getValuesListFromParameterAttribute(getOrEmptyStringFromMap(physParamProperties, propertyName));
+		}
+
+		return getValuesListFromParameterAttribute(entryFound.getOldValue());
+
 	}
 
 	/**
@@ -3262,14 +3301,13 @@ public class ArgoFileSpecification {
 	/**
 	 * attribute in the defintion field of NVS parameters table is in form of
 	 * "extra_dim:[name1, name2,...]". For this attribute, the NvsDefinitionParser
-	 * provide a map with key="extra_dim" and value="[name1, name2]". This function
-	 * is needed to extract name1, name2, etc. and provide a list of string
+	 * provide a map with key="extra_dim" and value="name1, name2". This function is
+	 * needed to extract name1, name2, etc. and provide a list of string
 	 * 
-	 * @param stringList (String). ex : "[name1, name2]"
+	 * @param stringList (String). ex : "name1, name2"
 	 * @return list of extra dimensions. ex : {"name1","name2"}
 	 */
 	private static String[] getValuesListFromParameterListAttribute(String content) {
-
 		// Split and trim each element
 		return Arrays.stream(content.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toArray(String[]::new);
 
