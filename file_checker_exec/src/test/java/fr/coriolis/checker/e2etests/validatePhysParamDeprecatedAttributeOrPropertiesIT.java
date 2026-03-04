@@ -36,4 +36,15 @@ class validatePhysParamDeprecatedAttributeOrPropertiesIT {
 		TestsUtils.e2eTestWarningPresence(fileName, dac, warningMessage, TEST_DIR_NAME);
 	}
 
+	@Tag(TEST_DIR_NAME)
+	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
+	@CsvSource({ "D4900757_024_CNDC_without_ADJUSTED_version-3.0_DMode-A.nc,aoml,FILE-REJECTED,FORMAT-VERIFICATION",
+			"D4900757_024_CNDC_with_ADJUSTED_version-3.0_DMode-A.nc,aoml,FILE-ACCEPTED,FORMAT-VERIFICATION" })
+	void fileChecker_shouldTakeIntoaccount_deprecatedProperties(String fileName, String dac, String result,
+			String phase) throws IOException, InterruptedException {
+
+		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME);
+
+	}
+
 }

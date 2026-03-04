@@ -2136,8 +2136,9 @@ public class ArgoFileSpecification {
 	 */
 	private String getPropertyValueFromSpec(String paramName, Map<String, String> physParamProperties,
 			String propertyName) {
+		// get the parsed table
 		List<R03DeprecatedEntry> entries = getDeprecatedPhysicalParamsEntries();
-
+		// seek if an entry is relevant (paramName / propertyName)
 		R03DeprecatedEntry entryFound = entries.stream()
 				.filter(e -> e.getParamName().equals(paramName) && e.getAttributeKey().equals(propertyName)).findFirst()
 				.orElse(null);
@@ -2146,7 +2147,7 @@ public class ArgoFileSpecification {
 			// nothing in deprecated table, switch to the reference NVS table :
 			return getOrEmptyStringFromMap(physParamProperties, propertyName);
 		}
-
+		// return the value specified in the deprecated table
 		return entryFound.getOldValue();
 	}
 
