@@ -225,6 +225,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		boolean haveLaunch = false;
 
 		if (launch.trim().length() > 0) {
+			// =======
+			// CK_0097
+			// =======
 			dateLaunch = ArgoDate.get(launch);
 			haveLaunch = true;
 
@@ -233,6 +236,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				haveLaunch = false;
 
 			} else {
+				// =======
+				// CK_0098
+				// =======
 				if (dateLaunch.before(earliestDate)) {
 					validationResult.addError("LAUNCH_DATE: '" + launch + "': Before earliest allowed date ('"
 							+ ArgoDate.format(earliestDate) + "')");
@@ -246,7 +252,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// ............start date checks:...........
 		// ..if set, must be valid
 		Date dateStart = null;
-
+		// =======
+		// CK_0099
+		// =======
 		if (start.trim().length() > 0) {
 			dateStart = ArgoDate.get(start);
 
@@ -258,7 +266,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// ............startup date checks:...........
 		// ..if set, within 3 days of launch date (W) and launch data set (W)
 		Date dateStartup = null;
-
+		// =======
+		// CK_0100
+		// =======
 		if (startup.trim().length() > 0) {
 			dateStartup = ArgoDate.get(startup);
 
@@ -273,17 +283,25 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		if (end.trim().length() > 0) {
 			dateEnd = ArgoDate.get(end);
-
+			// =======
+			// CK_0101
+			// =======
 			if (dateEnd == null) {
 				validationResult.addError("END_MISSION_DATE: '" + end + "': Invalid date");
 
 			} else {
 				if (haveLaunch) {
+					// =======
+					// CK_0102
+					// =======
 					if (dateEnd.before(dateLaunch)) {
 						validationResult
-								.addError("END_MISSION_DATE: '" + start + "': Before LAUNCH_DATE ('" + launch + "')");
+								.addError("END_MISSION_DATE: '" + end + "': Before LAUNCH_DATE ('" + launch + "')");
 					}
 				} else {
+					// =======
+					// CK_0103
+					// =======
 					validationResult.addWarning("END_MISSION_DATE: Set. LAUNCH_DATE missing");
 				}
 			}
@@ -599,7 +617,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		SkosConcept tableEntry;
 
 		// ...........single valued variables..............
-
+		// =======
+		// CK_0104
+		// =======
 		name = "CONTROLLER_BOARD_SERIAL_NO_PRIMARY"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -607,6 +627,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": Empty");
 		}
 
+		// =======
+		// CK_0105
+		// =======
 		name = "CONTROLLER_BOARD_TYPE_PRIMARY"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -614,6 +637,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": Empty");
 		}
 
+		// =======
+		// CK_0106
+		// =======
 		name = "DAC_FORMAT_ID"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -624,6 +650,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// DATA_CENTRE
 		super.validateDataCentre(dac);
 
+		// =======
+		// CK_0107
+		// =======
 		name = "FIRMWARE_VERSION"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -631,6 +660,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": Empty");
 		}
 
+		// =======
+		// CK_0046
+		// =======
 		name = "FLOAT_SERIAL_NO"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -640,6 +672,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		// ..LAUNCH_DATE --> checked elsewhere
 
+		// =======
+		// CK_0108
+		// =======
 		name = "LAUNCH_LATITUDE"; // ..on the earth
 		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
@@ -648,6 +683,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": " + dVal + ": Invalid");
 		}
 
+		// =======
+		// CK_0109
+		// =======
 		name = "LAUNCH_LONGITUDE"; // ..on the earth
 		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
@@ -656,20 +694,27 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": " + dVal + ": Invalid");
 		}
 
-		name = "LAUNCH_QC"; // ..ref table 2
+		name = "LAUNCH_QC"; // ..ref table NVS RD2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-
 		tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
 		if (tableEntry != null) {
 			if (tableEntry.isDeprecated()) {
+				// =======
+				// CK_0111
+				// =======
 				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
+			// =======
+			// CK_0110
+			// =======
 			validationResult.addError(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
-
+		// =======
+		// CK_0112
+		// =======
 		name = "MANUAL_VERSION"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -679,6 +724,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		// ..PARAMETER --> see below
 
+		// =======
+		// CK_0113
+		// =======
 		name = "PI_NAME"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -692,13 +740,21 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		tableEntry = ArgoNVSReferenceTable.PLATFORM_FAMILY_TABLE.getConceptMembersByAltLabelMap().get(str);
 		if (tableEntry != null) {
 			if (tableEntry.isDeprecated()) {
+				// =======
+				// CK_0115
+				// =======
 				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
+			// =======
+			// CK_0114
+			// =======
 			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
-
+		// =======
+		// CK_0116
+		// =======
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
 		str = arFile.readString(name).trim();
 		if (!super.validatePlatfomNumber(str)) {
@@ -716,11 +772,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			pmkrValid = true;
 
 			if (plfmMakerTableEntry.isDeprecated()) {
+				// =======
+				// CK_0118
+				// =======
 				validationResult
 						.addWarning(plfmMakerName + ": '" + plfmMaker + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
+			// =======
+			// CK_0117
+			// =======
 			validationResult
 					.addError(plfmMakerName + ": '" + plfmMaker + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
@@ -736,11 +798,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			typValid = true;
 
 			if (pltmTypeTableEntry.isDeprecated()) {
+				// =======
+				// CK_0120
+				// =======
 				validationResult
 						.addWarning(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
+			// =======
+			// CK_0119
+			// =======
 			validationResult
 					.addError(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
@@ -763,7 +831,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// ..POSITIONING_SYSTEM --> see per-positioning_system below
 		// ..PREDEPLOYMENT_CALIB_COEFFICIENT --> see per-param below
 		// ..PREDEPLOYMENT_CALIB_EQUATION --> see per-param below
-
+		// =======
+		// CK_0121
+		// =======
 		name = "PTT";
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -782,13 +852,22 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
 		if (tableEntry != null) {
 			if (tableEntry.isDeprecated()) {
+				// =======
+				// CK_0123
+				// =======
 				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
+			// =======
+			// CK_0122
+			// =======
 			validationResult.addError(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
+		// =======
+		// CK_0124
+		// =======
 		name = "STANDARD_FORMAT_ID"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -809,15 +888,24 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		SkosConcept wmoInstTypetableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE
 				.getConceptMembersByAltLabelMap().get(str);
 		try {
+			// =======
+			// CK_0125
+			// =======
 			Integer.valueOf(str); // check if can be converted to integer
 			if (wmoInstTypetableEntry != null) {
 				wmoValid = true;
 
 				if (wmoInstTypetableEntry.isDeprecated()) {
+					// =======
+					// CK_0127
+					// =======
 					validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
+				// =======
+				// CK_0126
+				// =======
 				validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
@@ -849,20 +937,28 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
+			// =======
+			// CK_0128
+			// =======
 			if (!arFile.getFileSpec().isPhysicalParamName(str)) {
 				validationResult.addError(name + "[" + (n + 1) + "]: '" + str + "': Invalid");
 			}
 		}
 		// check unicity in PARAMETER entries :
+		// =======
+		// CK_0129
+		// =======
 		Set<String> duplicateParameters = checkForDuplicate(paramVar);
 		if (duplicateParameters.size() > 0) {
 			validationResult.addWarning(
 					"PARAMETER variable contains duplicate values: [" + String.join(", ", duplicateParameters) + "]");
 		}
 
+		// =======
+		// CK_0130
+		// =======
 		name = "PARAMETER_UNITS"; // ..not empty
 		paramVar = arFile.readStringArr(name);
-
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
@@ -871,6 +967,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 
+		// =======
+		// CK_0131
+		// =======
 		name = "PARAMETER_SENSOR"; // ..not empty
 		paramVar = arFile.readStringArr(name);
 
@@ -882,6 +981,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 
+		// =======
+		// CK_0132
+		// =======
 		name = "PREDEPLOYMENT_CALIB_COEFFICIENT"; // ..not empty
 		paramVar = arFile.readStringArr(name);
 
@@ -894,6 +996,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 
+		// =======
+		// CK_0133
+		// =======
 		name = "PREDEPLOYMENT_CALIB_EQUATION"; // ..not empty
 		paramVar = arFile.readStringArr(name);
 
@@ -925,18 +1030,27 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			SkosConcept sensorMakerTableEntry;
 
 			// ..check SENSOR
+			// =================
+			// CK_0134 & CK_0135
+			// =================
 			String snsr = sensor[n].trim();
 			String normalizedSensorName = normalizeSensorName(snsr);
 			boolean snsrValid = checkParameterValueAgainstRefTable(sensorName + "[" + (n + 1) + "]",
 					normalizedSensorName, ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap(), false);
 
 			// ..check SENSOR_MAKER
+			// =================
+			// CK_0136 & CK_0137
+			// =================
 			String snsrMaker = sensorMaker[n].trim();
 			boolean smkrValid = checkParameterValueAgainstRefTable(sensorMakerName + "[" + (n + 1) + "]", snsrMaker,
 					ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap(), false);
 			log.debug(sensorMakerName + "[{}]: '{}'", n, snsrMaker);
 
 			// ..check SENSOR_MODEL
+			// =================
+			// CK_0138 & CK_0139
+			// =================
 			String snsrModel = sensorModel[n].trim();
 			boolean mdlValid = checkParameterValueAgainstRefTable(sensorModelName + "[" + (n + 1) + "]", snsrModel,
 					ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap(), false);
@@ -981,6 +1095,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 		// check unicity in SENSOR entries :
+		// =======
+		// CK_0140
+		// =======
 		Set<String> duplicateSensors = checkForDuplicate(sensor);
 		if (duplicateSensors.size() > 0) {
 			validationResult.addWarning(
@@ -1001,10 +1118,16 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			tableEntry = ArgoNVSReferenceTable.POSITIONING_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
 			if (tableEntry != null) {
 				if (tableEntry.isDeprecated()) {
+					// =======
+					// CK_0142
+					// =======
 					validationResult.addWarning(
 							name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 			} else {
+				// =======
+				// CK_0141
+				// =======
 				validationResult.addError(
 						name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
@@ -1024,15 +1147,24 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			tableEntry = ArgoNVSReferenceTable.TRANS_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
 			if (tableEntry != null) {
 				if (tableEntry.isDeprecated()) {
+					// =======
+					// CK_0144
+					// =======
 					validationResult.addWarning(
 							name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 			} else {
+				// =======
+				// CK_0143
+				// =======
 				validationResult.addError(
 						name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 		}
 
+		// =======
+		// CK_0145
+		// =======
 		name = "TRANS_SYSTEM_ID"; // ..not empty
 		transVar = arFile.readStringArr(name);
 

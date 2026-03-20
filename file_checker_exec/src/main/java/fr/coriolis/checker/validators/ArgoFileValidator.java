@@ -162,6 +162,9 @@ public class ArgoFileValidator {
 		checkGroupsCompleteness(dataElement, dataGroup);
 
 		// ......Step 6: Compare the spec global attributes to the file.......
+		// =======
+		// CK_0002
+		// =======
 		log.debug(".....verifyFormat: compare spec global attr to data file.....");
 		verifyGlobalAttributes(dacName);
 
@@ -217,6 +220,9 @@ public class ArgoFileValidator {
 			// log.debug ("ckVarAttr: {}", attrName);
 
 			if (specAttr == null) {
+				// =======
+				// CK_0023
+				// =======
 				// ..data file attribute is not in the specification
 
 				/*
@@ -234,6 +240,9 @@ public class ArgoFileValidator {
 				continue;
 			}
 
+			// ===========
+			// CK_0022 1/2
+			// ===========
 			// ..check if the spec attribute is label "NOT_ALLOWED" error
 			ArgoAttribute.AttrHandling specialHandling = specAttr.getHandling();
 			if (!checkAttributNotAllowed(varName, attrName, specialHandling)) {
@@ -292,7 +301,9 @@ public class ArgoFileValidator {
 				|| specialHandling == ArgoAttribute.AttrHandling.IGNORE_VALUE)) {
 			String dataAttrValue = null;
 			String specAttrValue = specAttr.getValue().toString();
-
+			// =======
+			// CK_0017
+			// =======
 			if (dataAttr.isString()) {
 				try {
 					dataAttrValue = dataAttr.getStringValue();
@@ -319,10 +330,16 @@ public class ArgoFileValidator {
 				if (regex == null) {
 					// ..no regex .. this is a format error unless it is listed as a deprecated
 					// values
+					// =======
+					// CK_0018
+					// =======
 					return checkDeprecatedAttrOrPropValue(varName, attrName, dataAttrValue, specAttrValue);
 
 				} else {
 					// ..regex defined ... does it match?
+					// =======
+					// CK_0020
+					// =======
 					if (!regex.pattern.matcher(dataAttrValue).matches()) {
 						validationResult.addError("attribute: " + dataVar.getShortName() + ":" + dataAttr.getShortName()
 								+ ": Definitions differ " + "\n\tSpecification = '" + regex.pattern + "' (regex)"
@@ -331,8 +348,10 @@ public class ArgoFileValidator {
 						return false;
 
 					} else {
+						// =======
+						// CK_0021
+						// =======
 						if (regex.warn) {
-
 							validationResult.addWarning("attribute: " + dataVar.getShortName() + ":"
 									+ dataAttr.getShortName() + ": Accepted; not standard value"
 									+ "\n\tSpecification     = '" + specAttrValue + "'" + "\n\tException allowed = '"
@@ -377,6 +396,9 @@ public class ArgoFileValidator {
 					specAttrValue, dataAttrValue);
 
 			return false;
+			// =======
+			// CK_0019
+			// =======
 		} else if (entryFound.getStatus().equals("warning")) {
 			validationResult.addWarning(entryFound.getMessage());
 			return true;
@@ -436,6 +458,9 @@ public class ArgoFileValidator {
 	}
 
 	private boolean checkTechParamUnitsAttribute(String varName, String attrName, String dataAttrValue) {
+		// ===========
+		// CK_0095 2/2
+		// ===========
 		if (!arFile.getFileSpec().ConfigTech.isConfigTechUnit(dataAttrValue)
 				&& !arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(dataAttrValue)) {
 			// units not found in reference table !
@@ -450,7 +475,9 @@ public class ArgoFileValidator {
 
 	private boolean checkTechParamLongNameAttribute(Variable dataVar, String varName, String attrName,
 			String dataAttrValue) {
-
+		// ========
+		// CK_0096
+		// =======
 		// get unit value
 		Attribute unitAttribute = dataVar.findAttribute("units");
 		String unitsValue = unitAttribute.getStringValue();
@@ -481,7 +508,9 @@ public class ArgoFileValidator {
 	 */
 	private boolean checkAttributeType(String varName, Attribute dataAttr, String attrName, ArgoAttribute specAttr) {
 		DataType dataAttrType = dataAttr.getDataType();
-
+		// =======
+		// CK_0015
+		// =======
 		if (specAttr.isString()) {
 			if (!dataAttr.isString()) {
 				String err = String.format("attribute: %s:%s: Incorrect attribute value type. Must be string", varName,
@@ -514,6 +543,9 @@ public class ArgoFileValidator {
 			// log.debug("ckVarAttr: '{}': spec/data both Number", attrName);
 
 		} else {
+			// =======
+			// CK_0016
+			// =======
 			// ..what the hell were you thinking?
 			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: ArgoDataFile(ckvarattr) " + varName + ":" + attrName
 					+ ": unknown specAttr type.  TERMINATING.\n" + "******");
@@ -524,6 +556,7 @@ public class ArgoFileValidator {
 
 	private boolean checkAttributNotAllowed(String varName, String attrName,
 			ArgoAttribute.AttrHandling specialHandling) {
+
 		if (specialHandling == ArgoAttribute.AttrHandling.NOT_ALLOWED) {
 			String err = String.format("attribute: %s:%s: Attribute is not allowed.", varName, attrName);
 			// formatErrors.add(err)
@@ -547,6 +580,9 @@ public class ArgoFileValidator {
 	 * @return the boolean status. True - they are the same. False - they differ.
 	 */
 	private boolean ckVarDims(Variable dataVar, ArgoVariable specVar) {
+		// =======
+		// CK_0013
+		// =======
 		String specDims = specVar.getDimensionsString();
 		String dataDims = dataVar.getDimensionsString();
 
@@ -650,6 +686,9 @@ public class ArgoFileValidator {
 	 */
 
 	private boolean ckVarTypes(Variable dataVar, ArgoVariable specVar) {
+		// =======
+		// CK_0012
+		// =======
 		// ..compare data type
 		DataType specType = specVar.getType();
 		DataType dataType = dataVar.getDataType();
@@ -676,14 +715,19 @@ public class ArgoFileValidator {
 	} // ..end ckVarTypes
 
 	private void checkGlobalAttributeValue(String dacName, String name, ArgoAttribute specAttr, Attribute dataAttr) {
+
 		if (dataAttr.isString()) {
 			String specValue = specAttr.getValue().toString();
 			String dataValue = dataAttr.getStringValue();
-
+			// =======
+			// CK_0004
+			// =======
 			if (!(specValue.startsWith(ArgoFileSpecification.ATTR_IGNORE)
 					|| specValue.startsWith(ArgoFileSpecification.ATTR_IGNORE_VALUE))) {
 				// ..specAttr is not set for ignore
-
+				// =======
+				// CK_0003
+				// =======
 				if (!dataValue.equals(specValue)) {
 					// ..data file attribute is not the same as the spec file attribute
 
@@ -717,7 +761,7 @@ public class ArgoFileValidator {
 							log.warn("TEMP WARNING: {}: {}: {}", dacName, arFile.getFileName(), err);
 
 						} else {
-							if (regex.warn) {
+							if (regex.warn) { // useless as global attribute regex warn is always false
 								validationResult.addWarning("global attribute: " + name
 										+ ": Accepted; not standard value" + "\n\tSpecification     = '" + specValue
 										+ "'" + "\n\tException allowed = '" + regex.pattern + "' (regex)"
@@ -786,7 +830,9 @@ public class ArgoFileValidator {
 	}
 
 	private void verifySpecVariablePresenceInData() {
-
+		// =======
+		// CK_0011
+		// =======
 		for (String name : arFile.getFileSpec().getSpecVariableNames()) {
 			ArgoVariable specVar = arFile.getFileSpec().getVariable(name);
 			Variable dataVar = arFile.getNcReader().findVariable(name);
@@ -807,6 +853,9 @@ public class ArgoFileValidator {
 
 				// ..........Step 4a: Check the spec attributes against the data file.......
 			} else {
+				// =======
+				// CK_0013
+				// =======
 				// ..we are looking for attributes the spec says must exist
 				// ..and checking the data variable to see if they do
 				// ..- don't have to check values because the data var attr values were checked
@@ -822,7 +871,9 @@ public class ArgoFileValidator {
 			String attrName) {
 		ArgoAttribute attr = specVar.getAttribute(attrName);
 		ArgoAttribute.AttrHandling handling = attr.getHandling();
-
+		// =======
+		// CK_0014
+		// =======
 		if (handling == ArgoAttribute.AttrHandling.IGNORE_COMPLETELY
 				|| handling == ArgoAttribute.AttrHandling.NOT_ALLOWED) {
 
@@ -845,7 +896,9 @@ public class ArgoFileValidator {
 	}
 
 	private void verifySpecDimensionsPresenceInData() {
-
+		// =======
+		// CK_0006
+		// =======
 		for (ArgoDimension dim : arFile.getFileSpec().getDimensions()) {
 			String name = dim.getName();
 			Dimension dataDim = arFile.getNcReader().findDimension(name);
@@ -893,6 +946,9 @@ public class ArgoFileValidator {
 		ArgoVariable specVar = arFile.getFileSpec().getVariable(name);
 
 		if (specVar == null) {
+			// =====================
+			// CK_0010 & CK_0072 1/2
+			// =====================
 			// ..data file variable is not in the specification
 			validationResult.addError("variable: " + name + ": not defined in specification '"
 					+ arFile.getFileSpec().getSpecName() + "'");
@@ -919,7 +975,9 @@ public class ArgoFileValidator {
 	// ........... verifyFileDimensions ..............
 	// .........................................................
 	private void verifyFileDimensions(HashSet<String> dataElement, HashSet<String> dataGroup) {
-
+		// =======
+		// CK_0005
+		// =======
 		List<Dimension> dimList = arFile.getNcReader().getDimensions();
 
 		if (dimList == null || dimList.isEmpty()) {
@@ -951,6 +1009,9 @@ public class ArgoFileValidator {
 	}
 
 	private void addElementToGroupIfDefinedInSpec(HashSet<String> dataGroup, String elementName) {
+		// =======
+		// CK_0009
+		// =======
 		String group = arFile.getFileSpec().inGroup(elementName);
 		if (group != null) {
 			dataGroup.add(group);
@@ -958,6 +1019,9 @@ public class ArgoFileValidator {
 	}
 
 	private void validateDimensionLength(Dimension dataDim, ArgoDimension specDim) {
+		// =======
+		// CK_0007
+		// =======
 		int specValue = specDim.getValue();
 		int dataValue = dataDim.getLength();
 		if (specValue > 0 && specValue != dataValue) {
@@ -971,6 +1035,9 @@ public class ArgoFileValidator {
 	}
 
 	private void handleExtraDimension(Dimension dataDim, String dimName) {
+		// ============
+		// CK_0008 3/3
+		// ============
 		ArgoDimension specDim;
 		specDim = arFile.getFileSpec().addExtraDimension(dimName, dataDim.getLength());
 
@@ -1062,6 +1129,9 @@ public class ArgoFileValidator {
 		boolean haveCreation = false;
 		long creationSec = 0;
 
+		// =======
+		// CK_0024
+		// =======
 		if (creation.trim().length() <= 0) {
 			validationResult.addError("DATE_CREATION: Not set");
 
@@ -1075,12 +1145,17 @@ public class ArgoFileValidator {
 
 			} else {
 				creationSec = dateCreation.getTime();
-
+				// =======
+				// CK_0025
+				// =======
 				if (dateCreation.before(earliestDate)) {
 					validationResult.addError("DATE_CREATION: '" + creation + "': Before earliest allowed date ('"
 							+ ArgoDate.format(earliestDate) + "')");
 
 				} else if ((arFile.getCreationSec() - fileSec) > oneDaySec) {
+					// =======
+					// CK_0026
+					// =======
 					validationResult.addError("DATE_CREATION: '" + creation + "': After GDAC receipt time ('"
 							+ ArgoDate.format(fileTime) + "')");
 				}
@@ -1093,7 +1168,9 @@ public class ArgoFileValidator {
 		Date dateUpdate = null;
 		boolean haveUpdate = false;
 		long updateSec = 0;
-
+		// =======
+		// CK_0027
+		// =======
 		if (update.trim().length() <= 0) {
 			validationResult.addError("DATE_UPDATE: Not set");
 		} else {
@@ -1106,12 +1183,17 @@ public class ArgoFileValidator {
 
 			} else {
 				updateSec = dateUpdate.getTime();
-
+				// =======
+				// CK_0028
+				// =======
 				if (arFile.isHaveCreationDate() && dateUpdate.before(dateCreation)) {
 					validationResult
 							.addError("DATE_UPDATE: '" + update + "': Before DATE_CREATION ('" + creation + "')");
 				}
 
+				// =======
+				// CK_0029
+				// =======
 				if ((updateSec - fileSec) > oneDaySec) {
 					validationResult.addError("DATE_UPDATE: '" + update + "': After GDAC receipt time ('"
 							+ ArgoDate.format(fileTime) + "')");
@@ -1133,11 +1215,17 @@ public class ArgoFileValidator {
 		String str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 		if (dac != null) {
+			// =======
+			// CK_0039
+			// =======
 			if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(str)) {
 				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid for DAC " + dac);
 			}
 
 		} else { // ..incoming DAC not set
+			// =======
+			// CK_0038
+			// =======
 			if (!ArgoReferenceTable.DacCenterCodes.containsValue(str)) {
 				validationResult.addError("DATA_CENTRE: '" + str + "': Invalid (for all DACs)");
 			}
@@ -1292,7 +1380,9 @@ public class ArgoFileValidator {
 	 * @return true = file name conforms; false = file name non-conforming
 	 */
 	public boolean validateGdacFileName() {
-
+		// =======
+		// CK_0001
+		// =======
 		String expected = getGdacFileName();
 
 		if (expected == null) {
@@ -1463,7 +1553,6 @@ public class ArgoFileValidator {
 
 		// ..update date check
 		// ..just check for valid date
-
 		String update = arFile.readString("DATE_UPDATE");
 
 		if (update.trim().length() <= 0) {

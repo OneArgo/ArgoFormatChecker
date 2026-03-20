@@ -11,7 +11,7 @@ public class AuxilliarySettings {
 		this.errComment = null;
 		this.errLongName = null;
 		this.presAdjAxis = "Z";
-		this.presAxis = "Z";
+		this.presAxis = "Z"; // REQ_0037 1/2
 	}
 
 	public String getErrComment() {

@@ -27,7 +27,8 @@ public final class ArgoNVSReferenceTable {
 		STATUS("STATUS", "R19"), GROUNDED("GROUNDED", "R20"), PLATFORM_FAMILY("PLATFORM_FAMILY", "R22"),
 		SENSOR("SENSOR", "R25"), SENSOR_MAKER("SENSOR_MAKER", "R26"), SENSOR_MODEL("SENSOR_MODEL", "R27"),
 		MEASUREMENT_CODE_ID("MEASUREMENT_CODE_ID", "R15"), TECHNICAL_PARAMETER_NAME("TECHNICAL_PARAMETER_NAME", "R14"),
-		CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME", "R18"), PARAMETER("PARAMETER", "R03");
+		CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME", "R18"), PARAMETER("PARAMETER", "R03"),
+		PROGRAM_NAME("PROGRAM_NAME", "R41");
 
 		public final String name;
 		public final String code;
@@ -75,6 +76,7 @@ public final class ArgoNVSReferenceTable {
 	public static SkosCollection TECHNICAL_PARAMETER_NAME_TABLE;
 	public static SkosCollection CONFIG_PARAMETER_NAME_TABLE;
 	public static SkosCollection PARAMETER_TABLE;
+	public static SkosCollection PROGRAM_NAME_TABLE;
 
 	// ====
 	// INIT
@@ -176,6 +178,7 @@ public final class ArgoNVSReferenceTable {
 		TECHNICAL_PARAMETER_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.TECHNICAL_PARAMETER_NAME);
 		CONFIG_PARAMETER_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.CONFIG_PARAMETER_NAME);
 		PARAMETER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PARAMETER);
+		PROGRAM_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PROGRAM_NAME);
 	}
 
 	private static Set<File> listFolderFiles(String nvsFolderPath) {

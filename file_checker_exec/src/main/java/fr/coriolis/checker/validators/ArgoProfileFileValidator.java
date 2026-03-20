@@ -529,15 +529,16 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							}
 						} // ..end if (param.length)
 					} // ..end for (nParam)
-
-					// ..check that calibration info is set for all parameters
+						// ===============
+						// CHECK_0088_PROF
+						// ===============
+						// ..check that calibration info is set for all parameters
 					for (String prm : profParam.get(n)) {
 						if (!calibParam.contains(prm)) {
 							validationResult.addError("D-mode: PARAMETER[" + (n + 1) + "," + (c + 1)
 									+ ",*,*]: Parameter '" + prm + "' not included");
 						}
 					}
-
 					// ..check that calibration info is set for all parameters
 					for (String prm : calibParam) {
 						if (!profParam.get(n).contains(prm)) {
@@ -1957,24 +1958,27 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 											}
 										}
 									}
+									// ===================
+									// CHECK_0087_PROF 1/2
+									// ===================
 									if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[k])) {
 										errNotMiss++;
 									}
 
 								} else {
 									// ..param_adj is NOT missing
-									if (prm_adj_qc[k] == '4' || prm_adj_qc[k] == '9') {
-										if (mode == 'D') {
-											missNot++;
 
-										} else { // ..mode == 'A'
-											if (prm_adj_qc[k] == '9') {
-												missNot++;
-											}
-										}
+									// =================================
+									// CHECK_0084_PROF & CHECK_0085_PROF
+									// =================================
+									if ((prm_adj_qc[k] == '4' && mode == 'D') || prm_adj_qc[k] == '9') {
+										missNot++;
 
 									} else {
 										if (mode == 'D') {
+											// =====================================
+											// CHECK_0086_PROF & CHECK_0087_PROF 2/2
+											// =====================================
 											if (is_99_999_FillValue(prm_adj_err[k])) {
 												errMiss++;
 											}

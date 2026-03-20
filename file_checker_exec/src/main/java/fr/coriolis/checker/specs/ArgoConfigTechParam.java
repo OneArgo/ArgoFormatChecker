@@ -744,6 +744,9 @@ public class ArgoConfigTechParam {
 
 		// ..column[0] is the parameter name and includes an example unit
 		// ..need to strip off the unit
+		// ===========
+		// CK_0093 1/2
+		// ===========
 		String[] paramNameAndUnit = extractParamNameAndUnitFromParamCode(fileName, parameterCode);
 		String paramName = paramNameAndUnit[0];
 		String unit = paramNameAndUnit[1];
@@ -784,6 +787,9 @@ public class ArgoConfigTechParam {
 //	}
 
 	private void buildListOfShortSensorNameFromNVSParamTemplateValues(Map<String, String> paramAttributes) {
+		// =======
+		// CK_0094
+		// =======
 		String[] shortSensorNameValuesforGivenParameter = ArgoFileSpecification.getValuesListFromParameterAttribute(
 				ArgoFileSpecification.getOrEmptyStringFromMap(paramAttributes, "short_sensor_name"));
 		// first clean the map for this key (from previous tech param parsing):
@@ -1142,7 +1148,9 @@ public class ArgoConfigTechParam {
 	 */
 	public void parseUnitFile() throws IOException {
 		log.debug(".....parseConfigTechUnitFile: start.....");
-
+		// ===========
+		// CK_0095 1/2
+		// ===========
 		String[] fileNames = { unitFileName, unitFileName + ".deprecated" };
 		LinkedHashMap<String, ConfigTechValueType> list;
 

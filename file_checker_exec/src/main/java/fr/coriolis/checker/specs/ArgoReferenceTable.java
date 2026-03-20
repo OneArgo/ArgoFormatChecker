@@ -129,7 +129,7 @@ public final class ArgoReferenceTable {
 	public static LinkedHashSet<String> BATTERY_TYPE_manufacturer;
 	public static LinkedHashSet<String> BATTERY_TYPE_type;
 
-	// .....reference table 29.....
+	// .....reference table 30.....
 	public static LinkedHashSet<String> BATTERY_PACKS_style;
 	public static LinkedHashSet<String> BATTERY_PACKS_type;
 

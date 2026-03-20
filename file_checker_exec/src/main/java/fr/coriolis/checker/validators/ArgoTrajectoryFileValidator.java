@@ -2293,7 +2293,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						}
 
 					} else {
-						// ==============
+						// ===============
 						// CHECK_0081_TRAJ
 						// ===============
 						// ..check if param (not param_adj!) is missing
@@ -2327,32 +2327,33 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 									missAdj.increment(n);
 								}
 
+								// ===================
+								// CHECK_0087_TRAJ 1/2
+								// ===================
 								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 									errNotMiss.increment(n);
 								}
 
 							} else {
 								// ..param_adj is NOT missing
-
-								if (prm_adj_qc[n] == '4' || prm_adj_qc[n] == '9') {
-									if (mode[n] == 'D') {
-										adjNotMiss.increment(n);
-
-									} else { // ..mode == 'A'
-										if (prm_adj_qc[n] == '9') {
-											adjNotMiss.increment(n);
-										}
-									}
+								// =================================
+								// CHECK_0084_TRAJ & CHECK_0085_TRAJ
+								// =================================
+								if ((prm_adj_qc[n] == '4' && mode[n] == 'D') || prm_adj_qc[n] == '9') {
+									adjNotMiss.increment(n);
 
 								} else {
 									if (mode[n] == 'D') {
+										// =====================================
+										// CHECK_0086_TRAJ & CHECK_0087_TRAJ 2/2
+										// =====================================
 										if (is_FillValue(fValue, prm_adj_err[n])) {
 											errNotSetDmode.increment(n);
 										}
 
-										// =================================
-										// CHECK_0076_TRAJ & CHECK_0080_TRAJ
-										// =================================
+										// ===================================================
+										// CHECK_0076_TRAJ & CHECK_0080_TRAJ (not implemented)
+										// ===================================================
 
 										// } else {
 										// //.. mode == 'A'

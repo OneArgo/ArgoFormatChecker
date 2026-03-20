@@ -760,6 +760,9 @@ public class ArgoFileSpecification {
 	 * @return The ArgoDimension object. Null if not defined.
 	 */
 	public ArgoDimension addExtraDimension(String name, int length) {
+		// ===========
+		// CK_0008 2/3
+		// ===========
 		ArgoDimension aDim = dimHash.get(name);
 
 		if (aDim != null) {
@@ -1181,6 +1184,9 @@ public class ArgoFileSpecification {
 	private void addOptionnalTechParamVariables() {
 		// get tech param names (without unit)
 		for (String techParamName : ConfigTech.getTechParamList()) {
+			// ================
+			// CK_0093_TECH 2/2
+			// ================
 			createAndAddToGroupOptionnalTechParamVariable(techParamName);
 		}
 
@@ -1223,6 +1229,9 @@ public class ArgoFileSpecification {
 
 		varHash.put(techParamName, techParamVar);
 		// 2 - add it to the optionnal variables :
+		// =======
+		// CK_0092
+		// =======
 		optVar.add(techParamName);
 		// 3 - create the group for the <tech_param> variable
 		createGroup(groupMembers, techParamName);
@@ -1394,6 +1403,9 @@ public class ArgoFileSpecification {
 		m = pDimPattern.matcher(line);
 
 		if (m.matches()) {
+			// ===========
+			// CK_0008 1/3
+			// ===========
 			Pattern pattern = null;
 			name = m.group(1);
 
@@ -2019,6 +2031,9 @@ public class ArgoFileSpecification {
 			ArgoDimension[] dimPQc, ArgoDimension[] dimParam, AuxilliarySettings auxilliarySettings, boolean isCoreProf,
 			boolean isBioProf, boolean isOldCoreTraj, boolean isOldBioTraj, boolean isTraj, boolean isPost3_0)
 			throws IOException {
+		// ===========
+		// CK_0072 2/2
+		// ===========
 		for (SkosConcept physParamEntry : ArgoNVSReferenceTable.PARAMETER_TABLE.getConceptMembersByAltLabelMap()
 				.values()) {
 
@@ -2044,6 +2059,9 @@ public class ArgoFileSpecification {
 				String prmCategory = getPropertyValueFromSpec(prm, physParamProperties, "category");
 
 				// deal with empty or "-" attributes (only for >3.0 version)
+				// ===========
+				// CK_0022 2/2
+				// ===========
 				if (isPost3_0) {
 					prmSName = replaceAttributeIfNotAllowed(prmSName);
 					prmVmin = replaceAttributeIfNotAllowed(prmVmin);
@@ -2906,6 +2924,9 @@ public class ArgoFileSpecification {
 			}
 
 			if (v.equals("PRES")) {
+				// ========
+				// REQ_0037
+				// ========
 				addAttr(aVar, axis, presAxis, DataType.STRING);
 			} else if (v.equals("PRES_ADJUSTED")) {
 				addAttr(aVar, axis, pres_adjAxis, DataType.STRING);
@@ -3122,6 +3143,12 @@ public class ArgoFileSpecification {
 	}
 
 	private void createVariableGroups(String prmName, boolean CORE, boolean BIO, String group_qc, String group_adj) {
+		// ==========
+		// CHECK_0087
+		// ==========
+		// phase of building variable group in fonction of core/bgc and intermediate
+		// physical parameter is important for te format check and the expected presence
+		// of <PARAM>_ADJUSTED, <PARAM>_ADJUSTED_QC, <PARAM>_ADJUSTED_ERROR
 		if (CORE || BIO) { // ..a "full parameter"
 			if (!groupMembers.containsKey(prmName)) { // ..new group - init
 				groupMembers.put(prmName, new HashSet<String>());
@@ -3387,7 +3414,7 @@ public class ArgoFileSpecification {
 	 */
 	private String replaceAttributeIfNotAllowed(String attrValue) {
 		if (attrValue.length() == 0 || attrValue.equals("-")) {
-			attrValue = ATTR_NOT_ALLOWED;
+			return ATTR_NOT_ALLOWED;
 		}
 		return attrValue;
 	}

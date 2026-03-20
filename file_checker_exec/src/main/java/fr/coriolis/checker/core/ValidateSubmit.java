@@ -472,7 +472,7 @@ public class ValidateSubmit {
 		boolean doDataCheck = false;
 		if (formatPassed && !rudimentaryDateCheckDone) {
 			doDataCheck = true;
-
+			System.out.println("do data check");
 			if (isDoFormatOnly) {
 				doDataCheck = false;
 				log.debug("data check SKIPPED (-format-only)");
@@ -480,6 +480,7 @@ public class ValidateSubmit {
 
 		} else {
 			doDataCheck = false;
+			System.out.println("data check SKIPPED (format rejected)");
 			log.debug("data check SKIPPED (format rejected)");
 		}
 
