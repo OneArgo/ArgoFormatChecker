@@ -620,32 +620,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// =======
 		// CK_0104
 		// =======
-		name = "CONTROLLER_BOARD_SERIAL_NO_PRIMARY"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("CONTROLLER_BOARD_SERIAL_NO_PRIMARY");
 
 		// =======
 		// CK_0105
 		// =======
-		name = "CONTROLLER_BOARD_TYPE_PRIMARY"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("CONTROLLER_BOARD_TYPE_PRIMARY");
 
 		// =======
 		// CK_0106
 		// =======
-		name = "DAC_FORMAT_ID"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("DAC_FORMAT_ID");
 
 		// DATA_CENTRE
 		super.validateDataCentre(dac);
@@ -653,22 +638,12 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// =======
 		// CK_0107
 		// =======
-		name = "FIRMWARE_VERSION"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("FIRMWARE_VERSION");
 
 		// =======
 		// CK_0046
 		// =======
-		name = "FLOAT_SERIAL_NO"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("FLOAT_SERIAL_NO");
 
 		// ..LAUNCH_DATE --> checked elsewhere
 
@@ -715,24 +690,14 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// =======
 		// CK_0112
 		// =======
-		name = "MANUAL_VERSION"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("MANUAL_VERSION");
 
 		// ..PARAMETER --> see below
 
 		// =======
 		// CK_0113
 		// =======
-		name = "PI_NAME"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("PI_NAME");
 
 		name = "PLATFORM_FAMILY"; // ..ref table 22
 		str = arFile.readString(name).trim();
@@ -834,12 +799,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// =======
 		// CK_0121
 		// =======
-		name = "PTT";
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("PTT");
 
 		// ..SENSOR --> see per-sensor below
 		// ..SENSOR_MAKER --> see per-sensor below
@@ -868,12 +828,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// =======
 		// CK_0124
 		// =======
-		name = "STANDARD_FORMAT_ID"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		super.checkStrVarEmpty("STANDARD_FORMAT_ID");
 
 		// ..TRANS_FREQUENCY \
 		// ..TRANS_SYSTEM --> see per-trans_sys below

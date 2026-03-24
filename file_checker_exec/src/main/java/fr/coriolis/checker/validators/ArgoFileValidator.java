@@ -1232,6 +1232,19 @@ public class ArgoFileValidator {
 		}
 	}
 
+	/**
+	 * Check if a String variable is empty. Error if empty
+	 * 
+	 * @param varName : the variable name
+	 */
+	protected void checkStrVarEmpty(String varName) {
+		String str = arFile.readString(varName).trim();
+		log.debug("{}: '{}'", varName, str);
+		if (str.length() <= 0) {
+			validationResult.addError(varName + ": Empty");
+		}
+	}
+
 	// .........................................................
 	// ........... getGdacFileName ..............
 	// .........................................................
