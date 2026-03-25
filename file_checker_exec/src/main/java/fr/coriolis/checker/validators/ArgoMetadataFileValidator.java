@@ -1224,7 +1224,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String str = arFile.readString("BATTERY_TYPE");
 		log.debug("BATTERY_TYPE: '{}'", str);
 
-		if (str.length() <= 0) {
+		if (str.trim().length() <= 0) {
 			validationResult.addError("BATTERY_TYPE: Empty");
 
 		} else {
@@ -1245,7 +1245,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 					log.debug("...matched pattern: manu, type, volt = '{}', '{}', '{}'", manu, type, volt);
 
-					if (!ArgoReferenceTable.BATTERY_TYPE_manufacturer.contains(manu)) {
+					SkosConcept tableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE.getConceptMembersByAltLabelMap()
+							.get(manu);
+					if (tableEntry != null) {
+						if (tableEntry.isDeprecated()) {
+							String err = String.format("BATTERY_TYPE[%d]: Deprecated manufacturer: '{%s}'", nTypes,
+									manu);
+							validationResult.addWarning(err);
+						} else {
+							log.debug("valid manufacturer");
+						}
+					} else {
 						String err = String.format("BATTERY_TYPE[%d]: Invalid manufacturer: '{%s}'", nTypes, manu);
 						// validationResult.addError(err);
 
@@ -1254,10 +1264,21 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("...invalid manufacturer");
-
-					} else {
-						log.debug("valid manufacturer");
 					}
+
+//					if (!ArgoReferenceTable.BATTERY_TYPE_manufacturer.contains(manu)) {
+//						String err = String.format("BATTERY_TYPE[%d]: Invalid manufacturer: '{%s}'", nTypes, manu);
+//						// validationResult.addError(err);
+//
+//						// ################# TEMPORARY WARNING ################
+//						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//						log.debug("...invalid manufacturer");
+//
+//					} else {
+//						log.debug("valid manufacturer");
+//					}
 
 					if (!ArgoReferenceTable.BATTERY_TYPE_type.contains(type)) {
 						String err = String.format("BATTERY_TYPE[%d]: Invalid type: '{%s}'", nTypes, type);

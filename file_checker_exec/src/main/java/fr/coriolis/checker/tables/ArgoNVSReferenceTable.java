@@ -28,7 +28,7 @@ public final class ArgoNVSReferenceTable {
 		SENSOR("SENSOR", "R25"), SENSOR_MAKER("SENSOR_MAKER", "R26"), SENSOR_MODEL("SENSOR_MODEL", "R27"),
 		MEASUREMENT_CODE_ID("MEASUREMENT_CODE_ID", "R15"), TECHNICAL_PARAMETER_NAME("TECHNICAL_PARAMETER_NAME", "R14"),
 		CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME", "R18"), PARAMETER("PARAMETER", "R03"),
-		PROGRAM_NAME("PROGRAM_NAME", "R41");
+		PROGRAM_NAME("PROGRAM_NAME", "R41"), BATTERY_MAKER("BATTERY_MAKER", "R33");
 
 		public final String name;
 		public final String code;
@@ -77,6 +77,7 @@ public final class ArgoNVSReferenceTable {
 	public static SkosCollection CONFIG_PARAMETER_NAME_TABLE;
 	public static SkosCollection PARAMETER_TABLE;
 	public static SkosCollection PROGRAM_NAME_TABLE;
+	public static SkosCollection BATTERY_MAKER_TABLE;
 
 	// ====
 	// INIT
@@ -179,6 +180,7 @@ public final class ArgoNVSReferenceTable {
 		CONFIG_PARAMETER_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.CONFIG_PARAMETER_NAME);
 		PARAMETER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PARAMETER);
 		PROGRAM_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PROGRAM_NAME);
+		BATTERY_MAKER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.BATTERY_MAKER);
 	}
 
 	private static Set<File> listFolderFiles(String nvsFolderPath) {
