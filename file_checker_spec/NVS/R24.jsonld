@@ -275,10 +275,10 @@
             "@type": "skos:Concept",
             "skos:related": [
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_II/"
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR/"
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_II/"
                 }
             ],
             "skos:definition": {
@@ -500,10 +500,13 @@
             "@type": "skos:Concept",
             "skos:related": [
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_V/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_V_JUMBO/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_II/"
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_IV/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR/"
@@ -512,22 +515,19 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R23/current/ARVOR/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_V/"
-                },
-                {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/POPS_PROVOR/"
-                },
-                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_III/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R23/current/ARVOR_D/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_IV/"
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/ARVOR_C/"
                 },
                 {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/ARVOR_C/"
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/PROVOR_II/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R23/current/POPS_PROVOR/"
                 }
             ],
             "skos:definition": {

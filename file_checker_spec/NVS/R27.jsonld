@@ -887,39 +887,47 @@
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/AANDERAA_OPTODE_3930/",
-            "pav:authoredOn": "2021-05-26 09:01:46.0",
+            "pav:hasVersion": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/AANDERAA_OPTODE_3930/1/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/AANDERAA_OPTODE_3930/2/"
+                }
+            ],
+            "pav:authoredOn": "2026-03-09 09:11:24.0",
             "@type": "skos:Concept",
             "skos:related": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R25/current/OPTODE_DOXY/"
             },
             "skos:definition": {
                 "@language": "en",
-                "@value": "A stand-alone oxygen optode with integrated temperature sensor, manufactured by Aanderaa. This instrument exploits the physio-chemical principle of dynamic fluorescence quenching to measure absolute oxygen concentration and percent saturation. Depth rating: 2000 m or 6000 m; oxygen concentration accuracy of < 8 uM or 5 %, and resolution of < 1 uM; air saturation accuracy of < 5 %, and resolution of 0.4 %; settling time (63 %): < 25 s."
+                "@value": "Deprecated as it is not used on Argo Floats. A stand-alone oxygen optode with integrated temperature sensor, manufactured by Aanderaa. This instrument exploits the physio-chemical principle of dynamic fluorescence quenching to measure absolute oxygen concentration and percent saturation. Depth rating: 2000 m or 6000 m; oxygen concentration accuracy of < 8 uM or 5 %, and resolution of < 1 uM; air saturation accuracy of < 5 %, and resolution of 0.4 %; settling time (63 %): < 25 s."
             },
             "void:inDataset": {
                 "@id": "http://vocab.nerc.ac.uk/.well-known/void"
             },
-            "owl:deprecated": "false",
+            "owl:deprecated": "true",
             "skos:note": {
                 "@language": "en",
-                "@value": "accepted"
+                "@value": "deprecated"
             },
             "dc:identifier": "SDN:R27::AANDERAA_OPTODE_3930",
             "skos:prefLabel": {
                 "@language": "en",
                 "@value": "Aanderaa 3930 oxygen optode"
             },
-            "owl:versionInfo": "1",
-            "dc:date": "2021-05-26 09:01:46.0",
+            "owl:versionInfo": "3",
+            "dc:date": "2026-03-09 09:11:24.0",
             "skos:altLabel": "AANDERAA_OPTODE_3930",
             "skos:notation": "SDN:R27::AANDERAA_OPTODE_3930",
             "skos:broader": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/AANDERAA/"
             },
-            "pav:version": "1",
+            "pav:version": "3",
             "dce:identifier": "SDN:R27::AANDERAA_OPTODE_3930",
             "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/AANDERAA_OPTODE_3930/1/"
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/AANDERAA_OPTODE_3930/3/"
             }
         },
         {
@@ -6911,8 +6919,8 @@
             "dc:description": "Terms listing models of sensors mounted on Argo floats. Note: avoid using the manufacturer name and sensor firmware version in new entries when possible. Argo netCDF variable SENSOR_MODEL is populated by R27 altLabel.",
             "dc:title": "Argo sensor models",
             "skos:prefLabel": "Argo sensor models",
-            "owl:versionInfo": "23",
-            "dc:date": "2025-11-19 02:00:00.0",
+            "owl:versionInfo": "25",
+            "dc:date": "2026-03-10 02:00:00.0",
             "skos:altLabel": "SENSOR_MODEL",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "SENSOR_MODEL",

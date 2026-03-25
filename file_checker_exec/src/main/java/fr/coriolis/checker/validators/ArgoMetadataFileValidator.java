@@ -19,7 +19,6 @@ import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.specs.ArgoConfigTechParam;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
-import fr.coriolis.checker.specs.ArgoReferenceTable.StringTable;
 import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
@@ -161,7 +160,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 	private void validateOptionalParams() {
 		// PROGRAM_NAME - ref table 41
-		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME, true);
+		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME",
+				ArgoNVSReferenceTable.PROGRAM_NAME_TABLE.getConceptMembersByAltLabelMap(), true);
 	}
 
 	/**
@@ -1164,38 +1164,16 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		}
 	}
 
-	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable,
+	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, Map<String, SkosConcept> refTable,
 			boolean warningOnly) {
 
 		Variable dataVar = arFile.getNcReader().findVariable(parameterName);
 		if (dataVar != null) {
 			String parameterValue = arFile.readString(parameterName).trim();
-			// =======TO DO : replace with NVS table 41 when it exists. ======
-			ArgoReferenceTable.ArgoReferenceEntry info;
 
-			log.debug("{}: '{}'", parameterName, parameterValue);
-			if ((info = refTable.contains(parameterValue)).isValid()) {
-				if (info.isDeprecated) {
-					validationResult.addWarning(parameterName + ": '" + parameterValue + "' Status: " + info.message);
-				}
-				return true;
-
-			} else {
-				String resultMessage = parameterName + ": '" + parameterValue + "' Status: " + info.message
-						+ " (not in reference table)";
-				if (warningOnly) {
-					validationResult.addWarning(resultMessage);
-				} else {
-					validationResult.addError(resultMessage);
-				}
-
-				return false;
-			}
-			// =====================================================================
-
-			// return checkParameterValueAgainstRefTable(parameterName, parameterValue,
-			// refTable, warningOnly);
+			checkParameterValueAgainstRefTable(parameterName, parameterValue, refTable, warningOnly);
 		}
+
 		return true;
 	}
 
