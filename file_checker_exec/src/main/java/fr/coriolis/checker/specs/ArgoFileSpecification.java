@@ -1182,11 +1182,16 @@ public class ArgoFileSpecification {
 	 * variables contained in the groupe(if exists) "TECH_TIMESERIES".
 	 */
 	private void addOptionnalTechParamVariables() {
+		// ================
+		// CK_0093 2/2
+		// ================
 		// get tech param names (without unit)
 		for (String techParamName : ConfigTech.getTechParamList()) {
-			// ================
-			// CK_0093_TECH 2/2
-			// ================
+
+			createAndAddToGroupOptionnalTechParamVariable(techParamName);
+		}
+		// get tech param names from paramRegex
+		for (String techParamName : ConfigTech.getAllPossibleParamNames(ConfigTech.getTechParamRegex())) {
 			createAndAddToGroupOptionnalTechParamVariable(techParamName);
 		}
 

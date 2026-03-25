@@ -77,8 +77,6 @@ public class ArgoConfigTechParam {
 	static final Map<String, String> templateReplacement;
 	static final Set<String> knownTemplates;
 	static final Set<String> knownTemplatesWithMatchListToCheck;
-	static final Map<String, Set<String>> possibleValuesByKey;
-
 	static {
 		defaultTemplateReplacement = "(?<default>\\w+)";
 
@@ -103,18 +101,9 @@ public class ArgoConfigTechParam {
 
 		knownTemplates = new HashSet<>(Arrays.asList("D", "horizontalphasename", "I", "N", "N1", "param", "PARAM", "S",
 				"SubS", "shortsensorname", "verticalphasename", "cyclephasename", "digit", "int", "Z"));
-		knownTemplatesWithMatchListToCheck = new HashSet<>(Arrays.asList("horizontalphasename", "N", "N1", "param",
-				"PARAM", "shortsensorname", "verticalphasename", "cyclephasename"));
+		knownTemplatesWithMatchListToCheck = new HashSet<>(Arrays.asList("horizontalphasename", "N", "N1", "digit",
+				"param", "PARAM", "shortsensorname", "verticalphasename", "cyclephasename"));
 
-		// Map<String, Set<String>> temp2 = new HashMap<>();
-		possibleValuesByKey = new HashMap<>();
-		// temp2.put("short_sensor_name",
-		// ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name);
-		possibleValuesByKey.put("Z", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
-		possibleValuesByKey.put("I", new HashSet<>(Arrays.asList("1", "2", "3", "4", "5")));
-		possibleValuesByKey.put("cycle_phase_name", ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name);
-		possibleValuesByKey.put("param", ArgoReferenceTable.GENERIC_TEMPLATE_param);
-		// possibleValuesByKey = Collections.unmodifiableMap(temp2);
 	}
 	// ......define and initialize the pattern matcher objects......
 	static Pattern pBlankOrComment; // ..match a blank line or a comment line
@@ -586,12 +575,11 @@ public class ArgoConfigTechParam {
 		for (SkosConcept configParamEntry : ArgoNVSReferenceTable.CONFIG_PARAMETER_NAME_TABLE
 				.getConceptMembersByAltLabelMap().values()) {
 			if (!configParamEntry.isDeprecated()) {
-				parseConfigParamName(configParamList, configParamRegex, "NVS R18 table", pTemplate, configParamEntry);
+				parseParamName(configParamList, configParamRegex, "NVS R18 table", pTemplate, configParamEntry);
 
 			} else {
 				// it is a deprecated config param
-				parseConfigParamName(configParamList_DEP, configParamRegex_DEP, "NVS R18 table", pTemplate,
-						configParamEntry);
+				parseParamName(configParamList_DEP, configParamRegex_DEP, "NVS R18 table", pTemplate, configParamEntry);
 
 			}
 		}
@@ -613,12 +601,12 @@ public class ArgoConfigTechParam {
 	 * @param pTemplate
 	 * @param column
 	 */
-	private void parseConfigParamName(LinkedHashSet<String> paramList,
+	private void parseParamName(LinkedHashSet<String> paramList,
 			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String tableName, Pattern pTemplate,
-			SkosConcept configParamEntry) {
+			SkosConcept paramEntry) {
 
 		// ..need to strip off the unit
-		String paramCode = configParamEntry.getPrefLabel();
+		String paramCode = paramEntry.getPrefLabel();
 		String param = extractParamNameAndUnitFromParamCode(tableName, paramCode)[0];
 		String unit = extractParamNameAndUnitFromParamCode(tableName, paramCode)[1]; // not useful of the moment as we
 																						// authorize all units from the
@@ -663,10 +651,10 @@ public class ArgoConfigTechParam {
 			matchList = new HashMap<String, HashSet<String>>();
 
 			// get template_values defined in Definition field :
-			Map<String, String> configParamTemplateValues = NvsDefinitionParser.parseAttributes("Template_Values",
-					configParamEntry.getDefinition());
+			Map<String, String> paramTemplateValues = NvsDefinitionParser.parseAttributes("Template_Values",
+					paramEntry.getDefinition());
 
-			buildTemplatesMatchingListFromNVSParamTemplateValues(matchList, configParamTemplateValues);
+			buildTemplatesMatchingListFromNVSParamTemplateValues(matchList, paramTemplateValues);
 
 			if (matchList != null && matchList.size() > 0) {
 				paramRegex.put(pRegex, matchList);
@@ -688,6 +676,9 @@ public class ArgoConfigTechParam {
 	 * @throws IOException indicates file read or permission error
 	 */
 	public void parseTechParamFile() throws IOException {
+		// ===========
+		// CK_0093 1/2
+		// ===========
 		log.debug(".....parseTechParamFile: start.....");
 
 		techParamList = new LinkedHashSet<String>(250);
@@ -705,13 +696,12 @@ public class ArgoConfigTechParam {
 		for (SkosConcept techParamEntry : ArgoNVSReferenceTable.TECHNICAL_PARAMETER_NAME_TABLE
 				.getConceptMembersByAltLabelMap().values()) {
 			if (!techParamEntry.isDeprecated()) {
-				parseTechParamName(techParamList, techParamCodeList, techParamRegex, "NVS R14 table", pTemplate,
-						techParamEntry);
+				parseParamName(techParamList, techParamRegex, "NVS R14 table", pTemplate, techParamEntry);
+				// We want full
 			} else {
 				// it is a deprecated tech param
 
-				parseTechParamName(techParamList_DEP, techParamCodeList_DEP, techParamRegex_DEP, "NVS R14 table",
-						pTemplate, techParamEntry);
+				parseParamName(techParamList_DEP, techParamRegex_DEP, "NVS R14 table", pTemplate, techParamEntry);
 			}
 		}
 		log.debug(".....parseTechParamFile: end.....");
@@ -719,83 +709,86 @@ public class ArgoConfigTechParam {
 	} // ..end parseTechParamFile
 
 	/**
-	 * Parse a argo-tech_names-spec file line. The first column is
-	 * <TECH_PARAM>_unit, the second column is definition which are used for
-	 * long_name. Need to exctract and link the 3 informations : param name, unit
-	 * and long_name. It may have multiple units and long_name available for the
-	 * same parameter name.
-	 * 
-	 * @param paramList
-	 * @param paramCodeList
-	 * @param paramRegex
-	 * @param fileName
-	 * @param file
-	 * @param pTemplate
-	 * @param column
-	 * @throws IllegalArgumentException
+	 * Returns the complete set of all possible parameter names across all patterns
+	 * in configParamRegex.
+	 *
+	 * @return A Set of all concrete parameter names, deduplicated across all
+	 *         patterns.
 	 */
-	private void parseTechParamName(LinkedHashSet<String> paramList, LinkedHashSet<String> paramCodeList,
-			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, String fileName, Pattern pTemplate,
-			SkosConcept techParamEntry) throws IllegalArgumentException {
-
-		// get parameterCode & longName (prefLabel)
-		String parameterCode = techParamEntry.getPrefLabel();
-		String parameterLongName = parameterCode;
-
-		// ..column[0] is the parameter name and includes an example unit
-		// ..need to strip off the unit
-		// ===========
-		// CK_0093 1/2
-		// ===========
-		String[] paramNameAndUnit = extractParamNameAndUnitFromParamCode(fileName, parameterCode);
-		String paramName = paramNameAndUnit[0];
-		String unit = paramNameAndUnit[1];
-
-		// retrieve from Entry possible values for short_sensor_name and units :
-		Map<String, String> techParamAttributes = NvsDefinitionParser.parseAttributes("Template_Values",
-				techParamEntry.getDefinition());
-
-		// add list to authorized unit list for this parameter. TO USE LATER. FOR NOW
-		// USE AUTHORIZE ALL UNITS FROM UNITS TABLE
-		// buildListOfAuthorizedUnitsFromNVSParamTemplateValues(paramName,
-		// techParamAttributes);
-
-		// get the list of short_sensor_name :
-		buildListOfShortSensorNameFromNVSParamTemplateValues(techParamAttributes);
-		// add list to authorized long_name list for this parameter
-
-		// the following become useless as the long_name check should be
-		// <param>_<unit>
-		// processParamAndLongNameFields(paramName, parameterLongName, pTemplate);
-
-		// ..process the parameter name (can contain regex) and add to right list
-		// (paramList or paramRegex)
-		processParameterField(paramList, paramRegex, pTemplate, paramName);
-
+	protected Set<String> getAllPossibleParamNames(
+			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex) {
+		return generateParamListsFromConfigRegex(paramRegex).values().stream().flatMap(List::stream)
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
-//	private void buildListOfAuthorizedUnitsFromNVSParamTemplateValues(String paramName,
-//			Map<String, String> techParamAttributes) {
-//		List<String> UnitValuesforGivenParameter = new ArrayList<>(
-//				Arrays.asList(ArgoFileSpecification.getValuesListFromParametersAttributes(
-//						ArgoFileSpecification.getOrEmptyStringFromMap(techParamAttributes, "unit"))));
-//		if (paramAuthorizedUnits.containsKey(paramName)) {
-//			paramAuthorizedUnits.get(paramName).addAll(UnitValuesforGivenParameter);
-//		} else {
-//			paramAuthorizedUnits.put(paramName, UnitValuesforGivenParameter);
-//		}
-//	}
+	/**
+	 * Builds, for each Pattern in configParamRegex, the list of all possible
+	 * parameter names by substituting named groups with their allowed values.
+	 *
+	 * @return A map associating each Pattern to its list of concrete parameter
+	 *         names. Patterns with no injectable group values are mapped to an
+	 *         empty list.
+	 */
+	private Map<Pattern, List<String>> generateParamListsFromConfigRegex(
+			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex) {
+		Map<Pattern, List<String>> result = new LinkedHashMap<>();
 
-	private void buildListOfShortSensorNameFromNVSParamTemplateValues(Map<String, String> paramAttributes) {
-		// =======
-		// CK_0094
-		// =======
-		String[] shortSensorNameValuesforGivenParameter = ArgoFileSpecification.getValuesListFromParameterAttribute(
-				ArgoFileSpecification.getOrEmptyStringFromMap(paramAttributes, "short_sensor_name"));
-		// first clean the map for this key (from previous tech param parsing):
-		possibleValuesByKey.remove("short_sensor_name");
-		// add the new list of short_sensor_name :
-		possibleValuesByKey.put("short_sensor_name", Set.of(shortSensorNameValuesforGivenParameter));
+		for (Map.Entry<Pattern, HashMap<String, HashSet<String>>> entry : paramRegex.entrySet()) {
+			Pattern pattern = entry.getKey();
+			HashMap<String, HashSet<String>> groupValues = entry.getValue();
+
+			List<String> paramList = generateParamListFromPatternAndValues(pattern.pattern(), groupValues);
+			result.put(pattern, paramList);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Generates all concrete strings from a regex pattern by replacing each named
+	 * group with all its allowed values.
+	 *
+	 * @param pRegex      The regex pattern string (e.g.
+	 *                    "(?<env>...)_(?<region>...)").
+	 * @param groupValues Map of group name -> set of allowed values for that group.
+	 * @return List of concrete strings, or empty list if no group could be
+	 *         substituted.
+	 */
+	private List<String> generateParamListFromPatternAndValues(String pRegex,
+			HashMap<String, HashSet<String>> groupValues) {
+
+		if (groupValues == null || groupValues.isEmpty()) {
+			return new ArrayList<>();
+		}
+
+		List<String> regexList = new ArrayList<>(Collections.singletonList(pRegex));
+		boolean replacedAtLeastOne = false;
+
+		for (Map.Entry<String, HashSet<String>> entry : groupValues.entrySet()) {
+			String groupName = entry.getKey();
+			Set<String> values = entry.getValue();
+
+			if (values == null || values.isEmpty()) {
+				continue;
+			}
+
+			// Match the named group in the regex: (?<groupName>...)
+			String namedGroupPattern = "\\(\\?<" + groupName + ">.*?\\)";
+
+			boolean groupFound = regexList.stream().anyMatch(r -> Pattern.compile(namedGroupPattern).matcher(r).find());
+
+			if (!groupFound) {
+				continue;
+			}
+
+			replacedAtLeastOne = true;
+
+			regexList = regexList.stream().flatMap(
+					currentRegex -> generateStringsFromPattern(currentRegex, values, namedGroupPattern).stream())
+					.collect(Collectors.toList());
+		}
+
+		return replacedAtLeastOne ? regexList : new ArrayList<>();
 	}
 
 	private void buildTemplatesMatchingListFromNVSParamTemplateValues(HashMap<String, HashSet<String>> matchList,
@@ -827,74 +820,6 @@ public class ArgoConfigTechParam {
 
 		}
 	}
-
-	/**
-	 * tech paramater's variable's name and long_name may contain
-	 * <short_sensor_name>. This function compute the list of different possibility
-	 * for a given tech parameter name.
-	 * 
-	 * @param field
-	 */
-//	private void processParamAndLongNameFields(String paramName, String longName, Pattern pTemplate) {
-//		Matcher matcherParamName = pTemplate.matcher(paramName);
-//		Matcher matcherLongName = pTemplate.matcher(longName);
-//
-//		if (!matcherParamName.find()) {
-//
-//			List<String> longNameListFromRegex;
-//			// no <short_sensor_name> in tech param's name. Check if there is one in
-//			// long_name. In this case all possibilities are authorized :
-//			if (matcherLongName.find()) {
-//				// ..contains <*> structures in long_name, build list of possibilities
-//				String regexString = convertParamStringToRegex(longName, matcherLongName);
-//
-//				Pattern pRegex = Pattern.compile(regexString.toString());
-//
-//				longNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
-//
-//			} else {
-//				// no <sensor_short_name> in paramName nor in longName.
-//				longNameListFromRegex = new ArrayList<>(Arrays.asList(longName));
-//			}
-//
-//			// add list to authorized long_name list for this parameter
-//			if (paramAuthorizedLongName.containsKey(paramName)) {
-//				paramAuthorizedLongName.get(paramName).addAll(longNameListFromRegex);
-//			} else {
-//				paramAuthorizedLongName.put(paramName, longNameListFromRegex);
-//			}
-//
-//		} else {
-//			// ..contains <*> structures -- convert to a regex and build list of param name
-//			String regexString = convertParamStringToRegex(paramName, matcherParamName);
-//
-//			Pattern pRegex = Pattern.compile(regexString.toString());
-//			List<String> paramNameListFromRegex = generateParamListFromPattern(pRegex.pattern());
-//			// for each paramName, apply this function (recursivity) :
-//			for (String paramNameWithNoRegex : paramNameListFromRegex) {
-//				// need to repace the short_sensor_name and Z in longName by the same found in
-//				// paramName :
-//				String shortSensorNamefound = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex,
-//						"short_sensor_name");
-//				String zValue = extractSpecificValueFromPattern(paramName, paramNameWithNoRegex, pRegex, "Z");
-//
-//				// onlys sort_sensor_name and Z are found in paramName. Replace value if found
-//				// in corresponding longName
-//				String completedLongName = longName;
-//				if (shortSensorNamefound != null) {
-//					completedLongName = completedLongName.replace("<short_sensor_name>", shortSensorNamefound);
-//				}
-//
-//				if (zValue != null) {
-//					completedLongName = completedLongName.replace("<Z>", zValue);
-//				}
-//
-//				processParamAndLongNameFields(paramNameWithNoRegex, completedLongName, pTemplate);
-//
-//			}
-//		}
-//
-//	}
 
 	public String extractSpecificValueFromPattern(String originalPattern, String actualString, Pattern pRegex,
 			String placeholderName) {
@@ -949,74 +874,6 @@ public class ArgoConfigTechParam {
 		return names;
 	}
 
-	/**
-	 * paramName can contain <*>. If so convert the param name to regex and add it
-	 * to the list. If not, add the paramName to paramList.
-	 * 
-	 * @param paramList
-	 * @param paramRegex
-	 * @param pTemplate
-	 * @param param
-	 */
-	private void processParameterField(LinkedHashSet<String> paramList,
-			LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex, Pattern pTemplate, String param) {
-
-		Matcher matcher = pTemplate.matcher(param);
-
-		if (!matcher.find()) {
-			// ..no <*> structures -- just a straight fixed name
-			paramList.add(param);
-			log.debug("add param: '{}'", param);
-
-		} else {
-			// ..contains <*> structures -- convert to a regex
-			// ..convert CONFIG_<ssn>CpAscentPhaseDepthZone<N>SampleRate_hertz
-			// ..to CONFIG_(?<ssn>\w*)CpAscentPhaseDepthZone(?<N>\w*)SampleRate_hertz
-
-			String regexString = convertParamStringToRegex(param, matcher);
-
-			log.debug("add regex: '{}'", regexString);
-			Pattern pRegex = Pattern.compile(regexString);
-			paramRegex.put(pRegex, null);
-
-			// Build additional paramList using regex and referenceTable and add it to the
-			// paramList
-			List<String> paramListFromRegex = generateParamListFromPattern(pRegex.pattern());
-			paramList.addAll(paramListFromRegex);
-
-		}
-	}
-
-	private List<String> generateParamListFromPattern(String pRegex) {
-		List<String> regexList = new ArrayList<>(Arrays.asList(pRegex));
-		boolean replacedAtLeastOne = false;
-
-		for (Map.Entry<String, String> entry : templateReplacement.entrySet()) {
-			String key = entry.getKey();
-			String groupPattern = entry.getValue();
-
-			if (!possibleValuesByKey.containsKey(key)) {
-				continue;
-			} // no values to inject for this regex pattern
-			boolean containRegex = regexList.stream().anyMatch(regex -> regex.contains(groupPattern));
-
-			if (!containRegex) {
-				continue;
-			}
-
-			replacedAtLeastOne = true;
-			// replace the regex pattern by values (create a liste) from possibleValuesByKey
-			regexList = regexList.stream().flatMap(pRegexvalue -> {
-				return generateStringsFromPattern(pRegexvalue, possibleValuesByKey.get(key),
-						generalizeNamedGroupPattern(groupPattern)).stream();
-
-			}).collect(Collectors.toList());
-
-		}
-		return replacedAtLeastOne ? regexList : new ArrayList<>();
-
-	}
-
 	private List<String> generateStringsFromPattern(String pRegex, Set<String> values, String regexToReplace) {
 		if (!Pattern.compile(regexToReplace).matcher(pRegex).find()) {
 			// Pattern not processed (pattern to replace absent)
@@ -1026,18 +883,6 @@ public class ArgoConfigTechParam {
 		return values.stream().map(value -> pRegex.toString().replaceAll(regexToReplace, value))
 				.collect(Collectors.toList());
 
-	}
-
-	private String generalizeNamedGroupPattern(String groupRegex) {
-		Pattern groupPattern = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9_]*)>.*?\\)");
-		Matcher matcher = groupPattern.matcher(groupRegex);
-
-		if (matcher.matches()) {
-			String groupName = matcher.group(1);
-			return "\\(\\?<" + groupName + ">.*?\\)";
-		} else {
-			throw new IllegalArgumentException("Input regex does not contain a valid named group: " + groupRegex);
-		}
 	}
 
 	/**
