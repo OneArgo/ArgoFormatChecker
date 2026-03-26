@@ -130,8 +130,8 @@ public final class ArgoReferenceTable {
 //	public static LinkedHashSet<String> BATTERY_TYPE_type;
 
 	// .....reference table 30.....
-	public static LinkedHashSet<String> BATTERY_PACKS_style;
-	public static LinkedHashSet<String> BATTERY_PACKS_type;
+//	public static LinkedHashSet<String> BATTERY_PACKS_style;
+//	public static LinkedHashSet<String> BATTERY_PACKS_type;
 
 	// .....reference table 41.....
 //	public static StringTable PROGRAM_NAME;
@@ -286,11 +286,11 @@ public final class ArgoReferenceTable {
 //		readSetString("ref_table-29.type", BATTERY_TYPE_type);
 
 		// ..battery_packs style, type
-		BATTERY_PACKS_style = new LinkedHashSet<String>(10);
-		readSetString("ref_table-30.style", BATTERY_PACKS_style);
-
-		BATTERY_PACKS_type = new LinkedHashSet<String>(10);
-		readSetString("ref_table-30.type", BATTERY_PACKS_type);
+//		BATTERY_PACKS_style = new LinkedHashSet<String>(10);
+//		readSetString("ref_table-30.style", BATTERY_PACKS_style);
+//
+//		BATTERY_PACKS_type = new LinkedHashSet<String>(10);
+//		readSetString("ref_table-30.type", BATTERY_PACKS_type);
 
 		// .....measurement codes - specific codes....
 		// .....measurement codes - map to JULD variables
