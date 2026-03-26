@@ -126,8 +126,8 @@ public final class ArgoReferenceTable {
 	// public static HashSet<String> SHORT_SENSOR_NAME;
 
 	// .....reference table 29.....
-	public static LinkedHashSet<String> BATTERY_TYPE_manufacturer;
-	public static LinkedHashSet<String> BATTERY_TYPE_type;
+//	public static LinkedHashSet<String> BATTERY_TYPE_manufacturer;
+//	public static LinkedHashSet<String> BATTERY_TYPE_type;
 
 	// .....reference table 30.....
 	public static LinkedHashSet<String> BATTERY_PACKS_style;
@@ -279,11 +279,11 @@ public final class ArgoReferenceTable {
 		// SHORT_SENSOR_NAME = SENSOR_MODEL.getColumnSet(SHORT_SENSOR_COLUMN);
 
 		// ..battery_type manufacturer, type
-		BATTERY_TYPE_manufacturer = new LinkedHashSet<String>(10);
-		readSetString("ref_table-29.manufacturer", BATTERY_TYPE_manufacturer);
-
-		BATTERY_TYPE_type = new LinkedHashSet<String>(10);
-		readSetString("ref_table-29.type", BATTERY_TYPE_type);
+//		BATTERY_TYPE_manufacturer = new LinkedHashSet<String>(10);
+//		readSetString("ref_table-29.manufacturer", BATTERY_TYPE_manufacturer);
+//
+//		BATTERY_TYPE_type = new LinkedHashSet<String>(10);
+//		readSetString("ref_table-29.type", BATTERY_TYPE_type);
 
 		// ..battery_packs style, type
 		BATTERY_PACKS_style = new LinkedHashSet<String>(10);

@@ -1245,10 +1245,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 					log.debug("...matched pattern: manu, type, volt = '{}', '{}', '{}'", manu, type, volt);
 
-					SkosConcept tableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE.getConceptMembersByAltLabelMap()
-							.get(manu);
-					if (tableEntry != null) {
-						if (tableEntry.isDeprecated()) {
+					SkosConcept manueTableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE
+							.getConceptMembersByAltLabelMap().get(manu);
+					if (manueTableEntry != null) {
+						if (manueTableEntry.isDeprecated()) {
 							String err = String.format("BATTERY_TYPE[%d]: Deprecated manufacturer: '{%s}'", nTypes,
 									manu);
 							validationResult.addWarning(err);
@@ -1266,34 +1266,40 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						log.debug("...invalid manufacturer");
 					}
 
-//					if (!ArgoReferenceTable.BATTERY_TYPE_manufacturer.contains(manu)) {
-//						String err = String.format("BATTERY_TYPE[%d]: Invalid manufacturer: '{%s}'", nTypes, manu);
-//						// validationResult.addError(err);
-//
-//						// ################# TEMPORARY WARNING ################
-//						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-//						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-//
-//						log.debug("...invalid manufacturer");
-//
-//					} else {
-//						log.debug("valid manufacturer");
-//					}
-
-					if (!ArgoReferenceTable.BATTERY_TYPE_type.contains(type)) {
+					SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
+							.getConceptMembersByAltLabelMap().get(manu);
+					if (typeTableEntry != null) {
+						if (typeTableEntry.isDeprecated()) {
+							String err = String.format("BATTERY_TYPE[%d]: Deprecated type: '{%s}'", nTypes, type);
+							validationResult.addWarning(err);
+						} else {
+							log.debug("valid type");
+						}
+					} else {
+						// ..did not match the expected pattern
 						String err = String.format("BATTERY_TYPE[%d]: Invalid type: '{%s}'", nTypes, type);
-						// validationResult.addError(err);
 
 						// ################# TEMPORARY WARNING ################
 						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
 						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("invalid type");
-
-					} else {
-						log.debug("valid type");
 					}
 
+//					if (!ArgoReferenceTable.BATTERY_TYPE_type.contains(type)) {
+//						String err = String.format("BATTERY_TYPE[%d]: Invalid type: '{%s}'", nTypes, type);
+//						// validationResult.addError(err);
+//
+//						// ################# TEMPORARY WARNING ################
+//						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//						log.debug("invalid type");
+//
+//					} else {
+//						log.debug("valid type");
+//					}
+//
 				} else {
 					// ..did not match the expected pattern
 					String err = String.format(
@@ -1361,7 +1367,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						} else {
 							log.debug("valid style");
 						}
-
+						// BATTERY_TYPE pref label
 						if (!ArgoReferenceTable.BATTERY_PACKS_type.contains(type)) {
 							String err = String.format("BATTERY_PACKS[%d]: Invalid type: '{%s}'", nPacks, type);
 							// validationResult.addError(err);
