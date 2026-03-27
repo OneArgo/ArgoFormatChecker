@@ -2236,6 +2236,45 @@
             "@type": "skos:Concept"
         },
         {
+            "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/",
+            "pav:hasVersion": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/1/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/2/"
+                }
+            ],
+            "@type": "skos:Concept",
+            "skos:definition": {
+                "@language": "en",
+                "@value": "The number of records in each dataset type [1-5] as transmitted - dataset 1=test data, 2=park data if profile, GPS data if test, 3=not used, 4=profile data, 5=GPS data for profile. Template_Values:{unit:[COUNT];digit:[1..5]}."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "false",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "dc:identifier": "SDN:R14::T000226",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "NUMBER_RecordsInDataset<digit>_COUNT"
+            },
+            "owl:versionInfo": "3",
+            "dc:date": "2026-03-26 15:18:17.0",
+            "skos:altLabel": "226",
+            "skos:notation": "SDN:R14::T000226",
+            "pav:version": "3",
+            "dce:identifier": "SDN:R14::T000226",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/3/"
+            },
+            "pav:authoredOn": "2026-03-26 15:18:17.0"
+        },
+        {
             "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000142/",
             "pav:hasVersion": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000142/1/"
@@ -11027,40 +11066,6 @@
             "skos:definition": {
                 "@language": "en",
                 "@value": "Number of messages sent by the remote control and received by the iridium float. Template_Values:{unit:[COUNT]}."
-            },
-            "@type": "skos:Concept"
-        },
-        {
-            "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/",
-            "pav:hasVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/1/"
-            },
-            "pav:authoredOn": "2025-12-11 11:04:20.0",
-            "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/2/"
-            },
-            "dce:identifier": "SDN:R14::T000226",
-            "pav:version": "2",
-            "skos:notation": "SDN:R14::T000226",
-            "skos:altLabel": "226",
-            "dc:date": "2025-12-11 11:04:20.0",
-            "owl:versionInfo": "2",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "NUMBER_RecordsInDataset<digit>_COUNT"
-            },
-            "dc:identifier": "SDN:R14::T000226",
-            "skos:note": {
-                "@language": "en",
-                "@value": "accepted"
-            },
-            "owl:deprecated": "false",
-            "void:inDataset": {
-                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
-            },
-            "skos:definition": {
-                "@language": "en",
-                "@value": "The number of records in each dataset type [1-5] as transmitted - dataset 1=test data, 2=park data if profile, GPS data if test, 3=not used, 4=profile data, 5=GPS data for profile. Template_Values:{unit:[COUNT];digit=[1..5]}."
             },
             "@type": "skos:Concept"
         },
@@ -22419,6 +22424,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T100058/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000142/"
                 },
                 {
@@ -23182,9 +23190,6 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000310/"
-                },
-                {
-                    "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000226/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R14/current/T000496/"
@@ -24164,8 +24169,8 @@
             "dc:description": "List of technical parameters reported by a float at every cycle. Technical parameter names are stored in the float 'tech.nc' file, under TECHNICAL_PARAMETER_NAME, which is populated by R14 prefLabel. Detailed information (incl. Template_Values explanation) is in the user manual (https://dx.doi.org/10.13155/29825), in the Reference Table 14 section.",
             "dc:title": "Argo technical parameter names",
             "skos:prefLabel": "Argo technical parameter names",
-            "owl:versionInfo": "5",
-            "dc:date": "2026-01-20 02:00:01.0",
+            "owl:versionInfo": "6",
+            "dc:date": "2026-03-27 02:00:00.0",
             "skos:altLabel": "TECHNICAL_PARAMETER_NAME",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "TECHNICAL_PARAMETER_NAME",
