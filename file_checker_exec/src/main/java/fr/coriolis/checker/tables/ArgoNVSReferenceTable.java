@@ -1,15 +1,11 @@
 package fr.coriolis.checker.tables;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import fr.coriolis.checker.specs.SpecIO;
 import fr.coriolis.checker.utils.NetUtils;
@@ -29,7 +25,7 @@ public final class ArgoNVSReferenceTable {
 		MEASUREMENT_CODE_ID("MEASUREMENT_CODE_ID", "R15"), TECHNICAL_PARAMETER_NAME("TECHNICAL_PARAMETER_NAME", "R14"),
 		CONFIG_PARAMETER_NAME("CONFIG_PARAMETER_NAME", "R18"), PARAMETER("PARAMETER", "R03"),
 		PROGRAM_NAME("PROGRAM_NAME", "R41"), BATTERY_MAKER("BATTERY_MAKER", "R33"), BATTERY_TYPE("BATTERY_TYPE", "R34"),
-		BATTERY_SIZE("BATTERY_SIZE", "R35");
+		BATTERY_SIZE("BATTERY_SIZE", "R35"), PI_NAME("PI_NAME", "R40");
 
 		public final String name;
 		public final String code;
@@ -81,6 +77,7 @@ public final class ArgoNVSReferenceTable {
 	public static SkosCollection BATTERY_MAKER_TABLE;
 	public static SkosCollection BATTERY_TYPE_TABLE;
 	public static SkosCollection BATTERY_SIZE_TABLE;
+	public static SkosCollection PI_NAME_TABLE;
 
 	// ====
 	// INIT
@@ -186,11 +183,7 @@ public final class ArgoNVSReferenceTable {
 		BATTERY_MAKER_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.BATTERY_MAKER);
 		BATTERY_TYPE_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.BATTERY_TYPE);
 		BATTERY_SIZE_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.BATTERY_SIZE);
-	}
-
-	private static Set<File> listFolderFiles(String nvsFolderPath) {
-		File nvsDir = new File(nvsFolderPath);
-		return Stream.of(nvsDir.listFiles()).filter(file -> !file.isDirectory()).collect(Collectors.toSet());
+		PI_NAME_TABLE = nvsReferenceTables.get(RELEVANT_TABLES.PI_NAME);
 	}
 
 }

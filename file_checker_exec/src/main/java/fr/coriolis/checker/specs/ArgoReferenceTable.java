@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -19,7 +18,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Implements the capabilities associated with "reference tables":
+ * LEGACY ref tables. Mainly replaced by NVS tables in 2026, v3.0.0
+ *
+ * implements the capabilities associated with "reference tables":
  * <ul>
  * <li>Read the table from the spec directory
  * <li>Build "cross-reference" lists
@@ -141,9 +142,9 @@ public final class ArgoReferenceTable {
 	public static IntegerTable MEASUREMENT_CODE_toJuldVariable;
 
 	// .....Generic Parameter Templates.....
-	public static LinkedHashSet<String> GENERIC_TEMPLATE_short_sensor_name;
-	public static LinkedHashSet<String> GENERIC_TEMPLATE_cycle_phase_name;
-	public static LinkedHashSet<String> GENERIC_TEMPLATE_param;
+//	public static LinkedHashSet<String> GENERIC_TEMPLATE_short_sensor_name;
+//	public static LinkedHashSet<String> GENERIC_TEMPLATE_cycle_phase_name;
+//	public static LinkedHashSet<String> GENERIC_TEMPLATE_param;
 
 	// ..logger
 	private static final Logger log = LogManager.getLogger("ArgoReferenceTable");
@@ -178,7 +179,7 @@ public final class ArgoReferenceTable {
 	// .................................................................
 
 	public ArgoReferenceTable() throws IOException {
-		String prefix = "ref_table-";
+//		String prefix = "ref_table-";
 
 		if (initialized) {
 			log.debug(".....ArgoReferenceTable: already initialized.....");
@@ -300,14 +301,14 @@ public final class ArgoReferenceTable {
 
 		// .....Generic Parameter Templates.....
 
-		GENERIC_TEMPLATE_short_sensor_name = new LinkedHashSet<String>(10);
-		readSetString("generic_template_short_sensor_name", GENERIC_TEMPLATE_short_sensor_name);
-
-		GENERIC_TEMPLATE_cycle_phase_name = new LinkedHashSet<String>(10);
-		readSetString("generic_template_cycle_phase_name", GENERIC_TEMPLATE_cycle_phase_name);
-
-		GENERIC_TEMPLATE_param = new LinkedHashSet<String>(10);
-		readSetString("generic_template_param", GENERIC_TEMPLATE_param);
+//		GENERIC_TEMPLATE_short_sensor_name = new LinkedHashSet<String>(10);
+//		readSetString("generic_template_short_sensor_name", GENERIC_TEMPLATE_short_sensor_name);
+//
+//		GENERIC_TEMPLATE_cycle_phase_name = new LinkedHashSet<String>(10);
+//		readSetString("generic_template_cycle_phase_name", GENERIC_TEMPLATE_cycle_phase_name);
+//
+//		GENERIC_TEMPLATE_param = new LinkedHashSet<String>(10);
+//		readSetString("generic_template_param", GENERIC_TEMPLATE_param);
 	}
 
 	// ..................................................................
@@ -491,35 +492,35 @@ public final class ArgoReferenceTable {
 
 	} // ..end readMapIntegerString
 
-	private void readSetString(String fileName, LinkedHashSet<String> set) throws IOException {
-		log.debug("...start readSetString...");
-		log.debug("parsing file '{}'", fileName);
-
-		try (InputStream in = SpecIO.getInstance().open(fileName);
-				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
-
-			// ..read through the file
-			String line;
-			while ((line = fileReader.readLine()) != null) {
-				if (pBlankOrComment.matcher(line).matches()) {
-					log.debug("skipped line = '{}'", line);
-					continue;
-				}
-
-				log.debug("line = '{}'", line);
-
-				set.add(line.trim());
-			}
-			fileReader.close();
-			log.debug("...end readSetString...");
-		} catch (FileNotFoundException e) {
-			log.error("File '{}' not found", fileName);
-			throw e;
-		} catch (IOException e) {
-			log.error("File '" + fileName + "' cannot be read");
-			throw e;
-		}
-	} // ..end readSetString
+//	private void readSetString(String fileName, LinkedHashSet<String> set) throws IOException {
+//		log.debug("...start readSetString...");
+//		log.debug("parsing file '{}'", fileName);
+//
+//		try (InputStream in = SpecIO.getInstance().open(fileName);
+//				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+//
+//			// ..read through the file
+//			String line;
+//			while ((line = fileReader.readLine()) != null) {
+//				if (pBlankOrComment.matcher(line).matches()) {
+//					log.debug("skipped line = '{}'", line);
+//					continue;
+//				}
+//
+//				log.debug("line = '{}'", line);
+//
+//				set.add(line.trim());
+//			}
+//			fileReader.close();
+//			log.debug("...end readSetString...");
+//		} catch (FileNotFoundException e) {
+//			log.error("File '{}' not found", fileName);
+//			throw e;
+//		} catch (IOException e) {
+//			log.error("File '" + fileName + "' cannot be read");
+//			throw e;
+//		}
+//	} // ..end readSetString
 
 	// .................................................................
 	// INNER CLASSES

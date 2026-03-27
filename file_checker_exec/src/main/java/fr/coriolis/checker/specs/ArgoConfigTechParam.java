@@ -812,9 +812,15 @@ public class ArgoConfigTechParam {
 			if (!set.isEmpty() && knownTemplatesWithMatchListToCheck.contains(normalizedKey)) {
 				matchList.put(normalizedKey, set);
 				// special case for N and N+1 : N+1 has the "N" key in template values so need
-				// to replicate the set
+				// to replicate the set but with +1 to last value
 				if (normalizedKey.equals("N")) {
-					matchList.put("N1", set);
+					// Create a new set for N1 = N values + (max + 1)
+					HashSet<String> setN1 = new HashSet<>(set); // copy N set
+
+					int maxN = set.stream().mapToInt(Integer::parseInt).max().orElse(0);
+
+					setN1.add(String.valueOf(maxN + 1));
+					matchList.put("N1", setN1);
 				}
 			}
 

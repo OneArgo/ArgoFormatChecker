@@ -266,19 +266,33 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 
 						String str = match.unMatchedTemplates.get("shortsensorname");
 						if (str != null) {
-							if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
-								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName,
-										(n + 1), str, param);
-								// validationResult.addError(err);
+							String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName, (n + 1),
+									str, param);
+							// validationResult.addError(err);
 
-								// ################# TEMPORARY WARNING ################
-								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+							// ################# TEMPORARY WARNING ################
+							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
-								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
-							} else {
-								log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
-							}
+							log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+
+							// ==========================================================================
+							// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+							// table / defintion field / Template values ?
+							// ==========================================================================
+//							if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
+//								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName,
+//										(n + 1), str, param);
+//								// validationResult.addError(err);
+//
+//								// ################# TEMPORARY WARNING ################
+//								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+//							} else {
+//								log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
+//							}
 						}
 					}
 				}

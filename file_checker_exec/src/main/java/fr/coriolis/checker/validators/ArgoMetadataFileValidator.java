@@ -697,7 +697,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// =======
 		// CK_0113
 		// =======
-		super.checkStrVarEmpty("PI_NAME");
+		super.validatePINAME();
 
 		name = "PLATFORM_FAMILY"; // ..ref table 22
 		str = arFile.readString(name).trim();
@@ -1218,91 +1218,40 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	public void validateBattery() throws IOException {
 		log.debug(".....validateBattery.....");
 
-		// .........battery_type............
-		int nTypes = 0;
+		// .....BATTERY_TYPE.....
+		int nTypes = checkBatteryType();
 
-		String str = arFile.readString("BATTERY_TYPE");
-		log.debug("BATTERY_TYPE: '{}'", str);
+		// .....BATTERY_PACKS.....
+		int nPacks = checkBatteryPacks();
 
-		if (str.trim().length() <= 0) {
-			validationResult.addError("BATTERY_TYPE: Empty");
+		// ............compare TYPES and PACKS............
+		crossCheckBatteryPacksAndBatteryType(nTypes, nPacks);
 
-		} else {
+	}// ..end validateBattery
 
-			// ..not empty
-			// ..split multiple strings based on "+"
+	private void crossCheckBatteryPacksAndBatteryType(int nTypes, int nPacks) {
+		// =======
+		// CK_0157
+		// =======
+		if (nPacks >= 0) {
 
-			for (String substr : str.split("\\+")) {
-				nTypes++;
-				log.debug("battery_type substring: '{}'", substr);
+			if (nTypes != nPacks) {
+				String err = String.format("Number of BATTERY_TYPES {%d} != number of BATTERY_PACKS {%d}", nTypes,
+						nPacks);
+				// validationResult.addError(err);
 
-				Matcher m = pBatteryType.matcher(substr);
+				// ################# TEMPORARY WARNING ################
+				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+				log.warn("TEMP WARNING: {%s}: {%s}: {%s}", arFile.getDacName(), arFile.getFileName(), err);
 
-				if (m.matches()) {
-					String manu = m.group("manufacturer");
-					String type = m.group("type");
-					String volt = m.group("volts");
-
-					log.debug("...matched pattern: manu, type, volt = '{}', '{}', '{}'", manu, type, volt);
-
-					SkosConcept manuTableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE
-							.getConceptMembersByAltLabelMap().get(manu);
-					if (manuTableEntry != null) {
-						if (manuTableEntry.isDeprecated()) {
-							String err = String.format("BATTERY_TYPE[%d]: Deprecated manufacturer: '{%s}'", nTypes,
-									manu);
-							validationResult.addWarning(err);
-						} else {
-							log.debug("valid manufacturer");
-						}
-					} else {
-						String err = String.format("BATTERY_TYPE[%d]: Invalid manufacturer: '{%s}'", nTypes, manu);
-						// validationResult.addError(err);
-
-						// ################# TEMPORARY WARNING ################
-						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-						log.debug("...invalid manufacturer");
-					}
-
-					SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
-							.getConceptMembersByAltLabelMap().get(type);
-					if (typeTableEntry != null) {
-						if (typeTableEntry.isDeprecated()) {
-							String err = String.format("BATTERY_TYPE[%d]: Deprecated type: '{%s}'", nTypes, type);
-							validationResult.addWarning(err);
-						} else {
-							log.debug("valid type");
-						}
-					} else {
-						// ..did not match the expected pattern
-						String err = String.format("BATTERY_TYPE[%d]: Invalid type: '{%s}'", nTypes, type);
-
-						// ################# TEMPORARY WARNING ################
-						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-						log.debug("invalid type");
-					}
-
-				} else {
-					// ..did not match the expected pattern
-					String err = String.format(
-							"BATTERY_TYPE[%d]: Does not match template 'manufacturer type volts V': '%s'", nTypes,
-							substr.trim());
-					// validationResult.addError(err);
-
-					// ################# TEMPORARY WARNING ################
-					validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-					log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-					log.debug("...does not match template");
-				}
+				log.debug("number of types != number of packs => {%d} != {%d}", nTypes, nPacks);
 			}
-		} // ..endif battery_type is filled
 
-		// .....battery_packs.....
+		} // ..end if nPacks >= 0
+	}
+
+	private int checkBatteryPacks() {
+		String str;
 		int nPacks = -1;
 
 		str = arFile.readString("BATTERY_PACKS");
@@ -1324,6 +1273,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				log.debug("battery_packs substring: '{}'", substr);
 
 				if (substr.trim().equals("U")) {
+					// =======
+					// CK_0152
+					// =======
 					log.debug("battery_packs substring == U (undefined)");
 
 				} else {
@@ -1339,10 +1291,16 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 						log.debug("...matched pattern: num, style, type = '{}', '{}', '{}", num, style, type);
 
+						// =======
+						// CK_0153
+						// =======
 						SkosConcept styleTableEntry = ArgoNVSReferenceTable.BATTERY_SIZE_TABLE
 								.getConceptMembersByAltLabelMap().get(style);
 						if (styleTableEntry != null) {
 							if (styleTableEntry.isDeprecated()) {
+								// =======
+								// CK_0154
+								// =======
 								String err = String.format("BATTERY_PACKS[%d]: Deprecated style of battery: '{%s}'",
 										nPacks, style);
 								validationResult.addWarning(err);
@@ -1361,11 +1319,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 							log.debug("invalid style");
 						}
 
+						// =======
+						// CK_0155
+						// =======
 						// BATTERY_TYPE pref label
 						SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
 								.getConceptMembersByPrefLabelMap().get(type);
 						if (typeTableEntry != null) {
 							if (typeTableEntry.isDeprecated()) {
+								// =======
+								// CK_0156
+								// =======
 								String err = String.format("BATTERY_PACKS[%d]: Deprecated type: '{%s}'", nPacks, type);
 								validationResult.addWarning(err);
 							} else {
@@ -1381,20 +1345,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 							log.debug("invalid type");
 						}
-
-//						if (!ArgoReferenceTable.BATTERY_PACKS_type.contains(type)) {
-//							String err = String.format("BATTERY_PACKS[%d]: Invalid type: '{%s}'", nPacks, type);
-//							// validationResult.addError(err);
-//
-//							// ################# TEMPORARY WARNING ################
-//							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-//							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-//
-//							log.debug("invalid type");
-//
-//						} else {
-//							log.debug("valid type");
-//						}
 
 					} else {
 						// ..did not match the expected pattern
@@ -1412,26 +1362,112 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				} // ..end if undefined
 			} // ..end for (battery_packs substrings)
 		} // ..endif BATTERY_PACKS is filled
+		return nPacks;
+	}
 
-		// ............compare TYPES and PACKS............
+	private int checkBatteryType() {
+		int nTypes = 0;
 
-		if (nPacks >= 0) {
+		String str = arFile.readString("BATTERY_TYPE");
+		log.debug("BATTERY_TYPE: '{}'", str);
 
-			if (nTypes != nPacks) {
-				String err = String.format("Number of BATTERY_TYPES {%d} != number of BATTERY_PACKS {%d}", nTypes,
-						nPacks);
-				// validationResult.addError(err);
+		if (str.trim().length() <= 0) {
+			// =======
+			// CK_0146
+			// =======
+			validationResult.addError("BATTERY_TYPE: Empty");
 
-				// ################# TEMPORARY WARNING ################
-				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-				log.warn("TEMP WARNING: {%s}: {%s}: {%s}", arFile.getDacName(), arFile.getFileName(), err);
+		} else {
 
-				log.debug("number of types != number of packs => {%d} != {%d}", nTypes, nPacks);
+			// ..not empty
+			// ..split multiple strings based on "+"
+
+			for (String substr : str.split("\\+")) {
+				nTypes++;
+				log.debug("battery_type substring: '{}'", substr);
+
+				Matcher m = pBatteryType.matcher(substr);
+
+				if (m.matches()) {
+					String manu = m.group("manufacturer");
+					String type = m.group("type");
+					String volt = m.group("volts");
+
+					log.debug("...matched pattern: manu, type, volt = '{}', '{}', '{}'", manu, type, volt);
+
+					// =======
+					// CK_0148
+					// =======
+					SkosConcept manuTableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE
+							.getConceptMembersByAltLabelMap().get(manu);
+					if (manuTableEntry != null) {
+						if (manuTableEntry.isDeprecated()) {
+							// =======
+							// CK_0149
+							// =======
+							String err = String.format("BATTERY_TYPE[%d]: Deprecated manufacturer: '{%s}'", nTypes,
+									manu);
+							validationResult.addWarning(err);
+						} else {
+							log.debug("valid manufacturer");
+						}
+					} else {
+						String err = String.format("BATTERY_TYPE[%d]: Invalid manufacturer: '{%s}'", nTypes, manu);
+						// validationResult.addError(err);
+
+						// ################# TEMPORARY WARNING ################
+						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+						log.debug("...invalid manufacturer");
+					}
+
+					// =======
+					// CK_0150
+					// =======
+					SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
+							.getConceptMembersByAltLabelMap().get(type);
+					if (typeTableEntry != null) {
+						if (typeTableEntry.isDeprecated()) {
+							// =======
+							// CK_0151
+							// =======
+							String err = String.format("BATTERY_TYPE[%d]: Deprecated type: '{%s}'", nTypes, type);
+							validationResult.addWarning(err);
+						} else {
+							log.debug("valid type");
+						}
+					} else {
+						// ..did not match the expected pattern
+						String err = String.format("BATTERY_TYPE[%d]: Invalid type: '{%s}'", nTypes, type);
+
+						// ################# TEMPORARY WARNING ################
+						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+						log.debug("invalid type");
+					}
+
+				} else {
+					// =======
+					// CK_0147
+					// =======
+					// ..did not match the expected pattern
+					String err = String.format(
+							"BATTERY_TYPE[%d]: Does not match template 'manufacturer type volts V': '%s'", nTypes,
+							substr.trim());
+					// validationResult.addError(err);
+
+					// ################# TEMPORARY WARNING ################
+					validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+					log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+					log.debug("...does not match template");
+				}
 			}
-
-		} // ..end if nPacks >= 0
-
-	}// ..end validateBattery
+		} // ..endif battery_type is filled
+		return nTypes;
+	}
 
 	/**
 	 * Validates the configuration mission in the meta-data file. The mission number
@@ -1456,6 +1492,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			log.debug("CONFIG_MISSION_NUMBER[{}] = {}", n, mission[n]);
 
 			if (mission[n] == 99999) {
+				// =======
+				// CK_0158
+				// =======
 				validationResult.addWarning("CONFIG_MISSION_NUMBER: Missing at index: " + (n + 1));
 				log.debug("config_mission_number == 0 at {}", n);
 				break;
@@ -1575,58 +1614,102 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 							String str = match.unMatchedTemplates.get("shortsensorname");
 							if (str != null) {
-								if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
-									String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'",
-											varName, (n + 1), str, param);
-									// validationResult.addError(err);
 
-									// ################# TEMPORARY WARNING ################
-									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
-											err);
+								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", varName,
+										(n + 1), str, param);
+								// validationResult.addError(err);
 
-									log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
-								} else {
-									log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
-								}
+								// ################# TEMPORARY WARNING ################
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+								// ==========================================================================
+								// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+								// table / defintion field / Template values ?
+								// ==========================================================================
+//								if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
+//									String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'",
+//											varName, (n + 1), str, param);
+//									// validationResult.addError(err);
+//
+//									// ################# TEMPORARY WARNING ################
+//									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+//											err);
+//
+//									log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+//								} else {
+//									log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
+//								}
 							}
 
 							str = match.unMatchedTemplates.get("cyclephasename");
 							if (str != null) {
-								if (!ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name.contains(str)) {
-									String err = String.format("%s[%d]: Invalid cycle_phase_name '%s' in '%s'", varName,
-											(n + 1), str, param);
-									// validationResult.addError(err)
 
-									// ################# TEMPORARY WARNING ################
-									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
-											err);
+								String err = String.format("%s[%d]: Invalid cycle_phase_name '%s' in '%s'", varName,
+										(n + 1), str, param);
+								// validationResult.addError(err)
 
-									log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
+								// ################# TEMPORARY WARNING ################
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
-								} else {
-									log.debug("...generic cycle_phase_name lookup: valid = '{}'", str);
-								}
+								log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
+
+								// ==========================================================================
+								// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+								// table / defintion field / Template values ?
+								// ==========================================================================
+//								if (!ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name.contains(str)) {
+//									String err = String.format("%s[%d]: Invalid cycle_phase_name '%s' in '%s'", varName,
+//											(n + 1), str, param);
+//									// validationResult.addError(err)
+//
+//									// ################# TEMPORARY WARNING ################
+//									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+//											err);
+//
+//									log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
+//
+//								} else {
+//									log.debug("...generic cycle_phase_name lookup: valid = '{}'", str);
+//								}
 							}
 
 							str = match.unMatchedTemplates.get("param");
 							if (str != null) {
-								if (!ArgoReferenceTable.GENERIC_TEMPLATE_param.contains(str)) {
-									String err = String.format("%s[%d]: Invalid param '%s' in '%s'", varName, (n + 1),
-											str, param);
+								String err = String.format("%s[%d]: Invalid param '%s' in '%s'", varName, (n + 1), str,
+										param);
 
-									// validationResult.addError(err)
+								// validationResult.addError(err)
 
-									// ################# TEMPORARY WARNING ################
-									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
-											err);
+								// ################# TEMPORARY WARNING ################
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
-									log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
-								} else {
-									log.debug("...generic param: generic name lookup: valid = '{}'", str);
-								}
+								log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
+
+								// ==========================================================================
+								// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+								// table / defintion field / Template values ?
+								// ==========================================================================
+//								if (!ArgoReferenceTable.GENERIC_TEMPLATE_param.contains(str)) {
+//									String err = String.format("%s[%d]: Invalid param '%s' in '%s'", varName, (n + 1),
+//											str, param);
+//
+//									// validationResult.addError(err)
+//
+//									// ################# TEMPORARY WARNING ################
+//									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+//											err);
+//
+//									log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
+//								} else {
+//									log.debug("...generic param: generic name lookup: valid = '{}'", str);
+//								}
 							}
 						}
 					}

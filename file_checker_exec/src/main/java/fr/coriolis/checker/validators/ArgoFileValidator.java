@@ -3,11 +3,13 @@ package fr.coriolis.checker.validators;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +23,9 @@ import fr.coriolis.checker.specs.ArgoDimension;
 import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 import fr.coriolis.checker.specs.ArgoVariable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.tables.R03DeprecatedEntry;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -1237,11 +1241,41 @@ public class ArgoFileValidator {
 	 * 
 	 * @param varName : the variable name
 	 */
-	protected void checkStrVarEmpty(String varName) {
+	protected boolean checkStrVarEmpty(String varName) {
 		String str = arFile.readString(varName).trim();
 		log.debug("{}: '{}'", varName, str);
 		if (str.length() <= 0) {
 			validationResult.addError(varName + ": Empty");
+			return false;
+		}
+		return true;
+	}
+
+	protected void validatePINAME() {
+		// first check if empty or not:
+		if (checkStrVarEmpty("PI_NAME")) {
+			// is not empty we can do next checks.
+			String piNamesStr = arFile.readString("PI_NAME").trim();
+			// split the string to get the differents PI_NAME
+			List<String> piNames = Arrays.stream(piNamesStr.split(",")).map(String::trim).filter(s -> !s.isEmpty())
+					.collect(Collectors.toList());
+			// for each PI_NAME check if in the NVS R40 table
+			for (String piName : piNames) {
+				SkosConcept piNameTableEntry = ArgoNVSReferenceTable.PI_NAME_TABLE.getConceptMembersByAltLabelMap()
+						.get(piName);
+				if (piNameTableEntry != null) {
+					if (piNameTableEntry.isDeprecated()) {
+
+						validationResult
+								.addWarning("PI_NAME : '" + piName + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
+					}
+
+				} else {
+
+					validationResult.addWarning("PI_NAME : '" + piName + "' Status: "
+							+ SkosConcept.INVALID_ALTLABEL_MESSAGE + " (not in NVS R40 table)");
+				}
+			}
 		}
 	}
 
