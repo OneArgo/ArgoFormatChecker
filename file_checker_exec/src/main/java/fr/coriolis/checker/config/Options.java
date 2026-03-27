@@ -32,7 +32,6 @@ import fr.coriolis.checker.specs.ArgoReferenceTable;
  * <li>-format-only-pre3.1: Perform format-only checks for versions
  * pre-3.1.</li>
  * <li>-data-check-all: Perform data checks for all files.</li>
- * <li>-battery-check: Enable battery variable checks.</li>
  * <li>-psal-stats: Compute PSAL statistics for index files.</li>
  * <li>-list-file &lt;file&gt;: Specify a file containing a list of input
  * files.</li>
@@ -54,7 +53,6 @@ public class Options {
 
 	private static Options instance;
 
-	private final boolean doBatteryChecks; // ..check metadate battery vars - default: no
 	private final boolean doNameCheck; // ..check file name - default: yes
 	private final boolean doNulls; // ..check for nulls in strings - default: no
 	private final boolean doFormatOnly; // ..true: format-only; false: format and data checks
@@ -82,12 +80,11 @@ public class Options {
 	private static final Logger log = LogManager.getLogger("Options");
 
 	// ====== CONSTRUCTOR ======
-	private Options(boolean doBatteryChecks, boolean doNameCheck, boolean doNulls, boolean doFormatOnly,
-			boolean doFormatOnlyPre31, boolean doPsalStats, boolean version, boolean help, boolean doXml,
-			String listFile, List<String> inFileList, String dacName, String specDirName, String outDirName,
-			String inDirName, boolean useOnlineNVS, boolean useInternalSpecs) {
+	private Options(boolean doNameCheck, boolean doNulls, boolean doFormatOnly, boolean doFormatOnlyPre31,
+			boolean doPsalStats, boolean version, boolean help, boolean doXml, String listFile, List<String> inFileList,
+			String dacName, String specDirName, String outDirName, String inDirName, boolean useOnlineNVS,
+			boolean useInternalSpecs) {
 		super();
-		this.doBatteryChecks = doBatteryChecks;
 		this.doNameCheck = doNameCheck;
 		this.doNulls = doNulls;
 		this.doFormatOnly = doFormatOnly;
@@ -106,7 +103,6 @@ public class Options {
 		this.useOnlineNVS = useOnlineNVS;
 		this.useInternalSpecs = useInternalSpecs;
 
-		log.debug("doBatteryChecks = {}", doBatteryChecks);
 		log.debug("doFormatOnly = {}", doFormatOnly);
 		log.debug("doFormatOnlyPre31 = {}", doFormatOnlyPre31);
 		log.debug("doNameCheck = {}", doNameCheck);
@@ -160,7 +156,6 @@ public class Options {
 		// Default values :
 		String listFile = null;
 		List<String> inFileList = null; // ..list of input files//..list file name
-		boolean doBatteryChecks = false; // ..check metadate battery vars - default: no
 		boolean doNameCheck = true; // ..check file name - default: yes
 		boolean doNulls = false; // ..check for nulls in strings - default: no
 		boolean doFormatOnly = false; // ..true: format-only; false: format and data checks
@@ -206,9 +201,6 @@ public class Options {
 				break;
 			case "-data-check-all":
 				doFormatOnlyPre31 = false;
-				break;
-			case "-battery-check":
-				doBatteryChecks = true;
 				break;
 			case "-psal-stats":
 				doPsalStats = true;
@@ -260,9 +252,8 @@ public class Options {
 			}
 		}
 
-		return new Options(doBatteryChecks, doNameCheck, doNulls, doFormatOnly, doFormatOnlyPre31, doPsalStats, version,
-				help, doXml, listFile, inFileList, dacName, specDirName, outDirName, inDirName, useOnlineNVS,
-				useInternalSpecs);
+		return new Options(doNameCheck, doNulls, doFormatOnly, doFormatOnlyPre31, doPsalStats, version, help, doXml,
+				listFile, inFileList, dacName, specDirName, outDirName, inDirName, useOnlineNVS, useInternalSpecs);
 
 	}
 
@@ -327,10 +318,6 @@ public class Options {
 	}
 
 	// ===== GETTERS =====
-
-	public boolean isDoBatteryChecks() {
-		return doBatteryChecks;
-	}
 
 	public boolean isDoNameCheck() {
 		return doNameCheck;

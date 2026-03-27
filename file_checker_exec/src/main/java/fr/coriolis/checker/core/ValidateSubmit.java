@@ -244,7 +244,7 @@ public class ValidateSubmit {
 
 				if (doDataCheck) { // Full data check needs to be done
 					phase = "DATA-VALIDATION";
-					checkArgoFileData(dacName, options.isDoNulls(), options.isDoBatteryChecks());
+					checkArgoFileData(dacName, options.isDoNulls());
 				}
 
 				// ..................check file Name...................
@@ -391,7 +391,7 @@ public class ValidateSubmit {
 	 * @throws IOException
 	 * @throws ValidateFileDataFailedException
 	 */
-	private static void checkArgoFileData(String dacName, boolean doNulls, boolean doBatteryChecks)
+	private static void checkArgoFileData(String dacName, boolean doNulls)
 			throws IOException, ValidateFileDataFailedException {
 
 		// argoFileValidator must be in the right specialized validation class:
@@ -401,7 +401,7 @@ public class ValidateSubmit {
 
 			// Do metadata file validate data
 			boolean isValidateArgoMetadaFileDataCompleted = ((ArgoMetadataFileValidator) argoFileValidator)
-					.validateData(doNulls, doBatteryChecks);
+					.validateData(doNulls);
 			if (!isValidateArgoMetadaFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoMetadataFile.validate failed: " + ValidationResult.getMessage());

@@ -24,12 +24,11 @@ class validateBatteryParamsCheckInMetaFileIT {
 	@CsvSource({ "5907141_meta_good_batteryType.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
 			"5907141_meta_bad-type.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
 			"5907141_meta_bad-Manufacturer.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
-			"5907141_meta_batteryType_empty.nc,coriolis,FILE-REJECTED,DATA-VALIDATION" })
-	void fileChecker_shouldAcceptMetaFile_WhenBatteryTypeNotEmpty(String fileName, String dac, String result,
+			"5907141_meta_batteryType_empty.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION" })
+	void fileChecker_shouldAcceptMetaFile_WhenBatteryTypeBadOrGood(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 
-		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME,
-				"-no-name-check -battery-check");
+		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME);
 
 	}
 
@@ -41,8 +40,7 @@ class validateBatteryParamsCheckInMetaFileIT {
 	void fileChecker_shouldAcceptMetaFile_WhenBatteryPacksBadOrEmpty(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 
-		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME,
-				"-no-name-check -battery-check");
+		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME);
 
 	}
 
@@ -50,11 +48,12 @@ class validateBatteryParamsCheckInMetaFileIT {
 	@ParameterizedTest(name = "{0} from dac {1} should have warning {2}")
 	@CsvSource(delimiter = '|', value = {
 			"5907141_meta_bad-type.nc|coriolis|BATTERY_TYPE[1]: Invalid type: '{BAD}'   *** WILL BECOME AN ERROR ***",
-			"5907141_meta_bad-Manufacturer.nc|coriolis|BATTERY_TYPE[1]: Invalid manufacturer: '{BAD}'   *** WILL BECOME AN ERROR ***" })
+			"5907141_meta_bad-Manufacturer.nc|coriolis|BATTERY_TYPE[1]: Invalid manufacturer: '{BAD}'   *** WILL BECOME AN ERROR ***",
+			"5907141_meta_incoherent_type.nc|coriolis|Inconsistent battery's type in BATTERY_TYPE[1] and BATTERY_PACKS[1]. BATTERY_TYPE's type ={Lithium}, BATTERY_PACKS's type = {Hyb}",
+			"5907141_meta_incoherent_type_second_pack.nc|coriolis|Inconsistent battery's type in BATTERY_TYPE[2] and BATTERY_PACKS[2]. BATTERY_TYPE's type ={Lithium}, BATTERY_PACKS's type = {Alk}" })
 	void fileChecker_ShouldRaiseWarning_WhenBadBatteryType(String fileName, String dac, String warningMessage)
 			throws IOException, InterruptedException {
-		TestsUtils.e2eTestWarningPresence(fileName, dac, warningMessage, TEST_DIR_NAME,
-				"-no-name-check -battery-check");
+		TestsUtils.e2eTestWarningPresence(fileName, dac, warningMessage, TEST_DIR_NAME);
 	}
 
 	@Tag(TEST_DIR_NAME)
@@ -62,7 +61,7 @@ class validateBatteryParamsCheckInMetaFileIT {
 	@CsvSource(delimiter = '|', value = { "5907141_meta_good_batteryType.nc|coriolis", })
 	void fileChecker_ShouldNotRaiseWarning_WhenBatteryParamGood(String fileName, String dac)
 			throws IOException, InterruptedException {
-		TestsUtils.e2eTestWarningAbsence(fileName, dac, TEST_DIR_NAME, "-no-name-check -battery-check");
+		TestsUtils.e2eTestWarningAbsence(fileName, dac, TEST_DIR_NAME);
 	}
 
 	@Tag(TEST_DIR_NAME)
@@ -73,8 +72,7 @@ class validateBatteryParamsCheckInMetaFileIT {
 			"5907141_meta_Wrong-number-Battery-Packs.nc|coriolis|Number of BATTERY_TYPES {1} != number of BATTERY_PACKS {2}   *** WILL BECOME AN ERROR ***" })
 	void fileChecker_ShouldRaiseWarning_WhenBadBatteryPacks(String fileName, String dac, String warningMessage)
 			throws IOException, InterruptedException {
-		TestsUtils.e2eTestWarningPresence(fileName, dac, warningMessage, TEST_DIR_NAME,
-				"-no-name-check -battery-check");
+		TestsUtils.e2eTestWarningPresence(fileName, dac, warningMessage, TEST_DIR_NAME);
 	}
 
 }

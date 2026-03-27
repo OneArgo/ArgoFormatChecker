@@ -1,10 +1,12 @@
 package fr.coriolis.checker.validators;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -133,7 +135,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validateData(boolean ckNulls, boolean... optionalChecks) throws IOException {
+	public boolean validateData(boolean ckNulls) throws IOException {
 		boolean basicsChecks = super.basicDataValidation(ckNulls);
 		if (!basicsChecks) {
 			return false;
@@ -149,10 +151,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validateOptionalParams();
 			validateConfigMission();
 			validateConfigParams();
+			validateBattery();
 
-			if ((optionalChecks.length > 0) && (optionalChecks[0] == true)) {
-				validateBattery();
-			}
 		}
 
 		return true;
@@ -1219,22 +1219,27 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		log.debug(".....validateBattery.....");
 
 		// .....BATTERY_TYPE.....
-		int nTypes = checkBatteryType();
+		List<SkosConcept> typesTablesEntries = checkBatteryType();
 
 		// .....BATTERY_PACKS.....
-		int nPacks = checkBatteryPacks();
+		List<SkosConcept> packTypesTablesEntries = checkBatteryPacks();
 
 		// ............compare TYPES and PACKS............
-		crossCheckBatteryPacksAndBatteryType(nTypes, nPacks);
+		crossCheckBatteryPacksAndBatteryType(typesTablesEntries, packTypesTablesEntries);
 
 	}// ..end validateBattery
 
-	private void crossCheckBatteryPacksAndBatteryType(int nTypes, int nPacks) {
-		// =======
-		// CK_0157
-		// =======
-		if (nPacks >= 0) {
+	private void crossCheckBatteryPacksAndBatteryType(List<SkosConcept> typesTablesEntries,
+			List<SkosConcept> packTypesTablesEntries) {
 
+		int nPacks = packTypesTablesEntries.size();
+		int nTypes = typesTablesEntries.size();
+
+		if (nPacks >= 0) {
+			// =======
+			// CK_0157
+			// =======
+			// same number of entries
 			if (nTypes != nPacks) {
 				String err = String.format("Number of BATTERY_TYPES {%d} != number of BATTERY_PACKS {%d}", nTypes,
 						nPacks);
@@ -1245,14 +1250,55 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				log.warn("TEMP WARNING: {%s}: {%s}: {%s}", arFile.getDacName(), arFile.getFileName(), err);
 
 				log.debug("number of types != number of packs => {%d} != {%d}", nTypes, nPacks);
+			} else {
+				checkBatteryTypesConsistency(typesTablesEntries, packTypesTablesEntries);
 			}
 
-		} // ..end if nPacks >= 0
+		} // ..end if nPacks >=0
+
+//		if (nPacks >= 0) {
+//
+//			if (nTypes != nPacks) {
+//				String err = String.format("Number of BATTERY_TYPES {%d} != number of BATTERY_PACKS {%d}", nTypes,
+//						nPacks);
+//				// validationResult.addError(err);
+//
+//				// ################# TEMPORARY WARNING ################
+//				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//				log.warn("TEMP WARNING: {%s}: {%s}: {%s}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//				log.debug("number of types != number of packs => {%d} != {%d}", nTypes, nPacks);
+//			}
+//
+//		} // ..end if nPacks >= 0
 	}
 
-	private int checkBatteryPacks() {
+	private void checkBatteryTypesConsistency(List<SkosConcept> typesTablesEntries,
+			List<SkosConcept> packTypesTablesEntries) {
+		// =======
+		// CK_0158
+		// =======
+		// same number of entries, for each entries, same concept should be found for
+		// "Battery"
+		for (int i = 0; i < packTypesTablesEntries.size(); i++) {
+			SkosConcept batteryTypeType = typesTablesEntries.get(i);
+			SkosConcept batteryPackType = packTypesTablesEntries.get(i);
+			if (batteryPackType != null && batteryTypeType != null) {
+				if (!batteryPackType.getId().equals(batteryTypeType.getId())) {
+					// not same type : inconsistencies
+					String err = String.format(
+							"Inconsistent battery's type in BATTERY_TYPE[%d] and BATTERY_PACKS[%d]. BATTERY_TYPE's type ={%s}, BATTERY_PACKS's type = {%s}",
+							i + 1, i + 1, batteryTypeType.getAltLabel(), batteryPackType.getPrefLabel());
+					validationResult.addWarning(err);
+				}
+			}
+		}
+	}
+
+	private List<SkosConcept> checkBatteryPacks() {
 		String str;
 		int nPacks = -1;
+		List<SkosConcept> typesTablesEntries = new ArrayList<>();
 
 		str = arFile.readString("BATTERY_PACKS");
 
@@ -1273,6 +1319,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				log.debug("battery_packs substring: '{}'", substr);
 
 				if (substr.trim().equals("U")) {
+					typesTablesEntries.add(null);
 					// =======
 					// CK_0152
 					// =======
@@ -1325,6 +1372,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						// BATTERY_TYPE pref label
 						SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
 								.getConceptMembersByPrefLabelMap().get(type);
+						typesTablesEntries.add(typeTableEntry);
 						if (typeTableEntry != null) {
 							if (typeTableEntry.isDeprecated()) {
 								// =======
@@ -1347,6 +1395,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						}
 
 					} else {
+						typesTablesEntries.add(null);
 						// ..did not match the expected pattern
 						String err = String.format(
 								"BATTERY_PACKS[%d]: Does not match template 'xStyle type (or U): '%s'", nPacks,
@@ -1362,11 +1411,12 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				} // ..end if undefined
 			} // ..end for (battery_packs substrings)
 		} // ..endif BATTERY_PACKS is filled
-		return nPacks;
+		return typesTablesEntries;
 	}
 
-	private int checkBatteryType() {
+	private List<SkosConcept> checkBatteryType() {
 		int nTypes = 0;
+		List<SkosConcept> typesTablesEntries = new ArrayList<>();
 
 		String str = arFile.readString("BATTERY_TYPE");
 		log.debug("BATTERY_TYPE: '{}'", str);
@@ -1375,7 +1425,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			// =======
 			// CK_0146
 			// =======
-			validationResult.addError("BATTERY_TYPE: Empty");
+			validationResult.addWarning("BATTERY_TYPE: Empty.    *** WILL BECOME AN ERROR ***");
 
 		} else {
 
@@ -1400,6 +1450,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 					// =======
 					SkosConcept manuTableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE
 							.getConceptMembersByAltLabelMap().get(manu);
+
 					if (manuTableEntry != null) {
 						if (manuTableEntry.isDeprecated()) {
 							// =======
@@ -1427,6 +1478,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 					// =======
 					SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
 							.getConceptMembersByAltLabelMap().get(type);
+					typesTablesEntries.add(typeTableEntry);
 					if (typeTableEntry != null) {
 						if (typeTableEntry.isDeprecated()) {
 							// =======
@@ -1449,6 +1501,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 					}
 
 				} else {
+					typesTablesEntries.add(null);
 					// =======
 					// CK_0147
 					// =======
@@ -1466,7 +1519,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				}
 			}
 		} // ..endif battery_type is filled
-		return nTypes;
+		return typesTablesEntries;
 	}
 
 	/**
@@ -1493,7 +1546,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 			if (mission[n] == 99999) {
 				// =======
-				// CK_0158
+				// CK_0159
 				// =======
 				validationResult.addWarning("CONFIG_MISSION_NUMBER: Missing at index: " + (n + 1));
 				log.debug("config_mission_number == 0 at {}", n);

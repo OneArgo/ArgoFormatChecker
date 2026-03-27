@@ -36,9 +36,9 @@ class OptionsTest {
 		String file1 = "file1";
 		String file2 = "file2";
 
-		String[] args = { "-help", "-version", "-battery-check", "-no-name-check", "-text-result", "-format-only",
-				"-null-warn", "-data-check-all", "-psal-stats", "-online-nvs", "-list-file", listOfFiles, dacName,
-				specDir, outDir, inDir, file1, file2 };
+		String[] args = { "-help", "-version", "-no-name-check", "-text-result", "-format-only", "-null-warn",
+				"-data-check-all", "-psal-stats", "-online-nvs", "-list-file", listOfFiles, dacName, specDir, outDir,
+				inDir, file1, file2 };
 
 		// ACT
 		Options.init(args);
@@ -47,7 +47,6 @@ class OptionsTest {
 		// ASSERT
 		assertThat(options.isHelp()).isTrue();
 		assertThat(options.isVersion()).isTrue();
-		assertThat(options.isDoBatteryChecks()).isTrue();
 		assertThat(options.isDoNameCheck()).isFalse();
 		assertThat(options.isDoXml()).isFalse();
 		assertThat(options.isDoFormatOnly()).isTrue();
@@ -67,8 +66,7 @@ class OptionsTest {
 	@Test
 	public void getInstance_shouldThrowException_whenMissingArgumentAfterListFile() {
 		// ARRANG
-		String[] args = { "-help", "-version", "-battery-check", "-no-name-check", "-text-result", "-format-only",
-				"-list-file" };
+		String[] args = { "-help", "-version", "-no-name-check", "-text-result", "-format-only", "-list-file" };
 
 		// ACT & ASSERT
 		assertThatThrownBy(() -> Options.init(args)).isInstanceOf(IllegalArgumentException.class)
@@ -90,8 +88,8 @@ class OptionsTest {
 	public void getInstance_shouldThrowException_whenTooFewArguments() {
 
 		// ARRANGE
-		String[] args = { "-help", "-version", "-battery-check", "-no-name-check", "-text-result", "-format-only",
-				"-list-file", "list_of_files.txt", "dacName", "specDir", "outDir" };
+		String[] args = { "-help", "-version", "-no-name-check", "-text-result", "-format-only", "-list-file",
+				"list_of_files.txt", "dacName", "specDir", "outDir" };
 
 		// ACT & ASSERT
 
