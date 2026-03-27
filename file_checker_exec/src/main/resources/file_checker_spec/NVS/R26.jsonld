@@ -71,6 +71,9 @@
             "skos:notation": "SDN:R26::NKE",
             "skos:altLabel": "NKE",
             "dc:date": "2025-08-28 11:45:52.0",
+            "skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+            },
             "owl:versionInfo": "1",
             "skos:prefLabel": {
                 "@language": "en",
@@ -102,6 +105,9 @@
             "skos:notation": "SDN:R26::MARTEC",
             "skos:altLabel": "MARTEC",
             "dc:date": "2025-08-28 11:45:51.0",
+            "skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+            },
             "owl:versionInfo": "1",
             "skos:prefLabel": {
                 "@language": "en",
@@ -241,6 +247,9 @@
             "skos:notation": "SDN:R26::WRC",
             "skos:altLabel": "WRC",
             "dc:date": "2025-08-29 10:15:12.0",
+            "skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+            },
             "owl:versionInfo": "1",
             "skos:prefLabel": {
                 "@language": "en",
@@ -379,36 +388,41 @@
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R26/current/QUARTZDYNE/",
             "pav:authoredOn": "2021-09-14 12:16:36.0",
-            "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/QUARTZDYNE/1/"
-            },
-            "dce:identifier": "SDN:R26::QUARTZDYNE",
-            "pav:version": "1",
-            "skos:notation": "SDN:R26::QUARTZDYNE",
-            "skos:altLabel": "QUARTZDYNE",
-            "dc:date": "2021-09-14 12:16:36.0",
-            "skos:narrower": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/QUARTZDYNE_DSB301-10-C85/"
-            },
-            "owl:versionInfo": "1",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "Quartzdyne"
-            },
-            "dc:identifier": "SDN:R26::QUARTZDYNE",
-            "skos:note": {
-                "@language": "en",
-                "@value": "accepted"
-            },
-            "owl:deprecated": "false",
-            "void:inDataset": {
-                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
-            },
+            "@type": "skos:Concept",
             "skos:definition": {
                 "@language": "en",
                 "@value": "A ChampionX company specialised in resonating quartz pressure transducers and temperature gauges, located in Salt Lake City, Utah (United States of America)."
             },
-            "@type": "skos:Concept"
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "false",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "dc:identifier": "SDN:R26::QUARTZDYNE",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Quartzdyne"
+            },
+            "owl:versionInfo": "1",
+            "skos:narrower": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/QUARTZDYNE_DSB301-10-C85/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/DSB301-10-C85/"
+                }
+            ],
+            "dc:date": "2021-09-14 12:16:36.0",
+            "skos:altLabel": "QUARTZDYNE",
+            "skos:notation": "SDN:R26::QUARTZDYNE",
+            "pav:version": "1",
+            "dce:identifier": "SDN:R26::QUARTZDYNE",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/QUARTZDYNE/1/"
+            }
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R26/current/TSK/",
@@ -651,6 +665,9 @@
             "skos:notation": "SDN:R26::TWR",
             "skos:altLabel": "TWR",
             "dc:date": "2025-08-29 10:15:12.0",
+            "skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+            },
             "owl:versionInfo": "1",
             "skos:prefLabel": {
                 "@language": "en",
@@ -750,6 +767,9 @@
             "skos:notation": "SDN:R26::OPTIMARE",
             "skos:altLabel": "OPTIMARE",
             "dc:date": "2025-08-28 11:45:51.0",
+            "skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+            },
             "owl:versionInfo": "1",
             "skos:prefLabel": {
                 "@language": "en",
@@ -1167,6 +1187,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR507_ICSWR10W/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/FLOATCLOCK/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE61_V5.0.3/"
                 },
                 {
@@ -1458,7 +1481,7 @@
             "grg:RE_RegisterOwner": "Argo Data Management Team",
             "grg:RE_RegisterManager": "British Oceanographic Data Centre",
             "rdfs:seeAlso": {
-                "@id": "https://github.com/nvs-vocabs/R26"
+                "@id": "https://github.com/OneArgo/ArgoVocabs"
             }
         }
     ],
