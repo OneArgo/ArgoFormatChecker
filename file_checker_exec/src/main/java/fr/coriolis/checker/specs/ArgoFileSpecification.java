@@ -2067,12 +2067,12 @@ public class ArgoFileSpecification {
 				// ===========
 				// CK_0022 2/2
 				// ===========
-				if (isPost3_0) {
-					prmSName = replaceAttributeIfNotAllowed(prmSName);
-					prmVmin = replaceAttributeIfNotAllowed(prmVmin);
-					prmVmax = replaceAttributeIfNotAllowed(prmVmax);
-					prmLName = replaceAttributeIfToBeIgnored(prmLName);
-				}
+//				if (isPost3_0) { // 2026: cannot do the distinction with the use of NVS table
+				prmSName = replaceAttributeIfNotAllowed(prmSName);
+				prmVmin = replaceAttributeIfNotAllowed(prmVmin);
+				prmVmax = replaceAttributeIfNotAllowed(prmVmax);
+				prmLName = replaceAttributeIfToBeIgnored(prmLName);
+//				}
 
 				log.debug("parsed: {}|{}|{}|{}|{}|deprecated : {}|{}|", prm, prmType, prmLName, prmSName, prmUnits,
 						prmVmin, prmVmax, isDeprecated, prmFill);
