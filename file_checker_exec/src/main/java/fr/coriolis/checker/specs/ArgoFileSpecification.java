@@ -2337,16 +2337,63 @@ public class ArgoFileSpecification {
 
 				String attributeKey = c[1].strip();
 				String oldValue = normalizeValue(attributeKey, c[2].strip());
+				String status = c[3].strip();
+				String message = c[4].strip();
 
-				entries.add(new R03DeprecatedEntry(c[0].strip(), // paramName
-						attributeKey, // attributeKey
-						oldValue, // oldValue
-						c[3].strip(), // status
-						c[4].strip() // message
-				));
+				// virtually add the same entries for duplicate param :
+				String[] prmList = buildParamListForDuplicatePhysicalParameters(c[0].strip(),
+						NUMBER_ALLOWED_DUPLICATE_SENSOR);
+				for (String paramName : prmList) {
+					addParamEntries(entries, paramName, attributeKey, oldValue, status, message, version);
+
+				}
+
 			}
 		}
 		R03DeprecatedEntries = entries;
+	}
+
+	/**
+	 * Adds all R03DeprecatedEntry variants for a given parameter name, following
+	 * the derivation rules (ADJUSTED, ADJUSTED_ERROR, STD/MED suffixes).
+	 */
+	private void addParamEntries(List<R03DeprecatedEntry> entries, String paramName, String attributeKey,
+			String oldValue, String status, String message, String version) {
+
+		// Always: base + ADJUSTED
+		List<String> names = new ArrayList<>(List.of(paramName, paramName + "_ADJUSTED"));
+
+		// ADJUSTED_ERROR — excluded for min/max/name attributes
+		boolean excludeFromAdjustedError = attributeKey.equals("valid_min") || attributeKey.equals("valid_max")
+				|| attributeKey.equals("standard_name")
+				|| (version.compareTo("2.3") >= 0 && attributeKey.equals("long_name"));
+
+		if (!excludeFromAdjustedError) {
+			names.add(paramName + "_ADJUSTED_ERROR");
+		}
+
+		// STD & MED family — units and fillValue share the same oldValue
+		if (attributeKey.equals("units") || attributeKey.equals("fillValue")) {
+			names.addAll(List.of(paramName + "_STD", paramName + "_MED", paramName + "_STD_ADJUSTED",
+					paramName + "_MED_ADJUSTED", paramName + "_STD_ADJUSTED_ERROR", paramName + "_MED_ADJUSTED_ERROR"));
+		}
+
+		names.forEach(name -> {
+			entries.add(new R03DeprecatedEntry(name, attributeKey, oldValue, status, message));
+			// special case for "comment" attribute prior to v2.3
+			if (version.compareTo("2.3") < 0 && attributeKey.equals("standard_name")) {
+				entries.add(new R03DeprecatedEntry(name, "comment", oldValue, status, message));
+			}
+		});
+
+		// long_name — STD/MED variants get a prefixed oldValue
+		if (attributeKey.equals("long_name")) {
+			Map<String, String> longNameVariants = Map.of(paramName + "_STD", "Standard deviation of " + oldValue,
+					paramName + "_MED", "Median value of " + oldValue, paramName + "_STD_ADJUSTED",
+					"Standard deviation of " + oldValue, paramName + "_MED_ADJUSTED", "Median value of " + oldValue);
+			longNameVariants.forEach((name, derivedValue) -> entries
+					.add(new R03DeprecatedEntry(name, attributeKey, derivedValue, status, message)));
+		}
 	}
 
 	/**
