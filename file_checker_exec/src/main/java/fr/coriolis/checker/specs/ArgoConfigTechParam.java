@@ -120,9 +120,6 @@ public class ArgoConfigTechParam {
 
 	// .....object variables......
 
-	private String bioCfgParmFileName;
-	private String coreCfgParmFileName;
-	private String tecParmFileName;
 	private String unitFileName;
 	private String version;
 
@@ -182,11 +179,8 @@ public class ArgoConfigTechParam {
 		log.debug("...ArgoConfigTechParam: start...");
 
 		this.version = version.trim();
-
 		String prefix = "argo-";
-		coreCfgParmFileName = prefix + "core_config_names-spec-v" + this.version;
-		bioCfgParmFileName = prefix + "bio_config_names-spec-v" + this.version;
-		tecParmFileName = prefix + "tech_names-spec-v" + this.version;
+
 		unitFileName = prefix + "tech_units-spec-v" + this.version;
 
 		if (initConfig) {
@@ -555,11 +549,6 @@ public class ArgoConfigTechParam {
 	 */
 	public void parseConfigParamFiles() throws IOException {
 		log.debug(".....parseConfigParamFiles: start.....");
-
-		String[] fileNames = { coreCfgParmFileName, bioCfgParmFileName, coreCfgParmFileName + ".deprecated",
-				bioCfgParmFileName + ".deprecated" };
-		LinkedHashSet<String> paramList = null;
-		LinkedHashMap<Pattern, HashMap<String, HashSet<String>>> paramRegex = null;
 
 		// ..pattern to recognize/replace templates
 		Pattern pTemplate = Pattern.compile("<([^>]+?)>");
