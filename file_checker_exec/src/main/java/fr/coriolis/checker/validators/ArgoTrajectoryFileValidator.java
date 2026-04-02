@@ -950,7 +950,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			}
 
 			if (juld_status[n] != ' ') {
-				tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+				tableEntry = ArgoNVSReferenceTable.STATUS_TABLE.getConceptMembersByAltLabelMap()
 						.get(String.valueOf(juld_status[n]));
 				if (tableEntry != null) {
 					if (tableEntry.isDeprecated()) {
@@ -1119,7 +1119,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				if (juld_adj_status[n] != ' ') {
 					if (juld_adj_status[n] != ' ') {
-						tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+						tableEntry = ArgoNVSReferenceTable.STATUS_TABLE.getConceptMembersByAltLabelMap()
 								.get(String.valueOf(juld_adj_status[n]));
 						if (tableEntry != null) {
 							if (tableEntry.isDeprecated()) {
