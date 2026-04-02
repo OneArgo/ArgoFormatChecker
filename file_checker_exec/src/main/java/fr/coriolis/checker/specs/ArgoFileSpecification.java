@@ -2320,7 +2320,7 @@ public class ArgoFileSpecification {
 
 			String line;
 			while ((line = br.readLine()) != null) {
-				line = line.strip();
+				line = line.trim();
 				if (line.isEmpty() || line.startsWith("//")) {
 					continue;
 				}
@@ -2331,17 +2331,17 @@ public class ArgoFileSpecification {
 					continue; // not a valid entries as we expect at least 6 columns (deprecation date not
 								// used here)
 				}
-				if (!containsVersion(c[5].strip(), version)) {
+				if (!containsVersion(c[5].trim(), version)) {
 					continue; // we extract only for the current version
 				}
 
-				String attributeKey = c[1].strip();
-				String oldValue = normalizeValue(attributeKey, c[2].strip());
-				String status = c[3].strip();
-				String message = c[4].strip();
+				String attributeKey = c[1].trim();
+				String oldValue = normalizeValue(attributeKey, c[2].trim());
+				String status = c[3].trim();
+				String message = c[4].trim();
 
 				// virtually add the same entries for duplicate param :
-				String[] prmList = buildParamListForDuplicatePhysicalParameters(c[0].strip(),
+				String[] prmList = buildParamListForDuplicatePhysicalParameters(c[0].trim(),
 						NUMBER_ALLOWED_DUPLICATE_SENSOR);
 				for (String paramName : prmList) {
 					addParamEntries(entries, paramName, attributeKey, oldValue, status, message, version);
