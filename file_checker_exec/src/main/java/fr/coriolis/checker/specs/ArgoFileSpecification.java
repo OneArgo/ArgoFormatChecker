@@ -1134,8 +1134,11 @@ public class ArgoFileSpecification {
 			if (fType == ArgoDataFile.FileType.TECHNICAL) {
 				ConfigTech = new ArgoConfigTechParam(version, false, true);
 
-				// ..for each <tech_param> entry, automatically make <tech_param>* variables too
-				addOptionnalTechParamVariables();
+				// ..for each <tech_param> entry, automatically make <tech_param>* variables
+				// too. version >= 3.1 only
+				if (version.compareTo("3.1") >= 0) {
+					addOptionnalTechParamVariables();
+				}
 
 			}
 		}
