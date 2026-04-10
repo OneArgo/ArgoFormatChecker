@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
@@ -393,30 +395,44 @@ public class ArgoDataFile {
 			dac = dacName[0];
 		}
 
-		if (dt.equals("Argo meta-data")) {
-			ft = FileType.METADATA;
-
-		} else if (dt.equals("Argo profile")) {
-			ft = FileType.PROFILE;
-
-		} else if (dt.equals("Argo trajectory")) {
-			ft = FileType.TRAJECTORY;
-
-		} else if (dt.equals("Argo technical data")) {
-			ft = FileType.TECHNICAL;
-
-		} else if (dt.equals("B-Argo profile")) {
-			ft = FileType.BIO_PROFILE;
-
-		} else if (dt.equals("B-Argo trajectory")) {
-			ft = FileType.BIO_TRAJECTORY;
-
+		SkosConcept dataTypeTableEntry = ArgoNVSReferenceTable.DATA_TYPE_TABLE.getConceptMembersByPrefLabelMap()
+				.get(dt);
+		if (dataTypeTableEntry != null) {
+			if (dataTypeTableEntry.isDeprecated()) {
+				log.warn("TEMP WARNING: {}: {}: {}", dac, inFile,
+						"deprecated DATA_TYPE (temporarily allowed): '" + dt + "'");
+				badtype = "DATA_TYPE = '" + dataTypeTableEntry.getPrefLabel() + "' is deprecated";
+			}
 			/*
 			 * .................................................... ....these are exceptions
 			 * currently being allowed....
 			 * ....................................................
 			 */
+			if (dataTypeTableEntry.getAltLabel().equals("META")) {
+				ft = FileType.METADATA;
+			} else if (dataTypeTableEntry.getAltLabel().equals("PROF")) {
+				ft = FileType.PROFILE;
 
+			} else if (dataTypeTableEntry.getAltLabel().equals("TRAJ")) {
+				ft = FileType.TRAJECTORY;
+
+			} else if (dataTypeTableEntry.getAltLabel().equals("TECH")) {
+				ft = FileType.TECHNICAL;
+
+			} else if (dataTypeTableEntry.getAltLabel().equals("BPROF")) {
+				ft = FileType.BIO_PROFILE;
+
+			} else if (dataTypeTableEntry.getAltLabel().equals("BTRAJ")) {
+				ft = FileType.BIO_TRAJECTORY;
+			} else {
+				log.info("Invalid DATA_TYPE: '" + dt + "'");
+				ft = FileType.UNKNOWN;
+				stderr.println(
+						"\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
+				System.exit(1);
+				// ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
+				return null;
+			}
 		} else if (dt.equals("ARGO profile")) {
 			// ################# TEMPORARY WARNING ################
 			/*
@@ -466,9 +482,7 @@ public class ArgoDataFile {
 		} else {
 			log.info("Invalid DATA_TYPE: '" + dt + "'");
 			ft = FileType.UNKNOWN;
-			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
-			System.exit(1);
-			// ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
+			ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
 			return null;
 		}
 

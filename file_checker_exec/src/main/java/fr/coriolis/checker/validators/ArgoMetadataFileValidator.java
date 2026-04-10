@@ -1591,6 +1591,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				int index = full.lastIndexOf('_');
 
 				if (index <= 0) {
+					// =======
+					// CK_0160
+					// =======
 					// ..poorly formed name - only report if not already reported
 
 					if (!nameAlreadyChecked.contains(full)) {
@@ -1615,6 +1618,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				// ..check name
 
 				if (!nameAlreadyChecked.contains(param)) {
+					// =======
+					// CK_0161
+					// =======
 					// ..this parameter name has not been checked
 
 					ArgoConfigTechParam.ArgoConfigTechParamMatch match = arFile.getFileSpec().ConfigTech
@@ -1633,6 +1639,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 					} else {
 						if (match.isDeprecated) {
+							// =======
+							// CK_0162
+							// =======
 							// ..IS a deprecated name --> warning
 							validationResult.addWarning(varName + "[" + (n + 1) + "]: " + "Deprecated name '" + param);
 							log.debug("parameter is deprecated: '{}'", param);
@@ -1667,6 +1676,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 							String str = match.unMatchedTemplates.get("shortsensorname");
 							if (str != null) {
+								// =======
+								// CK_0163
+								// =======
 
 								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", varName,
 										(n + 1), str, param);
