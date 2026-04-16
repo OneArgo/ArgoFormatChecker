@@ -204,6 +204,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		String ref = arFile.readString(name);
 
 		log.debug(name + ": " + ref);
+		// =======
+		// CK_0178
+		// =======
 		if (!ref.matches(arFile.getFileSpec().getMeta(name))) {
 			validationResult.addError(name + ": '" + ref + "': Does not match specification ('"
 					+ arFile.getFileSpec().getMeta(name) + "')");
@@ -237,6 +240,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			int qc_index = goodJuldQC.indexOf(qc);
 
 			if (qc_index >= 0) {
+				// =======
+				// CK_0048
+				// =======
 				if (juld[n] > 999990.) {
 					validationResult.addError("JULD[" + (n + 1) + "]: Missing when QC = " + qc);
 					continue;
@@ -248,6 +254,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				String juldDTG = ArgoDate.format(dateJuld);
 
 				log.debug("JULD[{}]: {} = {} (qc = {})", n, juld[n], juldDTG, qc);
+				// =======
+				// CK_0049
+				// =======
 				if (dateJuld.before(earliestDate)) {
 					validationResult.addError("JULD[" + (n + 1) + "]: " + juld[n] + " = '" + juldDTG
 							+ "': Before earliest allowed date ('" + earliestDate + "')");
@@ -255,11 +264,16 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 				// ..check that JULD is before DATE_CREATION and before file time
 				long juldSec = dateJuld.getTime();
-
+				// =======
+				// CK_0050
+				// =======
 				if (arFile.isHaveCreationDate() && (juldSec - arFile.getCreationSec()) > oneDaySec) {
 					validationResult.addError("JULD[" + (n + 1) + "]: " + juld[n] + " = '" + juldDTG
 							+ "': After DATE_CREATION ('" + arFile.getCreationDate() + "')");
 				}
+				// =======
+				// CK_0051
+				// =======
 				if ((juldSec - fileSec) > oneDaySec) {
 					validationResult.addError("JULD[" + (n + 1) + "]: " + juld[n] + " = '" + juldDTG
 							+ "': After GDAC receipt time ('" + ArgoDate.format(fileTime) + "')");
@@ -270,7 +284,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					log.debug("JULD_LOCATION[" + n + "]: " + juld_loc[n] + " = "
 							+ ArgoDate.format(ArgoDate.get(juld_loc[n])));
 				}
-
+				// =======
+				// CK_0053
+				// =======
 				if (juld_loc[n] < 99990.d) {
 					double max = 2.d;
 					if (Math.abs(juld_loc[n] - juld[n]) > max) {
@@ -278,10 +294,14 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								+ max + " day of JULD (" + juld[n] + ")");
 					}
 
-				} else { // ..juld_location is missing
-							// ..if this is missing, position better be missing
-							// ..this is very rare -- spend the overhead to do it
-							// .. here each time
+				} else {
+					// =======
+					// CK_0054
+					// =======
+					// ..juld_location is missing
+					// ..if this is missing, position better be missing
+					// ..this is very rare -- spend the overhead to do it
+					// .. here each time
 					double lat = arFile.readDouble("LATITUDE", n);
 					double lon = arFile.readDouble("LONGITUDE", n);
 
@@ -310,6 +330,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					ndx.set(h, n, 0);
 					String dateHist = hDate.getString(ndx).trim();
 
+					// =======
+					// CK_0179
+					// =======
 					if (dateHist.length() > 0) {
 						// ..HISTORY_DATE is set. Is it reasonable?
 						if (log.isDebugEnabled()) {
@@ -328,6 +351,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 						} else if (arFile.isHaveUpdateDate()) {
 							long dateSec = date.getTime();
+							// =======
+							// CK_0180
+							// =======
 							if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 								validationResult.addError("HISTORY_DATE[" + (h + 1) + "," + (n + 1) + "]: '" + dateHist
 										+ "': After DATE_UPDATE ('" + arFile.getUpdateDate() + "')");
@@ -362,7 +388,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					for (int p = 0; p < nParam; p++) {
 						ndx.set(n, c, p, 0);
 						String dateCal = cDate.getString(ndx).trim();
-
+						// =======
+						// CK_0181
+						// =======
 						if (dateCal.length() > 0) {
 							// ..SCI_CALIB_/CALIBRATION_DATE is set. Is it reasonable?
 							if (log.isDebugEnabled()) {
@@ -374,12 +402,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								validationResult.addError(calib_date + "[" + (n + 1) + "," + (c + 1) + "," + (p + 1)
 										+ "]: '" + dateCal + "': Invalid date");
 
-								// } else if (haveCreation && date.before(dateCreation)) {
-								// validationResult.addError("CALIBRATION_DATE["+(n+1)+","+(c+1)+","+
-								// (p+1)+"]: '"+dateCal+
-								// "': Before DATE_CREATION ('"+creation+"')");
-
 							} else if (arFile.isHaveUpdateDate()) {
+								// =======
+								// CK_0182
+								// =======
 								long dateSec = date.getTime();
 								if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 									validationResult.addError(calib_date + "[" + (n + 1) + "," + (c + 1) + "," + (p + 1)
@@ -444,6 +470,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		for (int n = 0; n < nProf; n++) {
 			if (dMode.charAt(n) == 'D') {
 				String state = dState[n].trim();
+				// =======
+				// CK_0042
+				// =======
 				if (!(state.equals("2C") || state.equals("2C+"))) {
 					validationResult.addError(
 							"D-mode: DATA_STATE_INDICATOR[" + (n + 1) + "]: '" + state + "': Not set to \"2C\"");
@@ -499,6 +528,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 										+ "checked for PARAMETER '{}' due to missing PROFILE_param_QC");
 
 							} else { // if (pQC != ' ') { //....Qc manual pg 74.
+								// =======
+								// CK_0191
+								// =======
 								if (cmt.length() == 0) {
 									// ################# TEMPORARY WARNING ################
 									validationResult.addWarning("D-mode: SCIENTIFIC_CALIB_COMMENT[" + (n + 1) + ","
@@ -507,6 +539,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 											"TEMP WARNING: {}: D-mode: SCIENTIFIC_CALIB_COMMENT[{},{},{}] not set for {}",
 											arFile.getFile().getName(), n, c, p, param);
 								}
+								// =======
+								// CK_0192
+								// =======
 								if (date.length() == 0) {
 									// ################# TEMPORARY WARNING ################
 									validationResult.addWarning("D-mode: " + calib_date + "[" + (n + 1) + "," + (c + 1)
@@ -551,6 +586,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			} else {// ..end if ('D')
 				// ..either 'R' or 'A'
 				String state = dState[n].trim();
+				// =======
+				// CK_0041
+				// =======
 				if (state.startsWith("2C")) {
 					validationResult.addError(
 							"R/A-mode: DATA_STATE_INDICATOR[" + (n + 1) + "]: '" + state + "': Can not be \"2C...\"");
@@ -589,7 +627,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		// get NVS tables :
 
 		SkosConcept tableEntry;
-
+		// =======
+		// CK_0168
+		// =======
 		if (arFile.getFileSpec().getVariable("INST_REFERENCE") != null) {
 			// ..INST_REF is in spec, check that it is set
 
@@ -677,7 +717,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			if (!super.validatePlatfomNumber(s)) {
 				validationResult.addError("PLATFORM_NUMBER[" + (n + 1) + "]: '" + s + "': Invalid");
 			}
-
+			// =======
+			// CK_0174
+			// =======
 			if (singleCycle) {
 				if (!s.equals(firstNum)) {
 					// ..this isn't a single cycle file -- we're done
@@ -686,6 +728,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					return false;
 
 				} else {
+					// =======
+					// CK_0036
+					// =======
 					// ..platform numbers are the same -- check cycle
 					if (cyc[n] != firstCyc) {
 						// ..this isn't a single cycle file -- we're done
@@ -697,7 +742,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			}
 
 			// .....DIRECTION.....
-
+			// =======
+			// CK_0037
+			// =======
 			log.debug("DIRECTION[{}]: '{}'", n, dir.charAt(n));
 			if (dir.charAt(n) != 'A' && dir.charAt(n) != 'D') {
 				validationResult.addError("DIRECTION[" + (n + 1) + "]: '" + dir.charAt(n) + "': Invalid");
@@ -710,6 +757,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			s = ds[n].trim();
 			tableEntry = ArgoNVSReferenceTable.DATA_STATE_INDICATOR_TABLE.getConceptMembersByAltLabelMap().get(s);
 			if (s.length() == 0) {
+				// =======
+				// CK_0043
+				// =======
 				// ..set to _FillValue --- data must be missing
 				// ..use PRES as a proxy - if all PRES is missing assume all data is missing
 
@@ -735,6 +785,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				}
 
 			} else if (tableEntry == null) {
+				// =======
+				// CK_0040
+				// =======
 				validationResult.addError(
 						"DATA_STATE_INDICATOR[" + (n + 1) + "]: '" + s + "' " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
@@ -743,12 +796,18 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			log.debug("DATA_CENTRE[{}]: '{}'   DAC: '{}'", n, dc[n], dac);
 			if (dac != null) {
+				// =======
+				// CK_0039
+				// =======
 				if (!ArgoReferenceTable.DacCenterCodes.get(dac).contains(dc[n].trim())) {
 					validationResult
 							.addError("DATA_CENTRE[" + (n + 1) + "]: '" + dc[n] + "': Invalid for DAC '" + dac + "'");
 				}
 
 			} else { // ..incoming DAC not set
+				// =======
+				// CK_0038
+				// =======
 				if (!ArgoReferenceTable.DacCenterCodes.containsValue(dc[n].trim())) {
 					validationResult.addError("DATA_CENTRE[" + (n + 1) + "]: '" + dc[n] + "': Invalid (for all DACs)");
 				}
@@ -762,6 +821,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				validationResult.addError("WMO_INST_TYPE[" + (n + 1) + "]: Not set");
 			} else {
 				try {
+					// ===========================
+					// CK_0089 & CK_0090 & CK_0091
+					// ===========================
 					int N = Integer.valueOf(s);
 					tableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE.getConceptMembersByAltLabelMap().get(s);
 					if (tableEntry != null) {
@@ -783,6 +845,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			log.debug("VERTICAL_SAMPLING_SCHEME[{}]: '{}'", n, vert[n]); // ..ref_table 16
 			s = vert[n].trim();
 			if (s.length() == 0) {
+				// =======
+				// CK_0068
+				// =======
 				// ..set to _FillValue --- data must be missing
 				// ..use PRES as a proxy - if all PRES is missing assume all data is missing
 
@@ -819,13 +884,22 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 				tableEntry = ArgoNVSReferenceTable.VERTICAL_SAMPLING_SCHEME_TABLE.getConceptMembersByPrefLabelMap()
 						.get(s);
+				// =======
+				// CK_0176
+				// =======
 				if (tableEntry != null) {
+					// =======
+					// CK_0177
+					// =======
 					if (tableEntry.isDeprecated()) {
 						validationResult.addWarning("VERTICAL_SAMPLING_SCHEME[" + (n + 1) + "]: Status: "
 								+ SkosConcept.DEPRECATED_CONCEPT + ": '" + s.trim() + "'");
 					}
 
 					if (n == 0) {
+						// =======
+						// CK_0067
+						// =======
 						if (!s.startsWith("Primary sampling")) {
 							String err = String.format(
 									"VERTICAL_SAMPLING_SCHEME[%d]: Profile number 1 must be 'Primary sampling': '%s'",
@@ -837,6 +911,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFile().getName(), err);
 						}
 					} else {
+						// =======
+						// CK_0066
+						// =======
 						if (s.startsWith("Primary sampling")) {
 							String err = String.format(
 									"VERTICAL_SAMPLING_SCHEME[%d]: Not profile 1.  Must NOT be 'Primary sampling': '%s'",
@@ -934,7 +1011,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				log.debug("...profile #" + profNum);
 				log.debug("DATA_MODE[{}]: '{}'", profNum, mode);
 			}
-
+			// =======
+			// CK_0044
+			// =======
 			if (mode != 'A' && mode != 'D' && mode != 'R') {
 				validationResult.addError("DATA_MODE[" + (profNum + 1) + "]: '" + mode + "': Invalid");
 			}
@@ -953,6 +1032,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				for (int paramNum = 0; paramNum < nParam; paramNum++) {
 					char md = param_mode.charAt(paramNum);
 
+					// =======
+					// CK_0170
+					// =======
 					if (md != 'A' && md != 'D' && md != 'R' && md != ' ') {
 						validationResult.addError("PARAMETER_DATA_MODE[" + (profNum + 1) + "," + (paramNum + 1) + "]: '"
 								+ md + "': Invalid");
@@ -975,8 +1057,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						}
 					}
 
+					// =======
+					// CK_0173
+					// =======
 					// ..check bio-prof file: PARAM_DATA_MODE("PRES") == "R"
-
 					if (arFile.fileType() == FileType.BIO_PROFILE && stParam[paramNum].trim().startsWith("PRES")) {
 						if (md != 'R') {
 							log.debug("PRES[{}]: PARAMETER_DATA_MODE[{},{}] = '{}'. must be 'R'", profNum, profNum,
@@ -987,8 +1071,10 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					}
 				} // ..end for (paramNum)
 
+				// =================
+				// CK_0171 & CK_0172
+				// =================
 				// ..check for conformity of DATA_MODE and PARAMETER_DATA_MODE
-
 				if (final_mode == ' ') {
 					// ..all param_data_mode = ' '. data_mode better be 'R'
 					if (mode != 'R') {
@@ -1007,7 +1093,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			} // ..end if (param_mode != null)
 
 			// .........check CONFIG_MISSION_NUMBER............
-
+			// =======
+			// CK_0069
+			// =======
 			int msnNum = arFile.readInt("CONFIG_MISSION_NUMBER", profNum);
 
 			log.debug("CONFIG_MISSION_NUMBER[{}]: '{}'", profNum, msnNum);
@@ -1058,9 +1146,14 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					}
 
 					// ..check if this <param> is legal
+					// =======
+					// CK_0183
+					// =======
 					if (allowedParam.contains(param)) {
 						// ..<param> is allowed
-
+						// =======
+						// CK_0034
+						// =======
 						if (profParam.get(profNum).contains(param)) {
 							// ..this is a duplicate entry
 
@@ -1072,7 +1165,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							profParam.get(profNum).add(param);
 							nParamUsed++;
 						}
-
+						// =======
+						// CK_0184
+						// =======
 						if (arFile.getFileSpec().isDeprecatedPhysicalParam(param)) {
 							// ..this is a deprecated parameter name
 
@@ -1113,12 +1208,18 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				maxParamUsed = nParamUsed;
 			}
 
+			// =======
+			// CK_0035
+			// =======
 			// ..report errors and warnings
 			if (embeddedEmpty) {
 				validationResult.addWarning("STATION_PARAMETERS[" + (profNum + 1) + ",*]: Empty entries in list"
 						+ "\n\tList: " + paramList);
 			}
 
+			// =======
+			// CK_0033
+			// =======
 			// ..check that all required parameters are defined in STATION_PARAMETERS
 			// ..the parameters are only required in profile 0
 			if (profNum == 0) {
@@ -1131,6 +1232,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				} // ..end for (required parameters)
 			}
 
+			// =======
+			// CK_0031
+			// =======
 			// ......check that all STATION_PARAMETERS have <param> variable........
 			for (String p : profParam.get(profNum)) {
 				Variable var = arFile.findVariable(p);
@@ -1141,11 +1245,12 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				}
 			} // ..end profParam
 
+			// =======
+			// CK_0032
+			// =======
 			// ...check whether all <param> with data are in STATION_PARAMETERS...
-
 			origin2[0] = profNum; // ..origin2 = {profNum, 0};
 									// ..shape2 = {1, nLevel};
-
 			for (String p : allowedParam) {
 				if (!profParam.get(profNum).contains(p)) {
 					// ..STATION_PARAMETERS does NOT include this param,
@@ -1492,9 +1597,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			for (int k = 0; k < prm.length; k++) {
 				// if (! ArgoDataFile.is_99_999_FillValue(prm[k]) && k > maxLevelUsed)
 				// maxLevelUsed = k;
-				// =================================
-				// CHECK_0064_PROF & CHECK_0065_PROF
-				// =================================
+				// =================
+				// CK_0064 & CK_0065
+				// =================
 				if (Float.isNaN(prm[k])) {
 					nan++;
 				}
@@ -1506,15 +1611,20 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 				SkosConcept qcFlagsTableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 						.get(String.valueOf(prm_qc[k]));
 
+				// =======
+				// CK_0073
+				// =======
 				if (qcFlagsTableEntry != null) {
 					// ..valid QC flag (NOT " ")
-
+					// =======
+					// CK_0185
+					// =======
 					if (qcFlagsTableEntry.isDeprecated()) {
 						depQC++;
 					}
-					// ===============
-					// CHECK_0074_PROF
-					// ===============
+					// =======
+					// CK_0074
+					// =======
 					if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 						// ..data is missing - QC better be too
 						if (prm_qc[k] != '9' && prm_qc[k] != '0') {
@@ -1549,7 +1659,11 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					// CHECK_0074
 					// ==========
 				} else { // ..QC not is ref table 2, handle " " special case
+					// =======
+					// CK_0186
+					// =======
 					if (prm_qc[k] == ' ') {
+
 						// ..qc set to NOT MEASURED, data better be missing
 						if (!ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 							notNotMeas++;
@@ -1600,6 +1714,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						.addError(varName + "_QC[" + (profNum + 1) + "]: Blank (' ') QC when data is not missing at "
 								+ notNotMeas + " levels (of " + prm.length + ")");
 			}
+			// =======
+			// CK_0076
+			// =======
 			if (arFile.fileType() == FileType.PROFILE) {
 				// ..in a core-file, only intermediate params can have 0 QC
 				if (!arFile.getFileSpec().isInterPhysParam(varName)) {
@@ -1863,9 +1980,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 					 */
 
 					for (int k = 0; k < prm_adj.length; k++) {
-						// =================================
-						// CHECK_0064_PROF & CHECK_0065_PROF
-						// =================================
+						// =================
+						// CK_0187 & CK_0188
+						// =================
 						if (Float.isNaN(prm_adj[k])) {
 							nan++;
 						}
@@ -1880,14 +1997,17 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							infErr++;
 						}
 
-						// ===============
-						// CHECK_0077_PROF
-						// ===============
+						// ========
+						// CK_0077
+						// ========
 						// ..check the per level QC flag
 						SkosConcept qcFlagsTableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE
 								.getConceptMembersByAltLabelMap().get(String.valueOf(prm_adj_qc[k]));
 
 						if (qcFlagsTableEntry != null) {
+							// ========
+							// CK_0189
+							// ========
 							if (qcFlagsTableEntry.isDeprecated()) {
 								depQC++;
 							}
@@ -1899,9 +2019,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							}
 						}
 
-						// =================================
-						// CHECK_0078_PROF & CHECK_0079_PROF
-						// =================================
+						// =================
+						// CK_0078 & CK_0079
+						// =================
 						// ..check special case of adj_qc = ' '
 						if (prm_qc[k] == ' ' || prm_adj_qc[k] == ' ') {
 							// ..one is missing, both must be
@@ -1915,9 +2035,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							}
 
 						} else {
-							// ===============
-							// CHECK_0081_PROF
-							// ===============
+							// =======
+							// CK_0081
+							// =======
 							// ..check if param (not param_adj!) is missing
 							if (ArgoFileValidator.is_FillValue(fValue, prm[k])) {
 								// .....param is missing.....
@@ -1939,9 +2059,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								// .....param is NOT missing......
 
 								if (ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
-									// ===============
-									// CHECK_0082_PROF
-									// ===============
+									// =======
+									// CK_0082
+									// =======
 									// ..param_adj is missing - QC must be 4 or 9
 									if (prm_adj_qc[k] != '4') {
 										if (prm_adj_qc[k] != '9') {
@@ -1958,9 +2078,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 											}
 										}
 									}
-									// ===================
-									// CHECK_0087_PROF 1/2
-									// ===================
+									// =======
+									// CK_0087
+									// =======
 									if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[k])) {
 										errNotMiss++;
 									}
@@ -1968,17 +2088,17 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 								} else {
 									// ..param_adj is NOT missing
 
-									// =================================
-									// CHECK_0084_PROF & CHECK_0085_PROF
-									// =================================
+									// =================
+									// CK_0084 & CK_0085
+									// =================
 									if ((prm_adj_qc[k] == '4' && mode == 'D') || prm_adj_qc[k] == '9') {
 										missNot++;
 
 									} else {
 										if (mode == 'D') {
-											// =====================================
-											// CHECK_0086_PROF & CHECK_0087_PROF 2/2
-											// =====================================
+											// =====================
+											// CK_0086 & CK_0087 2/2
+											// =====================
 											if (is_99_999_FillValue(prm_adj_err[k])) {
 												errMiss++;
 											}
@@ -2131,12 +2251,17 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			SkosConcept tableEntry;
 			tableEntry = ArgoNVSReferenceTable.PROF_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 					.get(String.valueOf(profQC));
-
+			// =======
+			// CK_0058
+			// =======
 			if (profQC != profileQCFillValue && tableEntry == null) {
 				validationResult.addError("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + ": "
 						+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 
 			} else {
+				// =======
+				// CK_190
+				// =======
 				if (tableEntry != null && tableEntry.isDeprecated()) {
 					validationResult.addWarning("PROFILE_" + param + "_QC[" + (profNum + 1) + "]: '" + profQC + "': "
 							+ SkosConcept.DEPRECATED_CONCEPT);
@@ -2147,6 +2272,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							+ "] not checked due to errors in " + param + " data");
 
 				} else {
+					// =======
+					// CK_0061
+					// =======
 					double pctGood = (double) n_good / (double) n_data * 100.f;
 					expProfQC = profileQCFillValue;
 					if (n_noqc == n_data) {
@@ -2179,9 +2307,8 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 	}
 
 	/**
-	 * CHECK_0062_PROF : Check when DATA_MODE = ‘R’ then <PARAM>_ADJUSTED and
-	 * <PARAM>_ADJUSTED_QC are All FillValue (including *_QC and *_ERROR). ERROR if
-	 * not tge
+	 * Check when DATA_MODE = ‘R’ then <PARAM>_ADJUSTED and <PARAM>_ADJUSTED_QC are
+	 * All FillValue (including *_QC and *_ERROR). ERROR if not tge
 	 * 
 	 * @param prm_adj     : <PARAM>_ADJUSTED data
 	 * @param prm_adj_err : <PARAM>_ADJUSTED_ERROR data
@@ -2201,7 +2328,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 		int missNot = 0; // ..count of param_adj not missing
 		int qcNotMiss = 0; // ..count of ADJ_QC not missing
 		boolean paramErr = false;
-
+		// =======
+		// CK_0062
+		// =======
 		for (int k = 0; k < prm_adj.length; k++) {
 			if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[k])) {
 				missNot++;
@@ -2267,7 +2396,13 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 			tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 					.get(String.valueOf(ch));
 
+			// =======
+			// CK_0052
+			// =======
 			if (tableEntry != null) {
+				// =======
+				// CK_0169
+				// =======
 				if (tableEntry.isDeprecated()) {
 					validationResult.addWarning(
 							"JULD_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
@@ -2278,10 +2413,16 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 						"JULD_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
+			// =======
+			// CK_0055
+			// =======
 			ch = posQC.charAt(n);
 			tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 					.get(String.valueOf(ch));
 			if (tableEntry != null) {
+				// =======
+				// CK_0175
+				// =======
 				if (tableEntry.isDeprecated()) {
 					validationResult.addWarning(
 							"POSITION_QC[" + (n + 1) + "]: '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);

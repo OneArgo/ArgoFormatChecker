@@ -777,7 +777,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult
 					.addError(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
-
+		// =======
+		// CK_0166
+		// =======
 		if (pmkrValid && typValid) {
 			if (!plfmType.equals("FLOAT")) {
 
@@ -868,6 +870,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": '" + str + "' Invalid. Must be integer.");
 		}
 
+		// =======
+		// CK_0167
+		// =======
 		if (wmoValid && typValid) {
 			if (!plfmType.equals("FLOAT")) {
 				if (!pltmTypeTableEntry.checkNarowerReference(wmoInstTypetableEntry.getId())) {
@@ -1011,6 +1016,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 					ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap(), false);
 
 			// ..cross-reference SENSOR_MODEL R27 / SENSOR_MAKER R26
+			// =======
+			// CK_0164
+			// =======
 			if (smkrValid && mdlValid) {
 				sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
 						.get(snsrModel);
@@ -1031,6 +1039,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 
 			// ..cross-reference SENSOR_MODEL R27 / SENSOR R25
+			// =======
+			// CK_0165
+			// =======
 			if (snsrValid && mdlValid) {
 				sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
 						.get(snsrModel);

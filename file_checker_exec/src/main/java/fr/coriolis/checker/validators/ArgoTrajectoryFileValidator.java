@@ -244,11 +244,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			if (core) {
 				numAdj = cycleIndexAdj[n];
 			}
-
+			// =======
+			// CK_0213
+			// =======
 			if (num < 0) {
 				invCyc.increment(n, "invalid CYCLE_NUMBER_INDEX");
 			}
-
+			// =======
+			// CK_0214
+			// =======
 			if (core && numAdj < 0) {
 				invAdjCyc.increment(n, "invalid CYCLE_NUMBER_INDEX_ADJUSTED");
 			}
@@ -256,7 +260,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			if (overallDM == 'R') {
 
 				// .....file only contains R-mode data.......
-
+				// ===========
+				// CK_0215 1/2
+				// ===========
 				if (num == fillCycNum) {
 					// ..cycle_number_index missing in r-mode <--- error
 					missRCyc.increment(n, "r-mode: CYCLE_NUMBER_INDEX is missing");
@@ -273,7 +279,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				if (data_mode[n] != 'D') {
 					// ...r/a-mode cycle
-
+					// ===========
+					// CK_0215 2/2
+					// ===========
 					if (num == fillCycNum) {
 						// ..missing in r-mode <--- this is an error
 						missRCyc.increment(n, "r-mode: CYCLE_NUMBER_INDEX is missing");
@@ -720,6 +728,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String ref = arFile.readString(name);
 
 		log.debug(name + ": " + ref);
+		// =======
+		// CK_0210
+		// =======
 		if (!ref.matches(arFile.getFileSpec().getMeta(name))) {
 			validationResult.addError(name + ": '" + ref + "': Does not match specification ('"
 					+ arFile.getFileSpec().getMeta(name) + "')");
@@ -741,11 +752,17 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					// ..HISTORY_DATE is set. Is it reasonable?
 					log.debug("HISTORY_DATE[{}]: '{}'", h, dateHist[h]);
 
+					// =======
+					// CK_0211
+					// =======
 					Date date = ArgoDate.get(d);
 					if (date == null) {
 						validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h] + "': Invalid date");
 
 					} else if (arFile.isHaveUpdateDate()) {
+						// =======
+						// CK_0212
+						// =======
 						long dateSec = date.getTime();
 						if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 							validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h]
@@ -1445,8 +1462,13 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		log.debug("{}: '{}'", name, str);
 
 		tableEntry = ArgoNVSReferenceTable.DATA_STATE_INDICATOR_TABLE.getConceptMembersByAltLabelMap().get(str);
-
+		// =======
+		// CK_0200
+		// =======
 		if (tableEntry != null) {
+			// =======
+			// CK_0201
+			// =======
 			if (tableEntry.isDeprecated()) {
 				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
@@ -1454,6 +1476,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
+		// =======
+		// CK_0202
+		// =======
 		name = "FIRMWARE_VERSION"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -1461,6 +1486,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": Empty");
 		}
 
+		// =======
+		// CK_0203
+		// =======
 		name = "FLOAT_SERIAL_NO"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -1473,7 +1501,13 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		log.debug("{}: '{}'", name, str);
 
 		tableEntry = ArgoNVSReferenceTable.PLATFORM_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
+		// =======
+		// CK_0045
+		// =======
 		if (tableEntry != null) {
+			// =======
+			// CK_0047
+			// =======
 			if (tableEntry.isDeprecated()) {
 				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
@@ -1485,9 +1519,14 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
 		str = arFile.readString(name).trim();
 		log.debug(name + ": '{}'", str);
-
 		tableEntry = ArgoNVSReferenceTable.POSITIONING_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
+		// =======
+		// CK_0204
+		// =======
 		if (tableEntry != null) {
+			// =======
+			// CK_0205
+			// =======
 			if (tableEntry.isDeprecated()) {
 				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
@@ -1499,16 +1538,27 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		name = "WMO_INST_TYPE";
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-
+		// =======
+		// CK_0206
+		// =======
 		if (str.length() == 0) {
 			validationResult.addError(name + ": Not set");
 
 		} else {
 			try {
+				// =======
+				// CK_0207
+				// =======
 				int N = Integer.valueOf(str);
 
 				tableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
+				// =======
+				// CK_0208
+				// =======
 				if (tableEntry != null) {
+					// =======
+					// CK_0209
+					// =======
 					if (tableEntry.isDeprecated()) {
 						validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 					}
