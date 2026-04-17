@@ -14,6 +14,7 @@ Vocabularies and format changes are managed on [Argo Vocabs Task Team - AVTT Git
 **With each release (from 2.9.2) you will find :**
 
 - **file_checker_exec-[version].jar** which consolidates both application's compiled code and all its dependencies into a single executable file.
+- file_checker_spec folder containing all specifications and reference tables.
 - source code
 
 ## Run Argo NetCDF file format checker
@@ -114,7 +115,7 @@ output files will be generated in `./demo/outputs`.
 
 ### Run File checker using Python and an API
 
-In folder /file-checker-python you will find a python wrapper and an API to facilitate the use of Argo FileChecker. See python.README for more informations.
+In folder /file-checker-python you will find a python wrapper and an API to facilitate the use of Argo FileChecker. See [python.README](./python.README.md) for more informations.
 
 ### Test data
 
