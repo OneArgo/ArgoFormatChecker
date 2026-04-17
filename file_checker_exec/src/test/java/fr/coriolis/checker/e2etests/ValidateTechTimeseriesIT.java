@@ -30,13 +30,29 @@ class ValidateTechTimeseriesIT {
 
 	}
 
+	// TO DO : WHEN UM 4.5 USE THIS TEST AS IT SHOULD REJECT FILE WITH BAD long_name
+//	@Tag(TEST_DIR_NAME)
+//	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
+//	@CsvSource({ "3901682_tech_good_long_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+//			"3901682_tech_good_long_name_with_short_sensor_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+//			"3901682_tech_long_name_with_bad_short_sensor_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
+//			"3901682_tech_bad_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
+//			"3901682_tech_inconsistent_unit_in_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION", })
+//	void fileChecker_shouldAcceptTechTimeseries_WhenLongNameWellFormated(String fileName, String dac, String result,
+//			String phase) throws IOException, InterruptedException {
+//
+//		TestsUtils.genericFileCheckerE2ETest(fileName, dac, result, phase, TEST_DIR_NAME);
+//
+//	}
+	// TO DO : WHEN UM 4.5 DELETE THIS TEST AS IT SHOULD REJECT FILE WITH BAD
+	// long_name
 	@Tag(TEST_DIR_NAME)
 	@ParameterizedTest(name = "{0} from dac {1} should have status {2} at phase {3}")
 	@CsvSource({ "3901682_tech_good_long_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
 			"3901682_tech_good_long_name_with_short_sensor_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
-			"3901682_tech_long_name_with_bad_short_sensor_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
-			"3901682_tech_bad_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION",
-			"3901682_tech_inconsistent_unit_in_long_name.nc,coriolis,FILE-REJECTED,FORMAT-VERIFICATION", })
+			"3901682_tech_long_name_with_bad_short_sensor_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+			"3901682_tech_bad_long_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION",
+			"3901682_tech_inconsistent_unit_in_long_name.nc,coriolis,FILE-ACCEPTED,DATA-VALIDATION", })
 	void fileChecker_shouldAcceptTechTimeseries_WhenLongNameWellFormated(String fileName, String dac, String result,
 			String phase) throws IOException, InterruptedException {
 

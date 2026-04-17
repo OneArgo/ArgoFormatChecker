@@ -489,9 +489,9 @@ public class ArgoFileValidator {
 		String expectedLonName = varName + "_" + unitsValue;
 		if (!dataAttrValue.equals(expectedLonName)) {
 			// long_name wrong !
-			validationResult.addError("attribute: " + varName + ":" + attrName + ": Definitions differ "
-					+ "\n\tSpecification = long_name = TECH_PARAM_units : " + expectedLonName + "\n\tData File     = '"
-					+ dataAttrValue + "'");
+			validationResult.addWarning("attribute: " + varName + ":" + attrName + ": Definitions differ "
+					+ "\n\tSpecification : long_name = <TECH_PARAM>_<units> : " + expectedLonName
+					+ "\n\tData File     = '" + dataAttrValue + "'  *** WILL BECOME AN ERROR WITH UM 3.45 ***");
 			return false;
 		}
 
