@@ -2369,7 +2369,7 @@ public class ArgoFileSpecification {
 		// ADJUSTED_ERROR — excluded for min/max/name attributes
 		boolean excludeFromAdjustedError = attributeKey.equals("valid_min") || attributeKey.equals("valid_max")
 				|| attributeKey.equals("standard_name")
-				|| (version.compareTo("2.3") >= 0 && attributeKey.equals("long_name"));
+				|| (version.compareTo("3.1") >= 0 && attributeKey.equals("long_name"));
 
 		if (!excludeFromAdjustedError) {
 			names.add(paramName + "_ADJUSTED_ERROR");
