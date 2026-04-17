@@ -394,14 +394,12 @@ public class ArgoDataFile {
 		if (dacName.length > 0) {
 			dac = dacName[0];
 		}
-
 		SkosConcept dataTypeTableEntry = ArgoNVSReferenceTable.DATA_TYPE_TABLE.getConceptMembersByPrefLabelMap()
 				.get(dt);
 		if (dataTypeTableEntry != null) {
 			if (dataTypeTableEntry.isDeprecated()) {
 				log.warn("TEMP WARNING: {}: {}: {}", dac, inFile,
 						"deprecated DATA_TYPE (temporarily allowed): '" + dt + "'");
-				badtype = "DATA_TYPE = '" + dataTypeTableEntry.getPrefLabel() + "' is deprecated";
 			}
 			/*
 			 * .................................................... ....these are exceptions
