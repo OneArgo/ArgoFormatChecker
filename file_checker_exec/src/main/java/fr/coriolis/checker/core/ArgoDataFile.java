@@ -396,6 +396,9 @@ public class ArgoDataFile {
 		}
 		SkosConcept dataTypeTableEntry = ArgoNVSReferenceTable.DATA_TYPE_TABLE.getConceptMembersByPrefLabelMap()
 				.get(dt);
+		// =======
+		// CK_0293
+		// =======
 		if (dataTypeTableEntry != null) {
 			if (dataTypeTableEntry.isDeprecated()) {
 				log.warn("TEMP WARNING: {}: {}: {}", dac, inFile,
@@ -406,6 +409,9 @@ public class ArgoDataFile {
 			 * currently being allowed....
 			 * ....................................................
 			 */
+			// =======
+			// CK_0294
+			// =======
 			if (dataTypeTableEntry.getAltLabel().equals("META")) {
 				ft = FileType.METADATA;
 			} else if (dataTypeTableEntry.getAltLabel().equals("PROF")) {

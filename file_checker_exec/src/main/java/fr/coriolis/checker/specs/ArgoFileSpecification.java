@@ -1190,7 +1190,15 @@ public class ArgoFileSpecification {
 		// ================
 		// get tech param names (without unit)
 		for (String techParamName : ConfigTech.getTechParamList()) {
-
+			/*
+			 * TO DO : ADMT26 update
+			 * (https://github.com/OneArgo/ArgoVocabs/issues/173#issuecomment-3480328611),
+			 * issue 1 (Handling of terms with multiple extension/units for a same float),
+			 * => like what is done for physical param create a virtual list of 5 (or 10?)
+			 * techParamName_[N] by using function
+			 * buildParamListForDuplicatePhysicalParameters and create these variables with
+			 * the function below (createAndAddToGroupOptionnalTechParamVariable)
+			 */
 			createAndAddToGroupOptionnalTechParamVariable(techParamName);
 		}
 		// get tech param names from paramRegex

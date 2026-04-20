@@ -707,7 +707,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker invalid = new ErrorTracker();
 
 		char overallDM = 'R';
-
+		// =======
+		// CK_0283
+		// =======
 		for (int n = 0; n < data_mode.length(); n++) {
 			char m = data_mode.charAt(n);
 
@@ -1683,7 +1685,13 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			for (int n = 0; n < nCycle; n++) {
 				SkosConcept tableEntry = ArgoNVSReferenceTable.GROUNDED_TABLE.getConceptMembersByAltLabelMap()
 						.get(String.valueOf(g.charAt(n)));
+				// =======
+				// CK_0289
+				// =======
 				if (tableEntry != null) {
+					// =======
+					// CK_0290
+					// =======
 					if (tableEntry.isDeprecated()) {
 						dep.increment(n);
 					}
@@ -1710,9 +1718,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker set = new ErrorTracker();
 
 		for (int n = 1; n < nCycle; n++) {
+			// =======
+			// CK_0291
+			// =======
 			if (c[n] < 1) {
 				inv.increment(n);
 			}
+			// =======
+			// CK_0292
+			// =======
 			if (mode[n] == 'D' && c[n] == 99999) {
 				set.increment(n);
 			}
@@ -1821,7 +1835,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			int mc = -1;
 
 			// ..loop
-
+			// =========================
+			// CK_0284 1/2 & CK_0285 1/2
+			// =========================
 			for (int n = startNMeasureLoop; n < nMeasure; n++) {
 				int cycNum = finalNMVar[n].cycle_number;
 
@@ -1846,7 +1862,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				// ..carry on with this iteration
 
 				mc = finalNMVar[n].measurement_code;
-
+				// =======
+				// CK_0288
+				// =======
 				if (mc == M_CODE) {
 					// ..this is the one we are validating
 					// ..find the index of this cycNum in N_CYCLE arrays
@@ -1912,6 +1930,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			int notJuld_s = 0, a_notJuld_s = -1;
 
 			for (int n = 0; n < nCycle; n++) {
+				// =======
+				// CK_0286
+				// =======
 				if (!juldCheck.checked[n]) {
 					// ..this value wasn't compared to a JULD value
 
@@ -1922,7 +1943,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							log.debug("unchecked {}[{}] not missing", var, n);
 						}
 					}
-
+					// =======
+					// CK_0287
+					// =======
 					if (!(juldVar_status[n] == '9' || juldVar_status[n] == ' ')) {
 						notJuld_s++;
 						if (a_notJuld_s < 0) {
@@ -2135,9 +2158,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker notMiss = new ErrorTracker();
 
 			for (int n = 0; n < nMeasure; n++) {
-				// =================================
-				// CHECK_0064_PROF & CHECK_0065_PROF
-				// =================================
+				// =======
+				// CK_0260
+				// =======
 				if (Float.isNaN(prm[n])) {
 					nan.increment(n);
 				}
@@ -2148,14 +2171,20 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				if (prm_qc != null) {
 					tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 							.get(String.valueOf(prm_qc[n]));
-
+					// =======
+					// CK_0261
+					// =======
 					if (prm_qc[n] == ' ' || tableEntry != null) {
 						// ..valid QC flag or " "
-
+						// =======
+						// CK_0262
+						// =======
 						if (tableEntry != null && tableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
-						// CHECK_PROFILE_0074
+						// =======
+						// CK_0263
+						// =======
 						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// ..data is missing - QC better be too
 							if (prm_qc[n] != '9' && prm_qc[n] != ' ') {
@@ -2163,6 +2192,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							}
 
 						} else {
+							// =======
+							// CK_0264
+							// =======
 							// ..data not missing - check QC value
 
 							if (prm_qc[n] == ' ' || prm_qc[n] == '9') {
@@ -2354,18 +2386,27 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker rQcNotMiss = new ErrorTracker();
 
 			for (int n = 0; n < nMeasure; n++) {
-				// =================================
-				// CHECK_0064_PROF & CHECK_0065_PROF
-				// =================================
+				// =======
+				// CK_0265
+				// =======
 				if (Float.isNaN(prm_adj[n])) {
 					nan.increment(n);
 				}
+				// =======
+				// CK_0267
+				// =======
 				if (Float.isNaN(prm_adj_err[n])) {
 					nanErr.increment(n);
 				}
+				// =======
+				// CK_0266
+				// =======
 				if (Float.isInfinite(prm_adj[n])) {
 					inf.increment(n);
 				}
+				// =======
+				// CK_0268
+				// =======
 				if (Float.isInfinite(prm_adj_err[n])) {
 					infErr.increment(n);
 				}
@@ -2373,17 +2414,21 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				if (mode[n] == 'R') {
 
 					// ........... r-mode ............
-					// ===============
-					// CHECK_0062_TRAJ
-					// ===============
+					// =======
+					// CK_0269
+					// =======
 					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 						rNotMiss.increment(n);
 					}
-
+					// =======
+					// CK_0270
+					// =======
 					if (prm_adj_qc[n] != ' ' && prm_adj_qc[n] != '0' && prm_adj_qc[n] != '9') {
 						rQcNotMiss.increment(n);
 					}
-
+					// =======
+					// CK_0271
+					// =======
 					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 						rErrNotMiss.increment(n);
 					}
@@ -2392,17 +2437,19 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 					// ............ a-mode or d-mode ...........
 
-					// ===============
-					// CHECK_0077_TRAJ
-					// ===============
 					// ..check the QC flag
 
 					if (prm_adj_qc[n] != ' ') {
 
 						tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
 								.get(String.valueOf(prm_adj_qc[n]));
-
+						// =======
+						// CK_0272
+						// =======
 						if (tableEntry != null) {
+							// =======
+							// CK_0273
+							// =======
 							if (tableEntry.isDeprecated()) {
 								depQC.increment(n);
 							}
@@ -2412,9 +2459,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						}
 					}
 
-					// =================================
-					// CHECK_0078_TRAJ & CHECK_0079_TRAJ
-					// =================================
+					// =======
+					// CK_0274
+					// =======
 					// ..check special case of adj_qc = ' '
 					if (prm_qc[n] == ' ' || prm_adj_qc[n] == ' ') {
 						// ..one is "not measured", both must be
@@ -2422,29 +2469,38 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							incNotMeas.increment(n);
 
 						} else {
+							// =======
+							// CK_0275
+							// =======
 							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								notNotMeas.increment(n);
 							}
 						}
 
 					} else {
-						// ===============
-						// CHECK_0081_TRAJ
-						// ===============
+
 						// ..check if param (not param_adj!) is missing
 
 						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// .....param is missing.....
-
+							// =======
+							// CK_0276
+							// =======
 							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								// ..param_adjusted is NOT missing - error
 								notMissAdj.increment(n);
 
 							}
+							// =======
+							// CK_0278
+							// =======
 							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 								// ..param_adjusted_error is NOT missing - error
 								notMissErr.increment(n);
 							}
+							// =======
+							// CK_0277
+							// =======
 							if (prm_adj_qc[n] != '9') {
 								// ..param_adjusted_qc is NOT missing - error
 								notMissAdjQc.increment(n);
@@ -2454,40 +2510,39 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							// .....param is NOT missing......
 
 							if (ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
-								// ===============
-								// CHECK_0082_TRAJ
-								// ===============
+								// =======
+								// CK_0279
+								// =======
 								// ..param_adj is missing - QC must be 4 or 9
 								if (prm_adj_qc[n] != '4' && prm_adj_qc[n] != '9') {
 									missAdj.increment(n);
 								}
-
-								// ===================
-								// CHECK_0087_TRAJ 1/2
-								// ===================
+								// =======
+								// CK_0280
+								// =======
 								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 									errNotMiss.increment(n);
 								}
 
 							} else {
 								// ..param_adj is NOT missing
-								// =================================
-								// CHECK_0084_TRAJ & CHECK_0085_TRAJ
-								// =================================
+								// =======
+								// CK_0281
+								// =======
 								if ((prm_adj_qc[n] == '4' && mode[n] == 'D') || prm_adj_qc[n] == '9') {
 									adjNotMiss.increment(n);
 
 								} else {
 									if (mode[n] == 'D') {
-										// =====================================
-										// CHECK_0086_TRAJ & CHECK_0087_TRAJ 2/2
-										// =====================================
+										// =======
+										// CK_0282
+										// =======
 										if (is_FillValue(fValue, prm_adj_err[n])) {
 											errNotSetDmode.increment(n);
 										}
 
 										// ===================================================
-										// CHECK_0076_TRAJ & CHECK_0080_TRAJ (not implemented)
+										// CHECK_0077 & CK_0080 (not implemented)
 										// ===================================================
 
 										// } else {
@@ -2839,10 +2894,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					last_empty = -1;
 				}
 
+				// =======
+				// CK_0254
+				// =======
 				// ..check if this <param> is legal
 				if (allowedParam.contains(param)) {
 					// ..<param> is allowed
-
+					// =======
+					// CK_0256
+					// =======
 					if (paramList.contains(param)) {
 						// ..this is a duplicate entry
 
@@ -2853,7 +2913,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					} else {
 						log.debug("param #{}: '{}': accepted", paramNum, param);
 					}
-
+					// =======
+					// CK_0257
+					// =======
 					if (arFile.getFileSpec().isDeprecatedPhysicalParam(param)) {
 						// ..this is a deprecated parameter name
 
@@ -2874,11 +2936,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		log.debug("paramList: " + paramList);
 
+		// =======
+		// CK_0257
+		// =======
 		// ..report errors and warnings
 		if (embeddedEmpty) {
 			validationResult.addWarning("TRAJECTORY_PARAMETERS: Empty entries in list" + "\n\tList: " + paramList);
 		}
-
+		// =======
+		// CK_0258
+		// =======
 		// ......check that all TRAJECTORY_PARAMETERS have <param> variable........
 		for (String p : paramList) {
 			if (p.length() == 0) {
@@ -2891,7 +2958,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				// fatalError = true;
 			}
 		}
-
+		// =======
+		// CK_0259
+		// =======
 		// ...check whether all <param> with data are in TRAJECTORY_PARAMETERS...
 		for (String p : allowedParam) {
 			if (!paramList.contains(p)) {
@@ -3127,12 +3196,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				char juldIndex_status) {
 
 			checked[ndxIndex] = true;
-
+			// ===========
+			// CK_0284 2/2
+			// ===========
 			if (Math.abs(juld - juldIndex) > 1.e-6) {
 				// ..these don't match
 				incJuld.increment(ndx, ndxIndex);
 			}
-
+			// ===========
+			// CK_0285 2/2
+			// ===========
 			if (juld_status != juldIndex_status) {
 				// ..these don't match
 				incJuld_s.increment(ndx, ndxIndex);
