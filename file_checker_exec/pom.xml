@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.ifremer</groupId>
 	<artifactId>file_checker_exec</artifactId>
-	<version>2.9.5</version>
+	<version>3.0.0</version>
 
 	<name>Argo NetCDF file format checker</name>
 
@@ -13,6 +13,9 @@
 		<dep.junit.version>5.11.4</dep.junit.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
     	<maven.compiler.target>1.8</maven.compiler.target>
+    	
+    	<cz.cvut.kbss.jb4jsonld.version>0.15.4</cz.cvut.kbss.jb4jsonld.version>
+        <com.fasterxml.jackson.version>2.18.3</com.fasterxml.jackson.version>
 	</properties>
 
 	<dependencies>
@@ -81,6 +84,17 @@
 		</dependency>
 
 
+		<dependency>
+		    <groupId>com.io-informatics.oss</groupId>
+		    <artifactId>jackson-jsonld</artifactId>
+		    <version>0.1.1</version>
+		</dependency>
+		<dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jakarta-jsonp</artifactId>
+            <version>${com.fasterxml.jackson.version}</version>
+        </dependency>
+
 	</dependencies>
 
 	<!--Distribution-->
@@ -118,14 +132,25 @@
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<resources>
+		
+			
 			<resource>
 				<filtering>true</filtering>
 				<directory>src/main/resources</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
 					<exclude>**/log4j2*</exclude>
+					<exclude>file_checker_spec/**</exclude>					
 				</excludes>
 			</resource>
+			
+			<!--included spec dir for online mode : no filtering -->
+			<resource>
+		      <directory>src/main/resources/file_checker_spec</directory>
+		      <filtering>false</filtering>
+		      <targetPath>file_checker_spec</targetPath>
+    		</resource>
+			
 		</resources>
 		<testResources>
 			<testResource>

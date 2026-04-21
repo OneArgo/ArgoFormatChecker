@@ -1,14 +1,15 @@
 package fr.coriolis.checker.specs;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -17,7 +18,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Implements the capabilities associated with "reference tables":
+ * LEGACY ref tables. Mainly replaced by NVS tables in 2026, v3.0.0
+ *
+ * implements the capabilities associated with "reference tables":
  * <ul>
  * <li>Read the table from the spec directory
  * <li>Build "cross-reference" lists
@@ -64,84 +67,13 @@ public final class ArgoReferenceTable {
 	// ..match a string ending in a digit
 	static Pattern pEndsInDigit;
 
-	// .....reference table 2: QC Flags.....
-	// .....reference table 2a: Profile QC Flags.....
-	public static CharTable QC_FLAG;
-	public static CharTable PROFILE_QC_FLAG;
-
 	// ....reference table 4 --- but not quite. Also includes DAC to center-code
 	// mapping......
 	public static final EnumMap<DACS, String> DacCenterCodes = new EnumMap<DACS, String>(DACS.class);
 
-	// .....reference table 5: location classes.....
-	public static CharTable LOCATION_CLASS;
-
-	// .....reference table 6: Data State Indicators.....
-	public static StringTable DATA_STATE_INDICATOR;
-
-	// .....reference table 8.....
-	public static IntegerTable WMO_INST_TYPE;
-
-	// .....reference table 9.....
-	public static StringTable POSITIONING_SYSTEM;
-
-	// .....reference table 10.....
-	public static StringTable TRANS_SYSTEM;
-
-	// .....reference table 16.....
-	public static StringTable VERTICAL_SAMPLING_SCHEME;
-
-	// .....reference table 19.....
-	public static CharTable STATUS_FLAG;
-
-	// .....reference table 20: Grounded flags.....
-	public static CharTable GROUNDED;
-
-	// .....reference table 22.....
-	public static StringTable PLATFORM_FAMILY;
-
-	// .....reference table 23.....
-	public static StringTable PLATFORM_TYPE;
-
-	// .....reference table 24.....
-	public static StringTable PLATFORM_MAKER;
-
-	public static StringTableCrossReference PLATFORM_TYPExPLATFORM_MAKER;
-	public static StringTableCrossReference PLATFORM_TYPExWMO_INST;
-
-	// .....reference table 25.....
-	public static StringTable SENSOR;
-
-	// .....reference table 26.....
-	public static StringTable SENSOR_MAKER;
-
-	// .....reference table 27.....
-	public static StringTable SENSOR_MODEL;
-
-	public static StringTableCrossReference SENSOR_MODELxSENSOR;
-	public static StringTableCrossReference SENSOR_MODELxSENSOR_MAKER;
-
-	public static HashSet<String> SHORT_SENSOR_NAME;
-
-	// .....reference table 29.....
-	public static LinkedHashSet<String> BATTERY_TYPE_manufacturer;
-	public static LinkedHashSet<String> BATTERY_TYPE_type;
-
-	// .....reference table 29.....
-	public static LinkedHashSet<String> BATTERY_PACKS_style;
-	public static LinkedHashSet<String> BATTERY_PACKS_type;
-
-	// .....reference table 41.....
-	public static StringTable PROGRAM_NAME;
-
 	// .....Measurement_codes..........
-	public static IntegerTable MEASUREMENT_CODE_specific;
+	// public static IntegerTable MEASUREMENT_CODE_specific;
 	public static IntegerTable MEASUREMENT_CODE_toJuldVariable;
-
-	// .....Generic Parameter Templates.....
-	public static LinkedHashSet<String> GENERIC_TEMPLATE_short_sensor_name;
-	public static LinkedHashSet<String> GENERIC_TEMPLATE_cycle_phase_name;
-	public static LinkedHashSet<String> GENERIC_TEMPLATE_param;
 
 	// ..logger
 	private static final Logger log = LogManager.getLogger("ArgoReferenceTable");
@@ -175,8 +107,8 @@ public final class ArgoReferenceTable {
 	// CONSTRUCTORS
 	// .................................................................
 
-	public ArgoReferenceTable(String specDir) throws IOException {
-		String prefix = specDir.trim() + File.separator + "ref_table-";
+	public ArgoReferenceTable() throws IOException {
+//		String prefix = "ref_table-";
 
 		if (initialized) {
 			log.debug(".....ArgoReferenceTable: already initialized.....");
@@ -187,126 +119,8 @@ public final class ArgoReferenceTable {
 
 		initialized = true;
 
-		// .....reference table 2....
-		// .....reference table 2a....
-		QC_FLAG = new CharTable(prefix + "2");
-		PROFILE_QC_FLAG = new CharTable(prefix + "2a");
+		MEASUREMENT_CODE_toJuldVariable = new IntegerTable("measurement_code-juld_variables");
 
-		// .....reference table 5....
-		LOCATION_CLASS = new CharTable(prefix + "5");
-
-		// .....reference table 6....
-		DATA_STATE_INDICATOR = new StringTable(prefix + "6");
-
-		// .....reference table 8....
-		WMO_INST_TYPE = new IntegerTable(prefix + "8");
-
-		// .....reference table 9....
-		POSITIONING_SYSTEM = new StringTable(prefix + "9");
-
-		// .....reference table 10....
-		TRANS_SYSTEM = new StringTable(prefix + "10");
-
-		// .....reference table 16....
-		VERTICAL_SAMPLING_SCHEME = new StringTable(prefix + "16");
-
-		// .....reference table 19....
-		STATUS_FLAG = new CharTable(prefix + "19");
-
-		// .....reference table 20....
-		GROUNDED = new CharTable(prefix + "20");
-
-		// .....reference table 22....
-		// .....reference table 23....
-		// .....reference table 24....
-		PLATFORM_FAMILY = new StringTable(prefix + "22");
-		PLATFORM_TYPE = new StringTable(prefix + "23");
-		PLATFORM_MAKER = new StringTable(prefix + "24");
-
-		// ..platform_type/platform_maker cross-reference
-
-		final int PLATFORM_TYPE_COLUMN = 1;
-		final int WMO_INST_COLUMN = 3;
-		final int PLATFORM_MAKER_COLUMN = 4;
-
-		log.debug("...build PLATFORM_TYPE:PLATFORM_MAKER cross-reference...");
-
-		PLATFORM_TYPExPLATFORM_MAKER = new StringTableCrossReference(PLATFORM_TYPE, PLATFORM_TYPE_COLUMN,
-				PLATFORM_MAKER_COLUMN);
-
-		log.debug("...build PLATFORM_TYPE:WMO_INST cross-reference...");
-
-		PLATFORM_TYPExWMO_INST = new StringTableCrossReference(PLATFORM_TYPE, PLATFORM_TYPE_COLUMN, WMO_INST_COLUMN);
-
-		// .....reference table 25....
-		SENSOR = new StringTable(prefix + "25", true); // ..true = allowAppendedDigit
-
-		// .....reference table 26....
-		SENSOR_MAKER = new StringTable(prefix + "26");
-
-		// .....reference table 27....
-		SENSOR_MODEL = new StringTable(prefix + "27");
-
-		// .....reference table 41....
-		PROGRAM_NAME = new StringTable(prefix + "41");
-
-		// ..append platform_maker entries to sensor_maker table
-		// ..ADMT-19 confirmed this as a requirment
-
-		log.debug("...append PLATFORM_MAKER to SENSOR_MAKER...");
-		SENSOR_MAKER.add(PLATFORM_MAKER);
-
-		// ..sensor_model/sensor cross-reference
-
-		log.debug("...build SENSOR_MODEL:SENSOR cross-reference...");
-
-		final int SENSOR_MODEL_COLUMN = 1;
-		final int SENSOR_MAKER_COLUMN = 2;
-		final int SENSOR_LIST_COLUMN = 4;
-
-		SENSOR_MODELxSENSOR = new StringTableCrossReference(SENSOR_MODEL, SENSOR_MODEL_COLUMN, SENSOR_LIST_COLUMN);
-
-		SENSOR_MODELxSENSOR_MAKER = new StringTableCrossReference(SENSOR_MODEL, SENSOR_MODEL_COLUMN,
-				SENSOR_MAKER_COLUMN);
-
-		// ..harvest short_sensor_name from ref table 27
-		// log.debug("...build short_sensor_name set...");
-		// final int SHORT_SENSOR_COLUMN = 5;
-		// SHORT_SENSOR_NAME = SENSOR_MODEL.getColumnSet(SHORT_SENSOR_COLUMN);
-
-		// ..battery_type manufacturer, type
-		BATTERY_TYPE_manufacturer = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "ref_table-29.manufacturer", BATTERY_TYPE_manufacturer);
-
-		BATTERY_TYPE_type = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "ref_table-29.type", BATTERY_TYPE_type);
-
-		// ..battery_packs style, type
-		BATTERY_PACKS_style = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "ref_table-30.style", BATTERY_PACKS_style);
-
-		BATTERY_PACKS_type = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "ref_table-30.type", BATTERY_PACKS_type);
-
-		// .....measurement codes - specific codes....
-		// .....measurement codes - map to JULD variables
-		MEASUREMENT_CODE_specific = new IntegerTable(
-				specDir.trim() + File.separator + "measurement_code-specific_codes");
-		MEASUREMENT_CODE_toJuldVariable = new IntegerTable(
-				specDir.trim() + File.separator + "measurement_code-juld_variables");
-
-		// .....Generic Parameter Templates.....
-
-		GENERIC_TEMPLATE_short_sensor_name = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "generic_template_short_sensor_name",
-				GENERIC_TEMPLATE_short_sensor_name);
-
-		GENERIC_TEMPLATE_cycle_phase_name = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "generic_template_cycle_phase_name",
-				GENERIC_TEMPLATE_cycle_phase_name);
-
-		GENERIC_TEMPLATE_param = new LinkedHashSet<String>(10);
-		readSetString(specDir.trim() + File.separator + "generic_template_param", GENERIC_TEMPLATE_param);
 	}
 
 	// ..................................................................
@@ -318,47 +132,46 @@ public final class ArgoReferenceTable {
 		log.debug("...start readMapCharString...");
 		log.debug("parsing file '{}'", fileName);
 
-		File file = new File(fileName);
-		if (!file.isFile()) {
-			log.error("File '" + fileName + "' does not exist");
-			throw new IOException("File ('" + fileName + "') does not exist");
-		} else if (!file.canRead()) {
+		try (InputStream in = SpecIO.getInstance().open(fileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+			// ..read through the file
+			String line;
+			while ((line = fileReader.readLine()) != null) {
+				if (pBlankOrComment.matcher(line).matches()) {
+					log.debug("skipped line = '{}'", line);
+					continue;
+				}
+
+				log.debug("line = '{}'", line);
+
+				// .....parse the line into individual entries.....
+				String st[] = line.split("\\|");
+				for (int n = 0; n < st.length; n++) {
+					String s = st[n].trim();
+					st[n] = s;
+				}
+
+				char ca[] = st[0].toCharArray();
+				char c;
+				if (ca.length == 0) {
+					c = ' ';
+				} else {
+					c = ca[0];
+				}
+
+				map.put(Character.valueOf(c), new ArgoReferenceEntry(st));
+			}
+			fileReader.close();
+			log.debug("...end readMapCharString...");
+		} catch (FileNotFoundException e) {
+			log.error("File '{}' not found", fileName);
+			throw e;
+		} catch (IOException e) {
 			log.error("File '" + fileName + "' cannot be read");
-			throw new IOException("File ('" + fileName + "') cannot be read");
+			throw e;
 		}
 
-		BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
-
-		// ..read through the file
-
-		String line;
-		while ((line = fileReader.readLine()) != null) {
-			if (pBlankOrComment.matcher(line).matches()) {
-				log.debug("skipped line = '{}'", line);
-				continue;
-			}
-
-			log.debug("line = '{}'", line);
-
-			// .....parse the line into individual entries.....
-			String st[] = line.split("\\|");
-			for (int n = 0; n < st.length; n++) {
-				String s = st[n].trim();
-				st[n] = s;
-			}
-
-			char ca[] = st[0].toCharArray();
-			char c;
-			if (ca.length == 0) {
-				c = ' ';
-			} else {
-				c = ca[0];
-			}
-
-			map.put(Character.valueOf(c), new ArgoReferenceEntry(st));
-		}
-		fileReader.close();
-		log.debug("...end readMapCharString...");
 	} // ..end readMapCharString
 
 	private void readMapStringString(String fileName, LinkedHashMap<String, ArgoReferenceEntry> map,
@@ -366,85 +179,87 @@ public final class ArgoReferenceTable {
 		log.debug("...start readMapStringString...");
 		log.debug("parsing file '{}'", fileName);
 
-		File file = new File(fileName);
-		if (!file.isFile()) {
-			log.error("File '" + fileName + "' does not exist");
-			throw new IOException("File ('" + fileName + "') does not exist");
-		} else if (!file.canRead()) {
-			log.error("File '" + fileName + "' cannot be read");
-			throw new IOException("File ('" + fileName + "') cannot be read");
-		}
+		try (InputStream in = SpecIO.getInstance().open(fileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
 
-		BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
+			// ..read through the file
 
-		String anyStringReg = "\\\\w+"; // ..forces <*> to be something
-		log.debug("anyString regex substituion: '{}'", anyStringReg);
-		String anyOrNoWordReg = "\\\\w*"; // ..forces <*> to be something or nothing
-		log.debug("anyOrNoWord regex substituion: '{}'", anyOrNoWordReg);
-		String anyOrNoStringReg = ".*"; // ..forces <*> to be something or nothing
-		log.debug("anyOrNoString regex substituion: '{}'", anyOrNoStringReg);
-		String anyNumReg = "\\\\d+"; // ..forces <nnn> to be a number
-		log.debug("anyNum regex substituion: '{}'", anyNumReg);
+			String anyStringReg = "\\\\w+"; // ..forces <*> to be something
+			log.debug("anyString regex substituion: '{}'", anyStringReg);
+			String anyOrNoWordReg = "\\\\w*"; // ..forces <*> to be something or nothing
+			log.debug("anyOrNoWord regex substituion: '{}'", anyOrNoWordReg);
+			String anyOrNoStringReg = ".*"; // ..forces <*> to be something or nothing
+			log.debug("anyOrNoString regex substituion: '{}'", anyOrNoStringReg);
+			String anyNumReg = "\\\\d+"; // ..forces <nnn> to be a number
+			log.debug("anyNum regex substituion: '{}'", anyNumReg);
 
-		// ..read through the file
+			// ..read through the file
 
-		String line;
-		while ((line = fileReader.readLine()) != null) {
-			if (pBlankOrComment.matcher(line).matches()) {
-				log.debug("skipped line = '{}'", line);
-				continue;
-			}
+			String line;
+			while ((line = fileReader.readLine()) != null) {
+				if (pBlankOrComment.matcher(line).matches()) {
+					log.debug("skipped line = '{}'", line);
+					continue;
+				}
 
-			log.debug("line = '{}'", line);
+				log.debug("line = '{}'", line);
 
-			// .....parse the line into individual columns.....
-			String st[] = line.split("\\|");
-			for (int n = 0; n < st.length; n++) {
-				String s = st[n].trim();
-				st[n] = s;
-			}
+				// .....parse the line into individual columns.....
+				String st[] = line.split("\\|");
+				for (int n = 0; n < st.length; n++) {
+					String s = st[n].trim();
+					st[n] = s;
+				}
 
-			String key = st[0];
+				String key = st[0];
 
-			ArgoReferenceEntry info = new ArgoReferenceEntry(st);
+				ArgoReferenceEntry info = new ArgoReferenceEntry(st);
 
-			int flag = 0;
-			String reg;
+				int flag = 0;
+				String reg;
 
-			if (key.indexOf('<') < 0) {
-				// ..no <*> structures -- just a straight fixed name
+				if (key.indexOf('<') < 0) {
+					// ..no <*> structures -- just a straight fixed name
 
-				map.put(key, info);
-				log.debug("add literal: '{}'", key);
+					map.put(key, info);
+					log.debug("add literal: '{}'", key);
 
-				if (allowAppendedDigit) {
-					// ADMT-2025 : duplicate SENSOR must be named <SENSOR>_<n>
-					// so if sensor finish by a number, the duplicate will be xxxx[number]_n
-					// if sensor don't finish by a number, the duplicate will alsobe xxxx_n.
-					reg = key + "_\\d";
+					if (allowAppendedDigit) {
+						// ADMT-2025 : duplicate SENSOR must be named <SENSOR>_<n>
+						// so if sensor finish by a number, the duplicate will be xxxx[number]_n
+						// if sensor don't finish by a number, the duplicate will also be xxxx_n.
+						reg = key + "_\\d";
+
+						Pattern pRegex = Pattern.compile(reg, flag);
+
+						map_re.put(pRegex, info);
+
+						log.debug("allowAppendedDigit: add regex:    '{}'", pRegex);
+					}
+
+				} else {
+					// ..contains <*> structures -- convert to a regex
+
+					reg = key.replaceAll("<[nN]+>", anyNumReg).replaceAll("<\\*>", anyOrNoStringReg)
+							.replaceAll("<\\w+?>", anyOrNoWordReg);
 
 					Pattern pRegex = Pattern.compile(reg, flag);
 
 					map_re.put(pRegex, info);
 
-					log.debug("allowAppendedDigit: add regex:    '{}'", pRegex);
+					log.debug("add regex:    '{}' for entry '{}'", pRegex, key);
 				}
-
-			} else {
-				// ..contains <*> structures -- convert to a regex
-
-				reg = key.replaceAll("<[nN]+>", anyNumReg).replaceAll("<\\*>", anyOrNoStringReg).replaceAll("<\\w+?>",
-						anyOrNoWordReg);
-
-				Pattern pRegex = Pattern.compile(reg, flag);
-
-				map_re.put(pRegex, info);
-
-				log.debug("add regex:    '{}' for entry '{}'", pRegex, key);
 			}
+			fileReader.close();
+			log.debug("...end readMapStrinString...");
+		} catch (FileNotFoundException e) {
+			log.error("File '{}' not found", fileName);
+			throw e;
+		} catch (IOException e) {
+			log.error("File '" + fileName + "' cannot be read");
+			throw e;
 		}
-		fileReader.close();
-		log.debug("...end readMapStrinString...");
+
 	} // ..end readMapStringString
 
 	private void readMapIntegerString(String fileName, LinkedHashMap<Integer, ArgoReferenceEntry> map,
@@ -452,83 +267,42 @@ public final class ArgoReferenceTable {
 		log.debug("...start readMapIntegerString...");
 		log.debug("parsing file '{}'", fileName);
 
-		File file = new File(fileName);
-		if (!file.isFile()) {
-			log.error("File '" + fileName + "' does not exist");
-			throw new IOException("File ('" + fileName + "') does not exist");
-		} else if (!file.canRead()) {
+		try (InputStream in = SpecIO.getInstance().open(fileName);
+				BufferedReader fileReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));) {
+
+			// ..read through the file
+
+			String line;
+			while ((line = fileReader.readLine()) != null) {
+				if (pBlankOrComment.matcher(line).matches()) {
+					log.debug("skipped line = '{}'", line);
+					continue;
+				}
+
+				log.debug("line = '{}'", line);
+
+				// .....parse the line into individual entries.....
+				String st[] = line.split("\\|");
+				for (int n = 0; n < st.length; n++) {
+					String s = st[n].trim();
+					st[n] = s;
+				}
+
+				ArgoReferenceEntry info = new ArgoReferenceEntry(st);
+
+				map.put(Integer.valueOf(st[0]), info);
+			}
+			fileReader.close();
+			log.debug("...end readMapIntegerString...");
+		} catch (FileNotFoundException e) {
+			log.error("File '{}' not found", fileName);
+			throw e;
+		} catch (IOException e) {
 			log.error("File '" + fileName + "' cannot be read");
-			throw new IOException("File ('" + fileName + "') cannot be read");
+			throw e;
 		}
 
-		BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
-
-		// ..read through the file
-
-		String line;
-		while ((line = fileReader.readLine()) != null) {
-			if (pBlankOrComment.matcher(line).matches()) {
-				log.debug("skipped line = '{}'", line);
-				continue;
-			}
-
-			log.debug("line = '{}'", line);
-
-			// .....parse the line into individual entries.....
-			String st[] = line.split("\\|");
-			for (int n = 0; n < st.length; n++) {
-				String s = st[n].trim();
-				st[n] = s;
-			}
-
-			ArgoReferenceEntry info = new ArgoReferenceEntry(st);
-
-			map.put(Integer.valueOf(st[0]), info);
-		}
-		fileReader.close();
-		log.debug("...end readMapIntegerString...");
 	} // ..end readMapIntegerString
-
-	private void readSetString(String fileName, LinkedHashSet<String> set) throws IOException {
-		log.debug("...start readSetString...");
-		log.debug("parsing file '{}'", fileName);
-
-		File file = new File(fileName);
-		if (!file.isFile()) {
-			log.error("File '" + fileName + "' does not exist");
-			throw new IOException("File ('" + fileName + "') does not exist");
-		} else if (!file.canRead()) {
-			log.error("File '" + fileName + "' cannot be read");
-			throw new IOException("File ('" + fileName + "') cannot be read");
-		}
-
-		BufferedReader fileReader = new BufferedReader(new FileReader(fileName));
-
-		// ..read through the file
-
-		String line;
-		while ((line = fileReader.readLine()) != null) {
-			if (pBlankOrComment.matcher(line).matches()) {
-				log.debug("skipped line = '{}'", line);
-				continue;
-			}
-
-			log.debug("line = '{}'", line);
-
-			// .....parse the line into individual entries.....
-			// String st[] = line.split("\\|");
-			// for (int n = 0 ; n < st.length ; n++) {
-			// String s = st[n].trim();
-			// st[n] = s;
-			// }
-
-			// ArgoReferenceEntry info = new ArgoReferenceEntry(st);
-
-			set.add(line.trim());
-		}
-		fileReader.close();
-		log.debug("...end readSetString...");
-	} // ..end readSetString
 
 	// .................................................................
 	// INNER CLASSES

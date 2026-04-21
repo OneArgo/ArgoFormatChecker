@@ -32,7 +32,6 @@ import fr.coriolis.checker.specs.ArgoReferenceTable;
  * <li>-format-only-pre3.1: Perform format-only checks for versions
  * pre-3.1.</li>
  * <li>-data-check-all: Perform data checks for all files.</li>
- * <li>-battery-check: Enable battery variable checks.</li>
  * <li>-psal-stats: Compute PSAL statistics for index files.</li>
  * <li>-list-file &lt;file&gt;: Specify a file containing a list of input
  * files.</li>
@@ -54,7 +53,6 @@ public class Options {
 
 	private static Options instance;
 
-	private final boolean doBatteryChecks; // ..check metadate battery vars - default: no
 	private final boolean doNameCheck; // ..check file name - default: yes
 	private final boolean doNulls; // ..check for nulls in strings - default: no
 	private final boolean doFormatOnly; // ..true: format-only; false: format and data checks
@@ -71,18 +69,22 @@ public class Options {
 	private final String outDirName;
 	private final String inDirName;
 
+	private final boolean useOnlineNVS; // to read NVS tables from internet instead of the ones providing in the spec
+										// dir (internal or external)
+	private final boolean useInternalSpecs; // to use specs file now included in the .jar file instead of specifying an
+											// external file_chec_spec dir
+
 	// ..standard i/o shortcuts
 	static PrintStream stdout = new PrintStream(System.out);
 	static PrintStream stderr = new PrintStream(System.err);
 	private static final Logger log = LogManager.getLogger("Options");
 
 	// ====== CONSTRUCTOR ======
-	private Options(boolean doBatteryChecks, boolean doNameCheck, boolean doNulls, boolean doFormatOnly,
-			boolean doFormatOnlyPre31, boolean doPsalStats, boolean version, boolean help, boolean doXml,
-			String listFile, List<String> inFileList, String dacName, String specDirName, String outDirName,
-			String inDirName) {
+	private Options(boolean doNameCheck, boolean doNulls, boolean doFormatOnly, boolean doFormatOnlyPre31,
+			boolean doPsalStats, boolean version, boolean help, boolean doXml, String listFile, List<String> inFileList,
+			String dacName, String specDirName, String outDirName, String inDirName, boolean useOnlineNVS,
+			boolean useInternalSpecs) {
 		super();
-		this.doBatteryChecks = doBatteryChecks;
 		this.doNameCheck = doNameCheck;
 		this.doNulls = doNulls;
 		this.doFormatOnly = doFormatOnly;
@@ -98,7 +100,9 @@ public class Options {
 		this.outDirName = outDirName;
 		this.inDirName = inDirName;
 
-		log.debug("doBatteryChecks = {}", doBatteryChecks);
+		this.useOnlineNVS = useOnlineNVS;
+		this.useInternalSpecs = useInternalSpecs;
+
 		log.debug("doFormatOnly = {}", doFormatOnly);
 		log.debug("doFormatOnlyPre31 = {}", doFormatOnlyPre31);
 		log.debug("doNameCheck = {}", doNameCheck);
@@ -110,22 +114,35 @@ public class Options {
 		log.debug("outDirName = '{}'", outDirName);
 		log.debug("inDirName = '{}'", inDirName);
 		log.debug("number of inFileList = " + (inFileList == null ? "null" : inFileList.size()));
+		log.debug("useOnlineNVS = {}", useOnlineNVS);
+		log.debug("useInternalSpecs = {}", useInternalSpecs);
 	}
 
 	/**
-	 * Retrieves the singleton instance of {@code Options}, parsing command-line
-	 * arguments with {@code extractOptionsFromArgs} if instance is null .
 	 * 
-	 * @param args : The command-line arguments passed to the application.
 	 * @return The singleton instance of {@code Options}.
 	 */
-	public static synchronized Options getInstance(String args[]) throws IllegalArgumentException {
+	public static synchronized Options getInstance() throws IllegalArgumentException {
 
 		if (instance == null) {
 
-			instance = extractOptionsFromArgs(args);
+			throw new IllegalStateException("Options not initialized");
 		}
 		return instance;
+	}
+
+	/**
+	 * initiate the singleton of {@code Options}, parsing command-line arguments
+	 * with {@code extractOptionsFromArgs} if instance is null .
+	 * 
+	 * @param args : The command-line arguments passed to the application.
+	 */
+	public static void init(String args[]) {
+		if (instance != null) {
+			return;
+		} else {
+			instance = extractOptionsFromArgs(args);
+		}
 	}
 
 	/**
@@ -139,7 +156,6 @@ public class Options {
 		// Default values :
 		String listFile = null;
 		List<String> inFileList = null; // ..list of input files//..list file name
-		boolean doBatteryChecks = false; // ..check metadate battery vars - default: no
 		boolean doNameCheck = true; // ..check file name - default: yes
 		boolean doNulls = false; // ..check for nulls in strings - default: no
 		boolean doFormatOnly = false; // ..true: format-only; false: format and data checks
@@ -149,6 +165,9 @@ public class Options {
 		boolean version = false;
 		boolean help = false;
 		boolean doXml = true;
+
+		boolean useOnlineNVS = false;
+		boolean useInternalSpecs = false;
 
 		// loop trough the arguments provided and differentiate the option (start with
 		// "-") and the positional parameters.
@@ -183,11 +202,14 @@ public class Options {
 			case "-data-check-all":
 				doFormatOnlyPre31 = false;
 				break;
-			case "-battery-check":
-				doBatteryChecks = true;
-				break;
 			case "-psal-stats":
 				doPsalStats = true;
+				break;
+			case "-online-nvs":
+				useOnlineNVS = true;
+				break;
+			case "-internal-specs":
+				useInternalSpecs = true;
 				break;
 			case "-list-file":
 				if (++next < args.length) {
@@ -197,6 +219,7 @@ public class Options {
 					throw new IllegalArgumentException("Error: Missing argument after '-list-file'.");
 				}
 				break;
+
 			// ..obsolete arguments -- left in for backwards compatibility
 			case "-no-fresh":
 				log.error("Obsolete argument '-no-fresh' given. IGNORED");
@@ -212,22 +235,25 @@ public class Options {
 		}
 
 		// .....parse the positional parameters.....
-		validateNumberOfPositionalArguments(args, next); // exit system if too few arguments
+		validateNumberOfPositionalArguments(args, next, useInternalSpecs); // exit system if too few arguments
 
 		String dacName = args[next++];
-		String specDirName = args[next++];
+		String specDirName = "";
+
+		if (!useInternalSpecs) {
+			specDirName = args[next++];
+		}
 		String outDirName = args[next++];
 		String inDirName = args[next++];
 		if (next < args.length) {
 			inFileList = new ArrayList<String>(args.length - next);
 			for (; next < args.length; next++) {
 				inFileList.add(args[next]);
-
 			}
 		}
 
-		return new Options(doBatteryChecks, doNameCheck, doNulls, doFormatOnly, doFormatOnlyPre31, doPsalStats, version,
-				help, doXml, listFile, inFileList, dacName, specDirName, outDirName, inDirName);
+		return new Options(doNameCheck, doNulls, doFormatOnly, doFormatOnlyPre31, doPsalStats, version, help, doXml,
+				listFile, inFileList, dacName, specDirName, outDirName, inDirName, useOnlineNVS, useInternalSpecs);
 
 	}
 
@@ -238,8 +264,10 @@ public class Options {
 	 * @param args list of arguments
 	 * @param next indice of the next argument
 	 */
-	private static void validateNumberOfPositionalArguments(String[] args, int next) throws IllegalArgumentException {
-		if (args.length < (4 + next)) {
+	private static void validateNumberOfPositionalArguments(String[] args, int next, boolean useInternalSpecs)
+			throws IllegalArgumentException {
+		int minArgs = (useInternalSpecs ? 3 : 4) + next;
+		if (args.length < minArgs) {
 			log.error("too few arguments: " + args.length);
 			throw new IllegalArgumentException("Too few arguments provided.");
 		}
@@ -253,8 +281,8 @@ public class Options {
 	 */
 	public void validateMandatoryArguments() {
 		checkDacName(dacName);
-		checkDirectory(inDirName);
-		checkDirectory(specDirName);
+		checkDirectory(inDirName, false);
+		checkDirectory(specDirName, useInternalSpecs);
 	}
 
 	/**
@@ -282,18 +310,14 @@ public class Options {
 	 * 
 	 * @param directoryName
 	 */
-	protected static void checkDirectory(String directoryName) {
+	protected static void checkDirectory(String directoryName, boolean useOnlineTables) {
 		File dir = new File(directoryName);
-		if (!dir.isDirectory()) {
+		if (!useOnlineTables && !dir.isDirectory()) {
 			throw new IllegalArgumentException("ERROR: " + directoryName + " directory is not a directory");
 		}
 	}
 
 	// ===== GETTERS =====
-
-	public boolean isDoBatteryChecks() {
-		return doBatteryChecks;
-	}
 
 	public boolean isDoNameCheck() {
 		return doNameCheck;
@@ -349,6 +373,14 @@ public class Options {
 
 	public String getInDirName() {
 		return inDirName;
+	}
+
+	public boolean isUseOnlineNVS() {
+		return useOnlineNVS;
+	}
+
+	public boolean isUseInternalSpecs() {
+		return useInternalSpecs;
 	}
 
 }

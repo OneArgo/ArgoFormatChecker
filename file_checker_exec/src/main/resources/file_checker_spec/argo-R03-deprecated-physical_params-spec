@@ -1,0 +1,70 @@
+// This table lists attribute/values accepted or deprecated in previous format version of the physical parameter table (The NVS R03 table is the current reference)
+//i.e. it lists which param/local_attribute.key/local_attribute.value or param/property.key/property.value pairs 
+//trigger a warning, are accepted or rejected.
+
+// columns
+// PARAM_NAME | local_attribute.key or property.key | local_attribute.value or property.value | status (reject/warning/pass) | message | versions | deprecation_date
+BPHASE_DOXY | long_name | OPTICAL PHASE-SHIFT FROM OXYGEN SENSOR |  pass |  | [2.2] | 04/04/2018
+BPHASE_DOXY | standard_name | In situ measurement |  pass |  | [2.2] | 04/04/2018
+BPHASE_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+C1PHASE_DOXY | category | c |  pass |  | [2.3,3.0] | 04/04/2018
+C2PHASE_DOXY | valid_min | 10.f |  pass |  | [2.3,3.0] | 04/04/2018
+C2PHASE_DOXY | valid_max | 70.f |  pass |  | [2.3,3.0] | 04/04/2018
+C2PHASE_DOXY | category | c |  pass |  | [2.3,3.0] | 04/04/2018
+CNDC | long_name | ELECTRICAL CONDUCTIVITY |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+CNDC | standard_name | In situ measurement |  pass |  | [2.2] | 04/04/2018
+CNDC | valid_max | 60.f |  pass |  | [2.2] | 04/04/2018
+CNDC | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+COUNT_DOXY | long_name | COUNT_DOXY |  pass |  | [2.3] | 04/04/2018
+COUNT_DOXY | long_name | Raw counts reported by sensos such as SBE43 |  pass |  | [2.2] | 04/04/2018
+COUNT_DOXY | valid_min | 0.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+COUNT_DOXY | valid_max | 100.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+COUNT_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+DOXY | long_name | DISSOLVED OXYGEN |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+DOXY | standard_name | In situ measurement |  pass |  | [2.2] | 04/04/2018
+DOXY | valid_min | 0.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+DOXY | valid_max | 650.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+DPHASE_DOXY | long_name | Calibrated phase shirt reported by sensors such as Aandera Optode |  pass |  | [2.2] | 04/04/2018
+DPHASE_DOXY | long_name | DPHASE_DOXY |  pass |  | [2.3] | 04/04/2018
+DPHASE_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+FREQUENCY_DOXY | long_name | FREQUENCY_DOXY |  pass |  | [2.3] | 04/04/2018
+FREQUENCY_DOXY | long_name | Frequency reported by sensors such as SBE43 |  pass |  | [2.2] | 04/04/2018
+FREQUENCY_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+MLPL_DOXY | category | c |  pass |  | [2.3,3.0] | 04/04/2018
+MOLAR_DOXY | long_name | MOLAR_DOXY |  pass |  | [2.2,2.3] | 04/04/2018
+MOLAR_DOXY | standard_name | Technical value reported by sensors such as Aandera Optode |  pass |  | [2.2] | 04/04/2018
+MOLAR_DOXY | units | micromole/litre |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+MOLAR_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PHASE_DOXY | long_name | Phase shift reported by oxygen sensor |  pass |  | [2.3,3.0] | 04/04/2018
+PHASE_DOXY | units | degree |  pass |  | [2.3,3.0] | 04/04/2018
+PHASE_DOXY | valid_min | 10.f |  pass |  | [2.3,3.0] | 04/04/2018
+PHASE_DOXY | valid_max | 70.f |  pass |  | [2.3,3.0] | 04/04/2018
+PHASE_DOXY | category | c |  pass |  | [2.3,3.0] | 04/04/2018
+PHASE_DOXY | fillValue | 99999. |  pass |  | [2.3,3.0] | 04/04/2018
+PHASE_DOXY | data_type | float |  pass |  | [2.3,3.0] | 04/04/2018
+PRES | long_name | SEA PRESSURE |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PRES | standard_name | In situ measurement, sea surface = 0 |  pass |  | [2.2] | 04/04/2018
+PRES_DOXY | long_name | SEA PRESSURE FROM DOXY SENSOR |  pass |  | [2.2] | 04/04/2018
+PRES_DOXY | long_name | Sea water pressure at the depth of oxygen sampling |  pass |  | [2.3,3.0] | 04/04/2018
+PRES_DOXY | standard_name | In situ measurement, sea surface = 0 |  pass |  | [2.2] | 04/04/2018
+PRES_DOXY | units | decibar |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PRES_DOXY | valid_min | 0.f |  pass |  | [2.3,3.0] | 04/04/2018
+PRES_DOXY | valid_max | 12000.f |  pass |  | [2.3,3.0] | 04/04/2018
+PRES_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PRES_DOXY | fillValue | 99999. |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PRES_DOXY | data_type | float |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PSAL | long_name | PRACTICAL SALINITY |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PSAL | standard_name | In situ measurement |  pass |  | [2.2] | 04/04/2018
+PSAL | valid_min | 0.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+PSAL | valid_max | 42.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+TEMP | long_name | SEA TEMPERATURE IN SITU ITS-90 SCALE |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+TEMP | standard_name | In situ measurement |  pass |  | [2.2] | 04/04/2018
+TEMP | valid_min | -2.f |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+TEMP_DOXY | long_name | SEA TEMPERATURE FROM DOXY SENSOR (ITS-90 SCALE) |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+TEMP_DOXY | standard_name | In situ measurement |  pass |  | [2.2] | 04/04/2018
+TEMP_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018
+TPHASE_DOXY | category | c |  pass |  | [2.3,3.0] | 04/04/2018
+VOLTAGE_DOXY | long_name | VOLTAGE_DOXY |  pass |  | [2.3] | 04/04/2018
+VOLTAGE_DOXY | long_name | Voltage reported by sensors such as SBE43 |  pass |  | [2.2] | 04/04/2018
+VOLTAGE_DOXY | category | c |  pass |  | [2.2,2.3,3.0] | 04/04/2018

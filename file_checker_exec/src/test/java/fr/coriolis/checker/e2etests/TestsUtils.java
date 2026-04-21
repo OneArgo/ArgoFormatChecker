@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public final class TestsUtils {
@@ -40,7 +43,6 @@ public final class TestsUtils {
 		String inputDirPath = TestsUtils.TEST_FILES_DIR + "/" + testDirName;
 		File inputDir = new File(inputDirPath);
 		File testFile = new File(inputDirPath + "/" + fileName);
-
 		// pre-checks
 		assertThat(TestsUtils.jarFile).exists().isFile().as("jar should be created in target folder");
 		assertThat(testFile).exists().isFile().as("netcdf test file should be in test/netcdf/TEST* resources folder");
@@ -49,15 +51,19 @@ public final class TestsUtils {
 		assertThat(TestsUtils.outputDir).exists().isDirectory().as("output directory should exist");
 
 		// ACT
-		ProcessBuilder builder = new ProcessBuilder("java", "-jar", TestsUtils.jarPath, options, dac,
-				TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inputDirPath, fileName);
+		List<String> command = new ArrayList<>(List.of("java", "-jar", TestsUtils.jarPath));
+		if (options != null && !options.isBlank()) {
+			// split eventual multiple options
+			command.addAll(Arrays.asList(options.split("\\s+")));
+		}
+		command.addAll(List.of(dac, TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inputDirPath, fileName));
+		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.redirectErrorStream(true);
 		Process process = builder.start();
 
 		// ASSERT - common checks
 		int exitCode = process.waitFor();
 		assertThat(exitCode).isZero().as("execution should complete without errors");
-
 		File xmlResultFile = new File(TestsUtils.OUTPUT_DIR_PATH + "/" + fileName + ".filecheck");
 		assertThat(xmlResultFile).exists().isFile().as("Result file should be created in %s",
 				TestsUtils.OUTPUT_DIR_PATH);
@@ -68,9 +74,7 @@ public final class TestsUtils {
 	// ============== CHECK RESULT =================
 	public static void genericFileCheckerE2ETest(String fileName, String dac, String result, String phase,
 			String testDirName, String options) throws IOException, InterruptedException {
-
 		String content = executeJarAndGetResult(fileName, dac, testDirName, options);
-
 		assertThat(content).isNotEmpty().contains("<status>" + result).contains("<phase>" + phase);
 	}
 

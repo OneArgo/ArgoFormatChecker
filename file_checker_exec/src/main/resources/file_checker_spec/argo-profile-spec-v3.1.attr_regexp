@@ -1,0 +1,4 @@
+// $Revision: 656 $
+// $Date: 2017-04-24 16:47:02 +0000 (Mon, 24 Apr 2017) $
+
+POSITION_ERROR_ESTIMATED:long_name = "Position error (estimated|determined) by the real-time or delayed-mode process"; NOWARN

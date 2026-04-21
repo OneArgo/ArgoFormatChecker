@@ -15,6 +15,8 @@ import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.core.ArgoDataFile.FileType;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
@@ -59,405 +61,6 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 	public ArgoTrajectoryFileValidator(ArgoDataFile arFile) throws IOException {
 		super(arFile);
 	}
-
-//	protected ArgoTrajectoryFileValidator(String specDir, String version) {
-//		// super(specDir, FileType.TRAJECTORY, version);
-//	}
-
-	// ..........................................
-	// METHODS
-	// ..........................................
-
-//	/** Retrieve the NetcdfFileWriter reference */
-//	public NetcdfFileWriter getNetcdfFileWriter() {
-//		return ncWriter;
-//	}
-
-	/**
-	 * Retrieve a list of variables in the associated file
-	 */
-//	public List<String> getVariableNames() {
-//		LinkedList<String> varNames = new LinkedList<String>();
-//
-//		if (ncReader != null) {
-//			for (Variable var : ncReader.getVariables()) {
-//				varNames.add(var.getShortName());
-//			}
-//
-//		} else if (ncWriter != null) {
-//			for (Variable var : ncWriter.getNetcdfFile().getVariables()) {
-//				varNames.add(var.getShortName());
-//			}
-//
-//		} else {
-//			varNames = null;
-//		}
-//
-//		return varNames;
-//	}
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-//	@Override
-//	private void addToList(StringBuilder list, String add) {
-//		if (list.length() == 0) {
-//			list.append("'" + add + "'");
-//		} else {
-//			list.append(", '" + add + "'");
-//		}
-//	}
-
-	/**
-	 * Convenience method to add to String list for "pretty printing".
-	 *
-	 * @param list the StringBuilder list
-	 * @param add  the String to add
-	 */
-
-	/**
-	 * Creates a new Argo trajectory file. The "template" for the file is the
-	 * indicated CDL specification file.
-	 *
-	 * @param fileName   The name of the output file
-	 * @param specDir    Path to the specification directory
-	 * @param version    The version string of the spec file to use as a template
-	 * @param N_PROF     N_PROF dimension of the new file
-	 * @param N_PARAM    N_PARAM dimension of the new file
-	 * @param N_LEVELS   N_LEVELS dimension of the new file
-	 * @param N_CALIB    N_CALIB dimension of the new file
-	 * @param parameters The parameter names that will be in the new file
-	 * @throws IOException           If problems creating the file are encountered
-	 * @throws NumberFormatException If problems converting certain values encoded
-	 *                               in the CDL attributes to number are
-	 *                               encountered.
-	 */
-//	public static ArgoTrajectoryFileValidator createNew(String fileName, String specDir, String version, int N_PARAM,
-//			int N_CYCLE, int N_HISTORY, Set<String> parameters) throws IOException, NumberFormatException {
-//		log.debug(".....createNew: start.....");
-//
-//		ArgoTrajectoryFileValidator arFile = new ArgoTrajectoryFileValidator();
-//
-//		// ..create the template specification
-//		arFile.spec = ArgoDataFile.openSpecification(false, specDir, ArgoDataFile.FileType.TRAJECTORY, version);
-//		if (arFile.spec == null) {
-//			return null;
-//		}
-//
-//		arFile.fileType = ArgoDataFile.FileType.TRAJECTORY;
-//
-//		// ..remove any parameters that are not in this specification
-//
-//		Iterator<String> i = parameters.iterator();
-//		while (i.hasNext()) {
-//			String p = i.next();
-//			if (!arFile.spec.isPhysicalParamName(p)) {
-//				i.remove();
-//				// arFile.validationResult.addWarning("Parameter: '"+p+
-//				// "' not in specification. Removed.");
-//				log.debug("requested parameter '{}' not in spec: removed");
-//			}
-//		}
-//
-//		N_PARAM = parameters.size();
-//
-//		// ..create new file
-//
-//		arFile.ncWriter = NetcdfFileWriter.createNew(NetcdfFileWriter.Version.netcdf3, fileName);
-//		arFile.ncWriter.setFill(true);
-//
-//		// ..fill in object variables
-//		arFile.file = null; // ..don't know why I need this ..... yet
-//		arFile.fileType = ArgoDataFile.FileType.TRAJECTORY;
-//		arFile.format_version = version;
-//		arFile.ncFileName = fileName;
-//		// arFile.spec is filled in by openSpec...
-//
-//		// .....add globabl attributes.....
-//
-//		for (ArgoAttribute a : arFile.spec.getGlobalAttributes()) {
-//			String name = a.getName();
-//			String value = (String) a.getValue();
-//
-//			if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
-//				// ..the definition starts with one of the special ATTR_IGNORE codes
-//
-//				if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
-//					// ..there is more than just the code on the line
-//					// ..defining the default value, use it
-//
-//					value = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
-//					log.debug("global attribute with special code: '{}'", value);
-//
-//				} else {
-//					// ..nothing but the code on the line
-//					// ..ignore the attribute
-//					value = null;
-//				}
-//			}
-//
-//			if (name.equals("history")) {
-//				value = (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")).format(new Date()).toString();
-//				log.debug("history global attribute: '{}'", value);
-//			}
-//
-//			if (value != null) {
-//				arFile.ncWriter.addGroupAttribute(null, new Attribute(name, value));
-//				log.debug("add global attribute: '{}' = '{}'", name, value);
-//			}
-//		}
-//
-//		// .........add Dimensions...............
-//		// ..don't allow <= 0 dimensions
-//		if (N_PARAM <= 0) {
-//			N_PARAM = 1;
-//		}
-//		if (N_CYCLE <= 0) {
-//			N_CYCLE = 1;
-//		}
-//		if (N_HISTORY <= 0) {
-//			N_HISTORY = 1;
-//		}
-//
-//		for (ArgoDimension d : arFile.spec.getDimensions()) {
-//			String name = d.getName();
-//			int value = d.getValue();
-//
-//			if (name.equals("N_PARAM")) {
-//				value = N_PARAM;
-//			} else if (name.equals("N_CYCLE")) {
-//				value = N_CYCLE;
-//			} else if (name.equals("N_HISTORY")) {
-//				value = N_HISTORY;
-//			}
-//
-//			if (name.equals("N_MEASUREMENT")) {
-//				arFile.ncWriter.addUnlimitedDimension(name);
-//			} else {
-//				arFile.ncWriter.addDimension(null, name, value);
-//			}
-//
-//			log.debug("add dimension: '{}' = '{}'", name, value);
-//		}
-//
-//		// .........add Variables...............
-//
-//		// ......ordered list.....
-//		// ..this bit of code arranges the variables in the "expected order"
-//		// ..this is technically completely unnecessary
-//		// ..the ordering of the variables in the file should not matter
-//		// ..however, at least one user is complaining about the current files
-//		// ..and I am guessing that variable ordering is the problem.
-//
-//		// ..the way the "spec" files are parsed, the PARAM variables end up
-//		// ..at the end of the variables list
-//		// ..so I am trying to distribute the variables in the "expected order"
-//
-//		// ..good coding by users would eliminate the need for this
-//
-//		// ..the idea is to create an ordered list of variable names that are
-//		// ..then used in the next section
-//
-//		log.debug("...build ordered list of variables...");
-//
-//		ArrayList<ArgoVariable> orderedList = new ArrayList<ArgoVariable>(200);
-//
-//		for (ArgoVariable v : arFile.spec.getVariables()) {
-//			String name = v.getName();
-//
-//			if (v.isParamVar()) {
-//				// ..when we get to the PARAM variables, we are done
-//				// ..they are always at the end of the list and we handle
-//				// ..them separately in the if-blocks below
-//				break;
-//			}
-//
-//			orderedList.add(v);
-//			log.debug("add {}", name);
-//
-//			// ..insert the <PARAM> variables after MEASUREMENT_CODE
-//
-//			if (name.equals("MEASUREMENT_CODE")) {
-//				log.debug("insert <PARAM> here");
-//				for (ArgoVariable w : arFile.spec.getVariables()) {
-//					if (w.isParamVar()) {
-//						log.debug("isParamVar");
-//						orderedList.add(w);
-//						log.debug("add {}", w.getName());
-//					}
-//				}
-//			}
-//		}
-//
-//		log.debug("...ordered list complete...");
-//
-//		// ....end ordered list....
-//
-//		Boolean keep;
-//		// ...if we didn't need the list to be ordered...
-//		// for (ArgoVariable v : arFile.spec.getVariables()) {
-//
-//		for (ArgoVariable v : orderedList) {
-//			String name = v.getName();
-//			String prm = v.getParamName();
-//
-//			if (prm != null) {
-//				// ..this is a physical parameter variable
-//				// ..is it's parameter name in the parameter list
-//
-//				if (parameters.contains(prm)) {
-//					keep = true;
-//				} else {
-//					keep = false;
-//					log.debug("skip variable: '{}'", name);
-//				}
-//
-//			} else {
-//				// ..not a physical parameter, so keep it
-//				keep = true;
-//			}
-//
-//			if (keep) {
-//				DataType type = v.getType();
-//				String dims = v.getDimensionsString();
-//
-//				Variable var = arFile.ncWriter.addVariable(null, name, type, dims);
-//				log.debug("add variable: '{}': '{}' '{}'", name, type, dims);
-//
-//				// ..add attributes for this variable
-//				for (ArgoAttribute a : v.getAttributes()) {
-//					String aname = a.getName();
-//
-//					if (a.isNumeric()) {
-//						var.addAttribute(new Attribute(aname, (Number) a.getValue()));
-//						log.debug("add attribute: '{}:{}' = '{}'", name, aname, a.getValue());
-//
-//					} else if (a.isString()) {
-//						String value = (String) a.getValue();
-//						Object def = null;
-//
-//						if (value.matches(ArgoFileSpecification.ATTR_SPECIAL_REGEX)) {
-//							// ..the definition starts with one of the special ATTR_IGNORE codes
-//
-//							if (value.length() > ArgoFileSpecification.ATTR_SPECIAL_LENGTH) {
-//								// ..there is more than just the code on the line
-//								// ..defining the default value, use it
-//
-//								String val = value.substring(ArgoFileSpecification.ATTR_SPECIAL_LENGTH);
-//								log.debug("attribute with special code: '{}' '{}'", value, val);
-//
-//								if (val.startsWith("numeric:")) {
-//									// ..this should be encoded as a number
-//
-//									val = val.substring("numeric:".length());
-//									log.debug("...number: '{}'", val);
-//
-//									try {
-//										switch (v.getType()) {
-//										case DOUBLE:
-//											def = Double.valueOf(val);
-//											var.addAttribute(new Attribute(aname, (Number) def));
-//											break;
-//										case FLOAT:
-//											def = Float.valueOf(val);
-//											var.addAttribute(new Attribute(aname, (Number) def));
-//											break;
-//										case INT:
-//											def = Integer.valueOf(val);
-//											var.addAttribute(new Attribute(aname, (Number) def));
-//											break;
-//										case SHORT:
-//											def = Short.valueOf(val);
-//											var.addAttribute(new Attribute(aname, (Number) def));
-//											break;
-//										default: // ..assume it is a string
-//											def = val;
-//											var.addAttribute(new Attribute(aname, (String) def));
-//										}
-//									} catch (NumberFormatException e) {
-//										throw new NumberFormatException(
-//												"Attribute " + name + ":" + aname + ": Unable to convert to number");
-//									}
-//
-//								} else {
-//									// ..default value is a string
-//									var.addAttribute(new Attribute(aname, val));
-//								}
-//
-//								// } else {
-//								// ..nothing but the special code on the line
-//								// ..ignore the attribute
-//								// def = null;
-//							}
-//
-//						} else {
-//							// ..not a special value -- insert as is
-//							var.addAttribute(new Attribute(aname, value));
-//							log.debug("add attribute: '{}:{}' = '{}'", name, aname, value);
-//						}
-//
-//					} else {
-//						log.error("attribute not Number or String: '{}:{}'", name, aname);
-//						continue;
-//					}
-//
-//				}
-//			}
-//		}
-//
-//		// .....create the file -- end "define mode"
-//
-//		arFile.ncWriter.create();
-//		arFile.ncWriter.close();
-//
-//		log.debug(".....createNew: end.....");
-//		return arFile;
-//	}
-//
-//	/**
-//	 * Opens an existing file without opening the <i>specification</i>
-//	 *
-//	 * @param inFile the string name of the file to open
-//	 * @return the file object reference. Returns null if the file is not opened
-//	 *         successfully. (ArgoTrajectoryFile.getMessage() will return the reason
-//	 *         for the failure to open.)
-//	 * @throws IOException If an I/O error occurs
-//	 */
-//	public static ArgoTrajectoryFileValidator open(String inFile) throws IOException {
-//		ArgoDataFile arFile = ArgoDataFile.open(inFile);
-//		if (!(arFile instanceof ArgoTrajectoryFileValidator)) {
-//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
-//			return null;
-//		}
-//
-//		return (ArgoTrajectoryFileValidator) arFile;
-//	}
-//
-//	/**
-//	 * Opens an existing file and the associated <i>Argo specification</i>).
-//	 *
-//	 * @param inFile   the string name of the file to open
-//	 * @param specDir  the string name of the directory containing the format
-//	 *                 specification files
-//	 * @param fullSpec true = open the full specification; false = open the template
-//	 *                 specification
-//	 * @return the file object reference. Returns null if the file is not opened
-//	 *         successfully. (ArgoTrajectoryFile.getMessage() will return the reason
-//	 *         for the failure to open.)
-//	 * @throws IOException If an I/O error occurs
-//	 */
-//	public static ArgoTrajectoryFileValidator open(String inFile, String specDir, boolean fullSpec) throws IOException {
-//		ArgoDataFile arFile = ArgoDataFile.open(inFile, specDir, fullSpec);
-//		if (!(arFile instanceof ArgoTrajectoryFileValidator)) {
-//			ValidationResult.lastMessage = "ERROR: '" + inFile + "' not an Argo TRAJECTORY file";
-//			return null;
-//		}
-//
-//		return (ArgoTrajectoryFileValidator) arFile;
-//	}
 
 	/**
 	 * Validates the data in the trajectory file. This is a driver routine that
@@ -641,11 +244,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			if (core) {
 				numAdj = cycleIndexAdj[n];
 			}
-
+			// =======
+			// CK_0213
+			// =======
 			if (num < 0) {
 				invCyc.increment(n, "invalid CYCLE_NUMBER_INDEX");
 			}
-
+			// =======
+			// CK_0214
+			// =======
 			if (core && numAdj < 0) {
 				invAdjCyc.increment(n, "invalid CYCLE_NUMBER_INDEX_ADJUSTED");
 			}
@@ -653,13 +260,18 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			if (overallDM == 'R') {
 
 				// .....file only contains R-mode data.......
-
+				// ===========
+				// CK_0215 1/2
+				// ===========
 				if (num == fillCycNum) {
 					// ..cycle_number_index missing in r-mode <--- error
 					missRCyc.increment(n, "r-mode: CYCLE_NUMBER_INDEX is missing");
 
 				}
 
+				// ===========
+				// CK_0216 1/2
+				// ===========
 				if (core && numAdj != fillCycNum) {
 					// ..cycle_number_index_adjusted_index set in r-mode <---- error
 					adjSet.increment(n, "r-mode: CYCLE_NUMBER_INDEX_ADJUSTED is set");
@@ -670,11 +282,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				if (data_mode[n] != 'D') {
 					// ...r/a-mode cycle
-
+					// ===========
+					// CK_0215 2/2
+					// ===========
 					if (num == fillCycNum) {
 						// ..missing in r-mode <--- this is an error
 						missRCyc.increment(n, "r-mode: CYCLE_NUMBER_INDEX is missing");
 					}
+					// ===========
+					// CK_0216 2/2
+					// ===========
 					if (core && numAdj != fillCycNum) {
 						// ..numAdj set in r-mode <--- this is an error
 						adjSet.increment(n, "r-mode: CYCLE_NUMBER_INDEX_ADJUSTED is set");
@@ -682,7 +299,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				} else {
 					// ..d-mode cycle
-
+					// =======
+					// CK_0217
+					// =======
 					if (core && numAdj == fillCycNum) {
 						// ..*_adjusted is missing too this is an error
 						missDCyc.increment(n, "d-mode:CYCLE_NUMBER_INDEX_ADJUSTED is missing");
@@ -690,6 +309,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				}
 			} // ..endif (overallDM)
 
+			// =======
+			// CK_0218
+			// =======
 			// ..check for duplicates --- build the lookup table
 			int finalNum = -1;
 			if (numAdj != fillCycNum) {
@@ -775,8 +397,10 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				numAdj = cycleAdj[n];
 			}
 
+			// =======
+			// CK_0219
+			// =======
 			// ..check "launch cycle"
-
 			if (num < 0) {
 				// ..cycle_num == -1 is allowed in index 0
 				// ..anything else is an error
@@ -790,6 +414,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					invCyc.increment(n);
 				}
 			}
+			// =======
+			// CK_0220
+			// =======
 			if (core && numAdj < 0) {
 				// ..cycle_num_adjusted == -1 is allowed in index 0
 				// ..anything else is an error
@@ -809,13 +436,17 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			if (overallDM == 'R') {
 
 				// .....file only contains R-mode data.......
-
+				// ===========
+				// CK_0221 1/2
+				// ===========
 				if (num == fillCycNum) {
 					// ..cycle_number is missing in r-mode <--- error
 
 					missRCyc.increment(n);
 				}
-
+				// ===========
+				// CK_0222 1/2
+				// ===========
 				if (core && numAdj != fillCycNum) {
 					// ..cycle_number_index_adjusted_index set in r-mode <---- error
 
@@ -851,11 +482,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				if (!isD) {
 					// ..r-mode cycle
-
+					// ===========
+					// CK_0221 2/2
+					// ===========
 					if (num == fillCycNum) {
 						// ..cycle_number is missing in r-mode <--- error
 						missRCyc.increment(n);
 					}
+					// ===========
+					// CK_0222 2/2
+					// ===========
 					if (core && numAdj != fillCycNum && numAdj > -1) {
 						// ..numAdj set in r-mode <--- this is an error
 						adjSet.increment(n);
@@ -863,7 +499,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				} else {
 					// ..d-mode cycle
-
+					// =======
+					// CK_0223
+					// =======
 					if (core && numAdj == fillCycNum) {
 						// ..*_adjusted is missing too this is an error
 						missDCyc.increment(n);
@@ -918,6 +556,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		// ..............check that all cycle numbers in .................
 		// ..............CYCLE_NUMBER are in _INDEX .................
 		// ..build the mode[nMeasurement] array
+		// =======
+		// CK_0224
+		// =======
 		log.debug("cyc_num-in-cyc_num_ind: start");
 
 		HashSet<Integer> cycNumSet = new HashSet<Integer>(200);
@@ -993,6 +634,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		// .................check that all of the cycle number in .............
 		// .................CYCLE_NUMBER_INDEX are in CYCLE_NUMBER.............
+		// =======
+		// CK_0225
+		// =======
 		log.debug("cyc_num-in-cyc_num_ind: end");
 		log.debug("cyc_num_ind-in-cyc_num: start");
 
@@ -1063,7 +707,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker invalid = new ErrorTracker();
 
 		char overallDM = 'R';
-
+		// =======
+		// CK_0283
+		// =======
 		for (int n = 0; n < data_mode.length(); n++) {
 			char m = data_mode.charAt(n);
 
@@ -1117,6 +763,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String ref = arFile.readString(name);
 
 		log.debug(name + ": " + ref);
+		// =======
+		// CK_0210
+		// =======
 		if (!ref.matches(arFile.getFileSpec().getMeta(name))) {
 			validationResult.addError(name + ": '" + ref + "': Does not match specification ('"
 					+ arFile.getFileSpec().getMeta(name) + "')");
@@ -1138,11 +787,17 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					// ..HISTORY_DATE is set. Is it reasonable?
 					log.debug("HISTORY_DATE[{}]: '{}'", h, dateHist[h]);
 
+					// =======
+					// CK_0211
+					// =======
 					Date date = ArgoDate.get(d);
 					if (date == null) {
 						validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h] + "': Invalid date");
 
 					} else if (arFile.isHaveUpdateDate()) {
+						// =======
+						// CK_0212
+						// =======
 						long dateSec = date.getTime();
 						if ((dateSec - arFile.getUpdateSec()) > oneDaySec) {
 							validationResult.addError("HISTORY_DATE[" + (h + 1) + "]: '" + dateHist[h]
@@ -1188,6 +843,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		boolean core = false;
 		ArgoReferenceTable.ArgoReferenceEntry info;
+
+		// NVS tables entry :
+		SkosConcept tableEntry;
 
 		if (arFile.fileType() == FileType.TRAJECTORY) {
 			// ..implies this is 1) a v3.2+ or 2) a pre-v3.2 core-file (NOT a bio-file)
@@ -1254,6 +912,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			int rem = m_code[n] % 50;
 			int rel = rem - 50;
 
+			// =======
+			// CK_0226
+			// =======
 			if (m_code[n] == 0) {
 				// ..this is valid
 
@@ -1272,16 +933,19 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				// ..this is NOT a valid relative code
 
 				// ..is it a valid "specfic code"?
-				info = ArgoReferenceTable.MEASUREMENT_CODE_specific.contains(m_code[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				// =======
+				// CK_0227
+				// =======
+				tableEntry = ArgoNVSReferenceTable.MEASUREMENT_CODE_ID_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(m_code[n]));
+				if (tableEntry != null) {
+					// =======
+					// CK_0228
+					// =======
+					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);
 						log.debug("m_code[{}]: deprecated code = {}, rem = {}, rel = {}", n, m_code[n], rem, rel);
 					}
-
-				} else if (info.isDeleted) {
-					delCode.increment(n);
-					log.debug("m_code[{}]: deleted code = {}, rem = {}, rel = {}", n, m_code[n], rem, rel);
 
 				} else {
 					invCode.increment(n);
@@ -1334,9 +998,18 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker noQC = new ErrorTracker(); // ..count of juld set & QC set to missing
 
 		for (int n = 0; n < nMeasure; n++) {
+
 			if (juld_qc[n] != ' ') {
-				if ((info = ArgoReferenceTable.QC_FLAG.contains(juld_qc[n])).isValid()) {
-					if (info.isDeprecated) {
+				tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(juld_qc[n]));
+				// =======
+				// CK_0229
+				// =======
+				if (tableEntry != null) {
+					// =======
+					// CK_0230
+					// =======
+					if (tableEntry.isDeprecated()) {
 						depQC.increment(n);
 					}
 				} else {
@@ -1345,9 +1018,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			}
 
 			if (juld_status[n] != ' ') {
-				info = ArgoReferenceTable.STATUS_FLAG.contains(juld_status[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				tableEntry = ArgoNVSReferenceTable.STATUS_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(juld_status[n]));
+				// =======
+				// CK_0231
+				// =======
+				if (tableEntry != null) {
+					// =======
+					// CK_0232
+					// =======
+					if (tableEntry.isDeprecated()) {
 						depStatus.increment(n);
 					}
 
@@ -1355,7 +1035,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					invStatus.increment(n);
 				}
 			}
-
+			// =======
+			// CK_0233
+			// =======
 			if ((juld_qc[n] == ' ') ^ (juld_status[n] == ' ')) {
 				incStatus.increment(n);
 				log.debug("qc/status inconsistent: " + "n = {}: juld, juld_status, juld_qc = {}, '{}', '{}'", n,
@@ -1374,7 +1056,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			 * "n = {}: juld, juld_status, juld_qc = {}, '{}', '{}'", n, juld[n],
 			 * juld_status[n], juld_qc[n]); } }
 			 */
-
+			// =======
+			// CK_0234
+			// =======
 			if (ArgoFileValidator.is_999_999_FillValue(juld[n])) {
 				// ..data is missing - QC better be too
 				if (!(juld_qc[n] == '9' || juld_qc[n] == ' ')) {
@@ -1383,7 +1067,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			} else {
 				// ..data not missing - check QC value
-
+				// =======
+				// CK_0235
+				// =======
 				if (juld_qc[n] == ' ' || juld_qc[n] == '9') {
 					noQC.increment(n);
 				}
@@ -1499,9 +1185,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			for (int n = 0; n < nMeasure; n++) {
 				if (juld_adj_qc[n] != ' ') {
-					info = ArgoReferenceTable.QC_FLAG.contains(juld_adj_qc[n]);
-					if (info.isValid()) {
-						if (info.isDeprecated) {
+					tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+							.get(String.valueOf(juld_adj_qc[n]));
+					// =======
+					// CK_0238
+					// =======
+					if (tableEntry != null) {
+						// =======
+						// CK_0239
+						// =======
+						if (tableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
 
@@ -1511,19 +1204,26 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				}
 
 				if (juld_adj_status[n] != ' ') {
-					if (juld_adj_status[n] != ' ') {
-						info = ArgoReferenceTable.STATUS_FLAG.contains(juld_adj_status[n]);
-						if (info.isValid()) {
-							if (info.isDeprecated) {
-								depStatus.increment(n);
-							}
-
-						} else {
-							invStatus.increment(n);
+					tableEntry = ArgoNVSReferenceTable.STATUS_TABLE.getConceptMembersByAltLabelMap()
+							.get(String.valueOf(juld_adj_status[n]));
+					// =======
+					// CK_0240
+					// =======
+					if (tableEntry != null) {
+						// =======
+						// CK_0241
+						// =======
+						if (tableEntry.isDeprecated()) {
+							depStatus.increment(n);
 						}
+
+					} else {
+						invStatus.increment(n);
 					}
 				}
-
+				// =======
+				// CK_0242
+				// =======
 				if ((juld_adj_qc[n] == ' ') ^ (juld_adj_status[n] == ' ')) {
 					incStatus.increment(n);
 					log.debug("qc/status inconsistent: " + "n = {}: juld, juld_status, juld_qc = {}, '{}', '{}'", n,
@@ -1551,7 +1251,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				 * "n = {}: juld_adj, juld_adj_status, juld_adj_qc = {}, '{}', '{}'", n,
 				 * juld_adj[n], juld_adj_status[n], juld_adj_qc[n]); } }
 				 */
-
+				// =======
+				// CK_0243
+				// =======
 				if (ArgoFileValidator.is_999_999_FillValue(juld_adj[n])) {
 					// ..data is missing - QC better be too
 					if (!(juld_adj_qc[n] == '9' || juld_adj_qc[n] == ' ')) {
@@ -1560,7 +1262,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 				} else {
 					// ..juld_adj not missing - check QC value
-
+					// =======
+					// CK_0244
+					// =======
 					if (juld_adj_qc[n] == ' ' || juld_adj_qc[n] == '9') {
 						noQC.increment(n);
 					}
@@ -1577,9 +1281,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						// ..but ignore the "launch cycle" (-1)
 
 						if (finalCycle[n] > 0) {
-							// Integer ndx =
-							// CycNumIndex_cycle2index.get(Integer.valueOf(finalCycle[n]));
-
+							// =======
+							// CK_0245
+							// =======
 							if (mode[n] != 'A' && mode[n] != 'D') {
 								adjNotAorD.increment(n);
 							}
@@ -1698,13 +1402,17 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 					// String dtg = ArgoDate.format(date);
 					// log.debug("JULD[{}]: {} = {} (qc = {})", n, juld[n], juldDTG, qc);
-
+					// =======
+					// CK_0236
+					// =======
 					if (date.before(earliestDate)) {
 						juldBeforeEarliest.increment(n);
 					}
 
 					long sec = date.getTime();
-
+					// =======
+					// CK_0237
+					// =======
 					if ((sec - updateSec) > oneDaySec) {
 						juldAfterUpdate.increment(n);
 					}
@@ -1723,13 +1431,17 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						// ..check that JULD_ADJUSTED is after earliestDate and before DATE_UPDATE
 
 						Date date = ArgoDate.get(juld_adj[n]);
-
+						// =======
+						// CK_0246
+						// =======
 						if (date.before(earliestDate)) {
 							juld_adjBeforeEarliest.increment(n);
 						}
 
 						long sec = date.getTime();
-
+						// =======
+						// CK_0247
+						// =======
 						if ((sec - updateSec) > oneDaySec) {
 							juld_adjAfterUpdate.increment(n);
 						}
@@ -1820,6 +1532,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String name;
 		String str;
 
+		// NVS tables entry :
+		SkosConcept tableEntry;
+
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
 		str = arFile.readString(name).trim();
 		if (!super.validatePlatfomNumber(str)) {
@@ -1833,15 +1548,24 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
-		info = ArgoReferenceTable.DATA_STATE_INDICATOR.contains(str);
-		if (info.isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.DATA_STATE_INDICATOR_TABLE.getConceptMembersByAltLabelMap().get(str);
+		// =======
+		// CK_0200
+		// =======
+		if (tableEntry != null) {
+			// =======
+			// CK_0201
+			// =======
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
+		// =======
+		// CK_0202
+		// =======
 		name = "FIRMWARE_VERSION"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -1849,6 +1573,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": Empty");
 		}
 
+		// =======
+		// CK_0203
+		// =======
 		name = "FLOAT_SERIAL_NO"; // ..not empty
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
@@ -1860,49 +1587,71 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
-		info = ArgoReferenceTable.PLATFORM_TYPE.contains(str);
-		if (info.isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.PLATFORM_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
+		// =======
+		// CK_0045
+		// =======
+		if (tableEntry != null) {
+			// =======
+			// CK_0047
+			// =======
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "POSITIONING_SYSTEM"; // ..ref table 9
 		str = arFile.readString(name).trim();
 		log.debug(name + ": '{}'", str);
-
-		info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str);
-		if (info.isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.POSITIONING_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
+		// =======
+		// CK_0204
+		// =======
+		if (tableEntry != null) {
+			// =======
+			// CK_0205
+			// =======
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "WMO_INST_TYPE";
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-
+		// =======
+		// CK_0206
+		// =======
 		if (str.length() == 0) {
 			validationResult.addError(name + ": Not set");
 
 		} else {
 			try {
+				// =======
+				// CK_0207
+				// =======
 				int N = Integer.valueOf(str);
 
-				info = ArgoReferenceTable.WMO_INST_TYPE.contains(N);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
-						validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+				tableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE.getConceptMembersByAltLabelMap().get(str);
+				// =======
+				// CK_0208
+				// =======
+				if (tableEntry != null) {
+					// =======
+					// CK_0209
+					// =======
+					if (tableEntry.isDeprecated()) {
+						validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 					}
 
 				} else {
-					validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+					validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 				}
 			} catch (Exception e) {
 				validationResult.addError(name + ": '" + str + "' Invalid. Must be integer.");
@@ -1926,7 +1675,6 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		String varName;
 		ErrorTracker dep = new ErrorTracker();
 		ErrorTracker inv = new ErrorTracker();
-		ArgoReferenceTable.ArgoReferenceEntry info;
 
 		// ..bio-traj exception: GROUNDED not in bio-traj files
 
@@ -1935,9 +1683,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			String g = arFile.readString(varName, true); // ..true -> include any NULLs
 
 			for (int n = 0; n < nCycle; n++) {
-				info = ArgoReferenceTable.GROUNDED.contains(g.charAt(n));
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				SkosConcept tableEntry = ArgoNVSReferenceTable.GROUNDED_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(g.charAt(n)));
+				// =======
+				// CK_0289
+				// =======
+				if (tableEntry != null) {
+					// =======
+					// CK_0290
+					// =======
+					if (tableEntry.isDeprecated()) {
 						dep.increment(n);
 					}
 
@@ -1963,9 +1718,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker set = new ErrorTracker();
 
 		for (int n = 1; n < nCycle; n++) {
+			// =======
+			// CK_0291
+			// =======
 			if (c[n] < 1) {
 				inv.increment(n);
 			}
+			// =======
+			// CK_0292
+			// =======
 			if (mode[n] == 'D' && c[n] == 99999) {
 				set.increment(n);
 			}
@@ -2074,7 +1835,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			int mc = -1;
 
 			// ..loop
-
+			// =========================
+			// CK_0284 1/2 & CK_0285 1/2
+			// =========================
 			for (int n = startNMeasureLoop; n < nMeasure; n++) {
 				int cycNum = finalNMVar[n].cycle_number;
 
@@ -2099,7 +1862,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				// ..carry on with this iteration
 
 				mc = finalNMVar[n].measurement_code;
-
+				// =======
+				// CK_0288
+				// =======
 				if (mc == M_CODE) {
 					// ..this is the one we are validating
 					// ..find the index of this cycNum in N_CYCLE arrays
@@ -2165,6 +1930,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			int notJuld_s = 0, a_notJuld_s = -1;
 
 			for (int n = 0; n < nCycle; n++) {
+				// =======
+				// CK_0286
+				// =======
 				if (!juldCheck.checked[n]) {
 					// ..this value wasn't compared to a JULD value
 
@@ -2175,7 +1943,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							log.debug("unchecked {}[{}] not missing", var, n);
 						}
 					}
-
+					// =======
+					// CK_0287
+					// =======
 					if (!(juldVar_status[n] == '9' || juldVar_status[n] == ' ')) {
 						notJuld_s++;
 						if (a_notJuld_s < 0) {
@@ -2377,28 +2147,44 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			boolean fail = false;
 			ArgoReferenceTable.ArgoReferenceEntry info;
+			// NVS table entry
+			SkosConcept tableEntry;
 
 			ErrorTracker depQC = new ErrorTracker();
 			ErrorTracker invQC = new ErrorTracker();
 			ErrorTracker missQC = new ErrorTracker();
 			ErrorTracker nan = new ErrorTracker();
+			ErrorTracker inf = new ErrorTracker();
 			ErrorTracker notMiss = new ErrorTracker();
 
 			for (int n = 0; n < nMeasure; n++) {
-				if (prm[n] == Float.NaN) {
+				// =======
+				// CK_0260
+				// =======
+				if (Float.isNaN(prm[n])) {
 					nan.increment(n);
+				}
+				if (Float.isInfinite(prm[n])) {
+					inf.increment(n);
 				}
 
 				if (prm_qc != null) {
-					info = ArgoReferenceTable.QC_FLAG.contains(prm_qc[n]);
-
-					if (prm_qc[n] == ' ' || info.isValid()) {
+					tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+							.get(String.valueOf(prm_qc[n]));
+					// =======
+					// CK_0261
+					// =======
+					if (prm_qc[n] == ' ' || tableEntry != null) {
 						// ..valid QC flag or " "
-
-						if (info.isDeprecated) {
+						// =======
+						// CK_0262
+						// =======
+						if (tableEntry != null && tableEntry.isDeprecated()) {
 							depQC.increment(n);
 						}
-
+						// =======
+						// CK_0263
+						// =======
 						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// ..data is missing - QC better be too
 							if (prm_qc[n] != '9' && prm_qc[n] != ' ') {
@@ -2406,6 +2192,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							}
 
 						} else {
+							// =======
+							// CK_0264
+							// =======
 							// ..data not missing - check QC value
 
 							if (prm_qc[n] == ' ' || prm_qc[n] == '9') {
@@ -2587,6 +2376,7 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker missAdj = new ErrorTracker();
 			nan.reset();
 			ErrorTracker nanErr = new ErrorTracker();
+			ErrorTracker infErr = new ErrorTracker();
 			ErrorTracker notMissAdj = new ErrorTracker();
 			ErrorTracker notMissAdjQc = new ErrorTracker();
 			ErrorTracker notMissErr = new ErrorTracker();
@@ -2596,26 +2386,49 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 			ErrorTracker rQcNotMiss = new ErrorTracker();
 
 			for (int n = 0; n < nMeasure; n++) {
-				if (prm_adj[n] == Float.NaN) {
+				// =======
+				// CK_0265
+				// =======
+				if (Float.isNaN(prm_adj[n])) {
 					nan.increment(n);
 				}
-
-				if (prm_adj_err[n] == Float.NaN) {
+				// =======
+				// CK_0267
+				// =======
+				if (Float.isNaN(prm_adj_err[n])) {
 					nanErr.increment(n);
+				}
+				// =======
+				// CK_0266
+				// =======
+				if (Float.isInfinite(prm_adj[n])) {
+					inf.increment(n);
+				}
+				// =======
+				// CK_0268
+				// =======
+				if (Float.isInfinite(prm_adj_err[n])) {
+					infErr.increment(n);
 				}
 
 				if (mode[n] == 'R') {
 
 					// ........... r-mode ............
-
+					// =======
+					// CK_0269
+					// =======
 					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 						rNotMiss.increment(n);
 					}
-
+					// =======
+					// CK_0270
+					// =======
 					if (prm_adj_qc[n] != ' ' && prm_adj_qc[n] != '0' && prm_adj_qc[n] != '9') {
 						rQcNotMiss.increment(n);
 					}
-
+					// =======
+					// CK_0271
+					// =======
 					if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 						rErrNotMiss.increment(n);
 					}
@@ -2628,9 +2441,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 					if (prm_adj_qc[n] != ' ') {
 
-						info = ArgoReferenceTable.QC_FLAG.contains(prm_adj_qc[n]);
-						if (info.isValid()) {
-							if (info.isDeprecated) {
+						tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+								.get(String.valueOf(prm_adj_qc[n]));
+						// =======
+						// CK_0272
+						// =======
+						if (tableEntry != null) {
+							// =======
+							// CK_0273
+							// =======
+							if (tableEntry.isDeprecated()) {
 								depQC.increment(n);
 							}
 
@@ -2639,6 +2459,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 						}
 					}
 
+					// =======
+					// CK_0274
+					// =======
 					// ..check special case of adj_qc = ' '
 					if (prm_qc[n] == ' ' || prm_adj_qc[n] == ' ') {
 						// ..one is "not measured", both must be
@@ -2646,6 +2469,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							incNotMeas.increment(n);
 
 						} else {
+							// =======
+							// CK_0275
+							// =======
 							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								notNotMeas.increment(n);
 							}
@@ -2657,16 +2483,24 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 						if (ArgoFileValidator.is_FillValue(fValue, prm[n])) {
 							// .....param is missing.....
-
+							// =======
+							// CK_0276
+							// =======
 							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
 								// ..param_adjusted is NOT missing - error
 								notMissAdj.increment(n);
 
 							}
+							// =======
+							// CK_0278
+							// =======
 							if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 								// ..param_adjusted_error is NOT missing - error
 								notMissErr.increment(n);
 							}
+							// =======
+							// CK_0277
+							// =======
 							if (prm_adj_qc[n] != '9') {
 								// ..param_adjusted_qc is NOT missing - error
 								notMissAdjQc.increment(n);
@@ -2676,33 +2510,41 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 							// .....param is NOT missing......
 
 							if (ArgoFileValidator.is_FillValue(fValue, prm_adj[n])) {
+								// =======
+								// CK_0279
+								// =======
 								// ..param_adj is missing - QC must be 4 or 9
 								if (prm_adj_qc[n] != '4' && prm_adj_qc[n] != '9') {
 									missAdj.increment(n);
 								}
-
+								// =======
+								// CK_0280
+								// =======
 								if (!ArgoFileValidator.is_FillValue(fValue, prm_adj_err[n])) {
 									errNotMiss.increment(n);
 								}
 
 							} else {
 								// ..param_adj is NOT missing
-
-								if (prm_adj_qc[n] == '4' || prm_adj_qc[n] == '9') {
-									if (mode[n] == 'D') {
-										adjNotMiss.increment(n);
-
-									} else { // ..mode == 'A'
-										if (prm_adj_qc[n] == '9') {
-											adjNotMiss.increment(n);
-										}
-									}
+								// =======
+								// CK_0281
+								// =======
+								if ((prm_adj_qc[n] == '4' && mode[n] == 'D') || prm_adj_qc[n] == '9') {
+									adjNotMiss.increment(n);
 
 								} else {
 									if (mode[n] == 'D') {
+										// =======
+										// CK_0282
+										// =======
 										if (is_FillValue(fValue, prm_adj_err[n])) {
 											errNotSetDmode.increment(n);
 										}
+
+										// ===================================================
+										// CHECK_0077 & CK_0080 (not implemented)
+										// ===================================================
+
 										// } else {
 										// //.. mode == 'A'
 
@@ -2762,6 +2604,12 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 			nanErr.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + "_ERROR: NaN at ", "measurements");
+
+			inf.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
+					varName + ": Inf at ", "measurements");
+
+			infErr.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
+					varName + "_ERROR: Inf at ", "measurements");
 
 			notMissAdj.addMessage(validationResult.getWarnings(), // will be.. formatErrors,
 					varName + ": Not FillValue where PARAM is FillValue at", "measurements");
@@ -2898,12 +2746,21 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker depCode = new ErrorTracker();
 		ErrorTracker invCode = new ErrorTracker();
 		ArgoReferenceTable.ArgoReferenceEntry info;
+		// NVS table entry
+		SkosConcept tableEntry;
 
 		for (int n = 0; n < nMeasure; n++) {
 			if (pos_qc[n] != ' ') {
-				info = ArgoReferenceTable.QC_FLAG.contains(pos_qc[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(pos_qc[n]));
+				// =======
+				// CK_0248
+				// =======
+				if (tableEntry != null) {
+					// =======
+					// CK_0249
+					// =======
+					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);
 					}
 
@@ -2926,9 +2783,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		for (int n = 0; n < nMeasure; n++) {
 			if (pos_acc[n] != ' ') {
-				info = ArgoReferenceTable.LOCATION_CLASS.contains(pos_acc[n]);
-				if (info.isValid()) {
-					if (info.isDeprecated) {
+				// =======
+				// CK_0250
+				// =======
+				tableEntry = ArgoNVSReferenceTable.POSITION_ACCURACY_TABLE.getConceptMembersByAltLabelMap()
+						.get(String.valueOf(pos_acc[n]));
+				if (tableEntry != null) {
+					// =======
+					// CK_0251
+					// =======
+					if (tableEntry.isDeprecated()) {
 						depCode.increment(n);
 					}
 
@@ -2947,6 +2811,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 		ErrorTracker notMissQC = new ErrorTracker();
 		ErrorTracker notMissPos = new ErrorTracker();
 		for (int n = 0; n < nMeasure; n++) {
+			// =======
+			// CK_0252
+			// =======
 			if (is_99_999_FillValue(lat[n]) || is_99_999_FillValue(lon[n])) {
 
 				// ..lat or lon is FillValue, QC better be missing or FillValue
@@ -2954,7 +2821,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				if (!(pos_qc[n] == '9' || pos_qc[n] == ' ')) {
 					notMissQC.increment(n);
 				}
-
+				// =======
+				// CK_0253
+				// =======
 			} else if (pos_qc[n] == '9' || pos_qc[n] == ' ') {
 
 				// ..QC is missing or FillValue, lat/lon is NOT FillValue
@@ -3025,10 +2894,15 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					last_empty = -1;
 				}
 
+				// =======
+				// CK_0254
+				// =======
 				// ..check if this <param> is legal
 				if (allowedParam.contains(param)) {
 					// ..<param> is allowed
-
+					// =======
+					// CK_0256
+					// =======
 					if (paramList.contains(param)) {
 						// ..this is a duplicate entry
 
@@ -3039,7 +2913,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 					} else {
 						log.debug("param #{}: '{}': accepted", paramNum, param);
 					}
-
+					// =======
+					// CK_0257
+					// =======
 					if (arFile.getFileSpec().isDeprecatedPhysicalParam(param)) {
 						// ..this is a deprecated parameter name
 
@@ -3060,11 +2936,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 
 		log.debug("paramList: " + paramList);
 
+		// =======
+		// CK_0257
+		// =======
 		// ..report errors and warnings
 		if (embeddedEmpty) {
 			validationResult.addWarning("TRAJECTORY_PARAMETERS: Empty entries in list" + "\n\tList: " + paramList);
 		}
-
+		// =======
+		// CK_0258
+		// =======
 		// ......check that all TRAJECTORY_PARAMETERS have <param> variable........
 		for (String p : paramList) {
 			if (p.length() == 0) {
@@ -3077,7 +2958,9 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				// fatalError = true;
 			}
 		}
-
+		// =======
+		// CK_0259
+		// =======
 		// ...check whether all <param> with data are in TRAJECTORY_PARAMETERS...
 		for (String p : allowedParam) {
 			if (!paramList.contains(p)) {
@@ -3313,12 +3196,16 @@ public class ArgoTrajectoryFileValidator extends ArgoFileValidator {
 				char juldIndex_status) {
 
 			checked[ndxIndex] = true;
-
+			// ===========
+			// CK_0284 2/2
+			// ===========
 			if (Math.abs(juld - juldIndex) > 1.e-6) {
 				// ..these don't match
 				incJuld.increment(ndx, ndxIndex);
 			}
-
+			// ===========
+			// CK_0285 2/2
+			// ===========
 			if (juld_status != juldIndex_status) {
 				// ..these don't match
 				incJuld_s.increment(ndx, ndxIndex);

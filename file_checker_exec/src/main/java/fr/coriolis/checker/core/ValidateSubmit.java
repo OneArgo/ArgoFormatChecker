@@ -2,7 +2,6 @@ package fr.coriolis.checker.core;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,6 +22,8 @@ import fr.coriolis.checker.exceptions.NotAnArgoFileException;
 import fr.coriolis.checker.exceptions.ValidateFileDataFailedException;
 import fr.coriolis.checker.exceptions.VerifyFileFormatFailedException;
 import fr.coriolis.checker.output.ResultsFile;
+import fr.coriolis.checker.specs.SpecIO;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
 import fr.coriolis.checker.validators.ArgoFileValidator;
 import fr.coriolis.checker.validators.ArgoMetadataFileValidator;
 import fr.coriolis.checker.validators.ArgoProfileFileValidator;
@@ -52,6 +53,7 @@ public class ValidateSubmit {
 	private static boolean doXml = true;
 
 	private static final String UNKNOWN_VERSION = "unknown";
+	private static final String NVS_DEFAULT_BASE_URL = "https://vocab.nerc.ac.uk/collection/";
 	private static String fcVersion;
 	private static String spVersion;
 
@@ -92,7 +94,8 @@ public class ValidateSubmit {
 		log.info("{}:  START", ClassName);
 		// .....extract the options from command-line arguments....
 		try {
-			Options options = Options.getInstance(args);
+			Options.init(args);
+			Options options = Options.getInstance();
 
 			doXml = options.isDoXml();
 			String dacName = options.getDacName();
@@ -107,8 +110,11 @@ public class ValidateSubmit {
 			// validate Mandatory arguments :
 			options.validateMandatoryArguments(); // System exit with error if no validated
 
+			// initiate SpecIO
+			SpecIO.init(options.isUseInternalSpecs(), options.getSpecDirName());
+
 			// .............load the spec version information..............
-			loadSpecVersionInfo(options.getSpecDirName());
+			loadSpecVersionInfo();
 
 			// ....................get list of input files.................
 			List<String> filesToProcess = getFilesToProcessList(options.getListFile(), options.getInFileList(), inDir);
@@ -199,6 +205,9 @@ public class ValidateSubmit {
 	 * @param filesToProcess
 	 */
 	private static void validateFiles(Options options, String dacName, List<String> filesToProcess) {
+		// initialize NVS tables :
+		initializeNVSTables(options);
+
 		// Loop through files list
 		for (String file : filesToProcess) {
 			// .... get file informations from options :
@@ -212,6 +221,7 @@ public class ValidateSubmit {
 
 			// ......open and process the input file.....
 			try {
+
 				// ..............open Argo file ....................
 				argo = openArgoFile(inFileName, options.getSpecDirName(), dacName);
 
@@ -234,7 +244,7 @@ public class ValidateSubmit {
 
 				if (doDataCheck) { // Full data check needs to be done
 					phase = "DATA-VALIDATION";
-					checkArgoFileData(dacName, options.isDoNulls(), options.isDoBatteryChecks());
+					checkArgoFileData(dacName, options.isDoNulls());
 				}
 
 				// ..................check file Name...................
@@ -268,6 +278,16 @@ public class ValidateSubmit {
 				log.debug("closing Results file");
 				handleResultsFileOperation(out, "close", "");
 			}
+		}
+	}
+
+	private static void initializeNVSTables(Options options) {
+		if (options.isUseOnlineNVS()) {
+			String nvsBaseUrl = System.getenv().getOrDefault("NVS_BASE_URL",
+					codeProp.getProperty("nvs.baseurl.default", NVS_DEFAULT_BASE_URL));
+			ArgoNVSReferenceTable.initializeFromInternet(nvsBaseUrl);
+		} else {
+			ArgoNVSReferenceTable.initialize();
 		}
 	}
 
@@ -371,7 +391,7 @@ public class ValidateSubmit {
 	 * @throws IOException
 	 * @throws ValidateFileDataFailedException
 	 */
-	private static void checkArgoFileData(String dacName, boolean doNulls, boolean doBatteryChecks)
+	private static void checkArgoFileData(String dacName, boolean doNulls)
 			throws IOException, ValidateFileDataFailedException {
 
 		// argoFileValidator must be in the right specialized validation class:
@@ -381,7 +401,7 @@ public class ValidateSubmit {
 
 			// Do metadata file validate data
 			boolean isValidateArgoMetadaFileDataCompleted = ((ArgoMetadataFileValidator) argoFileValidator)
-					.validateData(doNulls, doBatteryChecks);
+					.validateData(doNulls);
 			if (!isValidateArgoMetadaFileDataCompleted) {
 				// ..the validate process failed (not errors within the data)
 				log.error("ArgoMetadataFile.validate failed: " + ValidationResult.getMessage());
@@ -452,7 +472,6 @@ public class ValidateSubmit {
 		boolean doDataCheck = false;
 		if (formatPassed && !rudimentaryDateCheckDone) {
 			doDataCheck = true;
-
 			if (isDoFormatOnly) {
 				doDataCheck = false;
 				log.debug("data check SKIPPED (-format-only)");
@@ -667,9 +686,8 @@ public class ValidateSubmit {
 	 * 
 	 * @param specDirName : specifications directory path
 	 */
-	private static void loadSpecVersionInfo(String specDirName) {
-		try {
-			InputStream in = new FileInputStream(specDirName + File.separator + specPropFileName);
+	private static void loadSpecVersionInfo() {
+		try (InputStream in = SpecIO.getInstance().open(specPropFileName)) {
 
 			specProp = new Properties();
 			specProp.load(in);
@@ -687,7 +705,7 @@ public class ValidateSubmit {
 
 	public static void Help() {
 		stdout.println("\n" + "Purpose: Validates the files in a directory\n" + "\n" + "Usage: java  " + ClassName
-				+ " [options] dac-name spec-dir output-dir input-dir [file-names]\n" + "Options:\n"
+				+ " [options] dac-name [spec-dir] output-dir input-dir [file-names]\n" + "Options:\n"
 				+ "   -help | -H | -U   Help -- this message\n" + "   -no-name-check Do not check the file name\n"
 				+ "   -null-warn     Perform 'nulls-in-string' check (warning)\n"
 				+ "                  default: do NOT check for nulls\n"
@@ -703,8 +721,11 @@ public class ValidateSubmit {
 				+ "                  default: don't compute this information\n" + "\n"
 				+ "   -format-only-pre3.1  (default) Only perform format checks on files format pre-3.1\n"
 				+ "      ***deprecated - now the default - retained for backwards compatibility***\n" + "\n"
+				+ "   -internal-specs  Use specs files wich are included in the JAR archive.\n"
+				+ "                     With this option, spec-dir argument should not be provided.\n "
+				+ "   -online-nvs  Use directly up-to-date NVS from internet. NVS forlder in spec dir will therefore be ignored.\n"
 				+ "Arguments:\n" + "   dac-name       Name of DAC that owns the input files\n"
-				+ "   spec-dir       Directory path of specification files\n"
+				+ "   spec-dir       Directory path of specification files. Do not specify if -internal-specs is used\n"
 				+ "   output-dir     Directory path where results files will be placed\n"
 				+ "   input-dir      Directory path where input files reside\n"
 				+ "   file-names     (Optional) List of files names to process (see below)\n" + "\n" + "Input Files:\n"

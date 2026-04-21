@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 
 import fr.coriolis.checker.specs.ArgoFileSpecification;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
@@ -392,31 +394,49 @@ public class ArgoDataFile {
 		if (dacName.length > 0) {
 			dac = dacName[0];
 		}
-
-		if (dt.equals("Argo meta-data")) {
-			ft = FileType.METADATA;
-
-		} else if (dt.equals("Argo profile")) {
-			ft = FileType.PROFILE;
-
-		} else if (dt.equals("Argo trajectory")) {
-			ft = FileType.TRAJECTORY;
-
-		} else if (dt.equals("Argo technical data")) {
-			ft = FileType.TECHNICAL;
-
-		} else if (dt.equals("B-Argo profile")) {
-			ft = FileType.BIO_PROFILE;
-
-		} else if (dt.equals("B-Argo trajectory")) {
-			ft = FileType.BIO_TRAJECTORY;
-
+		SkosConcept dataTypeTableEntry = ArgoNVSReferenceTable.DATA_TYPE_TABLE.getConceptMembersByPrefLabelMap()
+				.get(dt);
+		// =======
+		// CK_0293
+		// =======
+		if (dataTypeTableEntry != null) {
+			if (dataTypeTableEntry.isDeprecated()) {
+				log.warn("TEMP WARNING: {}: {}: {}", dac, inFile,
+						"deprecated DATA_TYPE (temporarily allowed): '" + dt + "'");
+			}
 			/*
 			 * .................................................... ....these are exceptions
 			 * currently being allowed....
 			 * ....................................................
 			 */
+			// =======
+			// CK_0294
+			// =======
+			if (dataTypeTableEntry.getAltLabel().equals("META")) {
+				ft = FileType.METADATA;
+			} else if (dataTypeTableEntry.getAltLabel().equals("PROF")) {
+				ft = FileType.PROFILE;
 
+			} else if (dataTypeTableEntry.getAltLabel().equals("TRAJ")) {
+				ft = FileType.TRAJECTORY;
+
+			} else if (dataTypeTableEntry.getAltLabel().equals("TECH")) {
+				ft = FileType.TECHNICAL;
+
+			} else if (dataTypeTableEntry.getAltLabel().equals("BPROF")) {
+				ft = FileType.BIO_PROFILE;
+
+			} else if (dataTypeTableEntry.getAltLabel().equals("BTRAJ")) {
+				ft = FileType.BIO_TRAJECTORY;
+			} else {
+				log.info("Invalid DATA_TYPE: '" + dt + "'");
+				ft = FileType.UNKNOWN;
+				stderr.println(
+						"\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
+				System.exit(1);
+				// ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
+				return null;
+			}
 		} else if (dt.equals("ARGO profile")) {
 			// ################# TEMPORARY WARNING ################
 			/*
@@ -466,9 +486,7 @@ public class ArgoDataFile {
 		} else {
 			log.info("Invalid DATA_TYPE: '" + dt + "'");
 			ft = FileType.UNKNOWN;
-			stderr.println("\n\n******\n" + "****** PROGRAM ERROR: Unexpected file type.  TERMINATING.\n" + "******");
-			System.exit(1);
-			// ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
+			ValidationResult.lastMessage = new String("Invalid DATA_TYPE: '" + dt + "'");
 			return null;
 		}
 
@@ -559,7 +577,7 @@ public class ArgoDataFile {
 
 		// ..create the specification
 		try {
-			arFile.spec = openSpecification(fullSpec, specDir, arFile.fileType, arFile.format_version);
+			arFile.spec = openSpecification(fullSpec, arFile.fileType, arFile.format_version);
 		} catch (IOException e) {
 			if (e.getMessage().matches("cdlFileName.*does not exist")) {
 				ValidationResult.lastMessage = "File type / version not valid in the FileChecker: " + arFile.fileType
@@ -607,17 +625,16 @@ public class ArgoDataFile {
 	 *         False if the specification could not be opened
 	 * @throws IOException If an I/O error occurs
 	 */
-	public static ArgoFileSpecification openSpecification(boolean fullSpec, String specDir, FileType ft, String version)
+	public static ArgoFileSpecification openSpecification(boolean fullSpec, FileType ft, String version)
 			throws IOException {
 		log.debug("fullSpec = {}", fullSpec);
-		log.debug("specDir = '{}'", specDir);
 		log.debug("file type = {}", ft.specType);
 		log.debug("version = '{}'", version);
 
 		// ..could handle specialized "specs" by replacing "pure" with something else
 		// .. for example, when we were doing "merged" files, it was set to "merge"
 
-		String specType = specDir + ";" + ft.specType + ";" + version.trim() + ";" + "pure";
+		String specType = ft.specType + ";" + version.trim() + ";" + "pure";
 
 		// ..full-specs are cached (so they can be reused)
 		// ..full-spec will work as a template spec too
@@ -642,7 +659,7 @@ public class ArgoDataFile {
 		// ..build a specification for this file
 		ArgoFileSpecification s = null;
 		try {
-			s = new ArgoFileSpecification(fullSpec, specDir, ft, version);
+			s = new ArgoFileSpecification(fullSpec, ft, version);
 
 		} catch (IOException e) {
 			ValidationResult.lastMessage = "Failed in ArgoFileSpecification";

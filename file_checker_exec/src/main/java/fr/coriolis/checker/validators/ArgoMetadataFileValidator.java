@@ -1,10 +1,12 @@
 package fr.coriolis.checker.validators;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -19,7 +21,8 @@ import fr.coriolis.checker.core.ArgoDataFile;
 import fr.coriolis.checker.specs.ArgoConfigTechParam;
 import fr.coriolis.checker.specs.ArgoDate;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
-import fr.coriolis.checker.specs.ArgoReferenceTable.StringTable;
+import fr.coriolis.checker.tables.ArgoNVSReferenceTable;
+import fr.coriolis.checker.tables.SkosConcept;
 import ucar.ma2.ArrayChar;
 import ucar.nc2.Variable;
 
@@ -132,7 +135,7 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	 *         reason).
 	 * @throws IOException If an I/O error occurs
 	 */
-	public boolean validateData(boolean ckNulls, boolean... optionalChecks) throws IOException {
+	public boolean validateData(boolean ckNulls) throws IOException {
 		boolean basicsChecks = super.basicDataValidation(ckNulls);
 		if (!basicsChecks) {
 			return false;
@@ -148,10 +151,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validateOptionalParams();
 			validateConfigMission();
 			validateConfigParams();
+			validateBattery();
 
-			if ((optionalChecks.length > 0) && (optionalChecks[0] == true)) {
-				validateBattery();
-			}
 		}
 
 		return true;
@@ -159,7 +160,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 	private void validateOptionalParams() {
 		// PROGRAM_NAME - ref table 41
-		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME", ArgoReferenceTable.PROGRAM_NAME, true);
+		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME",
+				ArgoNVSReferenceTable.PROGRAM_NAME_TABLE.getConceptMembersByAltLabelMap(), true);
 	}
 
 	/**
@@ -223,6 +225,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		boolean haveLaunch = false;
 
 		if (launch.trim().length() > 0) {
+			// =======
+			// CK_0097
+			// =======
 			dateLaunch = ArgoDate.get(launch);
 			haveLaunch = true;
 
@@ -231,6 +236,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				haveLaunch = false;
 
 			} else {
+				// =======
+				// CK_0098
+				// =======
 				if (dateLaunch.before(earliestDate)) {
 					validationResult.addError("LAUNCH_DATE: '" + launch + "': Before earliest allowed date ('"
 							+ ArgoDate.format(earliestDate) + "')");
@@ -244,7 +252,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// ............start date checks:...........
 		// ..if set, must be valid
 		Date dateStart = null;
-
+		// =======
+		// CK_0099
+		// =======
 		if (start.trim().length() > 0) {
 			dateStart = ArgoDate.get(start);
 
@@ -256,7 +266,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// ............startup date checks:...........
 		// ..if set, within 3 days of launch date (W) and launch data set (W)
 		Date dateStartup = null;
-
+		// =======
+		// CK_0100
+		// =======
 		if (startup.trim().length() > 0) {
 			dateStartup = ArgoDate.get(startup);
 
@@ -271,17 +283,25 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 		if (end.trim().length() > 0) {
 			dateEnd = ArgoDate.get(end);
-
+			// =======
+			// CK_0101
+			// =======
 			if (dateEnd == null) {
 				validationResult.addError("END_MISSION_DATE: '" + end + "': Invalid date");
 
 			} else {
 				if (haveLaunch) {
+					// =======
+					// CK_0102
+					// =======
 					if (dateEnd.before(dateLaunch)) {
 						validationResult
-								.addError("END_MISSION_DATE: '" + start + "': Before LAUNCH_DATE ('" + launch + "')");
+								.addError("END_MISSION_DATE: '" + end + "': Before LAUNCH_DATE ('" + launch + "')");
 					}
 				} else {
+					// =======
+					// CK_0103
+					// =======
 					validationResult.addWarning("END_MISSION_DATE: Set. LAUNCH_DATE missing");
 				}
 			}
@@ -316,6 +336,13 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		ArgoReferenceTable.ArgoReferenceEntry info;
 		String name;
 		String str;
+
+		// get NVS tables :
+//		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+//		SkosCollection positionningSystemTable = ArgoNVSReferenceTable.getNvsTableByName("POSITIONING_SYSTEM");
+//		SkosCollection transSystemTable = ArgoNVSReferenceTable.getNvsTableByName("TRANS_SYSTEM");
+
+		SkosConcept tableEntry;
 
 		// ...........single valued variables..............
 
@@ -371,8 +398,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
 
-		if (!(info = ArgoReferenceTable.QC_FLAG.contains(ch)).isActive) {
-			validationResult.addWarning(name + ": '" + ch + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (tableEntry == null) {
+			validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		// ..PARAMETER --> see below
@@ -395,8 +423,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
 
-		if (!(info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str)).isActive) {
-			validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.POSITION_ACCURACY_TABLE.getConceptMembersByAltLabelMap().get(str);
+		if (tableEntry == null) {
+			validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "PTT"; // ..not empty
@@ -416,17 +445,17 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "START_DATE_QC"; // ..valid ref table 2 value
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-
-		if (!(info = ArgoReferenceTable.QC_FLAG.contains(ch)).isActive) {
-			validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (tableEntry == null) {
+			validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "TRANS_SYSTEM"; // ..ref table 10
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-
-		if (!(info = ArgoReferenceTable.TRANS_SYSTEM.contains(str)).isActive) {
-			validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.TRANS_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
+		if (tableEntry == null) {
+			validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		name = "TRANS_SYSTEM_ID"; // ..not empty
@@ -579,48 +608,48 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String name;
 		String str;
 
+		// get nvs Tables :
+//		SkosCollection qcFlagsTable = ArgoNVSReferenceTable.getNvsTableByName("DM_QC_FLAG");
+//		SkosCollection wmoInstTypeTable = ArgoNVSReferenceTable.getNvsTableByName("ARGO_WMO_INST_TYPE");
+//		SkosCollection positioningSystemTable = ArgoNVSReferenceTable.getNvsTableByName("POSITIONING_SYSTEM");
+//		SkosCollection transSystemTable = ArgoNVSReferenceTable.getNvsTableByName("TRANS_SYSTEM");
+
+		SkosConcept tableEntry;
+
 		// ...........single valued variables..............
+		// =======
+		// CK_0104
+		// =======
+		super.checkStrVarEmpty("CONTROLLER_BOARD_SERIAL_NO_PRIMARY");
 
-		name = "CONTROLLER_BOARD_SERIAL_NO_PRIMARY"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0105
+		// =======
+		super.checkStrVarEmpty("CONTROLLER_BOARD_TYPE_PRIMARY");
 
-		name = "CONTROLLER_BOARD_TYPE_PRIMARY"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
-
-		name = "DAC_FORMAT_ID"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0106
+		// =======
+		super.checkStrVarEmpty("DAC_FORMAT_ID");
 
 		// DATA_CENTRE
 		super.validateDataCentre(dac);
 
-		name = "FIRMWARE_VERSION"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0107
+		// =======
+		super.checkStrVarEmpty("FIRMWARE_VERSION");
 
-		name = "FLOAT_SERIAL_NO"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0046
+		// =======
+		super.checkStrVarEmpty("FLOAT_SERIAL_NO");
 
 		// ..LAUNCH_DATE --> checked elsewhere
 
+		// =======
+		// CK_0108
+		// =======
 		name = "LAUNCH_LATITUDE"; // ..on the earth
 		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
@@ -629,6 +658,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": " + dVal + ": Invalid");
 		}
 
+		// =======
+		// CK_0109
+		// =======
 		name = "LAUNCH_LONGITUDE"; // ..on the earth
 		dVal = arFile.readDouble(name);
 		log.debug("{}: {}", name, dVal);
@@ -637,48 +669,57 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validationResult.addError(name + ": " + dVal + ": Invalid");
 		}
 
-		name = "LAUNCH_QC"; // ..ref table 2
+		name = "LAUNCH_QC"; // ..ref table NVS RD2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-
-		if ((info = ArgoReferenceTable.QC_FLAG.contains(ch)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + ch + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				// =======
+				// CK_0111
+				// =======
+				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + ch + "' Status: " + info.message);
+			// =======
+			// CK_0110
+			// =======
+			validationResult.addError(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
-
-		name = "MANUAL_VERSION"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0112
+		// =======
+		super.checkStrVarEmpty("MANUAL_VERSION");
 
 		// ..PARAMETER --> see below
 
-		name = "PI_NAME"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0113
+		// =======
+		super.validatePINAME();
 
 		name = "PLATFORM_FAMILY"; // ..ref table 22
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-
-		if ((info = ArgoReferenceTable.PLATFORM_FAMILY.contains(str)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.PLATFORM_FAMILY_TABLE.getConceptMembersByAltLabelMap().get(str);
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				// =======
+				// CK_0115
+				// =======
+				validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+			// =======
+			// CK_0114
+			// =======
+			validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
-
+		// =======
+		// CK_0116
+		// =======
 		name = "PLATFORM_NUMBER"; // ..valid wmo id
 		str = arFile.readString(name).trim();
 		if (!super.validatePlatfomNumber(str)) {
@@ -690,16 +731,25 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String plfmMakerName = "PLATFORM_MAKER"; // ..ref table 24
 		String plfmMaker = arFile.readString(plfmMakerName).trim();
 		log.debug("{}: '{}'", plfmMakerName, plfmMaker);
-
-		if ((info = ArgoReferenceTable.PLATFORM_MAKER.contains(plfmMaker)).isValid()) {
+		SkosConcept plfmMakerTableEntry = ArgoNVSReferenceTable.PLATFORM_MAKER_TABLE.getConceptMembersByAltLabelMap()
+				.get(plfmMaker);
+		if (plfmMakerTableEntry != null) {
 			pmkrValid = true;
 
-			if (info.isDeprecated) {
-				validationResult.addWarning(plfmMakerName + ": '" + plfmMaker + "' Status: " + info.message);
+			if (plfmMakerTableEntry.isDeprecated()) {
+				// =======
+				// CK_0118
+				// =======
+				validationResult
+						.addWarning(plfmMakerName + ": '" + plfmMaker + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(plfmMakerName + ": '" + plfmMaker + "' Status: " + info.message);
+			// =======
+			// CK_0117
+			// =======
+			validationResult
+					.addError(plfmMakerName + ": '" + plfmMaker + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
 		boolean typValid = false;
@@ -707,21 +757,33 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String plfmTypeName = "PLATFORM_TYPE"; // ..ref table 23
 		String plfmType = arFile.readString(plfmTypeName).trim();
 		log.debug("{}: '{}'", plfmTypeName, plfmType);
-
-		if ((info = ArgoReferenceTable.PLATFORM_TYPE.contains(plfmType)).isValid()) {
+		SkosConcept pltmTypeTableEntry = ArgoNVSReferenceTable.PLATFORM_TYPE_TABLE.getConceptMembersByAltLabelMap()
+				.get(plfmType);
+		if (pltmTypeTableEntry != null) {
 			typValid = true;
 
-			if (info.isDeprecated) {
-				validationResult.addWarning(plfmTypeName + ": '" + plfmType + "' Status: " + info.message);
+			if (pltmTypeTableEntry.isDeprecated()) {
+				// =======
+				// CK_0120
+				// =======
+				validationResult
+						.addWarning(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(plfmTypeName + ": '" + plfmType + "' Status: " + info.message);
+			// =======
+			// CK_0119
+			// =======
+			validationResult
+					.addError(plfmTypeName + ": '" + plfmType + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
-
+		// =======
+		// CK_0166
+		// =======
 		if (pmkrValid && typValid) {
 			if (!plfmType.equals("FLOAT")) {
-				if (!ArgoReferenceTable.PLATFORM_TYPExPLATFORM_MAKER.xrefContains(plfmType, plfmMaker)) {
+
+				if (!pltmTypeTableEntry.checkRelatedReference(plfmMakerTableEntry.getId())) {
 					validationResult.addError(plfmTypeName + "/" + plfmMakerName + ": Inconsistent: '" + plfmType
 							+ "'/'" + plfmMaker + "'");
 					log.debug("{}/{} xref inconsistent: plfmType, plfmMaker = '{}', '{}'", plfmTypeName, plfmMakerName,
@@ -736,13 +798,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		// ..POSITIONING_SYSTEM --> see per-positioning_system below
 		// ..PREDEPLOYMENT_CALIB_COEFFICIENT --> see per-param below
 		// ..PREDEPLOYMENT_CALIB_EQUATION --> see per-param below
-
-		name = "PTT";
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0121
+		// =======
+		super.checkStrVarEmpty("PTT");
 
 		// ..SENSOR --> see per-sensor below
 		// ..SENSOR_MAKER --> see per-sensor below
@@ -752,22 +811,26 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "START_DATE_QC"; // ..ref table 2
 		ch = getChar(name);
 		log.debug("{}: '{}'", name, ch);
-
-		if ((info = ArgoReferenceTable.QC_FLAG.contains(ch)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(name + ": '" + ch + "' Status: " + info.message);
+		tableEntry = ArgoNVSReferenceTable.DM_QC_FLAG_TABLE.getConceptMembersByAltLabelMap().get(String.valueOf(ch));
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				// =======
+				// CK_0123
+				// =======
+				validationResult.addWarning(name + ": '" + ch + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 
 		} else {
-			validationResult.addError(name + ": '" + ch + "' Status: " + info.message);
+			// =======
+			// CK_0122
+			// =======
+			validationResult.addError(name + ": '" + ch + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 		}
 
-		name = "STANDARD_FORMAT_ID"; // ..not empty
-		str = arFile.readString(name).trim();
-		log.debug("{}: '{}'", name, str);
-		if (str.length() <= 0) {
-			validationResult.addError(name + ": Empty");
-		}
+		// =======
+		// CK_0124
+		// =======
+		super.checkStrVarEmpty("STANDARD_FORMAT_ID");
 
 		// ..TRANS_FREQUENCY \
 		// ..TRANS_SYSTEM --> see per-trans_sys below
@@ -778,27 +841,41 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		name = "WMO_INST_TYPE"; // ..ref table 8
 		str = arFile.readString(name).trim();
 		log.debug("{}: '{}'", name, str);
-		try {
-			int N = Integer.valueOf(str);
 
-			if ((info = ArgoReferenceTable.WMO_INST_TYPE.contains(N)).isValid()) {
+		SkosConcept wmoInstTypetableEntry = ArgoNVSReferenceTable.ARGO_WMO_INST_TYPE_TABLE
+				.getConceptMembersByAltLabelMap().get(str);
+		try {
+			// =======
+			// CK_0125
+			// =======
+			Integer.valueOf(str); // check if can be converted to integer
+			if (wmoInstTypetableEntry != null) {
 				wmoValid = true;
 
-				if (info.isDeprecated) {
-					validationResult.addWarning(name + ": '" + str + "' Status: " + info.message);
+				if (wmoInstTypetableEntry.isDeprecated()) {
+					// =======
+					// CK_0127
+					// =======
+					validationResult.addWarning(name + ": '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 
 			} else {
-				validationResult.addError(name + ": '" + str + "' Status: " + info.message);
+				// =======
+				// CK_0126
+				// =======
+				validationResult.addError(name + ": '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 
 		} catch (Exception e) {
 			validationResult.addError(name + ": '" + str + "' Invalid. Must be integer.");
 		}
 
+		// =======
+		// CK_0167
+		// =======
 		if (wmoValid && typValid) {
 			if (!plfmType.equals("FLOAT")) {
-				if (!ArgoReferenceTable.PLATFORM_TYPExWMO_INST.xrefContains(plfmType, str)) {
+				if (!pltmTypeTableEntry.checkNarowerReference(wmoInstTypetableEntry.getId())) {
 					validationResult
 							.addError(plfmTypeName + "/" + name + ": Inconsistent: '" + plfmType + "'/'" + str + "'");
 					log.debug("{}/{} xref inconsistent: plfmType, wmo = '{}', '{}'", plfmTypeName, name, plfmType, str);
@@ -820,20 +897,28 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
+			// =======
+			// CK_0128
+			// =======
 			if (!arFile.getFileSpec().isPhysicalParamName(str)) {
 				validationResult.addError(name + "[" + (n + 1) + "]: '" + str + "': Invalid");
 			}
 		}
 		// check unicity in PARAMETER entries :
+		// =======
+		// CK_0129
+		// =======
 		Set<String> duplicateParameters = checkForDuplicate(paramVar);
 		if (duplicateParameters.size() > 0) {
 			validationResult.addWarning(
 					"PARAMETER variable contains duplicate values: [" + String.join(", ", duplicateParameters) + "]");
 		}
 
+		// =======
+		// CK_0130
+		// =======
 		name = "PARAMETER_UNITS"; // ..not empty
 		paramVar = arFile.readStringArr(name);
-
 		for (int n = 0; n < nParam; n++) {
 			str = paramVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
@@ -842,6 +927,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 
+		// =======
+		// CK_0131
+		// =======
 		name = "PARAMETER_SENSOR"; // ..not empty
 		paramVar = arFile.readStringArr(name);
 
@@ -853,6 +941,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 
+		// =======
+		// CK_0132
+		// =======
 		name = "PREDEPLOYMENT_CALIB_COEFFICIENT"; // ..not empty
 		paramVar = arFile.readStringArr(name);
 
@@ -865,6 +956,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			}
 		}
 
+		// =======
+		// CK_0133
+		// =======
 		name = "PREDEPLOYMENT_CALIB_EQUATION"; // ..not empty
 		paramVar = arFile.readStringArr(name);
 
@@ -891,62 +985,85 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		String[] sensorModel = arFile.readStringArr(sensorModelName);
 
 		for (int n = 0; n < nSensor; n++) {
-			ArgoReferenceTable.ArgoReferenceEntry mdlInfo;
-			ArgoReferenceTable.ArgoReferenceEntry mkrInfo;
-			ArgoReferenceTable.ArgoReferenceEntry snsrInfo;
+			SkosConcept sensorModelTableEntry;
+			SkosConcept sensorTableEntry;
+			SkosConcept sensorMakerTableEntry;
 
 			// ..check SENSOR
+			// =================
+			// CK_0134 & CK_0135
+			// =================
 			String snsr = sensor[n].trim();
-			snsrInfo = ArgoReferenceTable.SENSOR.contains(snsr);
-			boolean snsrValid = checkParameterValueAgainstRefTable(sensorName + "[" + (n + 1) + "]", snsr,
-					ArgoReferenceTable.SENSOR, false);
+			String normalizedSensorName = normalizeSensorName(snsr);
+			boolean snsrValid = checkParameterValueAgainstRefTable(sensorName + "[" + (n + 1) + "]",
+					normalizedSensorName, ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap(), false);
 
 			// ..check SENSOR_MAKER
+			// =================
+			// CK_0136 & CK_0137
+			// =================
 			String snsrMaker = sensorMaker[n].trim();
-			mkrInfo = ArgoReferenceTable.SENSOR_MAKER.contains(snsrMaker);
 			boolean smkrValid = checkParameterValueAgainstRefTable(sensorMakerName + "[" + (n + 1) + "]", snsrMaker,
-					ArgoReferenceTable.SENSOR_MAKER, false);
+					ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap(), false);
 			log.debug(sensorMakerName + "[{}]: '{}'", n, snsrMaker);
 
 			// ..check SENSOR_MODEL
+			// =================
+			// CK_0138 & CK_0139
+			// =================
 			String snsrModel = sensorModel[n].trim();
-			mdlInfo = ArgoReferenceTable.SENSOR_MODEL.contains(snsrModel);
 			boolean mdlValid = checkParameterValueAgainstRefTable(sensorModelName + "[" + (n + 1) + "]", snsrModel,
-					ArgoReferenceTable.SENSOR_MODEL, false);
+					ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap(), false);
 
-			// ..cross-reference SENSOR_MODEL / SENSOR_MAKER
+			// ..cross-reference SENSOR_MODEL R27 / SENSOR_MAKER R26
+			// =======
+			// CK_0164
+			// =======
 			if (smkrValid && mdlValid) {
+				sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
+						.get(snsrModel);
+				sensorMakerTableEntry = ArgoNVSReferenceTable.SENSOR_MAKER_TABLE.getConceptMembersByAltLabelMap()
+						.get(snsrMaker);
 				if (!snsrModel.equals("UNKNOWN")) {
-					String mkr = mkrInfo.getColumn(1);
-					String mdl = mdlInfo.getColumn(1);
 
-					if (!ArgoReferenceTable.SENSOR_MODELxSENSOR_MAKER.xrefContains(mdl, mkr)) {
+					if (!sensorModelTableEntry.checkBroaderReference(sensorMakerTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorMakerName + "[" + (n + 1) + "]: "
 								+ "Inconsistent: '" + snsrModel + "'/'" + snsrMaker + "'");
-						log.debug("SENSOR_MODEL/SENSOR_MAKER xref inconsistent: mdl, mkr = '{}', '{}'", mdl, mkr);
+						log.debug("SENSOR_MODEL/SENSOR_MAKER xref inconsistent: mdl, mkr = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorMakerTableEntry.getAltLabel());
 					} else {
-						log.debug("SENSOR_MODEL/SENSOR_MAKER xref valid: mdl, mkr = '{}', '{}'", mdl, mkr);
+						log.debug("SENSOR_MODEL/SENSOR_MAKER xref valid: mdl, mkr = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorMakerTableEntry.getAltLabel());
 					}
 				}
 			}
 
-			// ..cross-reference SENSOR_MODEL / SENSOR
+			// ..cross-reference SENSOR_MODEL R27 / SENSOR R25
+			// =======
+			// CK_0165
+			// =======
 			if (snsrValid && mdlValid) {
+				sensorModelTableEntry = ArgoNVSReferenceTable.SENSOR_MODEL_TABLE.getConceptMembersByAltLabelMap()
+						.get(snsrModel);
+				sensorTableEntry = ArgoNVSReferenceTable.SENSOR_TABLE.getConceptMembersByAltLabelMap()
+						.get(normalizedSensorName);
 				if (!snsrModel.equals("UNKNOWN")) {
-					String sn = snsrInfo.getColumn(1);
-					String mdl = mdlInfo.getColumn(1);
-
-					if (!ArgoReferenceTable.SENSOR_MODELxSENSOR.xrefContains(mdl, sn)) {
+					if (!sensorModelTableEntry.checkRelatedReference(sensorTableEntry.getId())) {
 						validationResult.addError(sensorModelName + "/" + sensorName + "[" + (n + 1) + "]: "
 								+ "Inconsistent: '" + snsrModel + "'/'" + snsr + "'");
-						log.debug("SENSOR_MODEL/SENSOR xref inconsistent: mdl, sn = '{}', '{}'", mdl, sn);
+						log.debug("SENSOR_MODEL/SENSOR xref inconsistent: mdl, sn = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorTableEntry.getAltLabel());
 					} else {
-						log.debug("SENSOR_MODEL/SENSOR xref valid: mdl, sn = '{}', '{}'", mdl, sn);
+						log.debug("SENSOR_MODEL/SENSOR xref valid: mdl, sn = '{}', '{}'",
+								sensorModelTableEntry.getAltLabel(), sensorTableEntry.getAltLabel());
 					}
 				}
 			}
 		}
 		// check unicity in SENSOR entries :
+		// =======
+		// CK_0140
+		// =======
 		Set<String> duplicateSensors = checkForDuplicate(sensor);
 		if (duplicateSensors.size() > 0) {
 			validationResult.addWarning(
@@ -964,13 +1081,21 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		for (int n = 0; n < nPosit; n++) {
 			str = positVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
-
-			if ((info = ArgoReferenceTable.POSITIONING_SYSTEM.contains(str)).isValid()) {
-				if (info.isDeprecated) {
-					validationResult.addWarning(name + "[" + (n + 1) + "]: '" + str + "' Status: " + info.message);
+			tableEntry = ArgoNVSReferenceTable.POSITIONING_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
+			if (tableEntry != null) {
+				if (tableEntry.isDeprecated()) {
+					// =======
+					// CK_0142
+					// =======
+					validationResult.addWarning(
+							name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 			} else {
-				validationResult.addError(name + "[" + (n + 1) + "]: '" + str + "' Status: " + info.message);
+				// =======
+				// CK_0141
+				// =======
+				validationResult.addError(
+						name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 		}
 
@@ -985,16 +1110,27 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		for (int n = 0; n < nTrans; n++) {
 			str = transVar[n].trim();
 			log.debug(name + "[{}]: '{}'", n, str);
-
-			if ((info = ArgoReferenceTable.TRANS_SYSTEM.contains(str)).isValid()) {
-				if (info.isDeprecated) {
-					validationResult.addWarning(name + "[" + (n + 1) + "]: '" + str + "' Status: " + info.message);
+			tableEntry = ArgoNVSReferenceTable.TRANS_SYSTEM_TABLE.getConceptMembersByAltLabelMap().get(str);
+			if (tableEntry != null) {
+				if (tableEntry.isDeprecated()) {
+					// =======
+					// CK_0144
+					// =======
+					validationResult.addWarning(
+							name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 				}
 			} else {
-				validationResult.addError(name + "[" + (n + 1) + "]: '" + str + "' Status: " + info.message);
+				// =======
+				// CK_0143
+				// =======
+				validationResult.addError(
+						name + "[" + (n + 1) + "]: '" + str + "' Status: " + SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			}
 		}
 
+		// =======
+		// CK_0145
+		// =======
 		name = "TRANS_SYSTEM_ID"; // ..not empty
 		transVar = arFile.readStringArr(name);
 
@@ -1010,19 +1146,25 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	} // ..end validateMandatory_v3
 
 	private boolean checkParameterValueAgainstRefTable(String parameterName, String parameterValue,
-			StringTable refTable, boolean warningOnly) {
+			Map<String, SkosConcept> refTable, boolean warningOnly) {
 		ArgoReferenceTable.ArgoReferenceEntry info;
 
 		log.debug("{}: '{}'", parameterName, parameterValue);
-		if ((info = refTable.contains(parameterValue)).isValid()) {
-			if (info.isDeprecated) {
-				validationResult.addWarning(parameterName + ": '" + parameterValue + "' Status: " + info.message);
+
+		SkosConcept tableEntry = refTable.get(parameterValue);
+
+		if (tableEntry != null) {
+			if (tableEntry.isDeprecated()) {
+				validationResult.addWarning(
+						parameterName + ": '" + parameterValue + "' Status: " + SkosConcept.DEPRECATED_CONCEPT);
 			}
 			return true;
 
 		} else {
-			String resultMessage = parameterName + ": '" + parameterValue + "' Status: " + info.message
-					+ " (not in reference table)";
+			String resultMessage = parameterName + ": '" + parameterValue + "' Status: "
+					+ SkosConcept.INVALID_ALTLABEL_MESSAGE + " (not in reference table)";
+//			validationResult.addError(sensorMakerName + "[" + (n + 1) + "]: '" + snsrMaker + "' Status: "
+//					+ SkosConcept.INVALID_ALTLABEL_MESSAGE);
 			if (warningOnly) {
 				validationResult.addWarning(resultMessage);
 			} else {
@@ -1033,14 +1175,16 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		}
 	}
 
-	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, StringTable refTable,
+	private boolean checkOptionalParameterValueAgainstRefTable(String parameterName, Map<String, SkosConcept> refTable,
 			boolean warningOnly) {
 
 		Variable dataVar = arFile.getNcReader().findVariable(parameterName);
 		if (dataVar != null) {
 			String parameterValue = arFile.readString(parameterName).trim();
-			return checkParameterValueAgainstRefTable(parameterName, parameterValue, refTable, warningOnly);
+
+			checkParameterValueAgainstRefTable(parameterName, parameterValue, refTable, warningOnly);
 		}
+
 		return true;
 	}
 
@@ -1085,14 +1229,214 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	public void validateBattery() throws IOException {
 		log.debug(".....validateBattery.....");
 
-		// .........battery_type............
+		// .....BATTERY_TYPE.....
+		List<SkosConcept> typesTablesEntries = checkBatteryType();
+
+		// .....BATTERY_PACKS.....
+		List<SkosConcept> packTypesTablesEntries = checkBatteryPacks();
+
+		// ............compare TYPES and PACKS............
+		crossCheckBatteryPacksAndBatteryType(typesTablesEntries, packTypesTablesEntries);
+
+	}// ..end validateBattery
+
+	private void crossCheckBatteryPacksAndBatteryType(List<SkosConcept> typesTablesEntries,
+			List<SkosConcept> packTypesTablesEntries) {
+
+		int nPacks = packTypesTablesEntries.size();
+		int nTypes = typesTablesEntries.size();
+
+		if (nPacks >= 0) {
+			// =======
+			// CK_0157
+			// =======
+			// same number of entries
+			if (nTypes != nPacks) {
+				String err = String.format("Number of BATTERY_TYPES {%d} != number of BATTERY_PACKS {%d}", nTypes,
+						nPacks);
+				// validationResult.addError(err);
+
+				// ################# TEMPORARY WARNING ################
+				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+				log.warn("TEMP WARNING: {%s}: {%s}: {%s}", arFile.getDacName(), arFile.getFileName(), err);
+
+				log.debug("number of types != number of packs => {%d} != {%d}", nTypes, nPacks);
+			} else {
+				checkBatteryTypesConsistency(typesTablesEntries, packTypesTablesEntries);
+			}
+
+		} // ..end if nPacks >=0
+
+//		if (nPacks >= 0) {
+//
+//			if (nTypes != nPacks) {
+//				String err = String.format("Number of BATTERY_TYPES {%d} != number of BATTERY_PACKS {%d}", nTypes,
+//						nPacks);
+//				// validationResult.addError(err);
+//
+//				// ################# TEMPORARY WARNING ################
+//				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//				log.warn("TEMP WARNING: {%s}: {%s}: {%s}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//				log.debug("number of types != number of packs => {%d} != {%d}", nTypes, nPacks);
+//			}
+//
+//		} // ..end if nPacks >= 0
+	}
+
+	private void checkBatteryTypesConsistency(List<SkosConcept> typesTablesEntries,
+			List<SkosConcept> packTypesTablesEntries) {
+		// =======
+		// CK_0158
+		// =======
+		// same number of entries, for each entries, same concept should be found for
+		// "Battery"
+		for (int i = 0; i < packTypesTablesEntries.size(); i++) {
+			SkosConcept batteryTypeType = typesTablesEntries.get(i);
+			SkosConcept batteryPackType = packTypesTablesEntries.get(i);
+			if (batteryPackType != null && batteryTypeType != null) {
+				if (!batteryPackType.getId().equals(batteryTypeType.getId())) {
+					// not same type : inconsistencies
+					String err = String.format(
+							"Inconsistent battery's type in BATTERY_TYPE[%d] and BATTERY_PACKS[%d]. BATTERY_TYPE's type ={%s}, BATTERY_PACKS's type = {%s}",
+							i + 1, i + 1, batteryTypeType.getAltLabel(), batteryPackType.getPrefLabel());
+					validationResult.addWarning(err);
+				}
+			}
+		}
+	}
+
+	private List<SkosConcept> checkBatteryPacks() {
+		String str;
+		int nPacks = -1;
+		List<SkosConcept> typesTablesEntries = new ArrayList<>();
+
+		str = arFile.readString("BATTERY_PACKS");
+
+		log.debug("BATTERY_PACKS: '{}'", str);
+
+		if (str.trim().length() <= 0) {
+			// ..empty - allowed - optional variable
+			log.debug("BATTERY_PACKS: empty (allowed)");
+
+		} else {
+
+			// ..not empty
+			// ..split multiple strings based on "+"
+
+			nPacks = 0;
+			for (String substr : str.split("\\+")) {
+				nPacks++;
+				log.debug("battery_packs substring: '{}'", substr);
+
+				if (substr.trim().equals("U")) {
+					typesTablesEntries.add(null);
+					// =======
+					// CK_0152
+					// =======
+					log.debug("battery_packs substring == U (undefined)");
+
+				} else {
+					// ..not undefined -- check pattern
+
+					Matcher m = pBatteryPacks.matcher(substr);
+
+					if (m.matches()) {
+
+						String num = m.group("numofpacks");
+						String style = m.group("style");
+						String type = m.group("type");
+
+						log.debug("...matched pattern: num, style, type = '{}', '{}', '{}", num, style, type);
+
+						// =======
+						// CK_0153
+						// =======
+						SkosConcept styleTableEntry = ArgoNVSReferenceTable.BATTERY_SIZE_TABLE
+								.getConceptMembersByAltLabelMap().get(style);
+						if (styleTableEntry != null) {
+							if (styleTableEntry.isDeprecated()) {
+								// =======
+								// CK_0154
+								// =======
+								String err = String.format("BATTERY_PACKS[%d]: Deprecated style of battery: '{%s}'",
+										nPacks, style);
+								validationResult.addWarning(err);
+							} else {
+								log.debug("valid style");
+							}
+						} else {
+							String err = String.format("BATTERY_PACKS[%d]: Invalid style of battery: '{%s}'", nPacks,
+									style);
+							// validationResult.addError(err);
+
+							// ################# TEMPORARY WARNING ################
+							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+							log.debug("invalid style");
+						}
+
+						// =======
+						// CK_0155
+						// =======
+						// BATTERY_TYPE pref label
+						SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
+								.getConceptMembersByPrefLabelMap().get(type);
+						typesTablesEntries.add(typeTableEntry);
+						if (typeTableEntry != null) {
+							if (typeTableEntry.isDeprecated()) {
+								// =======
+								// CK_0156
+								// =======
+								String err = String.format("BATTERY_PACKS[%d]: Deprecated type: '{%s}'", nPacks, type);
+								validationResult.addWarning(err);
+							} else {
+								log.debug("valid type");
+							}
+						} else {
+							String err = String.format("BATTERY_PACKS[%d]: Invalid type: '{%s}'", nPacks, type);
+							// validationResult.addError(err);
+
+							// ################# TEMPORARY WARNING ################
+							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+							log.debug("invalid type");
+						}
+
+					} else {
+						typesTablesEntries.add(null);
+						// ..did not match the expected pattern
+						String err = String.format(
+								"BATTERY_PACKS[%d]: Does not match template 'xStyle type (or U): '%s'", nPacks,
+								substr.trim());
+						// validationResult.addError(err);
+
+						// ################# TEMPORARY WARNING ################
+						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+						log.debug("...does not match template");
+					}
+				} // ..end if undefined
+			} // ..end for (battery_packs substrings)
+		} // ..endif BATTERY_PACKS is filled
+		return typesTablesEntries;
+	}
+
+	private List<SkosConcept> checkBatteryType() {
 		int nTypes = 0;
+		List<SkosConcept> typesTablesEntries = new ArrayList<>();
 
 		String str = arFile.readString("BATTERY_TYPE");
 		log.debug("BATTERY_TYPE: '{}'", str);
 
-		if (str.length() <= 0) {
-			validationResult.addError("BATTERY_TYPE: Empty");
+		if (str.trim().length() <= 0) {
+			// =======
+			// CK_0146
+			// =======
+			validationResult.addWarning("BATTERY_TYPE: Empty.    *** WILL BECOME AN ERROR ***");
 
 		} else {
 
@@ -1112,7 +1456,24 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 					log.debug("...matched pattern: manu, type, volt = '{}', '{}', '{}'", manu, type, volt);
 
-					if (!ArgoReferenceTable.BATTERY_TYPE_manufacturer.contains(manu)) {
+					// =======
+					// CK_0148
+					// =======
+					SkosConcept manuTableEntry = ArgoNVSReferenceTable.BATTERY_MAKER_TABLE
+							.getConceptMembersByAltLabelMap().get(manu);
+
+					if (manuTableEntry != null) {
+						if (manuTableEntry.isDeprecated()) {
+							// =======
+							// CK_0149
+							// =======
+							String err = String.format("BATTERY_TYPE[%d]: Deprecated manufacturer: '{%s}'", nTypes,
+									manu);
+							validationResult.addWarning(err);
+						} else {
+							log.debug("valid manufacturer");
+						}
+					} else {
 						String err = String.format("BATTERY_TYPE[%d]: Invalid manufacturer: '{%s}'", nTypes, manu);
 						// validationResult.addError(err);
 
@@ -1121,26 +1482,40 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("...invalid manufacturer");
-
-					} else {
-						log.debug("valid manufacturer");
 					}
 
-					if (!ArgoReferenceTable.BATTERY_TYPE_type.contains(type)) {
+					// =======
+					// CK_0150
+					// =======
+					SkosConcept typeTableEntry = ArgoNVSReferenceTable.BATTERY_TYPE_TABLE
+							.getConceptMembersByAltLabelMap().get(type);
+					typesTablesEntries.add(typeTableEntry);
+					if (typeTableEntry != null) {
+						if (typeTableEntry.isDeprecated()) {
+							// =======
+							// CK_0151
+							// =======
+							String err = String.format("BATTERY_TYPE[%d]: Deprecated type: '{%s}'", nTypes, type);
+							validationResult.addWarning(err);
+						} else {
+							log.debug("valid type");
+						}
+					} else {
+						// ..did not match the expected pattern
 						String err = String.format("BATTERY_TYPE[%d]: Invalid type: '{%s}'", nTypes, type);
-						// validationResult.addError(err);
 
 						// ################# TEMPORARY WARNING ################
 						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
 						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
 						log.debug("invalid type");
-
-					} else {
-						log.debug("valid type");
 					}
 
 				} else {
+					typesTablesEntries.add(null);
+					// =======
+					// CK_0147
+					// =======
 					// ..did not match the expected pattern
 					String err = String.format(
 							"BATTERY_TYPE[%d]: Does not match template 'manufacturer type volts V': '%s'", nTypes,
@@ -1155,108 +1530,8 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				}
 			}
 		} // ..endif battery_type is filled
-
-		// .....battery_packs.....
-		int nPacks = -1;
-
-		str = arFile.readString("BATTERY_PACKS");
-
-		log.debug("BATTERY_PACKS: '{}'", str);
-
-		if (str.length() <= 0) {
-			// ..empty - allowed - optional variable
-			log.debug("BATTERY_PACKS: empty (allowed)");
-
-		} else {
-
-			// ..not empty
-			// ..split multiple strings based on "+"
-
-			nPacks = 0;
-			for (String substr : str.split("\\+")) {
-				nPacks++;
-				log.debug("battery_packs substring: '{}'", substr);
-
-				if (substr.trim().equals("U")) {
-					log.debug("battery_packs substring == U (undefined)");
-
-				} else {
-					// ..not undefined -- check pattern
-
-					Matcher m = pBatteryPacks.matcher(substr);
-
-					if (m.matches()) {
-
-						String num = m.group("numofpacks");
-						String style = m.group("style");
-						String type = m.group("type");
-
-						log.debug("...matched pattern: num, style, type = '{}', '{}', '{}", num, style, type);
-
-						if (!ArgoReferenceTable.BATTERY_PACKS_style.contains(style)) {
-							String err = String.format("BATTERY_PACKS[%d]: Invalid style of battery: '{%s}'", nPacks,
-									style);
-							// validationResult.addError(err);
-
-							// ################# TEMPORARY WARNING ################
-							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-							log.debug("invalid style");
-
-						} else {
-							log.debug("valid style");
-						}
-
-						if (!ArgoReferenceTable.BATTERY_PACKS_type.contains(type)) {
-							String err = String.format("BATTERY_PACKS[%d]: Invalid type: '{%s}'", nPacks, type);
-							// validationResult.addError(err);
-
-							// ################# TEMPORARY WARNING ################
-							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-							log.debug("invalid type");
-
-						} else {
-							log.debug("valid type");
-						}
-
-					} else {
-						// ..did not match the expected pattern
-						String err = String.format(
-								"BATTERY_PACKS[%d]: Does not match template 'xStyle type (or U): '%s'", nPacks,
-								substr.trim());
-						// validationResult.addError(err);
-
-						// ################# TEMPORARY WARNING ################
-						validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-						log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-						log.debug("...does not match template");
-					}
-				} // ..end if undefined
-			} // ..end for (battery_packs substrings)
-		} // ..endif BATTERY_PACKS is filled
-
-		// ............compare TYPES and PACKS............
-
-		if (nPacks >= 0) {
-
-			if (nTypes != nPacks) {
-				String err = String.format("Number of BATTERY_TYPES {} != number of BATTERY_PACKS {}", nTypes, nPacks);
-				// validationResult.addError(err);
-
-				// ################# TEMPORARY WARNING ################
-				validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-				log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-				log.debug("number of types != number of packs => {} != {}", nTypes, nPacks);
-			}
-
-		} // ..end if nPacks >= 0
-
-	}// ..end validateBattery
+		return typesTablesEntries;
+	}
 
 	/**
 	 * Validates the configuration mission in the meta-data file. The mission number
@@ -1281,6 +1556,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			log.debug("CONFIG_MISSION_NUMBER[{}] = {}", n, mission[n]);
 
 			if (mission[n] == 99999) {
+				// =======
+				// CK_0159
+				// =======
 				validationResult.addWarning("CONFIG_MISSION_NUMBER: Missing at index: " + (n + 1));
 				log.debug("config_mission_number == 0 at {}", n);
 				break;
@@ -1324,6 +1602,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				int index = full.lastIndexOf('_');
 
 				if (index <= 0) {
+					// =======
+					// CK_0160
+					// =======
 					// ..poorly formed name - only report if not already reported
 
 					if (!nameAlreadyChecked.contains(full)) {
@@ -1348,6 +1629,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 				// ..check name
 
 				if (!nameAlreadyChecked.contains(param)) {
+					// =======
+					// CK_0161
+					// =======
 					// ..this parameter name has not been checked
 
 					ArgoConfigTechParam.ArgoConfigTechParamMatch match = arFile.getFileSpec().ConfigTech
@@ -1366,6 +1650,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 					} else {
 						if (match.isDeprecated) {
+							// =======
+							// CK_0162
+							// =======
 							// ..IS a deprecated name --> warning
 							validationResult.addWarning(varName + "[" + (n + 1) + "]: " + "Deprecated name '" + param);
 							log.debug("parameter is deprecated: '{}'", param);
@@ -1393,7 +1680,6 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 						if (match.nUnMatchedTemplates > 0) {
 							// ..these Templates did not have values specified in the table
-
 							// ..check the generic template values:
 							// .. shortsensorname, cyclephasename, param
 							// ..all others are accepted as is - they matched their basic regex
@@ -1401,58 +1687,105 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 
 							String str = match.unMatchedTemplates.get("shortsensorname");
 							if (str != null) {
-								if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
-									String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'",
-											varName, (n + 1), str);
-									// validationResult.addError(err);
+								// =======
+								// CK_0163
+								// =======
 
-									// ################# TEMPORARY WARNING ################
-									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
-											err);
+								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", varName,
+										(n + 1), str, param);
+								// validationResult.addError(err);
 
-									log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
-								} else {
-									log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
-								}
+								// ################# TEMPORARY WARNING ################
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+
+								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+								// ==========================================================================
+								// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+								// table / defintion field / Template values ?
+								// ==========================================================================
+//								if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
+//									String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'",
+//											varName, (n + 1), str, param);
+//									// validationResult.addError(err);
+//
+//									// ################# TEMPORARY WARNING ################
+//									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+//											err);
+//
+//									log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+//								} else {
+//									log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
+//								}
 							}
 
 							str = match.unMatchedTemplates.get("cyclephasename");
 							if (str != null) {
-								if (!ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name.contains(str)) {
-									String err = String.format("%s[%d]: Invalid cycle_phase_name '%s' in '%s'", varName,
-											(n + 1), str, param);
-									// validationResult.addError(err)
 
-									// ################# TEMPORARY WARNING ################
-									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
-											err);
+								String err = String.format("%s[%d]: Invalid cycle_phase_name '%s' in '%s'", varName,
+										(n + 1), str, param);
+								// validationResult.addError(err)
 
-									log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
+								// ################# TEMPORARY WARNING ################
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
-								} else {
-									log.debug("...generic cycle_phase_name lookup: valid = '{}'", str);
-								}
+								log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
+
+								// ==========================================================================
+								// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+								// table / defintion field / Template values ?
+								// ==========================================================================
+//								if (!ArgoReferenceTable.GENERIC_TEMPLATE_cycle_phase_name.contains(str)) {
+//									String err = String.format("%s[%d]: Invalid cycle_phase_name '%s' in '%s'", varName,
+//											(n + 1), str, param);
+//									// validationResult.addError(err)
+//
+//									// ################# TEMPORARY WARNING ################
+//									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+//											err);
+//
+//									log.debug("...generic cycle_phase_name lookup: INVALID = '{}'", str);
+//
+//								} else {
+//									log.debug("...generic cycle_phase_name lookup: valid = '{}'", str);
+//								}
 							}
 
 							str = match.unMatchedTemplates.get("param");
 							if (str != null) {
-								if (!ArgoReferenceTable.GENERIC_TEMPLATE_param.contains(str)) {
-									String err = String.format("%s[%d]: Invalid param '%s' in '%s'", varName, (n + 1),
-											str, param);
+								String err = String.format("%s[%d]: Invalid param '%s' in '%s'", varName, (n + 1), str,
+										param);
 
-									// validationResult.addError(err)
+								// validationResult.addError(err)
 
-									// ################# TEMPORARY WARNING ################
-									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
-											err);
+								// ################# TEMPORARY WARNING ################
+								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
 
-									log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
-								} else {
-									log.debug("...generic param: generic name lookup: valid = '{}'", str);
-								}
+								log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
+
+								// ==========================================================================
+								// 2026 / NVS / 3.0.0 : is it still usefull as all should be provided in the
+								// table / defintion field / Template values ?
+								// ==========================================================================
+//								if (!ArgoReferenceTable.GENERIC_TEMPLATE_param.contains(str)) {
+//									String err = String.format("%s[%d]: Invalid param '%s' in '%s'", varName, (n + 1),
+//											str, param);
+//
+//									// validationResult.addError(err)
+//
+//									// ################# TEMPORARY WARNING ################
+//									validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//									log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(),
+//											err);
+//
+//									log.debug("...generic param: generic name lookup: INVALID = '{}'", str);
+//								} else {
+//									log.debug("...generic param: generic name lookup: valid = '{}'", str);
+//								}
 							}
 						}
 					}
@@ -1504,5 +1837,23 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 		} // ..end for ("launch_config", "config_")
 
 	} // ..end validateConfigParams
+
+	// ===================
+	// CONVENIENCE METHODS
+	// ===================
+
+	/**
+	 * Get base sensor name for table lookup // ADMT-2025 : duplicate SENSOR must be
+	 * named <SENSOR>_<n> // so if sensor finish by a number, the duplicate will be
+	 * xxxx[number]_n // if sensor don't finish by a number, the duplicate will also
+	 * be xxxx_n.
+	 * 
+	 * @param snsr
+	 * @return
+	 */
+	public static String normalizeSensorName(String snsr) {
+		// Matches something ending with "_number" (e.g., TEMP_2, CHLA_10)
+		return snsr.replaceFirst("_(\\d+)$", "");
+	}
 
 } // ..end class

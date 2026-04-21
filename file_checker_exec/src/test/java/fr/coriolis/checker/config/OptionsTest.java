@@ -11,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import fr.coriolis.checker.config.Options;
 import fr.coriolis.checker.specs.ArgoReferenceTable;
 
 @Tag("ExtractOptionsTests")
@@ -37,23 +36,25 @@ class OptionsTest {
 		String file1 = "file1";
 		String file2 = "file2";
 
-		String[] args = { "-help", "-version", "-battery-check", "-no-name-check", "-text-result", "-format-only",
-				"-null-warn", "-data-check-all", "-psal-stats", "-list-file", listOfFiles, dacName, specDir, outDir,
+		String[] args = { "-help", "-version", "-no-name-check", "-text-result", "-format-only", "-null-warn",
+				"-data-check-all", "-psal-stats", "-online-nvs", "-list-file", listOfFiles, dacName, specDir, outDir,
 				inDir, file1, file2 };
 
 		// ACT
-		Options options = Options.getInstance(args);
+		Options.init(args);
+		Options options = Options.getInstance();
 
 		// ASSERT
 		assertThat(options.isHelp()).isTrue();
 		assertThat(options.isVersion()).isTrue();
-		assertThat(options.isDoBatteryChecks()).isTrue();
 		assertThat(options.isDoNameCheck()).isFalse();
 		assertThat(options.isDoXml()).isFalse();
 		assertThat(options.isDoFormatOnly()).isTrue();
 		assertThat(options.isDoNulls()).isTrue();
 		assertThat(options.isDoFormatOnlyPre31()).isFalse();
 		assertThat(options.isDoPsalStats()).isTrue();
+		assertThat(options.isUseInternalSpecs()).isFalse();
+		assertThat(options.isUseOnlineNVS()).isTrue();
 		assertThat(options.getListFile()).isEqualTo(listOfFiles);
 		assertThat(options.getDacName()).isEqualTo(dacName);
 		assertThat(options.getSpecDirName()).isEqualTo(specDir);
@@ -64,12 +65,11 @@ class OptionsTest {
 
 	@Test
 	public void getInstance_shouldThrowException_whenMissingArgumentAfterListFile() {
-		// ARRANGE
-		String[] args = { "-help", "-version", "-battery-check", "-no-name-check", "-text-result", "-format-only",
-				"-list-file" };
+		// ARRANG
+		String[] args = { "-help", "-version", "-no-name-check", "-text-result", "-format-only", "-list-file" };
 
 		// ACT & ASSERT
-		assertThatThrownBy(() -> Options.getInstance(args)).isInstanceOf(IllegalArgumentException.class)
+		assertThatThrownBy(() -> Options.init(args)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Missing argument");
 
 	}
@@ -80,7 +80,7 @@ class OptionsTest {
 		String[] args = { "-InvalidArgument" };
 
 		// ACT & ASSERT
-		assertThatThrownBy(() -> Options.getInstance(args)).isInstanceOf(IllegalArgumentException.class)
+		assertThatThrownBy(() -> Options.init(args)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Invalid argument");
 	}
 
@@ -88,11 +88,12 @@ class OptionsTest {
 	public void getInstance_shouldThrowException_whenTooFewArguments() {
 
 		// ARRANGE
-		String[] args = { "-help", "-version", "-battery-check", "-no-name-check", "-text-result", "-format-only",
-				"-list-file", "list_of_files.txt", "dacName", "specDir", "outDir" };
+		String[] args = { "-help", "-version", "-no-name-check", "-text-result", "-format-only", "-list-file",
+				"list_of_files.txt", "dacName", "specDir", "outDir" };
 
 		// ACT & ASSERT
-		assertThatThrownBy(() -> Options.getInstance(args)).isInstanceOf(IllegalArgumentException.class)
+
+		assertThatThrownBy(() -> Options.init(args)).isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("Too few arguments");
 	}
 
@@ -123,8 +124,8 @@ class OptionsTest {
 		String notValidDir = "unexistent dir";
 
 		// ACT & ASSERT
-		assertThatThrownBy(() -> Options.checkDirectory(notValidDir)).isInstanceOf(IllegalArgumentException.class)
-				.hasMessageContaining("is not a directory");
+		assertThatThrownBy(() -> Options.checkDirectory(notValidDir, false))
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("is not a directory");
 
 	}
 

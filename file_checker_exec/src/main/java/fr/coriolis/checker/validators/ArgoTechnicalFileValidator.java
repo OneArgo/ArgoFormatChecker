@@ -188,7 +188,9 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 		for (int n = 0; n < nParam; n++) {
 			String full = full_name[n].trim();
 			int index = full.lastIndexOf('_');
-
+			// =======
+			// CK_0194
+			// =======
 			if (index <= 0) {
 				// ..poorly formed name - only report if not already reported
 
@@ -217,7 +219,9 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 
 				ArgoConfigTechParam.ArgoConfigTechParamMatch match = arFile.getFileSpec().ConfigTech
 						.findTechParam(param);
-
+				// =======
+				// CK_0195
+				// =======
 				if (match == null) {
 					// ..NOT an active name, NOT a deprecated name --> error
 					String err = String.format("%s[%d]: Invalid name '%s'", nName, (n + 1), param);
@@ -230,12 +234,17 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 					log.debug("invalid param (not active or deprecated): '{}'", param);
 
 				} else {
+					// =======
+					// CK_0196
+					// =======
 					if (match.isDeprecated) {
 						// ..IS a deprecated name --> warning
 						validationResult.addWarning(nName + "[" + (n + 1) + "]: " + "Deprecated name '" + param);
 						log.debug("parameter is deprecated: '{}'", param);
 					}
-
+					// =======
+					// CK_0197
+					// =======
 					if (match.nFailedMatchedTemplates > 0) {
 						// ..these Templates failed to match the values specified in the table
 						// ..they are errors
@@ -257,6 +266,11 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 					}
 
 					if (match.nUnMatchedTemplates > 0) {
+						// ==========================================================================
+						// 2026 / NVS / 3.0.0 : not usefull anymore as all must be provided in the
+						// table / definition field / Template values
+						// ==========================================================================
+
 						// ..these Templates did not have values specified in the table
 
 						// ..check the generic template values:
@@ -264,22 +278,32 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 						// ..all others are accepted as is - they matched their basic regex
 						// ..- assume they are good
 
-						String str = match.unMatchedTemplates.get("shortsensorname");
-						if (str != null) {
-							if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
-								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName,
-										(n + 1), str, param);
-								// validationResult.addError(err);
+//						String str = match.unMatchedTemplates.get("shortsensorname");
+//						if (str != null) {
+//							String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName, (n + 1),
+//									str, param);
+//							// validationResult.addError(err);
+//
+//							// ################# TEMPORARY WARNING ################
+//							validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//							log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//							log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
 
-								// ################# TEMPORARY WARNING ################
-								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
-								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
-
-								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
-							} else {
-								log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
-							}
-						}
+//							if (!ArgoReferenceTable.GENERIC_TEMPLATE_short_sensor_name.contains(str)) {
+//								String err = String.format("%s[%d]: Invalid short_sensor_name '%s' in '%s'", nName,
+//										(n + 1), str, param);
+//								// validationResult.addError(err);
+//
+//								// ################# TEMPORARY WARNING ################
+//								validationResult.addWarning(err + "   *** WILL BECOME AN ERROR ***");
+//								log.warn("TEMP WARNING: {}: {}: {}", arFile.getDacName(), arFile.getFileName(), err);
+//
+//								log.debug("...generic short_sensor_name lookup: INVALID = '{}'", str);
+//							} else {
+//								log.debug("...generic short_sensor_name lookup: valid = '{}'", str);
+//							}
+//						}
 					}
 				}
 
@@ -292,10 +316,14 @@ public class ArgoTechnicalFileValidator extends ArgoFileValidator {
 
 			if (!unitAlreadyChecked.containsKey(unit)) {
 				// ..this unit name has NOT been checked
-
+				// =======
+				// CK_0198
+				// =======
 				if (!arFile.getFileSpec().ConfigTech.isConfigTechUnit(unit)) {
 					// ..NOT an active unit
-
+					// =======
+					// CK_0199
+					// =======
 					if (arFile.getFileSpec().ConfigTech.isDeprecatedConfigTechUnit(unit)) {
 						// ..IS a deprecated unit --> warning
 

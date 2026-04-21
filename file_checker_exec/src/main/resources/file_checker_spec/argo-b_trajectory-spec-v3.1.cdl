@@ -1,0 +1,233 @@
+netcdf argo-trajectory-v3.0-spec {
+
+//@ DATA_TYPE = "B-Argo trajectory"
+//@ FORMAT_VERSION   = "3.1"
+//@ HANDBOOK_VERSION = "1.2"
+//@ REFERENCE_DATE_TIME = "19500101000000"
+
+// global attributes:
+           :title = "Argo float trajectory file";
+           :institution = "<+>US GDAC" ;
+           :source = "Argo float";
+           :history = "<+>";
+           :references = "http://www.argodatamgt.org/Documentation";
+           :user_manual_version = "3.1" ;        /*REGEX = "3\..*" */
+           :Conventions = "Argo-3.1 CF-1.6" ;    /*REGEX = "Argo-3\..* +CF-.*" */
+           :featureType = "trajectory";
+
+dimensions:
+	DATE_TIME = 14;
+	STRING64 = 64;
+	STRING32 = 32;
+	STRING16 = 16;
+	STRING8 = 8;
+	STRING4 = 4;
+	STRING2 = 2;
+
+	N_PARAM = _unspecified_;
+	N_MEASUREMENT = UNLIMITED;
+	N_CYCLE = _unspecified_;
+        N_VALUES\d+ = _extra_;
+	N_HISTORY = _unspecified_;
+
+variables:
+
+//  General information on the trajectory file
+	char DATA_TYPE(STRING32); 
+		DATA_TYPE:long_name = "Data type";
+		DATA_TYPE:conventions = "Argo reference table 1";
+		DATA_TYPE:_FillValue = " ";
+	char FORMAT_VERSION(STRING4);
+		FORMAT_VERSION:long_name = "File format version";
+		FORMAT_VERSION:_FillValue = " ";
+	char HANDBOOK_VERSION(STRING4);
+		HANDBOOK_VERSION:long_name = "Data handbook version";
+		HANDBOOK_VERSION:_FillValue = " ";
+	char REFERENCE_DATE_TIME(DATE_TIME);
+		REFERENCE_DATE_TIME:long_name = "Date of reference for Julian days";
+		REFERENCE_DATE_TIME:conventions = "YYYYMMDDHHMISS";
+		REFERENCE_DATE_TIME:_FillValue = " ";
+	char DATE_CREATION(DATE_TIME);
+		DATE_CREATION:long_name = "Date of file creation";
+		DATE_CREATION:conventions = "YYYYMMDDHHMISS";
+		DATE_CREATION:_FillValue = " ";
+	char DATE_UPDATE(DATE_TIME);
+		DATE_UPDATE:long_name = "Date of update of this file";
+		DATE_UPDATE:conventions = "YYYYMMDDHHMISS";
+		DATE_UPDATE:_FillValue = " ";
+
+//  General information on the float
+	char PLATFORM_NUMBER(STRING8);
+		PLATFORM_NUMBER:long_name = "Float unique identifier";
+		PLATFORM_NUMBER:conventions = "WMO float identifier : A9IIIII";
+		PLATFORM_NUMBER:_FillValue = " ";
+	char PROJECT_NAME(STRING64);
+		PROJECT_NAME:long_name = "Name of the project";
+		PROJECT_NAME:_FillValue = " ";
+	char PI_NAME(STRING64);
+		PI_NAME:long_name = "Name of the principal investigator";
+		PI_NAME:_FillValue = " ";
+	char TRAJECTORY_PARAMETERS(N_PARAM,STRING64);
+		TRAJECTORY_PARAMETERS:long_name = "List of available parameters for the station";
+		TRAJECTORY_PARAMETERS:conventions = "Argo reference table 3";
+		TRAJECTORY_PARAMETERS:_FillValue = " ";
+	char DATA_CENTRE(STRING2);
+		DATA_CENTRE:long_name = "Data centre in charge of float data processing";
+		DATA_CENTRE:conventions = "Argo reference table 4";
+		DATA_CENTRE:_FillValue = " ";
+	char DATA_STATE_INDICATOR(STRING4);
+		DATA_STATE_INDICATOR:long_name = "Degree of processing the data have passed through";
+		DATA_STATE_INDICATOR:conventions = "Argo reference table 6";
+		DATA_STATE_INDICATOR:_FillValue = " ";
+	char PLATFORM_TYPE(STRING32); 
+		PLATFORM_TYPE:long_name = "Type of float"; 
+		PLATFORM_TYPE:conventions = "Argo reference table 23";
+		PLATFORM_TYPE:_FillValue = " ";
+	char FLOAT_SERIAL_NO(STRING32);
+		FLOAT_SERIAL_NO:long_name = "Serial number of the float";
+		FLOAT_SERIAL_NO:_FillValue = " ";
+	char FIRMWARE_VERSION(STRING32);
+		FIRMWARE_VERSION:long_name = "Instrument firmware version";
+		FIRMWARE_VERSION:_FillValue = " ";
+	char WMO_INST_TYPE(STRING4);
+		WMO_INST_TYPE:long_name = "Coded instrument type";
+		WMO_INST_TYPE:conventions = "Argo reference table 8";
+		WMO_INST_TYPE:_FillValue = " ";
+	char POSITIONING_SYSTEM(STRING8);
+		POSITIONING_SYSTEM:long_name = "Positioning system";
+		POSITIONING_SYSTEM:_FillValue = " ";
+
+//  N_MEASUREMENT dimension variable group
+	double JULD(N_MEASUREMENT);
+		JULD:long_name = "Julian day (UTC) of each measurement relative to REFERENCE_DATE_TIME";
+		JULD:standard_name = "time";
+		JULD:units = "days since 1950-01-01 00:00:00 UTC";
+		JULD:conventions = "Relative julian days with decimal part (as parts of day)";
+		JULD:resolution = "<+>DOUBLE:";
+		JULD:_FillValue = 999999.;
+		JULD:axis = "T";
+	char JULD_STATUS(N_MEASUREMENT);
+		JULD_STATUS:long_name = "Status of the date and time";
+		JULD_STATUS:conventions = "Argo reference table 19";
+		JULD_STATUS:_FillValue = " ";
+	char JULD_QC(N_MEASUREMENT);
+		JULD_QC:long_name = "Quality on date and time";
+		JULD_QC:conventions = "Argo reference table 2";
+		JULD_QC:_FillValue = " ";
+	double LATITUDE(N_MEASUREMENT);
+		LATITUDE:long_name = "Latitude of each location";
+		LATITUDE:standard_name = "latitude";
+		LATITUDE:units = "degree_north";
+		LATITUDE:_FillValue = 99999.;
+		LATITUDE:valid_min = -90.;
+		LATITUDE:valid_max = 90.;
+		LATITUDE:axis = "Y";
+	double LONGITUDE(N_MEASUREMENT);
+		LONGITUDE:long_name = "Longitude of each location";
+		LONGITUDE:standard_name = "longitude";
+		LONGITUDE:units = "degree_east";
+		LONGITUDE:_FillValue = 99999.;
+		LONGITUDE:valid_min = -180.;
+		LONGITUDE:valid_max = 180.;
+		LONGITUDE:axis = "X";
+	char POSITION_ACCURACY(N_MEASUREMENT);
+		POSITION_ACCURACY:long_name = "Estimated accuracy in latitude and longitude";
+		POSITION_ACCURACY:conventions = "Argo reference table 5";
+		POSITION_ACCURACY:_FillValue = " ";
+	char POSITION_QC(N_MEASUREMENT);
+		POSITION_QC:long_name = "Quality on position";
+		POSITION_QC:conventions = "Argo reference table 2";
+		POSITION_QC:_FillValue = " ";
+	int CYCLE_NUMBER(N_MEASUREMENT);
+		CYCLE_NUMBER:long_name = "Float cycle number of the measurement";
+		CYCLE_NUMBER:conventions = "0...N, 0 : launch cycle, 1 : first complete cycle";
+		CYCLE_NUMBER:_FillValue = 99999;
+	int MEASUREMENT_CODE(N_MEASUREMENT);
+		MEASUREMENT_CODE:long_name = "Flag referring to a measurement event in the cycle";
+		MEASUREMENT_CODE:conventions = "Argo reference table 15";
+		MEASUREMENT_CODE:_FillValue = 99999;
+
+// <PARAM> structures are added via argo-params-spec-v3.1
+
+	float AXES_ERROR_ELLIPSE_MAJOR(N_MEASUREMENT);
+		AXES_ERROR_ELLIPSE_MAJOR:long_name = "Major axis of error ellipse from positioning system";
+		AXES_ERROR_ELLIPSE_MAJOR:units = "meters";
+		AXES_ERROR_ELLIPSE_MAJOR:_FillValue = 99999.f;
+	float AXES_ERROR_ELLIPSE_MINOR(N_MEASUREMENT);
+		AXES_ERROR_ELLIPSE_MINOR:long_name = "Minor axis of error ellipse from positioning system";
+		AXES_ERROR_ELLIPSE_MINOR:units = "meters";
+		AXES_ERROR_ELLIPSE_MINOR:_FillValue = 99999.f;
+	float AXES_ERROR_ELLIPSE_ANGLE(N_MEASUREMENT);
+		AXES_ERROR_ELLIPSE_ANGLE:long_name = "Angle of error ellipse from positioning system";
+		AXES_ERROR_ELLIPSE_ANGLE:units = "Degrees (from North when heading East)";
+		AXES_ERROR_ELLIPSE_ANGLE:_FillValue = 99999.f;
+	char SATELLITE_NAME(N_MEASUREMENT);
+		SATELLITE_NAME:long_name = "Satellite name from positioning system";
+		SATELLITE_NAME:_FillValue = " ";
+
+//  N_CYCLE dimension variable group
+	int CONFIG_MISSION_NUMBER(N_CYCLE);
+		CONFIG_MISSION_NUMBER:long_name = "Unique number denoting the missions performed by the float";
+		CONFIG_MISSION_NUMBER:conventions = "1...N, 1 : first complete mission";
+		CONFIG_MISSION_NUMBER:_FillValue = 99999;
+	int CYCLE_NUMBER_INDEX(N_CYCLE);
+		CYCLE_NUMBER_INDEX:long_name = "Cycle number that corresponds to the current index";
+		CYCLE_NUMBER_INDEX:conventions = "0...N, 0 : launch cycle, 1 : first complete cycle";
+		CYCLE_NUMBER_INDEX:_FillValue = 99999;
+	char DATA_MODE(N_CYCLE);
+		DATA_MODE:long_name = "Delayed mode or real time data";
+		DATA_MODE:conventions = "R : real time; D : delayed mode; A : real time with adjustment";
+		DATA_MODE:_FillValue = " ";
+
+//  History information
+	char HISTORY_INSTITUTION(N_HISTORY, STRING4);
+		HISTORY_INSTITUTION:long_name = "Institution which performed action";
+		HISTORY_INSTITUTION:conventions = "Argo reference table 4";
+		HISTORY_INSTITUTION:_FillValue = " ";
+	char HISTORY_STEP(N_HISTORY, STRING4);
+		HISTORY_STEP:long_name = "Step in data processing";
+		HISTORY_STEP:conventions = "Argo reference table 12";
+		HISTORY_STEP:_FillValue = " ";
+	char HISTORY_SOFTWARE(N_HISTORY, STRING4);
+		HISTORY_SOFTWARE:long_name = "Name of software which performed action";
+		HISTORY_SOFTWARE:conventions = "Institution dependent";
+		HISTORY_SOFTWARE:_FillValue = " ";
+	char HISTORY_SOFTWARE_RELEASE(N_HISTORY, STRING4);
+		HISTORY_SOFTWARE_RELEASE:long_name = "Version/release of software which performed action";
+		HISTORY_SOFTWARE_RELEASE:conventions = "Institution dependent";
+		HISTORY_SOFTWARE_RELEASE:_FillValue = " ";
+	char HISTORY_REFERENCE(N_HISTORY, STRING64);
+		HISTORY_REFERENCE:long_name = "Reference of database";
+		HISTORY_REFERENCE:conventions = "Institution dependent";
+		HISTORY_REFERENCE:_FillValue = " ";
+	char HISTORY_DATE(N_HISTORY, DATE_TIME);
+		HISTORY_DATE:long_name = "Date the history record was created";
+		HISTORY_DATE:conventions = "YYYYMMDDHHMISS";
+		HISTORY_DATE:_FillValue = " ";
+	char HISTORY_ACTION(N_HISTORY, STRING4);
+		HISTORY_ACTION:long_name = "Action performed on data";
+		HISTORY_ACTION:conventions = "Argo reference table 7";
+		HISTORY_ACTION:_FillValue = " ";
+	char HISTORY_PARAMETER(N_HISTORY, STRING64);
+		HISTORY_PARAMETER:long_name = "Station parameter action is performed on";
+		HISTORY_PARAMETER:conventions = "Argo reference table 3";
+		HISTORY_PARAMETER:_FillValue = " ";
+float_or_double HISTORY_PREVIOUS_VALUE(N_HISTORY);
+		HISTORY_PREVIOUS_VALUE:long_name = "Parameter/Flag previous value before action";
+		HISTORY_PREVIOUS_VALUE:_FillValue = 99999.f;
+	char HISTORY_INDEX_DIMENSION(N_HISTORY);
+		HISTORY_INDEX_DIMENSION:long_name = "Name of dimension to which HISTORY_START_INDEX and HISTORY_STOP_INDEX correspond";
+		HISTORY_INDEX_DIMENSION:conventions = "C: N_CYCLE, M: N_MEASUREMENT";
+		HISTORY_INDEX_DIMENSION:_FillValue = " ";
+	int HISTORY_START_INDEX(N_HISTORY);
+		HISTORY_START_INDEX:long_name = "Start index action applied on";
+		HISTORY_START_INDEX:_FillValue = 99999;
+	int HISTORY_STOP_INDEX(N_HISTORY);
+		HISTORY_STOP_INDEX:long_name = "Stop index action applied on";
+		HISTORY_STOP_INDEX:_FillValue = 99999;
+	char HISTORY_QCTEST(N_HISTORY, STRING16);
+		HISTORY_QCTEST:long_name = "Documentation of tests performed, tests failed (in hex form)";
+		HISTORY_QCTEST:conventions = "Write tests performed when ACTION=QCP$; tests failed when ACTION=QCF$";
+		HISTORY_QCTEST:_FillValue = " ";
+
+}

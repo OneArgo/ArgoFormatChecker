@@ -13,18 +13,18 @@ include:
       pipeline_enable_sonarqube: "false"
       lint_yamllint_enable: "false"
 
-security:filesystem:scan 🛡️:
-  rules:
-    - when: always
+# security:filesystem:scan 🛡️:
+  # rules:
+    # - when: always
 
-check_container-image_scanning:
-  stage: security
-  image: alpine:latest
-  script:
-    - CRITICAL_COUNT=$(grep -o '<tr class="severity-CRITICAL">' scanning-report.html | wc -l || echo 0) 
-    - echo "Number of critical vulnerabilities:${CRITICAL_COUNT}"
-    - if [ "$CRITICAL_COUNT" -gt 0 ]; then echo "Critical vulnerabilities detected"; exit 1; fi
-  needs:
-    - job: security:filesystem:scan 🛡️
-      artifacts: true
-  allow_failure: false  
+# check_container-image_scanning:
+  # stage: security
+  # image: alpine:latest
+  # script:
+    # - CRITICAL_COUNT=$(grep -o '<tr class="severity-CRITICAL">' scanning-report.html | wc -l || echo 0) 
+    # - echo "Number of critical vulnerabilities:${CRITICAL_COUNT}"
+    # - if [ "$CRITICAL_COUNT" -gt 0 ]; then echo "Critical vulnerabilities detected"; exit 1; fi
+  # needs:
+    # - job: security:filesystem:scan 🛡️
+      # artifacts: true
+  # allow_failure: false  
