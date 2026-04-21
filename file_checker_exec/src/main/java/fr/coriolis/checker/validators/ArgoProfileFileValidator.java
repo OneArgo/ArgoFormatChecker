@@ -564,9 +564,9 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 							}
 						} // ..end if (param.length)
 					} // ..end for (nParam)
-						// ===============
-						// CHECK_0088_PROF
-						// ===============
+						// =======
+						// CK_0088
+						// =======
 						// ..check that calibration info is set for all parameters
 					for (String prm : profParam.get(n)) {
 						if (!calibParam.contains(prm)) {

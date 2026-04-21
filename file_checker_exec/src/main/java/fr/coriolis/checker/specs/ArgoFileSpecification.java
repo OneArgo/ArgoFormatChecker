@@ -3207,7 +3207,7 @@ public class ArgoFileSpecification {
 
 	private void createVariableGroups(String prmName, boolean CORE, boolean BIO, String group_qc, String group_adj) {
 		// ==========
-		// CHECK_0087
+		// CHECK_0295
 		// ==========
 		// phase of building variable group in fonction of core/bgc and intermediate
 		// physical parameter is important for te format check and the expected presence

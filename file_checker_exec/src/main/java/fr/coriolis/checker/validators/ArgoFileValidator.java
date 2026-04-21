@@ -439,22 +439,15 @@ public class ArgoFileValidator {
 			if (attrName.equals("units")) {
 				result = checkTechParamUnitsAttribute(varName, attrName, dataAttrValue);
 			}
+			// =======
+			// CK_0096
+			// =======
 			// special case for long_name : should be varName_units
 			if (attrName.equals("long_name")) {
-				result = checkTechParamLongNameAttribute(dataVar, varName, attrName, dataAttrValue);
+				// TO DO : UNCOMMENT the following when UM3.45 is published to activate
+				// long_name check with rule <paramName>_<unit> (ADMT26 approved)
+//				result = checkTechParamLongNameAttribute(dataVar, varName, attrName, dataAttrValue);
 			}
-			// List<String> authorizedLongName =
-			// arFile.getFileSpec().ConfigTech.getParamAuthorizedLongName().get(varName);
-//			if (attrName.equals("long_name") && authorizedLongName != null
-//					&& !authorizedLongName.contains(dataAttrValue)) {
-//
-//				String specValueInErrorReport = authorizedLongName.size() == 1 ? "'" + authorizedLongName.get(0) + "'"
-//						: "Multiple possibilities; see argo-tech_names-spec list, definition column";
-//
-//				validationResult.addError(
-//						String.format("attribute: %s:%s: Definitions differ\n\tSpecification = %s\n\tData File = '%s'",
-//								varName, attrName, specValueInErrorReport, dataAttrValue));
-//			}
 
 		}
 
@@ -479,9 +472,7 @@ public class ArgoFileValidator {
 
 	private boolean checkTechParamLongNameAttribute(Variable dataVar, String varName, String attrName,
 			String dataAttrValue) {
-		// ========
-		// CK_0096
-		// =======
+
 		// get unit value
 		Attribute unitAttribute = dataVar.findAttribute("units");
 		String unitsValue = unitAttribute.getStringValue();
@@ -489,9 +480,9 @@ public class ArgoFileValidator {
 		String expectedLonName = varName + "_" + unitsValue;
 		if (!dataAttrValue.equals(expectedLonName)) {
 			// long_name wrong !
-			validationResult.addWarning("attribute: " + varName + ":" + attrName + ": Definitions differ "
+			validationResult.addError("attribute: " + varName + ":" + attrName + ": Definitions differ "
 					+ "\n\tSpecification : long_name = <TECH_PARAM>_<units> : " + expectedLonName
-					+ "\n\tData File     = '" + dataAttrValue + "'  *** WILL BECOME AN ERROR WITH UM 3.45 ***");
+					+ "\n\tData File     = '" + dataAttrValue + "'");
 			return false;
 		}
 
