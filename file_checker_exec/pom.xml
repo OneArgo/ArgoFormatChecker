@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.ifremer</groupId>
 	<artifactId>file_checker_exec</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.1</version>
 
 	<name>Argo NetCDF file format checker</name>
 
@@ -161,6 +161,15 @@
 			</testResource>
 		</testResources>
 		<plugins>
+		<!-- Enforce Java 8 API compatibility -->
+		    <plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-compiler-plugin</artifactId>
+		        <version>3.13.0</version>
+		        <configuration>
+		            <release>8</release>
+		        </configuration>
+		    </plugin>
 			<!--Rename the log4j2 xml production file-->
 			<plugin>
 				<groupId>com.coderplus.maven.plugins</groupId>

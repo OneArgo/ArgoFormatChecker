@@ -2372,7 +2372,7 @@ public class ArgoFileSpecification {
 			String oldValue, String status, String message, String version) {
 
 		// Always: base + ADJUSTED
-		List<String> names = new ArrayList<>(List.of(paramName, paramName + "_ADJUSTED"));
+		List<String> names = new ArrayList<>(Arrays.asList(paramName, paramName + "_ADJUSTED"));
 
 		// ADJUSTED_ERROR — excluded for min/max/name attributes
 		boolean excludeFromAdjustedError = attributeKey.equals("valid_min") || attributeKey.equals("valid_max")
@@ -2385,7 +2385,7 @@ public class ArgoFileSpecification {
 
 		// STD & MED family — units and fillValue share the same oldValue
 		if (attributeKey.equals("units") || attributeKey.equals("fillValue")) {
-			names.addAll(List.of(paramName + "_STD", paramName + "_MED", paramName + "_STD_ADJUSTED",
+			names.addAll(Arrays.asList(paramName + "_STD", paramName + "_MED", paramName + "_STD_ADJUSTED",
 					paramName + "_MED_ADJUSTED", paramName + "_STD_ADJUSTED_ERROR", paramName + "_MED_ADJUSTED_ERROR"));
 		}
 
@@ -2399,9 +2399,11 @@ public class ArgoFileSpecification {
 
 		// long_name — STD/MED variants get a prefixed oldValue
 		if (attributeKey.equals("long_name")) {
-			Map<String, String> longNameVariants = Map.of(paramName + "_STD", "Standard deviation of " + oldValue,
-					paramName + "_MED", "Median value of " + oldValue, paramName + "_STD_ADJUSTED",
-					"Standard deviation of " + oldValue, paramName + "_MED_ADJUSTED", "Median value of " + oldValue);
+			Map<String, String> longNameVariants = new HashMap<>();
+			longNameVariants.put(paramName + "_STD", "Standard deviation of " + oldValue);
+			longNameVariants.put(paramName + "_MED", "Median value of " + oldValue);
+			longNameVariants.put(paramName + "_STD_ADJUSTED", "Standard deviation of " + oldValue);
+			longNameVariants.put(paramName + "_MED_ADJUSTED", "Median value of " + oldValue);
 			longNameVariants.forEach((name, derivedValue) -> entries
 					.add(new R03DeprecatedEntry(name, attributeKey, derivedValue, status, message)));
 		}

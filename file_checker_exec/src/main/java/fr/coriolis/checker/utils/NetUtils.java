@@ -2,35 +2,37 @@ package fr.coriolis.checker.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.time.Duration;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public final class NetUtils {
-	private static final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL)
-			.build(); // need to automatically follow redirection
+	private static final int TIMEOUT_MS = 15_000;
 
-	public static InputStream openInputStream(String url) throws IOException, InterruptedException {
+	public static InputStream openInputStream(String url) throws IOException {
 
-		// create request
-		HttpRequest req = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(15))
-				.header("Accept", "application/ld+json").GET().build();
+		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+		conn.setInstanceFollowRedirects(true); // follow redirects
+		conn.setConnectTimeout(TIMEOUT_MS);
+		conn.setReadTimeout(TIMEOUT_MS);
+		conn.setRequestProperty("Accept", "application/ld+json");
+		conn.setRequestMethod("GET");
+		conn.connect();
 
-		// send request :
-		HttpResponse<InputStream> res = httpClient.send(req, BodyHandlers.ofInputStream());
+		int status = conn.getResponseCode();
 
-		// client error response
-		if (res.statusCode() >= 400) {
-			// close stream if serveur send one
-			try (InputStream body = res.body()) {
-				/* ensure release */ }
-			throw new IOException("HTTP " + res.statusCode() + " for " + url);
+		// client/server error response
+		if (status >= 400) {
+			try (InputStream err = conn.getErrorStream()) {
+				if (err != null) {
+					byte[] buf = new byte[1024];
+					while (err.read(buf) != -1) {
+						/* drain */ }
+				}
+			}
+			throw new IOException("HTTP " + status + " for " + url);
 		}
 
-		return res.body();
+		return conn.getInputStream();
 	}
 
 }
