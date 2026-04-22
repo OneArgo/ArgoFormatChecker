@@ -51,12 +51,13 @@ public final class TestsUtils {
 		assertThat(TestsUtils.outputDir).exists().isDirectory().as("output directory should exist");
 
 		// ACT
-		List<String> command = new ArrayList<>(List.of("java", "-jar", TestsUtils.jarPath));
-		if (options != null && !options.isBlank()) {
+		List<String> command = new ArrayList<>(Arrays.asList("java", "-jar", TestsUtils.jarPath));
+		if (options != null && !options.trim().isEmpty()) {
 			// split eventual multiple options
 			command.addAll(Arrays.asList(options.split("\\s+")));
 		}
-		command.addAll(List.of(dac, TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inputDirPath, fileName));
+		command.addAll(
+				Arrays.asList(dac, TestsUtils.SPEC_DIR_PATH, TestsUtils.OUTPUT_DIR_PATH, inputDirPath, fileName));
 		ProcessBuilder builder = new ProcessBuilder(command);
 		builder.redirectErrorStream(true);
 		Process process = builder.start();

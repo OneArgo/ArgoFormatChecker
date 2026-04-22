@@ -127,9 +127,6 @@ public final class ArgoNVSReferenceTable {
 			} catch (IOException e) {
 				stderr.println("Table file not found on NVS : " + tableUrl + " (" + e.getMessage() + ")");
 				break;
-			} catch (InterruptedException e) {
-				stderr.println("Error while retrieving table on NVS : " + tableUrl + " (" + e.getMessage() + ")");
-				break;
 			}
 		}
 
