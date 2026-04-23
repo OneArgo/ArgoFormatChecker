@@ -95,6 +95,9 @@
             "dc:date": "2025-11-18 12:09:41.0",
             "skos:altLabel": "SBE83_OPTODE",
             "skos:notation": "SDN:R27::SBE83_OPTODE",
+			"skos:broader": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+            },			
             "pav:version": "2",
             "dce:identifier": "SDN:R27::SBE83_OPTODE",
             "pav:hasCurrentVersion": {
@@ -124,6 +127,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP_CNDC/"
                 }
             ],
+			"skos:broader": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/RBR/"
+            },
             "skos:definition": {
                 "@language": "en",
                 "@value": "A system comprising temperature, conductivity and pressure sensors, manufactured by RBR for moored applications. This cell was not optimized for use on profiling floats, and this was used in only one test deployment. The system supports both spot and continuous sampling modes, with sampling speeds configurable to up to 12 Hz. The depth rating for a standard profile is 2000 dbar, with energy consumption of approximately 700 J."
@@ -169,6 +175,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_UP_RAD412/"
                 }
             ],
+			"skos:broader": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+            },
             "skos:definition": {
                 "@language": "en",
                 "@value": "Replaces deprecated term  'http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_R10W'. A cosine-response, multispectral radiometer configured to measure upwelling radiance in water. Number of channels: 4; field of view: 10 deg (half angle, half maximum); bandwidth range: 400 nm to 865 nm (standard), or 305 nm, 325 nm, 340 nm, 380 nm (UV); sampling rate: 7 Hz - 24 Hz; spectral bandwidth: 10 nm or 20 nm. The instrument was originally developed and manufactured at Satlantic, and was rebranded as a Sea-Bird Scientific product following the company's acquisition by Danaher in 2011."
@@ -216,8 +225,14 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR490/"
-                }
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_PAR/"
+                }				
             ],
+			"skos:broader": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+            },
             "skos:definition": {
                 "@language": "en",
                 "@value": "Replaces deprecated term  'http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_ICSW'. A cosine-response, multispectral radiometer configured to measure downwelling irradiance in water. Number of channels: 4; bandwidth range: 400 nm to 865 nm (standard), or 305 nm, 325 nm, 340 nm, 380 nm (UV); sampling rate: 7 Hz - 24 Hz; spectral bandwidth: 10 nm or 20 nm. The instrument was originally developed and manufactured at Satlantic, and was rebranded as a Sea-Bird Scientific product following the company's acquisition by Danaher in 2011."

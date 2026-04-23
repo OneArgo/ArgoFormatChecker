@@ -864,6 +864,9 @@
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_PRES/"
                 },
+				{
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_CTD/"
+                },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/RBR_ARGO/"
                 },
@@ -1165,6 +1168,9 @@
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE63_OPTODE/"
                 },
+				{
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE83_OPTODE/"
+                },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41CP_V1/"
                 },
@@ -1273,6 +1279,9 @@
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_ICSW/"
                 },
+				{
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_ICSW/"
+                },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41CP_V1.9/"
                 },
@@ -1299,6 +1308,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_R10W/"
+                },
+				{
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_R10W/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/C_ROVER/"
