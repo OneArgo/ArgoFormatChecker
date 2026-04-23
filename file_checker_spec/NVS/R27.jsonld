@@ -2685,6 +2685,57 @@
                 "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
             }
         },
+		{
+            "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N_V5.3.5/",
+            "pav:hasVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N_V5.3.5/1/"
+            },
+            "pav:authoredOn": "2025-04-03 11:54:30.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N_V5.3.5/2/"
+            },
+            "dce:identifier": "SDN:R27::SBE41N_V5.3.5",
+            "pav:version": "2",
+            "@type": "skos:Concept",
+            "skos:related": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_PRES/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_TEMP/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/CTD_CNDC/"
+                }
+            ],
+            "skos:definition": {
+                "@language": "en",
+                "@value": "A system comprising temperature, conductivity and pressure sensors with pump-controlled, T-C ducted flow, manufactured by Sea-Bir Scientific. The unit is designed for deployment on profiling floats hosting multiple biogeochemical (BGC) sensors. This CTD operates in continuous profiling (CP) mode, thus sampling at 1 Hz during float ascent. Data from all the float's sensors, including the optional bolt-on ones, are integrated in the data stream and transmitted to the float controller when the float reaches the surface. This SBE41N model has firmware version 5.3.5."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "true",
+            "skos:note": {
+                "@language": "en",
+                "@value": "deprecated"
+            },
+            "dc:identifier": "SDN:R27::SBE41N_V5.3.5",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Sea-Bird Scientific SBE 41N CTD V5.3.5"
+            },
+            "owl:versionInfo": "2",
+            "dc:date": "2025-04-03 11:54:30.0",
+            "skos:altLabel": "SBE41N_V5.3.5",
+            "skos:notation": "SDN:R27::SBE41N_V5.3.5",
+            "skos:broader": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+            }
+        },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N/",
             "pav:hasVersion": {
@@ -6699,6 +6750,9 @@
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N_V5.3.4/"
+                },
+				{
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41N_V5.3.5/"
                 },
                 {
                     "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SBE41CP_V1.2/"
