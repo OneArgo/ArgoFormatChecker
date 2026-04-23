@@ -100,6 +100,9 @@
             "skos:related": {
                 "@id": "http://vocab.nerc.ac.uk/collection/R24/current/OPTIMARE/"
             },
+			"skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R08/current/843/"
+            },
             "@type": "skos:Concept"
         },
         {
@@ -111,7 +114,7 @@
             "dce:identifier": "SDN:R23::PROVOR_III_JUMBO",
             "pav:version": "1",
             "skos:notation": "SDN:R23::PROVOR_III_JUMBO",
-            "skos:altLabel": "",
+            "skos:altLabel": "PROVOR_III_JUMBO",
             "dc:date": "2024-09-11 11:40:41.0",
             "owl:versionInfo": "1",
             "skos:prefLabel": {
@@ -130,6 +133,12 @@
             "skos:definition": {
                 "@language": "en",
                 "@value": "PROVOR float with additional battery pack. PLATFORM_ TYPE_ KEY = 108."
+            },
+			"skos:related": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R24/current/NKE/"
+            },
+			"skos:narrower": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R08/current/836/"
             },
             "@type": "skos:Concept"
         },

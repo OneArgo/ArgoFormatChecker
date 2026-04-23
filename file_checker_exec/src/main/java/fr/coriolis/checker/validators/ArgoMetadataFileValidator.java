@@ -151,7 +151,10 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 			validateOptionalParams();
 			validateConfigMission();
 			validateConfigParams();
-			validateBattery();
+			// 04/2026 V3.0.2 : Battery parameters's checks are deactivated for the moment
+			// as majority of files was not compliants. More time is given to DACs. But
+			// should be reactivated in the coming months.
+//			validateBattery(); 
 
 		}
 

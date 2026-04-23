@@ -350,15 +350,6 @@ public class ArgoConfigTechParam {
 			}
 		}
 
-		if (deprecatedList != null) {
-			if (deprecatedList.contains(name)) {
-				match = new ArgoConfigTechParamMatch(name, true);
-
-				log.debug("findParam: '{}': deprecated literal match", name);
-				return match;
-			}
-		}
-
 		// ..did NOT match one of the literal strings
 		// ..check for a regex match
 
@@ -370,6 +361,15 @@ public class ArgoConfigTechParam {
 			if (match != null) {
 				match.isDeprecated = false;
 				log.debug("findParam: '{}': active regex match '{}'", name, match.match);
+				return match;
+			}
+		}
+
+		if (deprecatedList != null) {
+			if (deprecatedList.contains(name)) {
+				match = new ArgoConfigTechParamMatch(name, true);
+
+				log.debug("findParam: '{}': deprecated literal match", name);
 				return match;
 			}
 		}

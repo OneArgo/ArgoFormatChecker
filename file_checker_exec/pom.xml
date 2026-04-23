@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.ifremer</groupId>
 	<artifactId>file_checker_exec</artifactId>
-	<version>3.0.1</version>
+	<version>3.0.2</version>
 
 	<name>Argo NetCDF file format checker</name>
 
