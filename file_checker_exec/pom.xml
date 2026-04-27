@@ -161,6 +161,31 @@
 			</testResource>
 		</testResources>
 		<plugins>
+		<!-- delete resources/file_checker_spec folder before copying it from source folder -->
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-clean-plugin</artifactId>
+			    <version>3.4.0</version>
+			    <executions>
+			        <execution>
+			            <id>delete-spec-folder</id>
+			            <phase>initialize</phase>
+			            <goals>
+			                <goal>clean</goal>
+			            </goals>
+			            <configuration>
+			                <excludeDefaultDirectories>true</excludeDefaultDirectories> 
+			                <filesets>
+			                    <fileset>
+			                        <directory>
+			                            ${project.basedir}/src/main/resources/file_checker_spec
+			                        </directory>
+			                    </fileset>
+			                </filesets>
+			            </configuration>
+			        </execution>
+			    </executions>
+			</plugin>
 		<!-- Copy /file_checker_spec folder in resources -->
 		<plugin>
 		    <groupId>org.apache.maven.plugins</groupId>
