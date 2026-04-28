@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.ifremer</groupId>
 	<artifactId>file_checker_exec</artifactId>
-	<version>3.0.2</version>
+	<version>3.0.3</version>
 
 	<name>Argo NetCDF file format checker</name>
 
@@ -161,6 +161,58 @@
 			</testResource>
 		</testResources>
 		<plugins>
+		<!-- delete resources/file_checker_spec folder before copying it from source folder -->
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-clean-plugin</artifactId>
+			    <version>3.4.0</version>
+			    <executions>
+			        <execution>
+			            <id>delete-spec-folder</id>
+			            <phase>initialize</phase>
+			            <goals>
+			                <goal>clean</goal>
+			            </goals>
+			            <configuration>
+			                <excludeDefaultDirectories>true</excludeDefaultDirectories> 
+			                <filesets>
+			                    <fileset>
+			                        <directory>
+			                            ${project.basedir}/src/main/resources/file_checker_spec
+			                        </directory>
+			                    </fileset>
+			                </filesets>
+			            </configuration>
+			        </execution>
+			    </executions>
+			</plugin>
+		<!-- Copy /file_checker_spec folder in resources -->
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-resources-plugin</artifactId>
+		    <version>3.3.1</version>
+		    <executions>
+		        <execution>
+		            <id>copy-external-folder</id>
+		            <phase>generate-resources</phase> 
+		            <goals>
+		                <goal>copy-resources</goal>
+		            </goals>
+		            <configuration>
+		                <outputDirectory>
+		                    ${project.basedir}/src/main/resources/file_checker_spec
+		                </outputDirectory>
+		                <overwrite>true</overwrite>
+		                <resources>
+		                    <resource>
+		                        <directory>${project.basedir}/../file_checker_spec</directory>
+		                        <filtering>false</filtering> 
+		                    </resource>
+		                </resources>
+		            </configuration>
+		        </execution>
+		    </executions>
+		</plugin>
 		<!-- Enforce Java 8 API compatibility -->
 		    <plugin>
 		        <groupId>org.apache.maven.plugins</groupId>

@@ -880,7 +880,7 @@ public class ArgoProfileFileValidator extends ArgoFileValidator {
 
 			} else {
 				// need to delete optionnal free text ([free text]) :
-				s = s.replaceAll("\\s*\\[[^\\]]*\\]\\s*", "").trim();
+				s = s.replaceAll("\\s*\\[.*\\]\\s*", "").trim();
 
 				tableEntry = ArgoNVSReferenceTable.VERTICAL_SAMPLING_SCHEME_TABLE.getConceptMembersByPrefLabelMap()
 						.get(s);
