@@ -175,9 +175,14 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_UP_RAD412/"
                 }
             ],
-			"skos:broader": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
-            },
+			"skos:broader": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SATLANTIC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+                }
+            ],
             "skos:definition": {
                 "@language": "en",
                 "@value": "Replaces deprecated term  'http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_R10W'. A cosine-response, multispectral radiometer configured to measure upwelling radiance in water. Number of channels: 4; field of view: 10 deg (half angle, half maximum); bandwidth range: 400 nm to 865 nm (standard), or 305 nm, 325 nm, 340 nm, 380 nm (UV); sampling rate: 7 Hz - 24 Hz; spectral bandwidth: 10 nm or 20 nm. The instrument was originally developed and manufactured at Satlantic, and was rebranded as a Sea-Bird Scientific product following the company's acquisition by Danaher in 2011."
@@ -230,9 +235,14 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_PAR/"
                 }				
             ],
-			"skos:broader": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
-            },
+			"skos:broader": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SATLANTIC/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R26/current/SBE/"
+                }
+            ],
             "skos:definition": {
                 "@language": "en",
                 "@value": "Replaces deprecated term  'http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_ICSW'. A cosine-response, multispectral radiometer configured to measure downwelling irradiance in water. Number of channels: 4; bandwidth range: 400 nm to 865 nm (standard), or 305 nm, 325 nm, 340 nm, 380 nm (UV); sampling rate: 7 Hz - 24 Hz; spectral bandwidth: 10 nm or 20 nm. The instrument was originally developed and manufactured at Satlantic, and was rebranded as a Sea-Bird Scientific product following the company's acquisition by Danaher in 2011."
