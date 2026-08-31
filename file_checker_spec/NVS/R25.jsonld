@@ -246,6 +246,45 @@
             }
         },
         {
+            "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR670/",
+            "pav:authoredOn": "2026-07-09 11:22:59.0",
+            "@type": "skos:Concept",
+            "skos:related": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_ICSW/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_ICSW/"
+                }
+            ],
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Radiometer measuring downwelling irradiance at 670 nanometers."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "false",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "dc:identifier": "SDN:R25::RADIOMETER_DOWN_IRR670",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Radiometer measuring downwelling irradiance at 670 nanometers"
+            },
+            "owl:versionInfo": "1",
+            "dc:date": "2026-07-09 11:22:59.0",
+            "skos:altLabel": "RADIOMETER_DOWN_IRR670",
+            "skos:notation": "SDN:R25::RADIOMETER_DOWN_IRR670",
+            "pav:version": "1",
+            "dce:identifier": "SDN:R25::RADIOMETER_DOWN_IRR670",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR670/1/"
+            }
+        },
+        {
             "@id": "http://vocab.nerc.ac.uk/collection/R25/current/SPECTROPHOTOMETER_BISULFIDE/",
             "pav:authoredOn": "2019-10-11 15:06:36.0",
             "pav:hasCurrentVersion": {
@@ -1490,6 +1529,45 @@
             }
         },
         {
+            "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR665/",
+            "pav:authoredOn": "2026-07-09 11:22:59.0",
+            "@type": "skos:Concept",
+            "skos:related": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/OCR504_ICSW/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R27/current/SATLANTIC_OCR504_ICSW/"
+                }
+            ],
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Radiometer measuring downwelling irradiance at 665 nanometers."
+            },
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "false",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "dc:identifier": "SDN:R25::RADIOMETER_DOWN_IRR665",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Radiometer measuring downwelling irradiance at 665 nanometers"
+            },
+            "owl:versionInfo": "1",
+            "dc:date": "2026-07-09 11:22:59.0",
+            "skos:altLabel": "RADIOMETER_DOWN_IRR665",
+            "skos:notation": "SDN:R25::RADIOMETER_DOWN_IRR665",
+            "pav:version": "1",
+            "dce:identifier": "SDN:R25::RADIOMETER_DOWN_IRR665",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR665/1/"
+            }
+        },
+        {
             "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR555/",
             "pav:authoredOn": "2021-02-09 15:34:44.0",
             "@type": "skos:Concept",
@@ -2013,6 +2091,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/BACKSCATTERINGMETER_BBP700/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR670/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/SPECTROPHOTOMETER_BISULFIDE/"
                 },
                 {
@@ -2076,6 +2157,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/OPTODE_DOXY/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR665/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R25/current/RADIOMETER_DOWN_IRR555/"
                 },
                 {
@@ -2102,8 +2186,8 @@
             "dc:description": "Terms describing sensor types mounted on Argo floats. Argo netCDF variable SENSOR is populated by R25 altLabel.",
             "dc:title": "Argo sensor types",
             "skos:prefLabel": "Argo sensor types",
-            "owl:versionInfo": "5",
-            "dc:date": "2026-04-30 03:00:00.0",
+            "owl:versionInfo": "6",
+            "dc:date": "2026-07-10 03:00:01.0",
             "skos:altLabel": "SENSOR",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "SENSOR",
