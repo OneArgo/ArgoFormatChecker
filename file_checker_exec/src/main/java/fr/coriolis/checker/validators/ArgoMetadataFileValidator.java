@@ -162,9 +162,9 @@ public class ArgoMetadataFileValidator extends ArgoFileValidator {
 	}// ..end validate
 
 	private void validateOptionalParams() {
-		// PROGRAM_NAME - ref table 41
+		// PROGRAM_NAME - ref table 41 - DD 2026/08/31 - modifying AltLabel -> PrefLabel
 		checkOptionalParameterValueAgainstRefTable("PROGRAM_NAME",
-				ArgoNVSReferenceTable.PROGRAM_NAME_TABLE.getConceptMembersByAltLabelMap(), true);
+				ArgoNVSReferenceTable.PROGRAM_NAME_TABLE.getConceptMembersByPrefLabelMap(), true);
 	}
 
 	/**
