@@ -40,6 +40,37 @@
             "pav:authoredOn": "2025-11-26 10:16:04.0"
         },
         {
+            "@id": "http://vocab.nerc.ac.uk/collection/R03/current/DOWN_IRRADIANCE665/",
+            "pav:authoredOn": "2026-07-20 09:27:57.0",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R03/current/DOWN_IRRADIANCE665/1/"
+            },
+            "dce:identifier": "SDN:R03::DOWN_IRRADIANCE665",
+            "pav:version": "1",
+            "skos:notation": "SDN:R03::DOWN_IRRADIANCE665",
+            "skos:altLabel": "DOWN_IRRADIANCE665",
+            "dc:date": "2026-07-20 09:27:57.0",
+            "owl:versionInfo": "1",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "Downwelling irradiance at 665 nanometers"
+            },
+            "dc:identifier": "SDN:R03::DOWN_IRRADIANCE665",
+            "skos:note": {
+                "@language": "en",
+                "@value": "accepted"
+            },
+            "owl:deprecated": "false",
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "skos:definition": {
+                "@language": "en",
+                "@value": "Downwelling irradiance at 665 nm wavelength, reported by OCR504 sensor (unit conversion). Local_Attributes:{long_name:Downwelling irradiance at 665 nanometers; standard_name:-; units:W/m^2/nm; valid_min:-; valid_max:-; fill_value:99999.f}. Properties:{category:b; data_type:float}."
+            },
+            "@type": "skos:Concept"
+        },
+        {
             "@id": "http://vocab.nerc.ac.uk/collection/R03/current/RAW_DOWNWELLING_IRRADIANCE665/",
             "pav:authoredOn": "2026-06-11 09:21:52.0",
             "pav:hasCurrentVersion": {
@@ -561,34 +592,42 @@
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R03/current/BDOWN_IRRADIANCE665/",
-            "pav:authoredOn": "2026-06-11 09:21:52.0",
-            "pav:hasCurrentVersion": {
-                "@id": "http://vocab.nerc.ac.uk/collection/R03/current/BDOWN_IRRADIANCE665/1/"
-            },
-            "dce:identifier": "SDN:R03::BDOWN_IRRADIANCE665",
-            "pav:version": "1",
-            "skos:notation": "SDN:R03::BDOWN_IRRADIANCE665",
-            "skos:altLabel": "DOWN_IRRADIANCE665",
-            "dc:date": "2026-06-11 09:21:52.0",
-            "owl:versionInfo": "1",
-            "skos:prefLabel": {
-                "@language": "en",
-                "@value": "Downwelling irradiance at 665 nanometers"
-            },
-            "dc:identifier": "SDN:R03::BDOWN_IRRADIANCE665",
-            "skos:note": {
-                "@language": "en",
-                "@value": "accepted"
-            },
-            "owl:deprecated": "false",
-            "void:inDataset": {
-                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
-            },
+            "pav:hasVersion": [
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/BDOWN_IRRADIANCE665/1/"
+                },
+                {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/BDOWN_IRRADIANCE665/2/"
+                }
+            ],
+            "@type": "skos:Concept",
             "skos:definition": {
                 "@language": "en",
                 "@value": "Downwelling irradiance at 665 nm wavelength, reported by OCR504 sensor (unit conversion). Local_Attributes:{long_name:Downwelling irradiance at 665 nanometers; standard_name:-; units:W/m^2/nm; valid_min:-; valid_max:-; fill_value:99999.f}. Properties:{category:b; data_type:float}"
             },
-            "@type": "skos:Concept"
+            "void:inDataset": {
+                "@id": "http://vocab.nerc.ac.uk/.well-known/void"
+            },
+            "owl:deprecated": "true",
+            "skos:note": {
+                "@language": "en",
+                "@value": "deprecated"
+            },
+            "dc:identifier": "SDN:R03::BDOWN_IRRADIANCE665",
+            "skos:prefLabel": {
+                "@language": "en",
+                "@value": "deprecated_for_incorrect_id"
+            },
+            "owl:versionInfo": "3",
+            "dc:date": "2026-07-15 14:47:24.0",
+            "skos:altLabel": "deprecated_for_incorrect_id",
+            "skos:notation": "SDN:R03::BDOWN_IRRADIANCE665",
+            "pav:version": "3",
+            "dce:identifier": "SDN:R03::BDOWN_IRRADIANCE665",
+            "pav:hasCurrentVersion": {
+                "@id": "http://vocab.nerc.ac.uk/collection/R03/current/BDOWN_IRRADIANCE665/3/"
+            },
+            "pav:authoredOn": "2026-07-15 14:47:24.0"
         },
         {
             "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_CYC/",
@@ -4518,6 +4557,9 @@
                     "@id": "http://vocab.nerc.ac.uk/collection/R03/current/NB_SAMPLE_DURAFET/"
                 },
                 {
+                    "@id": "http://vocab.nerc.ac.uk/collection/R03/current/DOWN_IRRADIANCE665/"
+                },
+                {
                     "@id": "http://vocab.nerc.ac.uk/collection/R03/current/RAW_DOWNWELLING_IRRADIANCE665/"
                 },
                 {
@@ -4832,8 +4874,8 @@
             "dc:description": "Terms describing individual measured parameters or phenomena, used to mark up sets of data in Argo netCDF arrays. Argo netCDF variables PARAMETER, STATION_PARAMETERS, HISTORY_PARAMETER and TRAJECTORY_PARAMETERS are populated by R03 altLabel. R03 altLabel is also used to name netCDF variables. Detailed information (incl. about Local_Attributes and Properties) is in the user manual (https://dx.doi.org/10.13155/29825), in the Reference Table 3 section.",
             "dc:title": "Argo parameter codes",
             "skos:prefLabel": "Argo parameter codes",
-            "owl:versionInfo": "15",
-            "dc:date": "2026-06-12 03:00:01.0",
+            "owl:versionInfo": "17",
+            "dc:date": "2026-07-21 03:00:00.0",
             "skos:altLabel": "PARAMETER",
             "dc:creator": "Argo Data Management Team",
             "dc:alternative": "PARAMETER",
